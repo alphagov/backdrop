@@ -33,7 +33,8 @@ class Locations(object):
             max_results = "5000",
             start_date = "2013-01-01",
             end_date = "2013-02-01",
-            ids = "ga:63654109")
+            ids = "ga:63654109",
+            filters = "ga:pagePath=~^/apply-for-a-licence/.*/form$")
         
         response = query.execute()['rows']
         

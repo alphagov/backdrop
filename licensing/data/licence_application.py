@@ -8,13 +8,9 @@ class LicenceApplication(_LicenceApplication):
         split_url = path.rsplit('/')
         
         return cls(split_url[2], split_url[3], split_url[4].partition('-')[0], location)
-        
-def remove_nonapplication_urls(visits):
-    for path, country, num_visits in visits:
-        if len(path.rsplit('/')) == 5:
-            yield (path, country, num_visits)
+
 
 def from_google_data(data):
-    for path, country, num_visits in remove_nonapplication_urls(data):
+    for path, country, num_visits in data:
         for _ in range(int(num_visits)):
             yield LicenceApplication.from_google_row(path, country)

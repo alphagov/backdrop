@@ -38,11 +38,6 @@ class LicenceApplicationBatchCreation(unittest.TestCase):
         licence_applications = licence_application.from_google_data(self.stub_google_results_1)
         #should create an application for each visit
         self.assertEqual(len(list(licence_applications)),3)
-        
-        #should not include results with licenses which don't split into five parts
-        l_apps = licence_application.from_google_data(self.stub_google_results_2)
-        print l_apps
-        self.assertEqual(len(list(l_apps)),1)
     
 
 if __name__ == '__main__':
