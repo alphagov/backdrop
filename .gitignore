@@ -1,4 +1,6 @@
 *.pyc
 client_secrets.json
 tokens.dat
+ASSETS/*
+!ASSETS/.gitkeep
 
