@@ -20,7 +20,7 @@ class Locations(object):
         credentials = storage.get()
 
         if credentials is None or credentials.invalid:
-            credentials = run(FLOW, storage)
+            credentials = run(self.FLOW, storage)
 
         http = httplib2.Http()
         http = credentials.authorize(http)
