@@ -1,7 +1,5 @@
+import datetime
 import httplib2
-import json
-import itertools
-from collections import defaultdict
 
 from apiclient.discovery import build
 from oauth2client.file import Storage
@@ -27,16 +25,25 @@ class Locations(object):
 
         service = build("analytics","v3", http = http)
 
+        first_date, last_date = get_last_whole_month(datetime.date.today())
         query = service.data().ga().get(
             metrics = "ga:visits",
             dimensions = "ga:pagePath,ga:country",
             max_results = "5000",
-            start_date = "2013-01-01",
-            end_date = "2013-02-01",
+            start_date = first_date.strftime('%Y-%m-%d'),
+            end_date = last_date.strftime('%Y-%m-%d'),
             ids = "ga:63654109",
             filters = "ga:pagePath=~^/apply-for-a-licence/.*/form$")
         
         response = query.execute()['rows']
         
         self.results = response
-        
+
+def get_last_whole_month(date):
+    last_date = first_day_of_month(date) - datetime.timedelta(days=1)
+    first_date = first_day_of_month(last_date)
+
+    return first_date, last_date
+
+def first_day_of_month(date):
+    return datetime.date(year=date.year, month=date.month, day=1)
