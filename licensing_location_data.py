@@ -8,6 +8,7 @@ def application_to_dict(application):
         'authority': application.authority,
         'interaction': application.interaction,
         'location': application.location,
+        'visits': application.visits,
         'start_at': application.start_at,
         'end_at': application.end_at
     }
