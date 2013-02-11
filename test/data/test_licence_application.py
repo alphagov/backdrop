@@ -14,7 +14,7 @@ class LicenceApplicationTest(unittest.TestCase):
         self.assertEqual(self.visit.authority, 'authority')
 
     def test_interaction_extraction(self):
-        self.assertEqual(self.visit.interaction, 'interaction')
+        self.assertEqual(self.visit.interaction, 'interaction-X')
 
     def test_location(self):
         self.assertEqual(self.visit.location, 'republic of test')
