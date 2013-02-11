@@ -35,11 +35,11 @@ class Locations(object):
             ids = "ga:63654109",
             filters = "ga:pagePath=~^/apply-for-a-licence/.*/form$")
         
-        response = query.execute()['rows']
+        response = query.execute()
         
-        self.results = response
-        self.start_date = query.execute()["query"]["start-date"]
-        self.end_date = query.execute()["query"]["end-date"]
+        self.results = response["rows"]
+        self.start_date = response["query"]["start-date"]
+        self.end_date = response["query"]["end-date"]
 
 def get_last_whole_month(date):
     last_date = first_day_of_month(date) - datetime.timedelta(days=1)
