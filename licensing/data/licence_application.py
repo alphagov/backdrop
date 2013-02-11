@@ -1,6 +1,6 @@
 import collections
 
-_LicenceApplication = collections.namedtuple('LicenceApplication', 'licence body interaction location start_at end_at')
+_LicenceApplication = collections.namedtuple('LicenceApplication', 'licence authority interaction location start_at end_at')
 
 class LicenceApplication(_LicenceApplication):
     @classmethod

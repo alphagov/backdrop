@@ -5,13 +5,13 @@ from licensing.data import licence_application
 class LicenceApplicationTest(unittest.TestCase):
 
     def setUp(self):
-        self.visit = licence_application.LicenceApplication.from_google_row('www.foo.com/apply-for-a-licence/licence-name/body/interaction-X','republic of test', '2012-01-01', '2012-01-31')
+        self.visit = licence_application.LicenceApplication.from_google_row('www.foo.com/apply-for-a-licence/licence-name/authority/interaction-X','republic of test', '2012-01-01', '2012-01-31')
 
     def test_licence_extraction(self):
         self.assertEqual(self.visit.licence, 'licence-name')
 
-    def test_body_extraction(self):
-        self.assertEqual(self.visit.body, 'body')
+    def test_authority_extraction(self):
+        self.assertEqual(self.visit.authority, 'authority')
 
     def test_interaction_extraction(self):
         self.assertEqual(self.visit.interaction, 'interaction')
@@ -20,7 +20,7 @@ class LicenceApplicationTest(unittest.TestCase):
         self.assertEqual(self.visit.location, 'republic of test')
 
     def test_equality(self):
-        another_application = licence_application.LicenceApplication.from_google_row('www.foo.com/apply-for-a-licence/licence-name/body/interaction-X','republic of test', '2012-01-01', '2012-01-31')
+        another_application = licence_application.LicenceApplication.from_google_row('www.foo.com/apply-for-a-licence/licence-name/authority/interaction-X','republic of test', '2012-01-01', '2012-01-31')
         self.assertEqual(self.visit, another_application)
 
 

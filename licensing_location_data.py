@@ -5,7 +5,7 @@ import json
 def application_to_dict(application):
     return {
         'licence': application.licence,
-        'body': application.body,
+        'authority': application.authority,
         'interaction': application.interaction,
         'location': application.location,
         'start_at': application.start_at,
