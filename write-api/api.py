@@ -40,12 +40,12 @@ def queue_json_object(obj):
 
 def valid_json_object(obj):
     for key, value in obj.items():
-        validate_key(key)
-        validate_value(value)
+        if not key_is_valid(key) or not value_is_valid(value):
+            abort(400)
     return True
 
 
-def validate_key(key):
+def key_is_valid(key):
     key = key.lower()
     if key[0] == '_':
         if key in RESERVED_KEYWORDS:
@@ -53,15 +53,15 @@ def validate_key(key):
     else:
         if VALID_KEYWORD.match(key):
             return True
-    abort(400)
+    return False
 
 
-def validate_value(value):
+def value_is_valid(value):
     if type(value) == int:
         return True
     if type(value) == unicode:
         return True
-    abort(400)
+    return False
 
 
 def store_valid_objects(bucket_name):

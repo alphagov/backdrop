@@ -8,3 +8,8 @@ A minimal repo for spiking out getting hold of some licencing performance data.
 
 Would you like a crontab to collect data each month?
 `./set-crontab.sh`
+
+## The write API
+
+`sudo pip install nose` and run `nosetests` to run the tests.
+
