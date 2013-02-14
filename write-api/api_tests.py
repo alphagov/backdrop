@@ -1,4 +1,3 @@
-from flask import request
 from api import key_is_valid, value_is_valid
 
 import api
@@ -32,10 +31,10 @@ class ValidValuesTestCase(unittest.TestCase):
         self.assertFalse( value_is_valid( "1257" ) )
 
     def test_values_cannot_be_arrays(self):
-        self.assertFalse( value_is_valid([1,2,3,4]) )
+        self.assertFalse( value_is_valid([1, 2, 3, 4]) )
 
     def test_values_cannot_be_dictionaries(self):
-        self.assertFalse( value_is_valid( {'thing':'I am a thing'} ) )
+        self.assertFalse( value_is_valid( {'thing': 'I am a thing'} ) )
 
 
 class PostDataTestCase(unittest.TestCase):
