@@ -1,6 +1,7 @@
 from flask import request
 from api import key_is_valid, value_is_valid
 
+import api
 import unittest
 
 
@@ -35,3 +36,29 @@ class ValidValuesTestCase(unittest.TestCase):
 
     def test_values_cannot_be_dictionaries(self):
         self.assertFalse( value_is_valid( {'thing':'I am a thing'} ) )
+
+
+class PostDataTestCase(unittest.TestCase):
+    def stub_storage(self, bucket_name):
+        self.stored_bucket = bucket_name
+    
+    def setUp(self):
+        self.app = api.app.test_client()
+        self.stored_bucket = None
+    
+    def test_data_gets_stored(self):
+        api.store_valid_objects = self.stub_storage
+        self.app.post(
+            '/foo-bucket/',
+            data = '{"foo": "bar"}',
+            content_type = "application/json"
+        )
+        self.assertTrue(self.stored_bucket == 'foo-bucket')
+
+    def test_bucket_name_validation(self):
+        response = self.app.post(
+            '/_foo-bucket/',
+            data = '{"foo": "bar"}',
+            content_type = "application/json"
+        )
+        self.assertEqual(response.status_code, 400)

@@ -8,6 +8,7 @@ app = Flask(__name__)
 mongo = MongoClient('localhost', 27017)
 
 VALID_KEYWORD = re.compile('^[a-z0-9_\.-]+$')
+VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
 
 RESERVED_KEYWORDS = (
     '_timestamp',
@@ -21,6 +22,8 @@ valid_objects = []
 @app.route('/<bucket>/', methods=['POST'])
 def post_to_bucket(bucket):
     if request.json:
+        if not bucket_is_valid(bucket):
+            abort(400)
         if type(request.json) == list:
             # i am an array
             for obj in request.json:
@@ -43,6 +46,12 @@ def valid_json_object(obj):
         if not key_is_valid(key) or not value_is_valid(value):
             abort(400)
     return True
+
+
+def bucket_is_valid(bucket_name):
+    if VALID_BUCKET_NAME.match(bucket_name):
+        return True
+    return False
 
 
 def key_is_valid(key):
