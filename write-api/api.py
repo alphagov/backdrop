@@ -37,14 +37,15 @@ def post_to_bucket(bucket):
 
 def queue_json_object(obj):
     if valid_json_object(obj):
-        print "APPEND", obj
         valid_objects.append(obj)
+    else:
+        abort(400)
 
 
 def valid_json_object(obj):
     for key, value in obj.items():
         if not key_is_valid(key) or not value_is_valid(value):
-            abort(400)
+            return False
     return True
 
 
