@@ -24,7 +24,7 @@ def post_to_bucket(bucket):
 
     incoming_data = prep_data(request.json)
 
-    if any((not valid_json_object(obj)) for obj in incoming_data):
+    if any(invalid_data_object(obj) for obj in incoming_data):
         abort(400)
     else:
         store_objects(bucket, incoming_data)
@@ -45,11 +45,12 @@ def prep_data(incoming_json):
         return [incoming_json]
 
 
-def valid_json_object(obj):
+def invalid_data_object(obj):
     for key, value in obj.items():
-        if not key_is_valid(key) or not value_is_valid(value):
+        if key_is_valid(key) and value_is_valid(value):
             return False
-    return True
+        else:
+            return True
 
 
 def bucket_is_valid(bucket_name):
