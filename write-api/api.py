@@ -7,6 +7,7 @@ import re
 app = Flask(__name__)
 mongo = MongoClient('localhost', 27017)
 
+DATABASE_NAME = 'performance_platform'
 VALID_KEYWORD = re.compile('^[a-z0-9_\.-]+$')
 VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
 
@@ -79,7 +80,7 @@ def value_is_valid(value):
 
 
 def store_objects(bucket_name, objects_to_store):
-    bucket = mongo['performance_platform'][bucket_name]
+    bucket = mongo[DATABASE_NAME][bucket_name]
     bucket.insert(objects_to_store)
 
 
