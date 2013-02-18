@@ -16,30 +16,23 @@ RESERVED_KEYWORDS = (
     '_end_at',
 )
 
-valid_objects = []
-
 
 @app.route('/<bucket>/', methods=['POST'])
 def post_to_bucket(bucket):
-    if request.json:
-        if not bucket_is_valid(bucket):
-            abort(400)
-        if type(request.json) == list:
-            # i am an array
-            for obj in request.json:
-                queue_json_object(obj)
-        else:
-            queue_json_object(request.json)
-        store_valid_objects(bucket)
-    else:
+    if not request.json or not bucket_is_valid(bucket):
+        # explicit error out
         abort(400)
 
-
-def queue_json_object(obj):
-    if valid_json_object(obj):
-        valid_objects.append(obj)
+    if type(request.json) == list:
+        incoming_objects = request.json
     else:
+        incoming_objects = [request.json]
+
+    if any((not valid_json_object(objects)) for objects in incoming_objects):
         abort(400)
+    else:
+        store_objects(bucket, incoming_objects)
+        return "{'status':'ok'}\n"
 
 
 def valid_json_object(obj):
@@ -74,9 +67,9 @@ def value_is_valid(value):
     return False
 
 
-def store_valid_objects(bucket_name):
+def store_objects(bucket_name, objects_to_store):
     bucket = mongo['performance_platform'][bucket_name]
-    bucket.insert(valid_objects)
+    bucket.insert(objects_to_store)
 
 
 if __name__ == '__main__':

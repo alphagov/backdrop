@@ -3,4 +3,4 @@ client_secrets.json
 tokens.dat
 assets/*
 !assets/.gitkeep
-
+.idea
