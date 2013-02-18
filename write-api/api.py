@@ -19,20 +19,30 @@ RESERVED_KEYWORDS = (
 
 @app.route('/<bucket>/', methods=['POST'])
 def post_to_bucket(bucket):
-    if not request.json or not bucket_is_valid(bucket):
-        # explicit error out
+    if not request_is_valid(request, bucket):
         abort(400)
 
-    if type(request.json) == list:
-        incoming_objects = request.json
-    else:
-        incoming_objects = [request.json]
+    incoming_data = prep_data(request.json)
 
-    if any((not valid_json_object(objects)) for objects in incoming_objects):
+    if any((not valid_json_object(obj)) for obj in incoming_data):
         abort(400)
     else:
-        store_objects(bucket, incoming_objects)
+        store_objects(bucket, incoming_data)
         return "{'status':'ok'}\n"
+
+
+def request_is_valid(request, bucket_name):
+    if request.json and bucket_is_valid(bucket_name):
+        return True
+    else:
+        return False
+
+
+def prep_data(incoming_json):
+    if isinstance(incoming_json, list):
+        return incoming_json
+    else:
+        return [incoming_json]
 
 
 def valid_json_object(obj):
