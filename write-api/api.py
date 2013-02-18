@@ -62,6 +62,8 @@ def invalid_data_object(obj):
     for key, value in obj.items():
         if not key_is_valid(key) or not value_is_valid(value):
             return True
+        if key == '_timestamp' and not value_is_valid_datetime_string(value):
+            return True
     return False
 
 
@@ -95,12 +97,11 @@ def store_objects(bucket_name, objects_to_store):
     bucket.insert(objects_to_store)
 
 
-def value_is_a_date_time_string(value):
+def value_is_valid_datetime_string(value):
     time_pattern = re.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}"
                               "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
                               "[+-][0-9]{2}:[0-9]{2}")
     return time_pattern.match(value)
-
 
 if __name__ == '__main__':
     app.debug = True

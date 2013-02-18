@@ -1,6 +1,6 @@
 import unittest
 
-from api import key_is_valid, value_is_valid, value_is_a_date_time_string
+from api import key_is_valid, value_is_valid, value_is_valid_datetime_string
 import api
 
 
@@ -70,28 +70,35 @@ class TimestampValueIsInDateTimeFormat(unittest.TestCase):
     def test_value_is_of_valid_format(self):
         # our time format = YYYY-MM-DDTHH:MM:SS+HH:MM
         self.assertTrue(
-            value_is_a_date_time_string('2014-01-01T00:00:00+00:00') )
+            value_is_valid_datetime_string('2014-01-01T00:00:00+00:00') )
         self.assertTrue(
-            value_is_a_date_time_string('2014-01-01T00:00:00-00:00') )
+            value_is_valid_datetime_string('2014-01-01T00:00:00-00:00') )
 
         self.assertFalse(
-            value_is_a_date_time_string('i am not a time') )
+            value_is_valid_datetime_string('i am not a time') )
         self.assertFalse(
-            value_is_a_date_time_string('abcd-aa-aaTaa:aa:aa+aa:aa') )
+            value_is_valid_datetime_string('abcd-aa-aaTaa:aa:aa+aa:aa') )
         self.assertFalse(
-            value_is_a_date_time_string('14-11-01T11:55:11+00:15') )
+            value_is_valid_datetime_string('14-11-01T11:55:11+00:15') )
         self.assertFalse(
-            value_is_a_date_time_string('2014-JAN-01T11:55:11+00:15') )
+            value_is_valid_datetime_string('2014-JAN-01T11:55:11+00:15') )
         self.assertFalse(
-            value_is_a_date_time_string('2014-1-1T11:55:11+00:15') )
+            value_is_valid_datetime_string('2014-1-1T11:55:11+00:15') )
         self.assertFalse(
-            value_is_a_date_time_string('2014-1-1T11:55:11') )
+            value_is_valid_datetime_string('2014-1-1T11:55:11') )
         self.assertFalse(
-            value_is_a_date_time_string('2014-aa-aaTaa:aa:55+aa:aa') )
+            value_is_valid_datetime_string('2014-aa-aaTaa:aa:55+aa:aa') )
 
 
 class ValidDateObjectTestCase(unittest.TestCase):
     def test_validation_happens_until_error_or_finish(self):
+        #see value validation tests, we don't accept arrays
         my_second_value_is_bad = {u'aardvark': u'puppies',
                                   u'Cthulu': ["R'lyeh"]}
         self.assertTrue( api.invalid_data_object(my_second_value_is_bad) )
+
+    def test_validation_for_bad_time_strings(self):
+        some_bad_data = {u'_timestamp': u'hammer time'}
+        self.assertTrue( api.invalid_data_object(some_bad_data))
+        some_good_data = {u'_timestamp': u'2014-01-01T00:00:00+00:00'}
+        self.assertFalse( api.invalid_data_object(some_good_data))
