@@ -88,3 +88,10 @@ class TimestampValueIsInDateTimeFormat(unittest.TestCase):
             value_is_a_date_time_string('2014-1-1T11:55:11') )
         self.assertFalse(
             value_is_a_date_time_string('2014-aa-aaTaa:aa:55+aa:aa') )
+
+
+class ValidDateObjectTestCase(unittest.TestCase):
+    def test_validation_happens_until_error_or_finish(self):
+        my_second_value_is_bad = {u'aardvark': u'puppies',
+                                  u'Cthulu': ["R'lyeh"]}
+        self.assertTrue( api.invalid_data_object(my_second_value_is_bad) )

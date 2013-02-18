@@ -60,10 +60,9 @@ def prep_data(incoming_json):
 
 def invalid_data_object(obj):
     for key, value in obj.items():
-        if key_is_valid(key) and value_is_valid(value):
-            return False
-        else:
+        if not key_is_valid(key) or not value_is_valid(value):
             return True
+    return False
 
 
 def bucket_is_valid(bucket_name):
