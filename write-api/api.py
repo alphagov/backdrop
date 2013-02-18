@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import abort, request
+from flask import abort, request, Response
 from pymongo import MongoClient
 
 import re
@@ -18,6 +18,18 @@ RESERVED_KEYWORDS = (
 )
 
 
+@app.route('/_status/')
+def health_check():
+    if mongo.alive():
+        return Response("{'status':'ok','message':'database seems fine'}",
+                        mimetype='application/json')
+    else:
+        return Response(
+            "{'status':500,'message':'can't connect to ""database'}",
+            mimetype='application/json',
+            status=500)
+
+
 @app.route('/<bucket>/', methods=['POST'])
 def post_to_bucket(bucket):
     if not request_is_valid(request, bucket):
@@ -29,7 +41,7 @@ def post_to_bucket(bucket):
         abort(400)
     else:
         store_objects(bucket, incoming_data)
-        return "{'status':'ok'}\n"
+        return Response("{'status':'ok'}", mimetype='application/json')
 
 
 def request_is_valid(request, bucket_name):
