@@ -40,10 +40,12 @@ class ValidValuesTestCase(unittest.TestCase):
 class PostDataTestCase(unittest.TestCase):
     def stub_storage(self, bucket_name, data_to_store):
         self.stored_bucket = bucket_name
+        self.stored_data = data_to_store
 
     def setUp(self):
         self.app = api.app.test_client()
         self.stored_bucket = None
+        self.stored_data = None
 
     def test_data_gets_stored(self):
         api.store_objects = self.stub_storage
@@ -53,6 +55,7 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
         self.assertTrue(self.stored_bucket == 'foo-bucket')
+        self.assertTrue(self.stored_data[0]['foo'] == 'bar')
 
     def test_bucket_name_validation(self):
         response = self.app.post(
