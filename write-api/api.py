@@ -96,6 +96,13 @@ def store_objects(bucket_name, objects_to_store):
     bucket.insert(objects_to_store)
 
 
+def value_is_a_date_time_string(value):
+    time_pattern = re.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                              "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+                              "[+-][0-9]{2}:[0-9]{2}")
+    return time_pattern.match(value)
+
+
 if __name__ == '__main__':
     app.debug = True
     app.run(host='0.0.0.0')

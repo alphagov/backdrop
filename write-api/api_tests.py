@@ -1,7 +1,7 @@
-from api import key_is_valid, value_is_valid
-
-import api
 import unittest
+
+from api import key_is_valid, value_is_valid, value_is_a_date_time_string
+import api
 
 
 class ValidKeysTestCase(unittest.TestCase):
@@ -64,3 +64,27 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
         self.assertEqual(response.status_code, 400)
+
+
+class TimestampValueIsInDateTimeFormat(unittest.TestCase):
+    def test_value_is_of_valid_format(self):
+        # our time format = YYYY-MM-DDTHH:MM:SS+HH:MM
+        self.assertTrue(
+            value_is_a_date_time_string('2014-01-01T00:00:00+00:00') )
+        self.assertTrue(
+            value_is_a_date_time_string('2014-01-01T00:00:00-00:00') )
+
+        self.assertFalse(
+            value_is_a_date_time_string('i am not a time') )
+        self.assertFalse(
+            value_is_a_date_time_string('abcd-aa-aaTaa:aa:aa+aa:aa') )
+        self.assertFalse(
+            value_is_a_date_time_string('14-11-01T11:55:11+00:15') )
+        self.assertFalse(
+            value_is_a_date_time_string('2014-JAN-01T11:55:11+00:15') )
+        self.assertFalse(
+            value_is_a_date_time_string('2014-1-1T11:55:11+00:15') )
+        self.assertFalse(
+            value_is_a_date_time_string('2014-1-1T11:55:11') )
+        self.assertFalse(
+            value_is_a_date_time_string('2014-aa-aaTaa:aa:55+aa:aa') )
