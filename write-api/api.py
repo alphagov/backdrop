@@ -1,8 +1,11 @@
+import re
+
 from flask import Flask
 from flask import abort, request, Response
+from dateutil import parser
 from pymongo import MongoClient
+import pytz
 
-import re
 
 app = Flask(__name__)
 mongo = MongoClient('localhost', 27017)
@@ -40,6 +43,10 @@ def post_to_bucket(bucket):
     if any(invalid_data_object(obj) for obj in incoming_data):
         abort(400)
     else:
+        for data in incoming_data:
+            if '_timestamp' in data:
+                data['_timestamp'] = \
+                    time_string_to_utc_datetime(data['_timestamp'])
         store_objects(bucket, incoming_data)
         return Response("{'status':'ok'}", mimetype='application/json')
 
@@ -102,6 +109,11 @@ def value_is_valid_datetime_string(value):
                               "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
                               "[+-][0-9]{2}:[0-9]{2}")
     return time_pattern.match(value)
+
+
+def time_string_to_utc_datetime(time_string):
+    time = parser.parse(time_string)
+    return time.astimezone(pytz.utc)
 
 if __name__ == '__main__':
     app.debug = True

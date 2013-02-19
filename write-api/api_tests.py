@@ -1,4 +1,6 @@
 import unittest
+from datetime import datetime
+import pytz
 
 from api import key_is_valid, value_is_valid, value_is_valid_datetime_string
 import api
@@ -65,6 +67,18 @@ class PostDataTestCase(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test__timestamps_get_stored_as_utc_datetimes(self):
+        api.store_objects = self.stub_storage
+        expected_time = {u'_timestamp':
+                         datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)}
+        self.app.post(
+            '/bucket/',
+            data = '{"_timestamp": "2014-01-02T03:49:00+00:00"}',
+            content_type = "application/json"
+        )
+        self.assertEqual(self.stored_bucket, 'bucket')
+        self.assertEqual(self.stored_data, [expected_time])
+
 
 class TimestampValueIsInDateTimeFormat(unittest.TestCase):
     def test_value_is_of_valid_format(self):
@@ -102,3 +116,23 @@ class ValidDateObjectTestCase(unittest.TestCase):
         self.assertTrue( api.invalid_data_object(some_bad_data))
         some_good_data = {u'_timestamp': u'2014-01-01T00:00:00+00:00'}
         self.assertFalse( api.invalid_data_object(some_good_data))
+
+
+class DateStringToUTCDateTimeTestCase(unittest.TestCase):
+    def test_that_date_strings_get_converted_to_datetimes(self):
+        some_datetime = api.time_string_to_utc_datetime(
+            '2014-01-02T03:04:05+00:00')
+
+        self.assertTrue(isinstance(some_datetime, datetime))
+        self.assertEquals(
+            some_datetime,
+            datetime(2014, 1, 2, 3, 4, 5, tzinfo=pytz.utc))
+
+    def test_that_date_strings_get_converted_to_utc(self):
+        some_datetime = api.time_string_to_utc_datetime(
+            '2014-01-02T06:04:05+03:30')
+
+        self.assertTrue(isinstance(some_datetime, datetime))
+        self.assertEquals(
+            some_datetime,
+            datetime(2014, 1, 2, 2, 34, 5, tzinfo=pytz.utc))
