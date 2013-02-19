@@ -24,13 +24,16 @@ RESERVED_KEYWORDS = (
 @app.route('/_status/')
 def health_check():
     if mongo.alive():
-        return Response("{'status':'ok','message':'database seems fine'}",
-                        mimetype='application/json')
+        return Response(
+            "{'status':'ok','message':'database seems fine'}",
+            mimetype='application/json'
+        )
     else:
         return Response(
             "{'status':500,'message':'can't connect to ""database'}",
             mimetype='application/json',
-            status=500)
+            status=500
+        )
 
 
 @app.route('/<bucket>/', methods=['POST'])
@@ -47,6 +50,7 @@ def post_to_bucket(bucket):
             if '_timestamp' in data:
                 data['_timestamp'] = \
                     time_string_to_utc_datetime(data['_timestamp'])
+
         store_objects(bucket, incoming_data)
         return Response("{'status':'ok'}", mimetype='application/json')
 
@@ -105,9 +109,11 @@ def store_objects(bucket_name, objects_to_store):
 
 
 def value_is_valid_datetime_string(value):
-    time_pattern = re.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}"
-                              "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
-                              "[+-][0-9]{2}:[0-9]{2}")
+    time_pattern = re.compile(
+        "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+        "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+        "[+-][0-9]{2}:[0-9]{2}"
+    )
     return time_pattern.match(value)
 
 
