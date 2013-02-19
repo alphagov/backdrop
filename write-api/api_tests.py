@@ -2,8 +2,9 @@ import unittest
 from datetime import datetime
 import pytz
 
-from api import key_is_valid, value_is_valid, value_is_valid_datetime_string
 import api
+from validators import value_is_valid_datetime_string, value_is_valid, \
+    key_is_valid
 
 
 class ValidKeysTestCase(unittest.TestCase):

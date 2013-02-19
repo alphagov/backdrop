@@ -5,20 +5,14 @@ from flask import abort, request, Response
 from dateutil import parser
 from pymongo import MongoClient
 import pytz
+from validators import value_is_valid_datetime_string, value_is_valid, \
+    key_is_valid, bucket_is_valid
 
 
 app = Flask(__name__)
 mongo = MongoClient('localhost', 27017)
 
 DATABASE_NAME = 'performance_platform'
-VALID_KEYWORD = re.compile('^[a-z0-9_\.-]+$')
-VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
-
-RESERVED_KEYWORDS = (
-    '_timestamp',
-    '_start_at',
-    '_end_at',
-)
 
 
 @app.route('/_status/')
@@ -78,43 +72,9 @@ def invalid_data_object(obj):
     return False
 
 
-def bucket_is_valid(bucket_name):
-    if VALID_BUCKET_NAME.match(bucket_name):
-        return True
-    return False
-
-
-def key_is_valid(key):
-    key = key.lower()
-    if key[0] == '_':
-        if key in RESERVED_KEYWORDS:
-            return True
-    else:
-        if VALID_KEYWORD.match(key):
-            return True
-    return False
-
-
-def value_is_valid(value):
-    if type(value) == int:
-        return True
-    if type(value) == unicode:
-        return True
-    return False
-
-
 def store_objects(bucket_name, objects_to_store):
     bucket = mongo[DATABASE_NAME][bucket_name]
     bucket.insert(objects_to_store)
-
-
-def value_is_valid_datetime_string(value):
-    time_pattern = re.compile(
-        "[0-9]{4}-[0-9]{2}-[0-9]{2}"
-        "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
-        "[+-][0-9]{2}:[0-9]{2}"
-    )
-    return time_pattern.match(value)
 
 
 def time_string_to_utc_datetime(time_string):
