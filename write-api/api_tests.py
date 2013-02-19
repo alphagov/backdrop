@@ -24,6 +24,11 @@ class ValidKeysTestCase(unittest.TestCase):
         self.assertFalse( key_is_valid("son;of;thing") )
         self.assertFalse( key_is_valid("son:of:thing") )
 
+    def test_key_cannot_be_empty(self):
+        self.assertFalse( key_is_valid("") )
+        self.assertFalse( key_is_valid("    ") )
+        self.assertFalse( key_is_valid("\t") )
+
 
 class ValidValuesTestCase(unittest.TestCase):
     def test_values_can_be_integers(self):
@@ -86,6 +91,15 @@ class PostDataTestCase(unittest.TestCase):
 
         self.assertEqual( self.stored_bucket, 'bucket' )
         self.assertEqual( self.stored_data, [expected_time] )
+
+    def test_data_gets_stored(self):
+        response = self.app.post(
+            '/foo-bucket/',
+            data = '{"": ""}',
+            content_type = "application/json"
+        )
+
+        self.assertEqual(response.status_code, 400)
 
 
 class TimestampValueIsInDateTimeFormat(unittest.TestCase):

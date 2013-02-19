@@ -33,6 +33,8 @@ def value_is_valid(value):
 
 def key_is_valid(key):
     key = key.lower()
+    if not key:
+        return False
     if key[0] == '_':
         if key in RESERVED_KEYWORDS:
             return True
