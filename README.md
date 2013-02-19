@@ -11,5 +11,13 @@ Would you like a crontab to collect data each month?
 
 ## The write API
 
-`sudo pip install nose` and run `nosetests` to run the tests.
+#Getting set up
 
+This assumes you are using the GDS dev environment and so have python and mongo installed.
+
+1. Change to the write-api directory `cd write-api`
+2. Install the dependencies with `sudo pip install -r requirements.txt`
+3. Start the api with `python api.py`
+4. Check the api started correctly with `curl localhost:5000/_status` 
+the response should look like: `{'status':'ok','message':'database seems fine'}`
+`sudo pip install nose` and run `nosetests` to run the tests.
