@@ -19,12 +19,12 @@ DATABASE_NAME = 'performance_platform'
 def health_check():
     if mongo.alive():
         return Response(
-            "{'status':'ok','message':'database seems fine'}",
+            '{"status":"ok","message":"database seems fine"}',
             mimetype='application/json'
         )
     else:
         return Response(
-            "{'status':500,'message':'can't connect to ""database'}",
+            '{"status":500,"message":"can''t connect to database"}',
             mimetype='application/json',
             status=500
         )
