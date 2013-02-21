@@ -73,13 +73,22 @@ def invalid_data_object(obj):
 
 
 def store_objects(bucket_name, objects_to_store):
-    bucket = mongo[DATABASE_NAME][bucket_name]
-    bucket.insert(objects_to_store)
+    DataStore(DATABASE_NAME).store_data(objects_to_store, bucket_name)
 
 
 def time_string_to_utc_datetime(time_string):
     time = parser.parse(time_string)
     return time.astimezone(pytz.utc)
+
+
+class DataStore(object):
+    def __init__(self, database_name):
+        self.database = database_name
+
+    def store_data(self, my_object, collection_name):
+        MongoClient('localhost', 27017)[self.database][collection_name] \
+            .insert(my_object)
+
 
 if __name__ == '__main__':
     app.debug = True

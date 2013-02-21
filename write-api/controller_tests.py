@@ -4,8 +4,6 @@ import unittest
 import pytz
 import api
 
-__author__ = 'grogers'
-
 
 class PostDataTestCase(unittest.TestCase):
     def stub_storage(self, bucket_name, data_to_store):
