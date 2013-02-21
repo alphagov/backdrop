@@ -1,8 +1,10 @@
 from datetime import datetime
 import json
 import unittest
+from hamcrest import *
 import pytz
 import api
+from test_helpers import is_bad_request, is_ok
 
 
 class PostDataTestCase(unittest.TestCase):
@@ -24,8 +26,8 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        self.assertTrue( self.stored_bucket == 'foo-bucket' )
-        self.assertTrue( self.stored_data[0]['foo'] == 'bar' )
+        assert_that( self.stored_bucket, is_("foo-bucket"))
+        assert_that( self.stored_data[0], has_entry("foo", "bar"))
 
     def test_bucket_name_validation(self):
         response = self.app.post(
@@ -34,11 +36,11 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        self.assertEqual( response.status_code, 400 )
+        assert_that( response, is_bad_request() )
 
     def test__timestamps_get_stored_as_utc_datetimes(self):
         api.store_objects = self.stub_storage
-        expected_time = {
+        expected_event_with_time = {
             u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
         }
 
@@ -48,8 +50,8 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        self.assertEqual( self.stored_bucket, 'bucket' )
-        self.assertEqual( self.stored_data, [expected_time] )
+        assert_that( self.stored_bucket, is_("bucket"))
+        assert_that( self.stored_data, contains(expected_event_with_time) )
 
     def test_data_with_empty_keys_400s(self):
         response = self.app.post(
@@ -58,7 +60,7 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        self.assertEqual(response.status_code, 400)
+        assert_that( response, is_bad_request())
 
     def test__id_gets_stored(self):
         api.store_objects = self.stub_storage
@@ -68,8 +70,8 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.stored_data, [{"_id": u"foo"}])
+        assert_that(response, is_ok())
+        assert_that(self.stored_data, contains({"_id": u"foo"}))
 
     def test_invalid__id_returns_400(self):
         response = self.app.post(
@@ -78,7 +80,7 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        self.assertEqual(response.status_code, 400)
+        assert_that(response, is_bad_request())
 
 
 class ApiHealthCheckTestCase(unittest.TestCase):
@@ -90,8 +92,8 @@ class ApiHealthCheckTestCase(unittest.TestCase):
     def test_api_exposes_a_healthcheck(self):
         response = self.app.get("/_status")
 
-        self.assertEquals(200, response.status_code)
-        self.assertEquals("application/json", response.headers["Content-Type"])
+        assert_that(response, is_ok())
+        assert_that(response.headers["Content-Type"], is_("application/json"))
 
         entity = json.loads(response.data)
-        self.assertEquals("ok", entity["status"])
+        assert_that(entity["status"], is_("ok"))

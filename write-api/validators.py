@@ -21,7 +21,7 @@ def value_is_valid_datetime_string(value):
         "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
         "[+-][0-9]{2}:[0-9]{2}"
     )
-    return time_pattern.match(value)
+    return bool(time_pattern.match(value))
 
 
 def value_is_valid(value):

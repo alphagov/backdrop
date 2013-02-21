@@ -1,5 +1,3 @@
-import re
-
 from flask import Flask
 from flask import abort, request, Response
 from dateutil import parser

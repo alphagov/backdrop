@@ -1,6 +1,6 @@
 import unittest
-from hamcrest import *
 from datetime import datetime
+from hamcrest import *
 
 import pytz
 
@@ -11,91 +11,86 @@ from validators import value_is_valid_datetime_string, value_is_valid, \
 
 class ValidKeysTestCase(unittest.TestCase):
     def test_some_keys_are_reserved_namespace(self):
-        self.assertTrue( key_is_valid("_timestamp") )
-        self.assertTrue( key_is_valid("_id") )
-        self.assertFalse( key_is_valid("_name") )
-
+        assert_that(key_is_valid("_timestamp"), is_(True))
+        assert_that(key_is_valid("_id"), is_(True))
+        assert_that(key_is_valid("_name"), is_(False))
 
     def test_keys_can_be_case_insensitive(self):
-        self.assertTrue( key_is_valid("name") )
-        self.assertTrue( key_is_valid("NAME") )
+        assert_that(key_is_valid("name"), is_(True))
+        assert_that(key_is_valid("NAME"), is_(True))
 
     def test_keys_can_contain_numbers_and_restricted_punctuation(self):
-        self.assertTrue( key_is_valid("name54") )
-        self.assertTrue( key_is_valid("name_of_thing") )
-        self.assertTrue( key_is_valid("name-of-thing") )
-        self.assertTrue( key_is_valid("son.of.thing") )
-        self.assertFalse( key_is_valid("son;of;thing") )
-        self.assertFalse( key_is_valid("son:of:thing") )
+        assert_that(key_is_valid("name54"), is_(True))
+        assert_that(key_is_valid("name_of_thing"), is_(True))
+        assert_that(key_is_valid("name-of-thing"), is_(True))
+        assert_that(key_is_valid("son.of.thing"), is_(True))
+        assert_that(key_is_valid("son;of;thing"), is_(False))
+        assert_that(key_is_valid("son:of:thing"), is_(False))
 
     def test_key_cannot_be_empty(self):
-        self.assertFalse( key_is_valid("") )
-        self.assertFalse( key_is_valid("    ") )
-        self.assertFalse( key_is_valid("\t") )
+        assert_that(key_is_valid(""), is_(False))
+        assert_that(key_is_valid("    "), is_(False))
+        assert_that(key_is_valid("\t"), is_(False))
 
 
 class ValidValuesTestCase(unittest.TestCase):
     def test_values_can_be_integers(self):
-        self.assertTrue( value_is_valid(1257) )
+        assert_that(value_is_valid(1257), is_(True))
 
     def test_string_values_can_only_be_unicode_strings(self):
-        self.assertTrue( value_is_valid( u"1257" ) )
-        self.assertFalse( value_is_valid( "1257" ) )
+        assert_that(value_is_valid(u"1257"), is_(True))
+        assert_that(value_is_valid("1257"), is_(False))
 
     def test_values_cannot_be_arrays(self):
-        self.assertFalse( value_is_valid([1, 2, 3, 4]) )
+        assert_that(value_is_valid([1, 2, 3, 4]), is_(False))
 
     def test_values_cannot_be_dictionaries(self):
-        self.assertFalse( value_is_valid( {'thing': 'I am a thing'} ) )
+        assert_that(value_is_valid({'thing': 'I am a thing'}), is_(False))
 
 
 class TimestampValueIsInDateTimeFormat(unittest.TestCase):
     def test_value_is_of_valid_format(self):
         # our time format = YYYY-MM-DDTHH:MM:SS+HH:MM
-        self.assertTrue(
-            value_is_valid_datetime_string('2014-01-01T00:00:00+00:00')
-        )
-        self.assertTrue(
-            value_is_valid_datetime_string('2014-01-01T00:00:00-00:00')
-        )
+        assert_that(
+            value_is_valid_datetime_string('2014-01-01T00:00:00+00:00'),
+            is_(True))
+        assert_that(
+            value_is_valid_datetime_string('2014-01-01T00:00:00-00:00'),
+            is_(True))
 
-        self.assertFalse(
-            value_is_valid_datetime_string('i am not a time')
-        )
-        self.assertFalse(
-            value_is_valid_datetime_string('abcd-aa-aaTaa:aa:aa+aa:aa')
-        )
-        self.assertFalse(
-            value_is_valid_datetime_string('14-11-01T11:55:11+00:15')
-        )
-        self.assertFalse(
-            value_is_valid_datetime_string('2014-JAN-01T11:55:11+00:15')
-        )
-        self.assertFalse(
-            value_is_valid_datetime_string('2014-1-1T11:55:11+00:15')
-        )
-        self.assertFalse(
-            value_is_valid_datetime_string('2014-1-1T11:55:11')
-        )
-        self.assertFalse(
-            value_is_valid_datetime_string('2014-aa-aaTaa:aa:55+aa:aa')
-        )
+        assert_that(value_is_valid_datetime_string('i am not a time'),
+                    is_(False))
+        assert_that(
+            value_is_valid_datetime_string('abcd-aa-aaTaa:aa:aa+aa:aa'),
+            is_(False))
+        assert_that(value_is_valid_datetime_string('14-11-01T11:55:11+00:15'),
+                    is_(False))
+        assert_that(
+            value_is_valid_datetime_string('2014-JAN-01T11:55:11+00:15'),
+            is_(False))
+        assert_that(value_is_valid_datetime_string('2014-1-1T11:55:11+00:15'),
+                    is_(False))
+        assert_that(value_is_valid_datetime_string('2014-1-1T11:55:11'),
+                    is_(False))
+        assert_that(
+            value_is_valid_datetime_string('2014-aa-aaTaa:aa:55+aa:aa'),
+            is_(False))
 
 
 class IdValueIsValidTestCase(unittest.TestCase):
     def test_id_value_cannot_be_empty(self):
-        self.assertFalse( value_is_valid_id('') )
-        self.assertTrue( value_is_valid_id('a') )
+        assert_that(value_is_valid_id(''), is_(False))
+        assert_that(value_is_valid_id('a'), is_(True))
 
     def test_id_value_cannot_contain_white_spaces(self):
-        self.assertFalse( value_is_valid_id('a b') )
-        self.assertFalse( value_is_valid_id('a    b') )
-        self.assertFalse( value_is_valid_id('a\tb') )
+        assert_that(value_is_valid_id('a b'), is_(False))
+        assert_that(value_is_valid_id('a    b'), is_(False))
+        assert_that(value_is_valid_id('a\tb'), is_(False))
 
     def test_id_should_be_a_utf8_string(self):
-        self.assertFalse( value_is_valid_id(7) )
-        self.assertFalse( value_is_valid_id(None) )
-        self.assertTrue( value_is_valid_id(u'7') )
+        assert_that(value_is_valid_id(7), is_(False))
+        assert_that(value_is_valid_id(None), is_(False))
+        assert_that(value_is_valid_id(u'7'), is_(True))
 
 
 class ValidDateObjectTestCase(unittest.TestCase):
@@ -106,13 +101,13 @@ class ValidDateObjectTestCase(unittest.TestCase):
             u'Cthulu': ["R'lyeh"]
         }
 
-        self.assertTrue( api.invalid_data_object(my_second_value_is_bad) )
+        assert_that(api.invalid_data_object(my_second_value_is_bad), is_(True))
 
     def test_validation_for_bad_time_strings(self):
         some_bad_data = {u'_timestamp': u'hammer time'}
-        self.assertTrue( api.invalid_data_object(some_bad_data) )
+        assert_that(api.invalid_data_object(some_bad_data), is_(True))
         some_good_data = {u'_timestamp': u'2014-01-01T00:00:00+00:00'}
-        self.assertFalse( api.invalid_data_object(some_good_data) )
+        assert_that(api.invalid_data_object(some_good_data), is_(False))
 
 
 class DateStringToUTCDateTimeTestCase(unittest.TestCase):
@@ -121,19 +116,15 @@ class DateStringToUTCDateTimeTestCase(unittest.TestCase):
             '2014-01-02T03:04:05+00:00'
         )
 
-        self.assertTrue( isinstance(some_datetime, datetime) )
-        self.assertEquals(
-            some_datetime,
-            datetime(2014, 1, 2, 3, 4, 5, tzinfo=pytz.utc)
-        )
+        assert_that(isinstance(some_datetime, datetime), is_(True))
+        assert_that(some_datetime,
+                    is_(datetime(2014, 1, 2, 3, 4, 5, tzinfo=pytz.utc)))
 
     def test_that_date_strings_get_converted_to_utc(self):
         some_datetime = api.time_string_to_utc_datetime(
             '2014-01-02T06:04:05+03:30'
         )
 
-        self.assertTrue( isinstance(some_datetime, datetime) )
-        self.assertEquals(
-            some_datetime,
-            datetime(2014, 1, 2, 2, 34, 5, tzinfo=pytz.utc)
-        )
+        assert_that(isinstance(some_datetime, datetime), is_(True))
+        assert_that(some_datetime,
+                    is_(datetime(2014, 1, 2, 2, 34, 5, tzinfo=pytz.utc)))
