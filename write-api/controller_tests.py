@@ -53,7 +53,7 @@ class PostDataTestCase(unittest.TestCase):
         self.assertEqual( self.stored_bucket, 'bucket' )
         self.assertEqual( self.stored_data, [expected_time] )
 
-    def test_data_gets_stored(self):
+    def test_data_with_empty_keys_400s(self):
         response = self.app.post(
             '/foo-bucket',
             data = '{"": ""}',
