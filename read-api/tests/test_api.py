@@ -31,4 +31,4 @@ class MyFlaskTestCase(unittest.TestCase):
 
         response_data = json.loads(response.data)
 
-        self.assertEqual(len(response_data), 3)
+        self.assertEqual(len(response_data['data']), 3)
