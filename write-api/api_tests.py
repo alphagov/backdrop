@@ -176,6 +176,7 @@ class DateStringToUTCDateTimeTestCase(unittest.TestCase):
             datetime(2014, 1, 2, 2, 34, 5, tzinfo=pytz.utc)
         )
 
+
 class ApiHealthCheckTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
@@ -183,10 +184,10 @@ class ApiHealthCheckTestCase(unittest.TestCase):
         self.stored_data = None
 
     def test_api_exposes_a_healthcheck(self):
-	response = self.app.get("/_status/")
+        response = self.app.get("/_status/")
 
-	self.assertEquals(200, response.status_code)
-	self.assertEquals("application/json", response.headers["Content-Type"])
-	
-	entity = json.loads(response.data)
-	self.assertEquals("ok", entity["status"])
+        self.assertEquals(200, response.status_code)
+        self.assertEquals("application/json", response.headers["Content-Type"])
+
+        entity = json.loads(response.data)
+        self.assertEquals("ok", entity["status"])
