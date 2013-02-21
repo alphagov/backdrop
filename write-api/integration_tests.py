@@ -5,13 +5,10 @@ from api import DataStore
 
 TEST_DATABASE = 'performance_platform_test'
 
+
 def setup_test_database():
-    # init mongo client
     mongo = MongoClient('localhost', 27017)
-    # cleanup test db
     mongo.drop_database(TEST_DATABASE)
-    # for collection_name in db.collection_names():
-    #     db.drop_collection(collection_name)
 
 
 def retrieve_data(collection_name):
@@ -23,7 +20,6 @@ class MongoTestCase(unittest.TestCase):
 
     def setUp(self):
         setup_test_database()
-
 
     def test_object_gets_stored_in_db(self):
         my_object = {'foo': 'bar', 'zap': 'bop'}
