@@ -12,8 +12,8 @@ def setup_test_database():
 
 
 def retrieve_data(collection_name):
-    return MongoClient('localhost', 27017)[TEST_DATABASE][collection_name]\
-        .find()
+    mongo = MongoClient('localhost', 27017)
+    return list(mongo[TEST_DATABASE][collection_name].find())
 
 
 class MongoTestCase(unittest.TestCase):
@@ -24,7 +24,7 @@ class MongoTestCase(unittest.TestCase):
     def test_object_gets_stored_in_db(self):
         my_object = {'foo': 'bar', 'zap': 'bop'}
 
-        DataStore(TEST_DATABASE).store_data(my_object, "kittens")
+        DataStore(TEST_DATABASE).store_data([my_object], "kittens")
 
         retrieved_objects = retrieve_data("kittens")
 
@@ -43,3 +43,24 @@ class MongoTestCase(unittest.TestCase):
 
         for o in objects:
             self.assertTrue(o in retrieved_objects)
+
+    def test_stored_object_is_appended_to_collection(self):
+        event = {"title": "I'm an event"}
+        another_event = {"title": "I'm another event"}
+
+        DataStore(TEST_DATABASE).store_data([event], "events")
+        DataStore(TEST_DATABASE).store_data([another_event], "events")
+
+        retrieved_objects = retrieve_data("marx-bros")
+        self.assertTrue(event, another_event in retrieved_objects)
+
+    def test_object_with_id_is_updated(self):
+        event = { "_id": "event1", "title": "I'm an event"}
+        updated_event = {"_id": "event1", "title": "I'm another event"}
+
+        DataStore(TEST_DATABASE).store_data([event], "events")
+        DataStore(TEST_DATABASE).store_data([updated_event], "events")
+
+        retrieved_objects = retrieve_data("events")
+        self.assertTrue(updated_event in retrieved_objects)
+        self.assertFalse(event in retrieved_objects)

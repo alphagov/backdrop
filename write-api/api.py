@@ -87,9 +87,12 @@ class DataStore(object):
     def __init__(self, database_name):
         self.database = database_name
 
-    def store_data(self, my_object, collection_name):
-        MongoClient('localhost', 27017)[self.database][collection_name] \
-            .insert(my_object)
+    def store_data(self, my_objects, collection_name):
+        bucket = MongoClient('localhost', 27017)[self.database][
+            collection_name]
+
+        for data_objects in my_objects:
+            bucket.save(data_objects)
 
 
 if __name__ == '__main__':
