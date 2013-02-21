@@ -9,6 +9,7 @@ RESERVED_KEYWORDS = (
     '_timestamp',
     '_start_at',
     '_end_at',
+    '_id'
 )
 VALID_KEYWORD = re.compile('^[a-z0-9_\.-]+$')
 VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
@@ -48,3 +49,11 @@ def bucket_is_valid(bucket_name):
     if VALID_BUCKET_NAME.match(bucket_name):
         return True
     return False
+
+
+def value_is_a_valid_id(value):
+    if not isinstance(value, basestring):
+        return False
+    if re.compile('\s').search(value):
+        return False
+    return len(value) > 0
