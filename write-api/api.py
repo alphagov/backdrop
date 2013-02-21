@@ -6,7 +6,7 @@ from dateutil import parser
 from pymongo import MongoClient
 import pytz
 from validators import value_is_valid_datetime_string, value_is_valid, \
-    key_is_valid, bucket_is_valid
+    key_is_valid, bucket_is_valid, value_is_valid_id
 
 
 app = Flask(__name__)
@@ -68,6 +68,8 @@ def invalid_data_object(obj):
         if not key_is_valid(key) or not value_is_valid(value):
             return True
         if key == '_timestamp' and not value_is_valid_datetime_string(value):
+            return True
+        if key == '_id' and not value_is_valid_id(value):
             return True
     return False
 

@@ -60,6 +60,26 @@ class PostDataTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test__id_gets_stored(self):
+        api.store_objects = self.stub_storage
+        response = self.app.post(
+            '/foo',
+            data = '{"_id": "foo"}',
+            content_type = "application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.stored_data, [{"_id": u"foo"}])
+
+    def test_invalid__id_returns_400(self):
+        response = self.app.post(
+            '/foo',
+            data = '{"_id": "f o o"}',
+            content_type = "application/json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+
 
 class ApiHealthCheckTestCase(unittest.TestCase):
     def setUp(self):

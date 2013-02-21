@@ -51,7 +51,7 @@ def bucket_is_valid(bucket_name):
     return False
 
 
-def value_is_a_valid_id(value):
+def value_is_valid_id(value):
     if not isinstance(value, basestring):
         return False
     if re.compile('\s').search(value):

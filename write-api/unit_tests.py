@@ -5,7 +5,7 @@ import pytz
 
 import api
 from validators import value_is_valid_datetime_string, value_is_valid, \
-    key_is_valid, value_is_a_valid_id
+    key_is_valid, value_is_valid_id
 
 
 class ValidKeysTestCase(unittest.TestCase):
@@ -82,18 +82,18 @@ class TimestampValueIsInDateTimeFormat(unittest.TestCase):
 
 class IdValueIsValidTestCase(unittest.TestCase):
     def test_id_value_cannot_be_empty(self):
-        self.assertFalse( value_is_a_valid_id('') )
-        self.assertTrue( value_is_a_valid_id('a') )
+        self.assertFalse( value_is_valid_id('') )
+        self.assertTrue( value_is_valid_id('a') )
 
     def test_id_value_cannot_contain_white_spaces(self):
-        self.assertFalse( value_is_a_valid_id('a b') )
-        self.assertFalse( value_is_a_valid_id('a    b') )
-        self.assertFalse( value_is_a_valid_id('a\tb') )
+        self.assertFalse( value_is_valid_id('a b') )
+        self.assertFalse( value_is_valid_id('a    b') )
+        self.assertFalse( value_is_valid_id('a\tb') )
 
     def test_id_should_be_a_utf8_string(self):
-        self.assertFalse( value_is_a_valid_id(7) )
-        self.assertFalse( value_is_a_valid_id(None) )
-        self.assertTrue( value_is_a_valid_id(u'7') )
+        self.assertFalse( value_is_valid_id(7) )
+        self.assertFalse( value_is_valid_id(None) )
+        self.assertTrue( value_is_valid_id(u'7') )
 
 
 class ValidDateObjectTestCase(unittest.TestCase):
