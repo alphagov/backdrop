@@ -1,5 +1,6 @@
 import unittest
 
+from hamcrest import *
 from pymongo import MongoClient
 from api import DataStore
 
@@ -29,6 +30,7 @@ class MongoTestCase(unittest.TestCase):
         retrieved_objects = retrieve_data("kittens")
 
         self.assertTrue(my_object in retrieved_objects)
+        assert_that( retrieved_objects, contains(my_object) )
 
     def test_object_list_gets_stored_in_db(self):
         objects = [
@@ -41,8 +43,7 @@ class MongoTestCase(unittest.TestCase):
 
         retrieved_objects = retrieve_data("marx-bros")
 
-        for o in objects:
-            self.assertTrue(o in retrieved_objects)
+        assert_that( retrieved_objects, contains(*objects) )
 
     def test_stored_object_is_appended_to_collection(self):
         event = {"title": "I'm an event"}
@@ -51,8 +52,8 @@ class MongoTestCase(unittest.TestCase):
         DataStore(TEST_DATABASE).store_data([event], "events")
         DataStore(TEST_DATABASE).store_data([another_event], "events")
 
-        retrieved_objects = retrieve_data("marx-bros")
-        self.assertTrue(event, another_event in retrieved_objects)
+        retrieved_objects = retrieve_data("events")
+        assert_that( retrieved_objects, contains(event, another_event) )
 
     def test_object_with_id_is_updated(self):
         event = { "_id": "event1", "title": "I'm an event"}
@@ -62,5 +63,4 @@ class MongoTestCase(unittest.TestCase):
         DataStore(TEST_DATABASE).store_data([updated_event], "events")
 
         retrieved_objects = retrieve_data("events")
-        self.assertTrue(updated_event in retrieved_objects)
-        self.assertFalse(event in retrieved_objects)
+        assert_that( retrieved_objects, only_contains(updated_event) )

@@ -1,4 +1,5 @@
 import unittest
+from hamcrest import *
 from datetime import datetime
 
 import pytz
@@ -13,6 +14,7 @@ class ValidKeysTestCase(unittest.TestCase):
         self.assertTrue( key_is_valid("_timestamp") )
         self.assertTrue( key_is_valid("_id") )
         self.assertFalse( key_is_valid("_name") )
+
 
     def test_keys_can_be_case_insensitive(self):
         self.assertTrue( key_is_valid("name") )
