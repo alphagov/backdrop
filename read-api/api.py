@@ -27,8 +27,13 @@ def query(bucket):
 
     if "start_at" in request.args:
         query["_timestamp"] = {
-            "$gte": time_string_to_utc_datetime(request.args['start_at'])
+            "$gte": parse_time_string(request.args['start_at'])
         }
+
+    if 'end_at' in request.args:
+        if '_timestamp' not in query:
+            query['_timestamp'] = {}
+        query['_timestamp']['$lt'] = parse_time_string(request.args['end_at'])
 
     response_data = [
         jsonify_document(document) for document in collection.find(query)
@@ -37,8 +42,11 @@ def query(bucket):
     return jsonify(data=response_data)
 
 
-def time_string_to_utc_datetime(time_string):
+def parse_time_string(time_string):
     time = parser.parse(time_string)
+    # If the timezone has not been provided assume UTC (as per ISO8601)
+    if time.tzinfo is None:
+        time = time.replace(tzinfo=pytz.utc)
     return time.astimezone(pytz.utc)
 
 
