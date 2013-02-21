@@ -21,7 +21,7 @@ def load_fixture(collection_name, fixture_name):
             api.mongo[DATABASE_NAME][collection_name].save(document)
 
 
-class MyFlaskTestCase(unittest.TestCase):
+class IntegrationTests(unittest.TestCase):
     def setUp(self):
         api.app.config['DATABASE_NAME'] = DATABASE_NAME
         load_fixture('licencing', "licence.json")
