@@ -15,7 +15,7 @@ mongo = MongoClient('localhost', 27017)
 DATABASE_NAME = 'performance_platform'
 
 
-@app.route('/_status/')
+@app.route('/_status')
 def health_check():
     if mongo.alive():
         return Response(
@@ -30,7 +30,7 @@ def health_check():
         )
 
 
-@app.route('/<bucket>/', methods=['POST'])
+@app.route('/<bucket>', methods=['POST'])
 def post_to_bucket(bucket):
     if not request_is_valid(request, bucket):
         abort(400)

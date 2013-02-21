@@ -60,7 +60,7 @@ class PostDataTestCase(unittest.TestCase):
         api.store_objects = self.stub_storage
 
         self.app.post(
-            '/foo-bucket/',
+            '/foo-bucket',
             data = '{"foo": "bar"}',
             content_type = "application/json"
         )
@@ -70,7 +70,7 @@ class PostDataTestCase(unittest.TestCase):
 
     def test_bucket_name_validation(self):
         response = self.app.post(
-            '/_foo-bucket/',
+            '/_foo-bucket',
             data = '{"foo": "bar"}',
             content_type = "application/json"
         )
@@ -80,12 +80,11 @@ class PostDataTestCase(unittest.TestCase):
     def test__timestamps_get_stored_as_utc_datetimes(self):
         api.store_objects = self.stub_storage
         expected_time = {
-            u'_timestamp':
-            datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
+            u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
         }
 
         self.app.post(
-            '/bucket/',
+            '/bucket',
             data = '{"_timestamp": "2014-01-02T03:49:00+00:00"}',
             content_type = "application/json"
         )
@@ -95,7 +94,7 @@ class PostDataTestCase(unittest.TestCase):
 
     def test_data_gets_stored(self):
         response = self.app.post(
-            '/foo-bucket/',
+            '/foo-bucket',
             data = '{"": ""}',
             content_type = "application/json"
         )
@@ -184,7 +183,7 @@ class ApiHealthCheckTestCase(unittest.TestCase):
         self.stored_data = None
 
     def test_api_exposes_a_healthcheck(self):
-        response = self.app.get("/_status/")
+        response = self.app.get("/_status")
 
         self.assertEquals(200, response.status_code)
         self.assertEquals("application/json", response.headers["Content-Type"])
