@@ -35,6 +35,10 @@ def query(bucket):
             query['_timestamp'] = {}
         query['_timestamp']['$lt'] = parse_time_string(request.args['end_at'])
 
+    if 'filter_by' in request.args:
+        key, value = request.args['filter_by'].split(':', 1)
+        query[key] = value
+
     response_data = [
         jsonify_document(document) for document in collection.find(query)
     ]

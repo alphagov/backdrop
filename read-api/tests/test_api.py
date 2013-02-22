@@ -94,3 +94,14 @@ class IntegrationTests(unittest.TestCase):
         response_data = json.loads(response.data)
 
         self.assertEqual(len(response_data['data']), 1)
+
+    def test_that_events_are_filtered(self):
+        query = self.create_query(filter_by='authority:Camden')
+        response = self.app.get(query)
+
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.data)
+
+        self.assertEqual(len(response_data['data']), 1)
+
