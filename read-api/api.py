@@ -1,3 +1,4 @@
+from bson.code import Code
 from dateutil import parser
 
 from flask import Flask, jsonify, request
@@ -39,8 +40,20 @@ def query(bucket):
         key, value = request.args['filter_by'].split(':', 1)
         query[key] = value
 
+    if 'group_by' in request.args:
+        result = collection.group(
+            key={request.args['group_by']: 1},
+            condition=query,
+            initial={'count': 0},
+            reduce=Code("""
+            function(current, previous) { previous.count++; }
+            """)
+        )
+    else:
+        result = collection.find(query)
+
     response_data = [
-        jsonify_document(document) for document in collection.find(query)
+        jsonify_document(document) for document in result
     ]
 
     return jsonify(data=response_data)

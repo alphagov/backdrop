@@ -105,3 +105,20 @@ class IntegrationTests(unittest.TestCase):
 
         self.assertEqual(len(response_data['data']), 1)
 
+    def test_that_events_are_grouped(self):
+        query = self.create_query(group_by='authority')
+        response = self.app.get(query)
+
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.data)
+
+        self.assertEqual(len(response_data['data']), 2)
+        self.assertEqual(response_data['data'][0], {
+            'authority': 'Westminster',
+            'count': 3
+        })
+        self.assertEqual(response_data['data'][1], {
+            'authority': 'Camden',
+            'count': 1
+        })
