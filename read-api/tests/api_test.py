@@ -64,7 +64,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(len(response_data['data']), 2)
 
     def test_that_events_earlier_than_end_at_are_returned(self):
-        query = self.create_query(start_at='2012-12-12T01:01:02%2B00:00')
+        query = self.create_query(end_at='2012-12-12T01:01:02%2B00:00')
         response = self.app.get(query)
 
         self.assertEqual(response.status_code, 200)
