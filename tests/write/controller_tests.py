@@ -1,10 +1,13 @@
+import test_helper
+
 from datetime import datetime
 import json
 import unittest
 from hamcrest import *
 import pytz
-import api
 from test_helpers import is_bad_request, is_ok
+
+from performance_platform.write import api
 
 
 class PostDataTestCase(unittest.TestCase):

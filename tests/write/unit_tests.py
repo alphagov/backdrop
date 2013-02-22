@@ -1,12 +1,14 @@
+import test_helper
+
 import unittest
 from datetime import datetime
 from hamcrest import *
 
 import pytz
 
-import api
-from validators import value_is_valid_datetime_string, value_is_valid, \
-    key_is_valid, value_is_valid_id
+from performance_platform.write import api
+from performance_platform.write.validators import value_is_valid_id, \
+    value_is_valid, key_is_valid, value_is_valid_datetime_string
 
 
 class ValidKeysTestCase(unittest.TestCase):

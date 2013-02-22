@@ -1,3 +1,5 @@
+import test_helper
+
 import os
 import unittest
 from dateutil import parser
@@ -5,14 +7,14 @@ from dateutil import parser
 from flask import json
 import pytz
 
-import api
+from performance_platform.read import api
 
 DATABASE_NAME = 'performance_platform_test'
 
 
 def load_fixture(collection_name, fixture_name):
-    root_path = os.path.join(os.path.dirname(__file__), '..', '..')
-    fixture_path = os.path.join(root_path, 'test', 'data', fixture_name)
+    test_path = os.path.join(os.path.dirname(__file__), '..')
+    fixture_path = os.path.join(test_path, 'fixtures', fixture_name)
     with open(fixture_path) as fixture:
         for document in json.load(fixture):
             if '_timestamp' in document:
