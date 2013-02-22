@@ -6,11 +6,13 @@ import pytz
 from validators import value_is_valid_datetime_string, value_is_valid, \
     key_is_valid, bucket_is_valid, value_is_valid_id
 
+# Configuration
+DATABASE_NAME = 'performance_platform'
 
 app = Flask(__name__)
-mongo = MongoClient('localhost', 27017)
+app.config.from_object(__name__)
 
-DATABASE_NAME = 'performance_platform'
+mongo = MongoClient('localhost', 27017)
 
 
 @app.route('/_status')
@@ -73,7 +75,7 @@ def invalid_data_object(obj):
 
 
 def store_objects(bucket_name, objects_to_store):
-    DataStore(DATABASE_NAME).store_data(objects_to_store, bucket_name)
+    DataStore(app.config['DATABASE_NAME']).store_data(objects_to_store, bucket_name)
 
 
 def time_string_to_utc_datetime(time_string):

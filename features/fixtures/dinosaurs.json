@@ -1,0 +1,22 @@
+[
+    {
+        "type": "dinosaur",
+        "size": "big",
+        "name": "t-rex"
+    },
+    {
+        "type": "dinosaur",
+        "size": "big",
+        "name": "sarcosuchus"
+    },
+    {
+        "type": "dinosaur",
+        "size": "medium",
+        "name": "pterodactyl"
+    },
+    {
+        "type": "dinosaur",
+        "size": "small",
+        "name": "microraptor"
+    }
+]

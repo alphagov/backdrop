@@ -7,13 +7,7 @@ from hamcrest import *
 from dateutil import parser
 import pytz
 
-FIXTURE_PATH = os.path.join(
-    os.path.dirname(__file__),
-    '..',
-    '..',
-    'tests',
-    'fixtures'
-)
+FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
 
 @given('"{fixture_name}" is in "{bucket_name}" bucket')

@@ -1,4 +1,4 @@
-Feature: performance platform read api
+Feature: the performance platform read api
 
     Scenario: getting all the data in a bucket
         Given "licensing.json" is in "foo" bucket
