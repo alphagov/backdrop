@@ -1,0 +1,5 @@
+flask
+pymongo==2.4
+python-dateutil < 2.0
+pytz
+nose

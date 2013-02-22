@@ -1,0 +1,38 @@
+[
+    {
+        "_id": "1234",
+        "_timestamp": "2012-12-12T01:01:01+00:00",
+
+        "licence_name": "Temporary events notice",
+        "interaction": "success",
+        "authority": "Westminster",
+        "type": "success"
+    },
+    {
+        "_id": "1235",
+        "_timestamp": "2012-12-12T01:01:01+00:00",
+
+        "licence_name": "Temporary events notice",
+        "interaction": "success",
+        "authority": "Camden",
+        "type": "success"
+    },
+    {
+        "_id": "1236",
+        "_timestamp": "2012-12-13T01:01:01+00:00",
+
+        "licence_name": "Temporary events notice",
+        "interaction": "success",
+        "authority": "Westminster",
+        "type": "success"
+    },
+    {
+        "_id": "1237",
+        "_timestamp": "2012-12-14T01:01:01+00:00",
+
+        "licence_name": "Temporary events notice",
+        "interaction": "success",
+        "authority": "Westminster",
+        "type": "success"
+    }
+]
