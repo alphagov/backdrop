@@ -1,0 +1,38 @@
+Feature: performance platform read api
+
+    Scenario: getting all the data in a bucket
+        Given "licensing.json" is in "foo" bucket
+         when I go to "/foo"
+         then I should get back a status of "200"
+          and the JSON should have "4" result(s)
+
+    Scenario: querying for data ON or AFTER a certain point
+        Given "licensing.json" is in "foo" bucket
+         when I go to "/foo?start_at=2012-12-13T01:01:01%2B00:00"
+         then I should get back a status of "200"
+          and the JSON should have "2" result(s)
+
+    Scenario: querying for data BEFORE a certain point
+        Given "licensing.json" is in "foo" bucket
+         when I go to "/foo?end_at=2012-12-12T01:01:02%2B00:00"
+         then I should get back a status of "200"
+          and the JSON should have "2" result(s)
+
+    Scenario: querying for data between two points
+        Given "licensing.json" is in "foo" bucket
+         when I go to "/foo?start_at=2012-12-12T01:01:02%2B00:00&end_at=2012-12-14T00:00:00%2B00:00"
+         then I should get back a status of "200"
+          and the JSON should have "1" result(s)
+
+    Scenario: filtering by a key and value
+        Given "licensing.json" is in "foo" bucket
+         when I go to "/foo?filter_by=authority:Camden"
+         then I should get back a status of "200"
+          and the JSON should have "1" result(s)
+
+    Scenario: grouping data by a key
+        Given "licensing.json" is in "foo" bucket
+         when I go to "/foo?group_by=authority"
+         then I should get back a status of "200"
+          and the JSON should have "2" result(s)
+          and result "1" should be "{"authority": "Camden", "count": 1}"

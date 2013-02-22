@@ -26,7 +26,7 @@ def load_fixture(collection_name, fixture_name):
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
         api.app.config['DATABASE_NAME'] = DATABASE_NAME
-        load_fixture('licencing', 'licence.json')
+        load_fixture('licencing', 'licensing.json')
         self.app = api.app.test_client()
 
     def tearDown(self):
