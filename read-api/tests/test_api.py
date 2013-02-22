@@ -7,7 +7,7 @@ import pytz
 
 import api
 
-DATABASE_NAME = "performance_platform_test"
+DATABASE_NAME = 'performance_platform_test'
 
 
 def load_fixture(collection_name, fixture_name):
@@ -15,8 +15,8 @@ def load_fixture(collection_name, fixture_name):
     fixture_path = os.path.join(root_path, 'test', 'data', fixture_name)
     with open(fixture_path) as fixture:
         for document in json.load(fixture):
-            if "_timestamp" in document:
-                document["_timestamp"] = parser.parse(document["_timestamp"])\
+            if '_timestamp' in document:
+                document['_timestamp'] = parser.parse(document['_timestamp'])\
                                                .astimezone(pytz.utc)
             api.mongo[DATABASE_NAME][collection_name].save(document)
 
@@ -24,7 +24,7 @@ def load_fixture(collection_name, fixture_name):
 class IntegrationTests(unittest.TestCase):
     def setUp(self):
         api.app.config['DATABASE_NAME'] = DATABASE_NAME
-        load_fixture('licencing', "licence.json")
+        load_fixture('licencing', 'licence.json')
         self.app = api.app.test_client()
 
     def tearDown(self):
@@ -71,7 +71,7 @@ class IntegrationTests(unittest.TestCase):
 
         response_data = json.loads(response.data)
 
-        self.assertEqual(len(response_data["data"]), 2)
+        self.assertEqual(len(response_data['data']), 2)
 
     def test_that_events_equal_to_that_end_at_are_not_returned(self):
         query = self.create_query(end_at='2012-12-12T01:01:01%2B00:00')
@@ -81,7 +81,7 @@ class IntegrationTests(unittest.TestCase):
 
         response_data = json.loads(response.data)
 
-        self.assertEqual(len(response_data["data"]), 0)
+        self.assertEqual(len(response_data['data']), 0)
 
     def test_that_events_between_start_at_and_end_at_are_returned(self):
         start_at = '2012-12-12T01:01:02%2B00:00'

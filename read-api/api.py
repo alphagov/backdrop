@@ -25,9 +25,9 @@ def query(bucket):
 
     query = {}
 
-    if "start_at" in request.args:
-        query["_timestamp"] = {
-            "$gte": parse_time_string(request.args['start_at'])
+    if 'start_at' in request.args:
+        query['_timestamp'] = {
+            '$gte': parse_time_string(request.args['start_at'])
         }
 
     if 'end_at' in request.args:
