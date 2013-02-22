@@ -11,7 +11,7 @@ source ./venv/bin/activate
 pip install -r requirements.txt
 pip install -r requirements_for_tests.txt
 
-PYTHONPATH=./tests/read behave ./tests/read/features
+behave
 RESULT=$?
 
 if [ $RESULT -ne 0 ]; then
