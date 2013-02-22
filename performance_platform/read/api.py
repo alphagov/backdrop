@@ -40,6 +40,8 @@ def query(bucket):
         key, value = request.args['filter_by'].split(':', 1)
         query[key] = value
 
+    some_array = []
+
     if 'group_by' in request.args:
         result = collection.group(
             key={request.args['group_by']: 1},
@@ -49,14 +51,18 @@ def query(bucket):
             function(current, previous) { previous.count++; }
             """)
         )
+
+        for obj in result:
+            some_array.append({obj[request.args['group_by']]: obj['count']})
     else:
-        result = collection.find(query)
+        result = collection.find(query).sort("_timestamp", -1)
 
-    response_data = [
-        jsonify_document(document) for document in result
-    ]
+        for obj in result:
+            # TODO: mongo and timezones?!
+            timestamp = obj.pop("_timestamp").replace(tzinfo=pytz.utc).isoformat()
+            some_array.append({timestamp: obj})
 
-    return jsonify(data=response_data)
+    return jsonify(data=some_array)
 
 
 def parse_time_string(time_string):

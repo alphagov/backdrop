@@ -12,4 +12,5 @@ def before_all(context):
 
 
 def after_scenario(context, _):
-    api.mongo[DATABASE_NAME][context.bucket].drop()
+    pass
+    # api.mongo[DATABASE_NAME][context.bucket].drop()
