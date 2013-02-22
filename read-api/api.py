@@ -61,9 +61,6 @@ def query(bucket):
 
 def parse_time_string(time_string):
     time = parser.parse(time_string)
-    # If the timezone has not been provided assume UTC (as per ISO8601)
-    if time.tzinfo is None:
-        time = time.replace(tzinfo=pytz.utc)
     return time.astimezone(pytz.utc)
 
 
