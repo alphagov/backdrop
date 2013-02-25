@@ -20,25 +20,31 @@ def open_bucket_collection(bucket):
     return mongo[app.config['DATABASE_NAME']][bucket]
 
 
+def build_query(request_args):
+    query = {}
+
+    if 'start_at' in request_args:
+        query['_timestamp'] = {
+            '$gte': parse_time_string(request_args['start_at'])
+        }
+
+    if 'end_at' in request_args:
+        if '_timestamp' not in query:
+            query['_timestamp'] = {}
+        query['_timestamp']['$lt'] = parse_time_string(request_args['end_at'])
+
+    if 'filter_by' in request_args:
+        key, value = request_args['filter_by'].split(':', 1)
+        query[key] = value
+
+    return query
+
+
 @app.route('/<bucket>', methods=['GET'])
 def query(bucket):
     collection = open_bucket_collection(bucket)
 
-    query = {}
-
-    if 'start_at' in request.args:
-        query['_timestamp'] = {
-            '$gte': parse_time_string(request.args['start_at'])
-        }
-
-    if 'end_at' in request.args:
-        if '_timestamp' not in query:
-            query['_timestamp'] = {}
-        query['_timestamp']['$lt'] = parse_time_string(request.args['end_at'])
-
-    if 'filter_by' in request.args:
-        key, value = request.args['filter_by'].split(':', 1)
-        query[key] = value
+    query = build_query(request.args)
 
     some_array = []
 
