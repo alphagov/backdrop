@@ -6,6 +6,12 @@ Feature: the performance platform read api
          then I should get back a status of "200"
           and the JSON should have "4" result(s)
 
+    Scenario: my data does not have timestamps
+        Given "dinosaurs.json" is in "rawr" bucket
+         when I go to "/rawr"
+         then I should get back a status of "200"
+         and the JSON should have "4" result(s)
+
     Scenario: querying for data ON or AFTER a certain point
         Given "licensing.json" is in "foo" bucket
          when I go to "/foo?start_at=2012-12-13T01:01:01%2B00:00"
