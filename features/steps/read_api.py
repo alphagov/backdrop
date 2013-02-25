@@ -43,4 +43,4 @@ def step(context, nth, expected_json):
     i = int(re.compile(r'\d+').match(nth).group(0)) - 1
     the_data = json.loads(context.response.data)['data']
     expected = json.loads(expected_json)
-    assert_that(the_data[i], has_entries(expected))
+    assert_that(the_data[i], is_(expected))

@@ -40,3 +40,19 @@ Feature: the performance platform read api
          then I should get back a status of "200"
           and the JSON should have "2" result(s)
           and the "1st" result should be "{"Westminster": 3}"
+          and the "2nd" result should be "{"Camden": 1}"
+
+    Scenario: extracting data for a representation
+        Given "licensing_2.json" is in "foo" bucket
+         when I go to "/foo?group_by=authority&filter_by=licence_name:Temporary%20events%20notice"
+         then I should get back a status of "200"
+          and the JSON should have "2" result(s)
+          and the "1st" result should be "{"Westminster": 3}"
+
+        Given "licensing_2.json" is in "foo" bucket
+         when I go to "/foo?group_by=licence_name&filter_by=authority:Westminster"
+         then I should get back a status of "200"
+          and the JSON should have "2" result(s)
+          and the "1st" result should be "{"Temporary events notice": 3}"
+          and the "2nd" result should be "{"Cat herding licence": 1}"
+
