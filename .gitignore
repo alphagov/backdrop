@@ -4,3 +4,5 @@ tokens.dat
 assets/*
 !assets/.gitkeep
 .idea
+venv
+*.tar.gz
