@@ -2,14 +2,7 @@
 
 set -e
 
-if [ -e venv ]; then
-  rm -r venv
-fi
-virtualenv venv
 source ./venv/bin/activate
-
-pip install -r requirements.txt
-pip install -r requirements_for_tests.txt
 
 behave
 RESULT=$?
