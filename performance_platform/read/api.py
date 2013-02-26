@@ -22,20 +22,21 @@ def open_bucket_collection(bucket):
     return mongo[app.config['DATABASE_NAME']][bucket]
 
 
-def build_query(request_args):
-    query = {}
-
+def validate_request_args(request_args):
     if 'start_at' in request_args:
         if not value_is_valid_datetime_string(request_args['start_at']):
             abort(400)
-
     if 'end_at' in request_args:
         if not value_is_valid_datetime_string(request_args['end_at']):
             abort(400)
-
     if 'filter_by' in request_args:
         if request_args['filter_by'].find(':') < 0:
             abort(400)
+
+
+def build_query(request_args):
+    query = {}
+
 
     if 'start_at' in request_args:
         query['_timestamp'] = {
@@ -56,6 +57,8 @@ def build_query(request_args):
 
 @app.route('/<bucket>', methods=['GET'])
 def query(bucket):
+    validate_request_args(request.args)
+
     collection = open_bucket_collection(bucket)
 
     query = build_query(request.args)
