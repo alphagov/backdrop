@@ -1,8 +1,7 @@
 Feature: the performance platform write api
 
     Scenario: hitting the health check url
-        Given ...
-         when I go to "/_status"
+         When I go to "/_status"
          then I should get back a status of "200"
 
     Scenario: posting to a reserved bucket name

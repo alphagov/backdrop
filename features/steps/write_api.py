@@ -5,11 +5,6 @@ from hamcrest import *
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
 
-@given("...")
-def step(context):
-    pass
-
-
 @given('I have the data in "{fixture_name}"')
 def step(context, fixture_name):
     path_to_fixture = os.path.join(FIXTURE_PATH, fixture_name)
