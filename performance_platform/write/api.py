@@ -3,7 +3,7 @@ from flask import abort, request, Response
 from dateutil import parser
 from pymongo import MongoClient
 import pytz
-from performance_platform.core.validators import *
+from core.validators import *
 
 # Configuration
 DATABASE_NAME = 'performance_platform'
@@ -97,6 +97,6 @@ class DataStore(object):
             bucket.save(data_objects)
 
 
-if __name__ == '__main__':
+def start():
     app.debug = True
     app.run(host='0.0.0.0')

@@ -7,10 +7,9 @@ import pytz
 
 
 # Configuration
-from performance_platform.core.validators import value_is_valid_datetime_string
+from core.validators import value_is_valid_datetime_string
 
 DATABASE_NAME = 'performance_platform'
-
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -106,6 +105,6 @@ def jsonify_document(document):
 
     return document
 
-if __name__ == '__main__':
+def start():
     app.debug = True
     app.run(host='0.0.0.0')

@@ -1,10 +1,12 @@
+import test_helper
 from datetime import datetime
 from unittest import TestCase
 
 import pytz
+
 from hamcrest import *
 
-from performance_platform.read.api import build_query
+from read.api import build_query
 
 
 class TestBuild_query(TestCase):

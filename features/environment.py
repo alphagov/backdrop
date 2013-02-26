@@ -1,6 +1,6 @@
 import test_helper
-from performance_platform.read import api as read_api
-from performance_platform.write import api as write_api
+from read import api as read_api
+from write import api as write_api
 
 DATABASE_NAME = "performance_platform_test"
 
