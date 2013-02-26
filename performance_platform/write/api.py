@@ -3,8 +3,7 @@ from flask import abort, request, Response
 from dateutil import parser
 from pymongo import MongoClient
 import pytz
-from validators import value_is_valid_datetime_string, value_is_valid, \
-    key_is_valid, bucket_is_valid, value_is_valid_id
+from performance_platform.core.validators import *
 
 # Configuration
 DATABASE_NAME = 'performance_platform'
@@ -75,7 +74,10 @@ def invalid_data_object(obj):
 
 
 def store_objects(bucket_name, objects_to_store):
-    DataStore(app.config['DATABASE_NAME']).store_data(objects_to_store, bucket_name)
+    DataStore(app.config['DATABASE_NAME']).store_data(
+        objects_to_store,
+        bucket_name
+    )
 
 
 def time_string_to_utc_datetime(time_string):

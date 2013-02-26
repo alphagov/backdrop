@@ -61,4 +61,3 @@ class TestBuild_query(TestCase):
             lambda: build_query({"filter_by": "bar"}),
             aborts_with(400)
         )
-

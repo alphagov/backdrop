@@ -1,6 +1,7 @@
 from hamcrest.core.base_matcher import BaseMatcher
 from werkzeug import exceptions
 
+
 class AbortsWithCode(BaseMatcher):
     def __init__(self, http_status_code):
         self.expected_status_code = http_status_code

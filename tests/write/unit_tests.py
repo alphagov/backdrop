@@ -1,5 +1,3 @@
-import test_helper
-
 import unittest
 from datetime import datetime
 from hamcrest import *
@@ -7,7 +5,7 @@ from hamcrest import *
 import pytz
 
 from performance_platform.write import api
-from performance_platform.write.validators import value_is_valid_id, \
+from performance_platform.core.validators import value_is_valid_id, \
     value_is_valid, key_is_valid, value_is_valid_datetime_string
 
 

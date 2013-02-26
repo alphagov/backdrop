@@ -3,11 +3,12 @@ from dateutil import parser
 
 from flask import Flask, jsonify, request, make_response, abort
 from pymongo import MongoClient
-from validators import *
 import pytz
 
 
 # Configuration
+from performance_platform.core.validators import value_is_valid_datetime_string
+
 DATABASE_NAME = 'performance_platform'
 
 
@@ -81,7 +82,9 @@ def query(bucket):
             obj['_id'] = string_id
             # TODO: mongo and timezones?!
             if "_timestamp" in obj:
-                timestamp = obj.pop("_timestamp").replace(tzinfo=pytz.utc).isoformat()
+                timestamp = obj.pop("_timestamp")\
+                    .replace(tzinfo=pytz.utc)\
+                    .isoformat()
                 some_array.append({timestamp: obj})
             else:
                 some_array.append(obj)
