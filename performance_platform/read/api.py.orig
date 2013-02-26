@@ -85,9 +85,19 @@ def query(bucket):
             obj['_id'] = string_id
             # TODO: mongo and timezones?!
             if "_timestamp" in obj:
+<<<<<<< HEAD
+                timestamp = obj.pop("_timestamp")\
+                    .replace(tzinfo=pytz.utc)\
+                    .isoformat()
+                some_array.append({timestamp: obj})
+            else:
+                some_array.append(obj)
+
+=======
                 timestamp = obj.pop("_timestamp").replace(tzinfo=pytz.utc).isoformat()
                 obj["_timestamp"] = timestamp
             result_data.append(obj)
+>>>>>>> wrap timestamp up into return objects.
 
     # allow requests from any origin
     response = make_response(jsonify(data=result_data))
