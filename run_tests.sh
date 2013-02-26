@@ -12,7 +12,7 @@ if [ $RESULT -ne 0 ]; then
   exit 1
 fi
 
-nosetests
+nosetests -v
 RESULT=$?
 
 if [ $RESULT -ne 0 ]; then
