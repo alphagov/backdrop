@@ -1,8 +1,9 @@
 from bson.code import Code
 from dateutil import parser
 
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, request, make_response, abort
 from pymongo import MongoClient
+from validators import *
 import pytz
 
 
@@ -22,6 +23,18 @@ def open_bucket_collection(bucket):
 
 def build_query(request_args):
     query = {}
+
+    if 'start_at' in request_args:
+        if not value_is_valid_datetime_string(request_args['start_at']):
+            abort(400)
+
+    if 'end_at' in request_args:
+        if not value_is_valid_datetime_string(request_args['end_at']):
+            abort(400)
+
+    if 'filter_by' in request_args:
+        if request_args['filter_by'].find(':') < 0:
+            abort(400)
 
     if 'start_at' in request_args:
         query['_timestamp'] = {

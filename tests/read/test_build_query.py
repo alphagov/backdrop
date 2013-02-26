@@ -6,6 +6,8 @@ import pytz
 from datetime import datetime
 from unittest import TestCase
 from hamcrest import *
+from werkzeug import exceptions
+from tests.support.aborts_with import aborts_with
 
 
 class TestBuild_query(TestCase):
@@ -44,3 +46,19 @@ class TestBuild_query(TestCase):
     def test_build_query_extracts_filter_by_correctly(self):
         query = build_query({"filter_by": "foo:bar"})
         assert_that(query, is_({"foo": "bar"}))
+
+    def test_reject_invalid_start_at(self):
+        assert_that(
+            lambda: build_query({"start_at": "i am not a time"}),
+            aborts_with(400)
+        )
+
+    def test_reject_invalid_end_at(self):
+        assert_that(lambda: build_query({"end_at": "foo"}), aborts_with(400))
+
+    def test_reject_filter_with_no_colon(self):
+        assert_that(
+            lambda: build_query({"filter_by": "bar"}),
+            aborts_with(400)
+        )
+
