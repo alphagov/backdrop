@@ -1,7 +1,7 @@
 from bson.code import Code
 from dateutil import parser
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from pymongo import MongoClient
 import pytz
 
@@ -73,7 +73,11 @@ def query(bucket):
             else:
                 some_array.append(obj)
 
-    return jsonify(data=some_array)
+
+    # allow requests from any origin
+    response = make_response(jsonify(data=some_array))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 def parse_time_string(time_string):
