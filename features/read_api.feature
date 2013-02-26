@@ -62,3 +62,6 @@ Feature: the performance platform read api
           and the "1st" result should be "{"Temporary events notice": 3}"
           and the "2nd" result should be "{"Cat herding licence": 1}"
 
+    Scenario: invalid request parameters
+         When I go to "/foo?start_at=not+a+date"
+         then I should get back a status of "400"
