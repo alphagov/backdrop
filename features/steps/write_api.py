@@ -15,7 +15,7 @@ def step(context, fixture_name):
 @when('I post the data to "{bucket_name}"')
 def step(context, bucket_name):
     context.bucket = bucket_name.replace('/', '')
-    context.response = context.api.post(
+    context.response = context.client.post(
         bucket_name,
         data=context.data_to_post,
         content_type="application/json"
@@ -24,5 +24,5 @@ def step(context, bucket_name):
 
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
-    result = context.mongo[context.bucket].find({key: value})
+    result = context.client.storage()[context.bucket].find({key: value})
     assert_that(list(result), has_length(int(amount)))

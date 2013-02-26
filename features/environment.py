@@ -12,12 +12,25 @@ def before_feature(context, feature):
     if feature.name == "the performance platform write api":
         api = write_api
 
-    context.database_name = DATABASE_NAME
-    api.app.config['DATABASE_NAME'] = DATABASE_NAME
-    context.api = api.app.test_client()
-    context.mongo = api.mongo[context.database_name]
+    context.client = FlaskTestClient(api, DATABASE_NAME)
 
 
 def after_scenario(context, _):
     if "bucket" in context:
-        context.mongo[context.bucket].drop()
+        context.client.storage()[context.bucket].drop()
+
+
+class FlaskTestClient(object):
+    def __init__(self, flask_app, database_name):
+        flask_app.app.config['DATABASE_NAME'] = database_name
+        self._client = flask_app.app.test_client()
+        self._storage = flask_app.mongo[database_name]
+
+    def get(self, url):
+        return self._client.get(url)
+
+    def post(self, url, **message):
+        return self._client.post(url, **message)
+
+    def storage(self):
+        return self._storage

@@ -18,13 +18,13 @@ def step(context, fixture_name, bucket_name):
             if '_timestamp' in obj:
                 obj['_timestamp'] = parser.parse(obj['_timestamp'])\
                     .astimezone(pytz.utc)
-            context.mongo[bucket_name].save(obj)
+            context.client.storage()[bucket_name].save(obj)
     context.bucket = bucket_name
 
 
 @when('I go to "{query}"')
 def step(context, query):
-    context.response = context.api.get(query)
+    context.response = context.client.get(query)
 
 
 @then('I should get back a status of "{expected_status}"')
