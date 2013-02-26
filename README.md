@@ -9,15 +9,15 @@ A minimal repo for spiking out getting hold of some licencing performance data.
 Would you like a crontab to collect data each month?
 `./set-crontab.sh`
 
-## The write API
+# The APIs
 
-#Getting set up
+##Getting set up
 
 This assumes you are using the GDS dev environment and so have python and mongo installed.
 
-1. Change to the write-api directory `cd write-api`
-2. Install the dependencies with `sudo pip install -r requirements.txt`
-3. Start the api with `python api.py`
-4. Check the api started correctly with `curl localhost:5000/_status/` 
-the response should look like: `{'status':'ok','message':'database seems fine'}`
-`sudo pip install nose` and run `nosetests` to run the tests.
+0. Check that you have virtualenv installed, if not ```sudo apt-get install python-virtualenv```.
+1. Navigate to the ```performance-platform``` directory and run ```./jenkins.sh``` this *should*
+create a new virtualenv and install the production and test requirements.
+2. ```source venv/bin/activate``` to enable the virtualenv.
+3. ```./run_tests.sh``` to run the feature and unit tests.
+
