@@ -16,8 +16,7 @@ Would you like a crontab to collect data each month?
 This assumes you are using the GDS dev environment and so have python and mongo installed.
 
 0. Check that you have virtualenv installed, if not ```sudo apt-get install python-virtualenv```.
-1. Navigate to the ```performance-platform``` directory and run ```./jenkins.sh``` this *should*
-create a new virtualenv and install the production and test requirements.
+1. Navigate to the ```performance-platform``` directory and run ```./run_tests.sh``` this will
+create a new virtualenv and install the production and test requirements and run the tests.
 2. ```source venv/bin/activate``` to enable the virtualenv.
-3. ```./run_tests.sh``` to run the feature and unit tests.
 

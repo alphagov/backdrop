@@ -19,6 +19,8 @@ function display_result {
 
 basedir=$(dirname $0)
 
+virtualenv --no-site-packages "$basedir/venv"
+
 source "$basedir/venv/bin/activate"
 
 nosetests -v
