@@ -26,12 +26,13 @@ def before_feature(context, feature):
     context.client = client_to_use
 
 
-def after_scenario(context, _):
-    if "bucket" in context:
-        context.client.storage()[context.bucket].drop()
+def before_scenario(context, _):
+    storage = context.client.storage()
+    name = storage.name
+    storage.connection.drop_database(name)
 
 
-def after_feature(context, feature):
+def after_feature(context, _):
     context.client.spin_down()
 
 
