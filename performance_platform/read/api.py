@@ -6,24 +6,19 @@ from pymongo import MongoClient
 from os import getenv
 import pytz
 
-
-# Configuration
 from core.validators import value_is_valid_datetime_string
 
-DATABASE_NAMES = {
-    "development": "performance_platform",
-    "test": "performance_platform_test"
-}
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+
+# Configuration
+app.config.from_object("read.config.%s" % getenv("FLASK_ENV", "development"))
 
 mongo = MongoClient('localhost', 27017)
 
 
 def open_bucket_collection(bucket):
-    database_name = DATABASE_NAMES[getenv("FLASK_ENV", "development")]
-    return mongo[database_name][bucket]
+    return mongo[app.config["DATABASE_NAME"]][bucket]
 
 
 def validate_request_args(request_args):
@@ -74,7 +69,7 @@ def query(bucket):
             condition=query,
             initial={'count': 0},
             reduce=Code("""
-            function(current, previous) { previous.count++; }
+            function(current, previous)  { previous.count++; }
             """)
         )
 

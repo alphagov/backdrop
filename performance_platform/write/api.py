@@ -6,15 +6,11 @@ from pymongo import MongoClient
 import pytz
 from core.validators import *
 
-# Configuration
-DATABASE_NAMES = {
-    "development": "performance_platform",
-    "test": "performance_platform_test"
-}
-
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+
+# Configuration
+app.config.from_object("write.config.%s" % getenv("FLASK_ENV", "development"))
 
 mongo = MongoClient('localhost', 27017)
 
@@ -79,8 +75,7 @@ def invalid_data_object(obj):
 
 
 def store_objects(bucket_name, objects_to_store):
-    database_name = DATABASE_NAMES[getenv("FLASK_ENV", "development")]
-    DataStore(database_name).store_data(
+    DataStore(app.config["DATABASE_NAME"]).store_data(
         objects_to_store,
         bucket_name
     )
