@@ -3,6 +3,7 @@ import sys
 from performance_platform.write import api as write_api
 from performance_platform.read import api as read_api
 
+
 def print_usage_and_exit():
     print('Usage: python {0} <read|write>')
     sys.exit(1)

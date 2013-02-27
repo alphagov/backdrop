@@ -10,7 +10,9 @@ from ..core.validators import *
 app = Flask(__name__)
 
 # Configuration
-app.config.from_object("performance_platform.write.config.%s" % getenv("FLASK_ENV", "development"))
+app.config.from_object(
+    "performance_platform.write.config.%s" % getenv("FLASK_ENV", "development")
+)
 
 mongo = MongoClient('localhost', 27017)
 
