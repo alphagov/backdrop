@@ -1,3 +1,4 @@
 #!/bin/bash
 
-pep8 --ignore E201,E202,E251 .
+basedir=$(dirname $0)
+pep8 --ignore=E201,E202,E251 --exclude=venv "$basedir"

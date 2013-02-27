@@ -1,23 +1,31 @@
 #!/bin/bash
 
-set -e
+function display_result {
+    RESULT=$1
+    EXIT_STATUS=$2
+    TEST=$3
 
-source ./venv/bin/activate
+    if [ $RESULT -ne 0 ]; then
+      echo
+      echo -e "\033[31m$TEST failed\033[0m"
+      echo
+      exit $EXIT_STATUS
+    else
+      echo
+      echo -e "\033[32m$TEST passed\033[0m"
+      echo
+    fi
+}
 
-behave
-RESULT=$?
+basedir=$(dirname $0)
 
-if [ $RESULT -ne 0 ]; then
-  echo 'user tests failed'
-  exit 1
-fi
+source "$basedir/venv/bin/activate"
 
 nosetests -v
-RESULT=$?
+display_result $? 1 "Unit tests"
 
-if [ $RESULT -ne 0 ]; then
-  echo 'developer tests failed'
-  exit 2
-fi
+behave
+display_result $? 2 "Feature tests"
 
-exit 0
+"$basedir/pep-it.sh"
+display_result $? 3 "Code style check"
