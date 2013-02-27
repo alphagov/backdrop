@@ -1,1 +1,1 @@
-DATABASE_NAME="performance_platform"
+DATABASE_NAME = "performance_platform"

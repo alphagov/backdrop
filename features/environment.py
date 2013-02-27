@@ -38,5 +38,3 @@ def init_client(feature):
         "Test client not selected! Please annotate the failing feature with "
         + "either @use_read_api_client, @use_write_api_client "
         + "or @use_http_client.")
-
-

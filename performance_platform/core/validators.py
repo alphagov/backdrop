@@ -27,6 +27,7 @@ def value_is_valid_datetime_string(value):
 def value_is_valid(value):
     return isinstance(value, (int, unicode, bool))
 
+
 def key_is_valid(key):
     key = key.lower()
     if not key:
