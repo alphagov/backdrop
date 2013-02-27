@@ -2,11 +2,11 @@
 
 set -e
 
-if [ -e venv ]; then
-  rm -r venv
-fi
-virtualenv venv
-source ./venv/bin/activate
+VIRTUALENV_DIR=/var/tmp/virtualenvs/$(echo ${JOB_NAME} | tr ' ' '-')
+export PIP_DOWNLOAD_CACHE=/var/tmp/pip_download_cache
+
+virtualenv --clear --no-site-packages $VIRTUALENV_DIR
+source $VIRTUALENV_DIR/bin/activate
 
 pip install -r requirements.txt
 pip install -r requirements_for_tests.txt
