@@ -1,3 +1,4 @@
+from os import getenv
 from flask import Flask
 from flask import abort, request, Response
 from dateutil import parser
@@ -6,7 +7,11 @@ import pytz
 from core.validators import *
 
 # Configuration
-DATABASE_NAME = 'performance_platform'
+DATABASE_NAMES = {
+    "development": "performance_platform",
+    "test": "performance_platform_test"
+}
+
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -74,7 +79,8 @@ def invalid_data_object(obj):
 
 
 def store_objects(bucket_name, objects_to_store):
-    DataStore(app.config['DATABASE_NAME']).store_data(
+    database_name = DATABASE_NAMES[getenv("FLASK_ENV", "development")]
+    DataStore(database_name).store_data(
         objects_to_store,
         bucket_name
     )

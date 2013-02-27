@@ -9,6 +9,8 @@ import os
 
 DATABASE_NAME = "performance_platform_test"
 
+os.environ["FLASK_ENV"] = "test"
+
 
 def before_feature(context, feature):
     client_to_use = None
@@ -19,7 +21,7 @@ def before_feature(context, feature):
     if feature.name == "licensing -> performance platform integration":
         client_to_use = FlaskTestClient(write_api, DATABASE_NAME)
     if feature.name == "end-to-end platform test":
-        client_to_use = HTTPTestClient("performance_platform")
+        client_to_use = HTTPTestClient(DATABASE_NAME)
 
     context.client = client_to_use
 
@@ -87,7 +89,7 @@ class HTTPTestClient(object):
     def run_api(self, api):
         return subprocess.Popen(
             ["python", "performance_platform/start.py", api],
-            preexec_fn=os.setsid
+            preexec_fn=os.setsid,
         )
 
     def read_url(self, url):

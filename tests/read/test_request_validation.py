@@ -14,7 +14,8 @@ class TestRequestValidation(TestCase):
         )
 
     def test_reject_invalid_end_at(self):
-        assert_that(lambda: validate_request_args({"end_at": "foo"}), aborts_with(400))
+        assert_that(lambda: validate_request_args({"end_at": "foo"}),
+                    aborts_with(400))
 
     def test_reject_filter_with_no_colon(self):
         assert_that(

@@ -3,13 +3,17 @@ from dateutil import parser
 
 from flask import Flask, jsonify, request, make_response, abort
 from pymongo import MongoClient
+from os import getenv
 import pytz
 
 
 # Configuration
 from core.validators import value_is_valid_datetime_string
 
-DATABASE_NAME = 'performance_platform'
+DATABASE_NAMES = {
+    "development": "performance_platform",
+    "test": "performance_platform_test"
+}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -18,7 +22,8 @@ mongo = MongoClient('localhost', 27017)
 
 
 def open_bucket_collection(bucket):
-    return mongo[app.config['DATABASE_NAME']][bucket]
+    database_name = DATABASE_NAMES[getenv("FLASK_ENV", "development")]
+    return mongo[database_name][bucket]
 
 
 def validate_request_args(request_args):
@@ -35,7 +40,6 @@ def validate_request_args(request_args):
 
 def build_query(request_args):
     query = {}
-
 
     if 'start_at' in request_args:
         query['_timestamp'] = {
@@ -84,8 +88,8 @@ def query(bucket):
             obj['_id'] = string_id
             # TODO: mongo and timezones?!
             if "_timestamp" in obj:
-                timestamp = obj.pop("_timestamp").replace(tzinfo=pytz.utc).isoformat()
-                obj["_timestamp"] = timestamp
+                time = obj.pop("_timestamp")
+                obj["_timestamp"] = time.replace(tzinfo=pytz.utc).isoformat()
             result_data.append(obj)
 
     # allow requests from any origin
@@ -104,6 +108,7 @@ def jsonify_document(document):
         document['_timestamp'] = document['_timestamp'].isoformat()
 
     return document
+
 
 def start():
     app.debug = True
