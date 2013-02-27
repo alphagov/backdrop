@@ -27,7 +27,7 @@ pip install -r requirements_for_tests.txt
 nosetests -v
 display_result $? 1 "Unit tests"
 
-behave $? 2 "Feature tests"
+behave 
 display_result $? 2 "Feature tests"
 
 $(dirname $0)/pep-it.sh
