@@ -33,7 +33,7 @@ class HTTPTestClient(object):
 
     def run_api(self, api):
         return subprocess.Popen(
-            ["python", "performance_platform/start.py", api],
+            ["python", "start.py", api],
             preexec_fn=os.setsid,
         )
 

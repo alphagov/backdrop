@@ -3,9 +3,8 @@ import os
 
 from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
-from read import api as read_api
-from write import api as write_api
-
+from performance_platform.read import api as read_api
+from performance_platform.write import api as write_api
 
 DATABASE_NAME = "performance_platform_test"
 

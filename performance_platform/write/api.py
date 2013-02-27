@@ -4,13 +4,13 @@ from flask import abort, request, Response
 from dateutil import parser
 from pymongo import MongoClient
 import pytz
-from core.validators import *
+from ..core.validators import *
 
 
 app = Flask(__name__)
 
 # Configuration
-app.config.from_object("write.config.%s" % getenv("FLASK_ENV", "development"))
+app.config.from_object("performance_platform.write.config.%s" % getenv("FLASK_ENV", "development"))
 
 mongo = MongoClient('localhost', 27017)
 
@@ -66,10 +66,13 @@ def prep_data(incoming_json):
 def invalid_data_object(obj):
     for key, value in obj.items():
         if not key_is_valid(key) or not value_is_valid(value):
+            print("step one {0} - {1}".format(key, value))
             return True
         if key == '_timestamp' and not value_is_valid_datetime_string(value):
+            print("step two")
             return True
         if key == '_id' and not value_is_valid_id(value):
+            print("step three")
             return True
     return False
 

@@ -6,13 +6,13 @@ from pymongo import MongoClient
 from os import getenv
 import pytz
 
-from core.validators import value_is_valid_datetime_string
+from ..core.validators import value_is_valid_datetime_string
 
 
 app = Flask(__name__)
 
 # Configuration
-app.config.from_object("read.config.%s" % getenv("FLASK_ENV", "development"))
+app.config.from_object("performance_platform.read.config.%s" % getenv("FLASK_ENV", "development"))
 
 mongo = MongoClient('localhost', 27017)
 
