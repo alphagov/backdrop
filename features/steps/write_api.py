@@ -1,3 +1,4 @@
+import os
 from behave import *
 from flask import json
 from hamcrest import *
