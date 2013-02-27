@@ -16,6 +16,8 @@ def before_feature(context, feature):
         client_to_use = FlaskTestClient(read_api, DATABASE_NAME)
     if feature.name == "the performance platform write api":
         client_to_use = FlaskTestClient(write_api, DATABASE_NAME)
+    if feature.name == "licensing -> performance platform integration":
+        client_to_use = FlaskTestClient(write_api, DATABASE_NAME)
     if feature.name == "end-to-end platform test":
         client_to_use = HTTPTestClient("performance_platform")
 
