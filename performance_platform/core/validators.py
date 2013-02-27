@@ -19,7 +19,7 @@ def value_is_valid_datetime_string(value):
     time_pattern = re.compile(
         "[0-9]{4}-[0-9]{2}-[0-9]{2}"
         "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
-        "[+-][0-9]{2}:[0-9]{2}"
+        "(?:[+-][0-9]{2}:?[0-9]{2}|Z)"
     )
     return bool(time_pattern.match(value))
 

@@ -75,6 +75,14 @@ class TimestampValueIsInDateTimeFormat(unittest.TestCase):
         assert_that(
             value_is_valid_datetime_string('2014-aa-aaTaa:aa:55+aa:aa'),
             is_(False))
+        assert_that(
+            value_is_valid_datetime_string('2012-12-12T00:00:00Z'),
+            is_(True)
+        )
+        assert_that(
+            value_is_valid_datetime_string('2012-12-12T00:00:00+0000'),
+            is_(True)
+        )
 
 
 class IdValueIsValidTestCase(unittest.TestCase):
