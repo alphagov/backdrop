@@ -25,12 +25,7 @@ def value_is_valid_datetime_string(value):
 
 
 def value_is_valid(value):
-    if type(value) == int:
-        return True
-    if type(value) == unicode:
-        return True
-    return False
-
+    return isinstance(value, (int, unicode, bool))
 
 def key_is_valid(key):
     key = key.lower()

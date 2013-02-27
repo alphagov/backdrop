@@ -41,6 +41,10 @@ class ValidValuesTestCase(unittest.TestCase):
         assert_that(value_is_valid(u"1257"), is_(True))
         assert_that(value_is_valid("1257"), is_(False))
 
+    def test_values_can_be_boolean(self):
+        assert_that(value_is_valid(True), is_(True))
+        assert_that(value_is_valid(False), is_(True))
+
     def test_values_cannot_be_arrays(self):
         assert_that(value_is_valid([1, 2, 3, 4]), is_(False))
 
