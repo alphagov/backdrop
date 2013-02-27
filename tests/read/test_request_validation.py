@@ -1,6 +1,6 @@
 from unittest import TestCase
 from hamcrest import assert_that
-from read.api import validate_request_args
+from performance_platform.read.api import validate_request_args
 from tests.support.aborts_with import aborts_with
 
 __author__ = 'mfliri'

@@ -6,7 +6,7 @@ import pytz
 
 from hamcrest import *
 
-from read.api import build_query
+from performance_platform.read.api import build_query
 
 
 class TestBuild_query(TestCase):

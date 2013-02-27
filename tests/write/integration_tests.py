@@ -4,7 +4,7 @@ import unittest
 
 from hamcrest import *
 from pymongo import MongoClient
-from write.api import DataStore
+from performance_platform.write.api import DataStore
 
 TEST_DATABASE = 'performance_platform_test'
 
