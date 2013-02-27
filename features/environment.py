@@ -14,13 +14,11 @@ os.environ["FLASK_ENV"] = "test"
 
 def before_feature(context, feature):
     client_to_use = None
-    if feature.name == "the performance platform read api":
+    if 'use_read_api_client' in feature.tags:
         client_to_use = FlaskTestClient(read_api, DATABASE_NAME)
-    if feature.name == "the performance platform write api":
+    if 'use_write_api_client' in feature.tags:
         client_to_use = FlaskTestClient(write_api, DATABASE_NAME)
-    if feature.name == "licensing -> performance platform integration":
-        client_to_use = FlaskTestClient(write_api, DATABASE_NAME)
-    if feature.name == "end-to-end platform test":
+    if 'use_http_client' in feature.tags:
         client_to_use = HTTPTestClient(DATABASE_NAME)
 
     context.client = client_to_use

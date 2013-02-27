@@ -1,3 +1,4 @@
+@use_write_api_client
 Feature: licensing -> performance platform integration
 
     Scenario: receiving data from licensing

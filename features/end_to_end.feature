@@ -1,3 +1,4 @@
+@use_http_client
 Feature: end-to-end platform test
 
     Scenario: write and retrieve data from platform

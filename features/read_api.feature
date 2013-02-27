@@ -1,3 +1,4 @@
+@use_read_api_client
 Feature: the performance platform read api
 
     Scenario: getting all the data in a bucket

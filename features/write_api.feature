@@ -1,3 +1,4 @@
+@use_write_api_client
 Feature: the performance platform write api
 
     Scenario: hitting the health check url
