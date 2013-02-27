@@ -37,9 +37,9 @@ class ValidValuesTestCase(unittest.TestCase):
     def test_values_can_be_integers(self):
         assert_that(value_is_valid(1257), is_(True))
 
-    def test_string_values_can_only_be_unicode_strings(self):
+    def test_string_values_can_strings(self):
         assert_that(value_is_valid(u"1257"), is_(True))
-        assert_that(value_is_valid("1257"), is_(False))
+        assert_that(value_is_valid("1257"), is_(True))
 
     def test_values_can_be_boolean(self):
         assert_that(value_is_valid(True), is_(True))
