@@ -5,6 +5,7 @@ from read import api as read_api
 from write import api as write_api
 import requests
 import time
+import os
 
 DATABASE_NAME = "performance_platform_test"
 
@@ -58,12 +59,8 @@ class HTTPTestResponse:
 class HTTPTestClient(object):
     def __init__(self, database_name):
         self.database_name = database_name
-        self.read = subprocess.Popen(
-            ["python", "performance_platform/start.py", "read"]
-        )
-        self.write = subprocess.Popen(
-            ["python", "performance_platform/start.py", "write"]
-        )
+        self.read = self.run_api("read")
+        self.write = self.run_api("write")
         time.sleep(1)  # wait until processes have started
 
     def get(self, url):
@@ -82,8 +79,14 @@ class HTTPTestClient(object):
         return MongoClient('localhost', 27017)[self.database_name]
 
     def spin_down(self):
-        self.read.kill()
-        self.write.kill()
+        os.killpg(self.read.pid, 9)
+        os.killpg(self.write.pid, 9)
+
+    def run_api(self, api):
+        return subprocess.Popen(
+            ["python", "performance_platform/start.py", api],
+            preexec_fn=os.setsid
+        )
 
     def read_url(self, url):
         return "http://localhost:5000" + url
