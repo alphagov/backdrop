@@ -23,6 +23,9 @@ virtualenv --no-site-packages "$basedir/venv"
 
 source "$basedir/venv/bin/activate"
 
+pip install -r requirements.txt
+pip install -r requirements_for_tests.txt
+
 nosetests -v
 display_result $? 1 "Unit tests"
 
