@@ -12,7 +12,7 @@ os.environ["FLASK_ENV"] = "test"
 
 
 def before_feature(context, feature):
-    context.client = init_client(feature)
+    context.client = create_client(feature)
 
 
 def before_scenario(context, _):
@@ -25,7 +25,7 @@ def after_feature(context, _):
     context.client.spin_down()
 
 
-def init_client(feature):
+def create_client(feature):
     if 'use_read_api_client' in feature.tags:
         return FlaskTestClient(read_api, DATABASE_NAME)
     if 'use_write_api_client' in feature.tags:
