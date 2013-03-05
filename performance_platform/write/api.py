@@ -32,30 +32,25 @@ def health_check():
         )
 
 
-@app.route('/<bucket>', methods=['POST'])
-def post_to_bucket(bucket):
-    if not request_is_valid(request, bucket):
-        abort(400)
+@app.route('/<bucket_name>', methods=['POST'])
+def post_to_bucket(bucket_name):
+    if not request.json:
+        abort(400, "Request must be JSON")
 
     incoming_data = prep_data(request.json)
 
-    if any(invalid_data_object(obj) for obj in incoming_data):
-        abort(400)
-    else:
-        for data in incoming_data:
-            if '_timestamp' in data:
-                data['_timestamp'] = \
-                    time_string_to_utc_datetime(data['_timestamp'])
+    result = validate_post_to_bucket(incoming_data, bucket_name)
 
-        store_objects(bucket, incoming_data)
-        return Response("{'status':'ok'}", mimetype='application/json')
+    if not result.is_valid:
+        abort(400, result.message)
 
+    for data in incoming_data:
+        if '_timestamp' in data:
+            data['_timestamp'] = \
+                time_string_to_utc_datetime(data['_timestamp'])
 
-def request_is_valid(request, bucket_name):
-    if request.json and bucket_is_valid(bucket_name):
-        return True
-    else:
-        return False
+    store_objects(bucket_name, incoming_data)
+    return Response("{'status':'ok'}", mimetype='application/json')
 
 
 def prep_data(incoming_json):
@@ -65,18 +60,41 @@ def prep_data(incoming_json):
         return [incoming_json]
 
 
-def invalid_data_object(obj):
+def validate_post_to_bucket(incoming_data, bucket_name):
+    if not bucket_is_valid(bucket_name):
+        return ValidationResult.invalid('Bucket name is invalid')
+
+    for datum in incoming_data:
+        result = validate_data_object(datum)
+        if not result.is_valid:
+            return result
+
+    return ValidationResult.valid()
+
+
+def validate_data_object(obj):
     for key, value in obj.items():
-        if not key_is_valid(key) or not value_is_valid(value):
-            print("step one {0} - {1}".format(key, value))
-            return True
+        if not key_is_valid(key):
+            return ValidationResult.invalid(
+                '{0} is not a valid key'.format(key)
+            )
+
+        if not value_is_valid(value):
+            return ValidationResult.invalid(
+                '{0} is not a valid value'.format(value)
+            )
+
         if key == '_timestamp' and not value_is_valid_datetime_string(value):
-            print("step two")
-            return True
+            return ValidationResult.invalid(
+                '{0} is not a valid timestamp'.format(value)
+            )
+
         if key == '_id' and not value_is_valid_id(value):
-            print("step three")
-            return True
-    return False
+            return ValidationResult.invalid(
+                '{0} is not a valid _id'.format(value)
+            )
+
+    return ValidationResult.valid()
 
 
 def store_objects(bucket_name, objects_to_store):

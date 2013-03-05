@@ -1,3 +1,4 @@
+from collections import namedtuple
 import re
 
 # Thinking that validators should validate a specific thing
@@ -53,3 +54,16 @@ def value_is_valid_id(value):
     if re.compile('\s').search(value):
         return False
     return len(value) > 0
+
+
+_ValidationResult = namedtuple('ValidationResult', 'is_valid message')
+
+
+class ValidationResult(_ValidationResult):
+    @classmethod
+    def valid(cls):
+        return ValidationResult(True, '')
+
+    @classmethod
+    def invalid(cls, message):
+        return ValidationResult(False, message)

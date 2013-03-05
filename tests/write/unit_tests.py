@@ -113,13 +113,19 @@ class ValidDateObjectTestCase(unittest.TestCase):
             u'Cthulu': ["R'lyeh"]
         }
 
-        assert_that(api.invalid_data_object(my_second_value_is_bad), is_(True))
+        assert_that(
+            api.validate_data_object(my_second_value_is_bad).is_valid,
+            is_(False))
 
     def test_validation_for_bad_time_strings(self):
         some_bad_data = {u'_timestamp': u'hammer time'}
-        assert_that(api.invalid_data_object(some_bad_data), is_(True))
+        assert_that(
+            api.validate_data_object(some_bad_data).is_valid,
+            is_(False))
         some_good_data = {u'_timestamp': u'2014-01-01T00:00:00+00:00'}
-        assert_that(api.invalid_data_object(some_good_data), is_(False))
+        assert_that(
+            api.validate_data_object(some_good_data).is_valid,
+            is_(True))
 
 
 class DateStringToUTCDateTimeTestCase(unittest.TestCase):
