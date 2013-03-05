@@ -6,6 +6,11 @@ import requests
 
 
 class HTTPTestClient(object):
+    APP_PORTS = {
+        'read':  '5000',
+        'write': '5001',
+    }
+
     def __init__(self, database_name):
         self.database_name = database_name
         self.read = self.run_api("read")
@@ -33,15 +38,15 @@ class HTTPTestClient(object):
 
     def run_api(self, api):
         return subprocess.Popen(
-            ["python", "start.py", api],
+            ["python", "start.py", api, self.APP_PORTS[api]],
             preexec_fn=os.setsid,
         )
 
     def read_url(self, url):
-        return "http://localhost:5000" + url
+        return 'http://localhost:{0}{1}'.format(self.APP_PORTS['read'], url)
 
     def write_url(self, url):
-        return "http://localhost:5001" + url
+        return 'http://localhost:{0}{1}'.format(self.APP_PORTS['write'], url)
 
 
 class HTTPTestResponse:
