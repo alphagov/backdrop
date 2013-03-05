@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from os import getenv
 import pytz
 
-from ..core.validators import value_is_valid_datetime_string
+from ..core.validators import value_is_valid_datetime_string, ValidationResult
 
 
 app = Flask(__name__)
@@ -26,13 +26,17 @@ def open_bucket_collection(bucket):
 def validate_request_args(request_args):
     if 'start_at' in request_args:
         if not value_is_valid_datetime_string(request_args['start_at']):
-            abort(400)
+            return ValidationResult.invalid(
+                'start_at is not a valid datetime')
     if 'end_at' in request_args:
         if not value_is_valid_datetime_string(request_args['end_at']):
-            abort(400)
+            return ValidationResult.invalid(
+                'end_at is not a valid datetime')
     if 'filter_by' in request_args:
         if request_args['filter_by'].find(':') < 0:
-            abort(400)
+            return ValidationResult.invalid('filter_by is not valid')
+
+    return ValidationResult.valid()
 
 
 def build_query(request_args):
@@ -57,7 +61,9 @@ def build_query(request_args):
 
 @app.route('/<bucket>', methods=['GET'])
 def query(bucket):
-    validate_request_args(request.args)
+    result = validate_request_args(request.args)
+    if not result.is_valid:
+        abort(400, result.message)
 
     collection = open_bucket_collection(bucket)
 
