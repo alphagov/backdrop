@@ -1,7 +1,7 @@
 from bson.code import Code
 from dateutil import parser
 
-from flask import Flask, jsonify, request, make_response, abort
+from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from os import getenv
 import pytz
@@ -63,7 +63,7 @@ def build_query(request_args):
 def query(bucket):
     result = validate_request_args(request.args)
     if not result.is_valid:
-        abort(400, result.message)
+        return jsonify(status='error', message=result.message), 400
 
     collection = open_bucket_collection(bucket)
 
@@ -96,7 +96,7 @@ def query(bucket):
             result_data.append(obj)
 
     # allow requests from any origin
-    response = make_response(jsonify(data=result_data))
+    response = jsonify(data=result_data)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 

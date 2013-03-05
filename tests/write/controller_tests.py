@@ -5,7 +5,7 @@ import json
 import unittest
 from hamcrest import *
 import pytz
-from test_helpers import is_bad_request, is_ok
+from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
 
 from performance_platform.write import api
 
@@ -19,6 +19,15 @@ class PostDataTestCase(unittest.TestCase):
         self.app = api.app.test_client()
         self.stored_bucket = None
         self.stored_data = None
+
+    def test_request_must_be_json(self):
+        response = self.app.post(
+            '/foo',
+            data='foobar'
+        )
+
+        assert_that( response, is_bad_request())
+        assert_that( response, is_error_response())
 
     def test_data_gets_stored(self):
         api.store_objects = self.stub_storage
@@ -40,6 +49,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that( response, is_bad_request() )
+        assert_that( response, is_error_response())
 
     def test__timestamps_get_stored_as_utc_datetimes(self):
         api.store_objects = self.stub_storage
@@ -64,6 +74,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that( response, is_bad_request())
+        assert_that( response, is_error_response())
 
     def test__id_gets_stored(self):
         api.store_objects = self.stub_storage
@@ -83,7 +94,8 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        assert_that(response, is_bad_request())
+        assert_that( response, is_bad_request())
+        assert_that( response, is_error_response())
 
 
 class ApiHealthCheckTestCase(unittest.TestCase):
