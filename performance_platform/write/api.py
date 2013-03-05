@@ -103,6 +103,6 @@ class DataStore(object):
             bucket.save(data_objects)
 
 
-def start():
+def start(port):
     app.debug = True
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=port)

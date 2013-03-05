@@ -107,6 +107,6 @@ def jsonify_document(document):
     return document
 
 
-def start():
+def start(port):
     app.debug = True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=port)
