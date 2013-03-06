@@ -22,7 +22,7 @@ def health_check():
     if mongo.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
-        return jsonify(status='500', message='cannot connect to database'), 500
+        return jsonify(status='error', message='cannot connect to database'), 500
 
 
 @app.route('/<bucket_name>', methods=['POST'])
