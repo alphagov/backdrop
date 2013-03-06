@@ -18,10 +18,11 @@ function display_result {
 }
 
 basedir=$(dirname $0)
+venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 
-virtualenv --no-site-packages "$basedir/venv"
+virtualenv --no-site-packages "$venvdir"
 
-source "$basedir/venv/bin/activate"
+source "$venvdir/bin/activate"
 
 pip install -r requirements.txt
 pip install -r requirements_for_tests.txt
