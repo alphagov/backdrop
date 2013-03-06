@@ -1,5 +1,3 @@
-import test_helper
-
 import unittest
 
 from hamcrest import *
