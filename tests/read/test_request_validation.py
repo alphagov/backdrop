@@ -1,6 +1,6 @@
 from unittest import TestCase
 from hamcrest import assert_that, is_
-from performance_platform.read.api import validate_request_args
+from backdrop.read.api import validate_request_args
 
 
 class TestRequestValidation(TestCase):

@@ -5,10 +5,10 @@ os.environ["GOVUK_ENV"] = "test"
 
 from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
-from performance_platform.read import api as read_api
-from performance_platform.write import api as write_api
+from backdrop.read import api as read_api
+from backdrop.write import api as write_api
 # pick one for test configuration, if they don't match things will fail
-from performance_platform.write.config import test as config
+from backdrop.write.config import test as config
 
 
 def before_feature(context, feature):

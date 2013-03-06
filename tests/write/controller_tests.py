@@ -7,7 +7,7 @@ from hamcrest import *
 import pytz
 from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
 
-from performance_platform.write import api
+from backdrop.write import api
 
 
 class PostDataTestCase(unittest.TestCase):

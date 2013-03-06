@@ -1,3 +1,3 @@
-DATABASE_NAME = "performance_platform_test"
+DATABASE_NAME = "backdrop"
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
