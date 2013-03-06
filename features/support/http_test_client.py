@@ -7,7 +7,7 @@ import requests
 
 class HTTPTestClient(object):
     APP_PORTS = {
-        'read':  '5000',
+        'read': '5000',
         'write': '5001',
     }
 

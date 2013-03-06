@@ -11,10 +11,10 @@ app = Flask(__name__)
 
 # Configuration
 app.config.from_object(
-    "performance_platform.write.config.%s" % getenv("FLASK_ENV", "development")
+    "performance_platform.write.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
-mongo = MongoClient('localhost', 27017)
+mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
 
 
 @app.route('/_status')
@@ -22,7 +22,8 @@ def health_check():
     if mongo.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
-        return jsonify(status='error', message='cannot connect to database'), 500
+        return jsonify(status='error',
+                       message='cannot connect to database'), 500
 
 
 @app.route('/<bucket_name>', methods=['POST'])

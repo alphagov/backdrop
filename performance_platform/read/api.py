@@ -13,10 +13,10 @@ app = Flask(__name__)
 
 # Configuration
 app.config.from_object(
-    "performance_platform.read.config.%s" % getenv("FLASK_ENV", "development")
+    "performance_platform.read.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
-mongo = MongoClient('localhost', 27017)
+mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
 
 
 def open_bucket_collection(bucket):
