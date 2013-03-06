@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 # Configuration
 app.config.from_object(
-    "performance_platform.read.config.%s" % getenv("GOVUK_ENV", "development")
+    "backdrop.read.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
 mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])

@@ -1,8 +1,8 @@
 from argh import arg
 from argh.dispatching import dispatch_command
 
-from performance_platform.write import api as write_api
-from performance_platform.read import api as read_api
+from backdrop.write import api as write_api
+from backdrop.read import api as read_api
 
 
 @arg('app', choices=['read', 'write'], help='The name of the app to start')

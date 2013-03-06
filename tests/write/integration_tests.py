@@ -4,8 +4,8 @@ import unittest
 
 from hamcrest import *
 from pymongo import MongoClient
-from performance_platform.write.api import DataStore
-from performance_platform.write.config import test as config
+from backdrop.write.api import DataStore
+from backdrop.write.config import test as config
 
 
 def setup_test_database():
