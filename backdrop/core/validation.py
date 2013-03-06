@@ -1,10 +1,11 @@
+"""Validators and validation related functions and types.
+
+Validators should validate a specific type of thing and return a boolean.
+App specific validation functions combine validators and return a
+ValidationResult object.
+"""
 from collections import namedtuple
 import re
-
-# Thinking that validators should validate a specific thing
-# eg. date_string or key. Combinations and logic should live
-# somewhere else... ideas?
-# TODO: This is probably not a permanent solution.
 
 RESERVED_KEYWORDS = (
     '_timestamp',
