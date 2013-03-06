@@ -1,14 +1,14 @@
 import test_helper
 import os
 
+os.environ["FLASK_ENV"] = "test"
+
 from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
 from performance_platform.read import api as read_api
 from performance_platform.write import api as write_api
-
-DATABASE_NAME = "performance_platform_test"
-
-os.environ["FLASK_ENV"] = "test"
+# pick one for test configuration, if they don't match things will fail
+from performance_platform.write.config import test as config
 
 
 def before_feature(context, feature):
@@ -27,11 +27,11 @@ def after_feature(context, _):
 
 def create_client(feature):
     if 'use_read_api_client' in feature.tags:
-        return FlaskTestClient(read_api, DATABASE_NAME)
+        return FlaskTestClient(read_api)
     if 'use_write_api_client' in feature.tags:
-        return FlaskTestClient(write_api, DATABASE_NAME)
+        return FlaskTestClient(write_api)
     if 'use_http_client' in feature.tags:
-        return HTTPTestClient(DATABASE_NAME)
+        return HTTPTestClient(config.DATABASE_NAME)
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "

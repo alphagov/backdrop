@@ -1,8 +1,7 @@
 class FlaskTestClient(object):
-    def __init__(self, flask_app, database_name):
-        flask_app.app.config['DATABASE_NAME'] = database_name
+    def __init__(self, flask_app):
         self._client = flask_app.app.test_client()
-        self._storage = flask_app.mongo[database_name]
+        self._storage = flask_app.mongo[flask_app.app.config['DATABASE_NAME']]
 
     def get(self, url):
         return self._client.get(url)
