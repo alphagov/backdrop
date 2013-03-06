@@ -1,7 +1,7 @@
 import test_helper
 import os
 
-os.environ["FLASK_ENV"] = "test"
+os.environ["GOVUK_ENV"] = "test"
 
 from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
