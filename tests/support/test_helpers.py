@@ -1,3 +1,4 @@
+import json
 from hamcrest.core.base_matcher import BaseMatcher
 
 
@@ -23,3 +24,26 @@ def is_bad_request():
 
 def is_ok():
     return has_status(200)
+
+
+class IsErrorResponse(BaseMatcher):
+    def _matches(self, response):
+        try:
+            data = json.loads(response.data)
+            if data.get('status') != 'error':
+                return False
+            # it should not fail with out a message
+            if not data.get('message'):
+                return False
+            return True
+        except ValueError:
+            return False
+
+    def describe_to(self, description):
+        description.append_text(
+            'error response'
+        )
+
+
+def is_error_response():
+    return IsErrorResponse()

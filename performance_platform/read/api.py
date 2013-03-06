@@ -1,12 +1,12 @@
 from bson.code import Code
 from dateutil import parser
 
-from flask import Flask, jsonify, request, make_response, abort
+from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from os import getenv
 import pytz
 
-from ..core.validators import value_is_valid_datetime_string
+from ..core.validators import value_is_valid_datetime_string, valid, invalid
 
 
 app = Flask(__name__)
@@ -26,13 +26,15 @@ def open_bucket_collection(bucket):
 def validate_request_args(request_args):
     if 'start_at' in request_args:
         if not value_is_valid_datetime_string(request_args['start_at']):
-            abort(400)
+            return invalid('start_at is not a valid datetime')
     if 'end_at' in request_args:
         if not value_is_valid_datetime_string(request_args['end_at']):
-            abort(400)
+            return invalid('end_at is not a valid datetime')
     if 'filter_by' in request_args:
         if request_args['filter_by'].find(':') < 0:
-            abort(400)
+            return invalid('filter_by is not valid')
+
+    return valid()
 
 
 def build_query(request_args):
@@ -57,7 +59,9 @@ def build_query(request_args):
 
 @app.route('/<bucket>', methods=['GET'])
 def query(bucket):
-    validate_request_args(request.args)
+    result = validate_request_args(request.args)
+    if not result.is_valid:
+        return jsonify(status='error', message=result.message), 400
 
     collection = open_bucket_collection(bucket)
 
@@ -90,7 +94,7 @@ def query(bucket):
             result_data.append(obj)
 
     # allow requests from any origin
-    response = make_response(jsonify(data=result_data))
+    response = jsonify(data=result_data)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 

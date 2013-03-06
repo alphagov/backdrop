@@ -1,10 +1,10 @@
 from os import getenv
-from flask import Flask
-from flask import abort, request, Response
+from flask import Flask, request, jsonify
 from dateutil import parser
 from pymongo import MongoClient
 import pytz
-from ..core.validators import *
+from ..core.validators import valid, invalid, bucket_is_valid, key_is_valid,\
+    value_is_valid, value_is_valid_datetime_string, value_is_valid_id
 
 
 app = Flask(__name__)
@@ -20,42 +20,30 @@ mongo = MongoClient('localhost', 27017)
 @app.route('/_status')
 def health_check():
     if mongo.alive():
-        return Response(
-            '{"status":"ok","message":"database seems fine"}',
-            mimetype='application/json'
-        )
+        return jsonify(status='ok', message='database seems fine')
     else:
-        return Response(
-            '{"status":500,"message":"can''t connect to database"}',
-            mimetype='application/json',
-            status=500
-        )
+        return jsonify(status='error', message='cannot connect to database'), 500
 
 
-@app.route('/<bucket>', methods=['POST'])
-def post_to_bucket(bucket):
-    if not request_is_valid(request, bucket):
-        abort(400)
+@app.route('/<bucket_name>', methods=['POST'])
+def post_to_bucket(bucket_name):
+    if not request.json:
+        return jsonify(status='error', message='Request must be JSON'), 400
 
     incoming_data = prep_data(request.json)
 
-    if any(invalid_data_object(obj) for obj in incoming_data):
-        abort(400)
-    else:
-        for data in incoming_data:
-            if '_timestamp' in data:
-                data['_timestamp'] = \
-                    time_string_to_utc_datetime(data['_timestamp'])
+    result = validate_post_to_bucket(incoming_data, bucket_name)
 
-        store_objects(bucket, incoming_data)
-        return Response("{'status':'ok'}", mimetype='application/json')
+    if not result.is_valid:
+        return jsonify(status='error', message=result.message), 400
 
+    for data in incoming_data:
+        if '_timestamp' in data:
+            data['_timestamp'] = \
+                time_string_to_utc_datetime(data['_timestamp'])
 
-def request_is_valid(request, bucket_name):
-    if request.json and bucket_is_valid(bucket_name):
-        return True
-    else:
-        return False
+    store_objects(bucket_name, incoming_data)
+    return jsonify(status='ok')
 
 
 def prep_data(incoming_json):
@@ -65,18 +53,33 @@ def prep_data(incoming_json):
         return [incoming_json]
 
 
-def invalid_data_object(obj):
+def validate_post_to_bucket(incoming_data, bucket_name):
+    if not bucket_is_valid(bucket_name):
+        return invalid('Bucket name is invalid')
+
+    for datum in incoming_data:
+        result = validate_data_object(datum)
+        if not result.is_valid:
+            return result
+
+    return valid()
+
+
+def validate_data_object(obj):
     for key, value in obj.items():
-        if not key_is_valid(key) or not value_is_valid(value):
-            print("step one {0} - {1}".format(key, value))
-            return True
+        if not key_is_valid(key):
+            return invalid('{0} is not a valid key'.format(key))
+
+        if not value_is_valid(value):
+            return invalid('{0} is not a valid value'.format(value))
+
         if key == '_timestamp' and not value_is_valid_datetime_string(value):
-            print("step two")
-            return True
+            return invalid('{0} is not a valid timestamp'.format(value))
+
         if key == '_id' and not value_is_valid_id(value):
-            print("step three")
-            return True
-    return False
+            return invalid('{0} is not a valid _id'.format(value))
+
+    return valid()
 
 
 def store_objects(bucket_name, objects_to_store):
