@@ -17,6 +17,7 @@ function display_result {
     fi
 }
 
+basedir=$(dirname $0)
 venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 
 virtualenv --no-site-packages "$venvdir"
