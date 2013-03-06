@@ -1,6 +1,5 @@
 import os
 import re
-import test_helper
 from behave import *
 from flask import json
 from hamcrest import *

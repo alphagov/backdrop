@@ -1,5 +1,3 @@
-import test_helper
-
 from datetime import datetime
 import json
 import unittest

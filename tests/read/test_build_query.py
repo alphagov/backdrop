@@ -1,4 +1,3 @@
-import test_helper
 from datetime import datetime
 from unittest import TestCase
 
