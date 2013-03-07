@@ -1,12 +1,12 @@
+from os import getenv
+
 from bson.code import Code
 from dateutil import parser
-
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
-from os import getenv
 import pytz
 
-from ..core.validators import value_is_valid_datetime_string, valid, invalid
+from .validation import validate_request_args
 
 
 app = Flask(__name__)
@@ -21,20 +21,6 @@ mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
 
 def open_bucket_collection(bucket):
     return mongo[app.config["DATABASE_NAME"]][bucket]
-
-
-def validate_request_args(request_args):
-    if 'start_at' in request_args:
-        if not value_is_valid_datetime_string(request_args['start_at']):
-            return invalid('start_at is not a valid datetime')
-    if 'end_at' in request_args:
-        if not value_is_valid_datetime_string(request_args['end_at']):
-            return invalid('end_at is not a valid datetime')
-    if 'filter_by' in request_args:
-        if request_args['filter_by'].find(':') < 0:
-            return invalid('filter_by is not valid')
-
-    return valid()
 
 
 def build_query(request_args):
@@ -102,13 +88,6 @@ def query(bucket):
 def parse_time_string(time_string):
     time = parser.parse(time_string)
     return time.astimezone(pytz.utc)
-
-
-def jsonify_document(document):
-    if '_timestamp' in document:
-        document['_timestamp'] = document['_timestamp'].isoformat()
-
-    return document
 
 
 def start(port):
