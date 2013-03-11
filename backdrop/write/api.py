@@ -72,8 +72,9 @@ class DataStore(object):
         self.database = database_name
 
     def store_data(self, my_objects, collection_name):
-        bucket = MongoClient('localhost', 27017)[self.database][
-            collection_name]
+        bucket = MongoClient(
+            app.config['MONGO_HOST'], app.config['MONGO_PORT']
+        )[self.database][collection_name]
 
         for data_objects in my_objects:
             bucket.save(data_objects)
