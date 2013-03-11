@@ -2,11 +2,10 @@ from os import getenv
 
 from dateutil import parser
 from flask import Flask, request, jsonify
-from pymongo import MongoClient
 import pytz
 
 from .validation import validate_post_to_bucket
-
+from ..core import storage
 
 app = Flask(__name__)
 
@@ -15,12 +14,16 @@ app.config.from_object(
     "backdrop.write.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
-mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
+store = storage.Store(
+    app.config['MONGO_HOST'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME']
+)
 
 
 @app.route('/_status')
 def health_check():
-    if mongo.alive():
+    if store.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
         return jsonify(status='error',
@@ -44,7 +47,8 @@ def post_to_bucket(bucket_name):
             data['_timestamp'] = \
                 time_string_to_utc_datetime(data['_timestamp'])
 
-    store_objects(bucket_name, incoming_data)
+    store.get_bucket(bucket_name).store_many(incoming_data)
+
     return jsonify(status='ok')
 
 
@@ -55,29 +59,9 @@ def prep_data(incoming_json):
         return [incoming_json]
 
 
-def store_objects(bucket_name, objects_to_store):
-    DataStore(app.config["DATABASE_NAME"]).store_data(
-        objects_to_store,
-        bucket_name
-    )
-
-
 def time_string_to_utc_datetime(time_string):
     time = parser.parse(time_string)
     return time.astimezone(pytz.utc)
-
-
-class DataStore(object):
-    def __init__(self, database_name):
-        self.database = database_name
-
-    def store_data(self, my_objects, collection_name):
-        bucket = MongoClient(
-            app.config['MONGO_HOST'], app.config['MONGO_PORT']
-        )[self.database][collection_name]
-
-        for data_objects in my_objects:
-            bucket.save(data_objects)
 
 
 def start(port):

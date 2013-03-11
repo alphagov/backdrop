@@ -1,22 +1,18 @@
 from datetime import datetime
 import json
 import unittest
+
 from hamcrest import *
 import pytz
-from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
+from mock import patch
 
+from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
 from backdrop.write import api
 
 
 class PostDataTestCase(unittest.TestCase):
-    def stub_storage(self, bucket_name, data_to_store):
-        self.stored_bucket = bucket_name
-        self.stored_data = data_to_store
-
     def setUp(self):
         self.app = api.app.test_client()
-        self.stored_bucket = None
-        self.stored_data = None
 
     def test_request_must_be_json(self):
         response = self.app.post(
@@ -27,17 +23,18 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
-    def test_data_gets_stored(self):
-        api.store_objects = self.stub_storage
-
+    @patch("backdrop.write.api.store")
+    def test_data_gets_stored(self, store):
         self.app.post(
             '/foo-bucket',
             data = '{"foo": "bar"}',
             content_type = "application/json"
         )
 
-        assert_that( self.stored_bucket, is_("foo-bucket"))
-        assert_that( self.stored_data[0], has_entry("foo", "bar"))
+        store.get_bucket.assert_called_with("foo-bucket")
+        store.get_bucket.return_value.store_many.assert_called_with(
+            [{"foo": "bar"}]
+        )
 
     def test_bucket_name_validation(self):
         response = self.app.post(
@@ -49,8 +46,8 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request() )
         assert_that( response, is_error_response())
 
-    def test__timestamps_get_stored_as_utc_datetimes(self):
-        api.store_objects = self.stub_storage
+    @patch("backdrop.write.api.store")
+    def test__timestamps_get_stored_as_utc_datetimes(self, store):
         expected_event_with_time = {
             u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
         }
@@ -61,8 +58,10 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        assert_that( self.stored_bucket, is_("bucket"))
-        assert_that( self.stored_data, contains(expected_event_with_time) )
+        store.get_bucket.assert_called_with("bucket")
+        store.get_bucket.return_value.store_many.assert_called_with(
+            [expected_event_with_time]
+        )
 
     def test_data_with_empty_keys_400s(self):
         response = self.app.post(
@@ -74,8 +73,8 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
-    def test__id_gets_stored(self):
-        api.store_objects = self.stub_storage
+    @patch("backdrop.write.api.store")
+    def test__id_gets_stored(self, store):
         response = self.app.post(
             '/foo',
             data = '{"_id": "foo"}',
@@ -83,7 +82,9 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that(response, is_ok())
-        assert_that(self.stored_data, contains({"_id": u"foo"}))
+        store.get_bucket.return_value.store_many.assert_called_with(
+            [{"_id": "foo"}]
+        )
 
     def test_invalid__id_returns_400(self):
         response = self.app.post(

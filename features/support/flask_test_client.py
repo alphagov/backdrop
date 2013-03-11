@@ -1,7 +1,12 @@
 class FlaskTestClient(object):
     def __init__(self, flask_app):
         self._client = flask_app.app.test_client()
-        self._storage = flask_app.mongo[flask_app.app.config['DATABASE_NAME']]
+        # This is a dirty hack until the read app also uses the storage api
+        if hasattr(flask_app, 'mongo'):
+            self._storage = flask_app.mongo[
+                flask_app.app.config['DATABASE_NAME']]
+        else:
+            self._storage = flask_app.store.database
 
     def get(self, url):
         return self._client.get(url)
