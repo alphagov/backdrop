@@ -50,7 +50,7 @@ class TestBucket(unittest.TestCase):
             {"name": "Chico"}
         ]
 
-        self.bucket.store_many(my_objects)
+        self.bucket.store(my_objects)
 
         retrieved_objects = self.bucket.all()
 

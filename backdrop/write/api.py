@@ -47,7 +47,7 @@ def post_to_bucket(bucket_name):
             data['_timestamp'] = \
                 time_string_to_utc_datetime(data['_timestamp'])
 
-    store.get_bucket(bucket_name).store_many(incoming_data)
+    store.get_bucket(bucket_name).store(incoming_data)
 
     return jsonify(status='ok')
 

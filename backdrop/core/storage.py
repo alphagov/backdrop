@@ -30,11 +30,11 @@ class Bucket(object):
     def _collection(self):
         return self._store.database[self.name]
 
-    def store(self, item):
-        self._collection.save(item)
-
-    def store_many(self, items):
-        [self._collection.save(item) for item in items]
+    def store(self, items):
+        if isinstance(items, list):
+            [self._collection.save(item) for item in items]
+        else:
+            self._collection.save(items)
 
     def all(self):
         return self._collection.find()

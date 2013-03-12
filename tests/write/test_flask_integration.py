@@ -32,7 +32,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         store.get_bucket.assert_called_with("foo-bucket")
-        store.get_bucket.return_value.store_many.assert_called_with(
+        store.get_bucket.return_value.store.assert_called_with(
             [{"foo": "bar"}]
         )
 
@@ -59,7 +59,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         store.get_bucket.assert_called_with("bucket")
-        store.get_bucket.return_value.store_many.assert_called_with(
+        store.get_bucket.return_value.store.assert_called_with(
             [expected_event_with_time]
         )
 
@@ -82,7 +82,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that(response, is_ok())
-        store.get_bucket.return_value.store_many.assert_called_with(
+        store.get_bucket.return_value.store.assert_called_with(
             [{"_id": "foo"}]
         )
 
