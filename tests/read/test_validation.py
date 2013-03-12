@@ -39,7 +39,7 @@ class TestRequestValidation(TestCase):
             'filter_by': 'foo:bar'
         })
         assert_that(validation_result.is_valid, is_(True))
-    
+
     def test_reject_period_with_no_start_at_and_end_at(self):
         validation_result = validate_request_args({'period': 'week'})
         assert_that( validation_result.is_valid, is_(False) )
