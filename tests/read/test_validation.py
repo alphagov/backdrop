@@ -10,14 +10,32 @@ class TestRequestValidation(TestCase):
             is_(False)
         )
 
+    def test_accepts_valid_start_at(self):
+        validation_result = validate_request_args({
+            'start_at': '2000-02-02T00:02:02+00:00'
+        })
+        assert_that(validation_result.is_valid, is_(True))
+
     def test_reject_invalid_end_at(self):
         assert_that(
             validate_request_args({'end_at': 'foo'}).is_valid,
             is_(False)
         )
 
+    def test_accepts_valid_end_at(self):
+        validation_result = validate_request_args({
+            'end_at': '2000-02-02T00:02:02+00:00'
+        })
+        assert_that(validation_result.is_valid, is_(True))
+
     def test_reject_filter_with_no_colon(self):
         assert_that(
             validate_request_args({'filter_by': 'bar'}).is_valid,
             is_(False)
         )
+
+    def test_accepts_valid_filter(self):
+        validation_result = validate_request_args({
+            'filter_by': 'foo:bar'
+        })
+        assert_that(validation_result.is_valid, is_(True))
