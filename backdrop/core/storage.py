@@ -1,4 +1,6 @@
+from bson.code import Code
 from pymongo.mongo_client import MongoClient
+import pytz
 
 
 class Store(object):
@@ -38,3 +40,44 @@ class Bucket(object):
 
     def all(self):
         return self._collection.find()
+
+    def query(
+            self, start_at=None, end_at=None, group_by=None, filter_by=None):
+        query = {}
+        if start_at:
+            query['_timestamp'] = {
+                '$gte': start_at
+            }
+        if end_at:
+            if '_timestamp' not in query:
+                query['_timestamp'] = {}
+            query['_timestamp']['$lt'] = end_at
+
+        if filter_by:
+            for key, value in filter_by:
+                query[key] = value
+
+        result = []
+        if group_by:
+            cursor = self._collection.group(
+                key=[group_by],
+                condition=query,
+                initial={'count': 0},
+                reduce=Code("""
+                function(current, previous) { previous.count++; }
+                """)
+            )
+
+            result = [{doc[group_by]: doc['count']} for doc in cursor]
+        else:
+            cursor = self._collection.find(query).sort('_timestamp', -1)
+
+            for doc in cursor:
+                # stringify the id
+                doc['_id'] = str(doc['_id'])
+                if '_timestamp' in doc:
+                    doc['_timestamp'] = doc['_timestamp'].replace(
+                        tzinfo=pytz.UTC)
+                result.append(doc)
+
+        return result

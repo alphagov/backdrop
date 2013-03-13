@@ -1,12 +1,13 @@
+import datetime
+import json
 from os import getenv
 
-from bson.code import Code
 from dateutil import parser
 from flask import Flask, jsonify, request
-from pymongo import MongoClient
 import pytz
 
 from .validation import validate_request_args
+from ..core import storage
 
 
 app = Flask(__name__)
@@ -16,7 +17,11 @@ app.config.from_object(
     "backdrop.read.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
-mongo = MongoClient(app.config['MONGO_HOST'], app.config['MONGO_PORT'])
+store = storage.Store(
+    app.config['MONGO_HOST'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME']
+)
 
 
 def open_bucket_collection(bucket):
@@ -61,46 +66,34 @@ def parse_request_args(request_args):
     return args
 
 
-@app.route('/<bucket>', methods=['GET'])
-def query(bucket):
+class JsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        return json.JSONEncoder.default(self, obj)
+
+
+@app.route('/<bucket_name>', methods=['GET'])
+def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
         return jsonify(status='error', message=result.message), 400
     args = parse_request_args(request.args)
 
-    collection = open_bucket_collection(bucket)
+    bucket = store.get_bucket(bucket_name)
 
-    query = build_query(args)
+    result_data = bucket.query(**args)
 
-    result_data = []
-
-    if 'group_by' in args:
-        result = collection.group(
-            key={args['group_by']: 1},
-            condition=query,
-            initial={'count': 0},
-            reduce=Code("""
-            function(current, previous)  { previous.count++; }
-            """)
-        )
-
-        for obj in result:
-            result_data.append({obj[args['group_by']]: obj['count']})
-    else:
-        result = collection.find(query).sort("_timestamp", -1)
-
-        for obj in result:
-            string_id = str(obj.pop("_id"))
-            obj['_id'] = string_id
-            # TODO: mongo and timezones?!
-            if "_timestamp" in obj:
-                time = obj.pop("_timestamp")
-                obj["_timestamp"] = time.replace(tzinfo=pytz.utc).isoformat()
-            result_data.append(obj)
+    # Taken from flask.helpers.jsonify to add JSONEncoder
+    # NB. this can be removed once fix #471 works it's way into a release
+    # https://github.com/mitsuhiko/flask/pull/471
+    json_data = json.dumps({"data": result_data}, cls=JsonEncoder,
+                           indent=None if request.is_xhr else 2)
+    response = app.response_class(json_data, mimetype='application/json')
 
     # allow requests from any origin
-    response = jsonify(data=result_data)
     response.headers['Access-Control-Allow-Origin'] = '*'
+
     return response
 
 
