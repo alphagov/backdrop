@@ -23,24 +23,42 @@ def open_bucket_collection(bucket):
     return mongo[app.config["DATABASE_NAME"]][bucket]
 
 
-def build_query(request_args):
+def build_query(args):
     query = {}
 
-    if 'start_at' in request_args:
+    if 'start_at' in args:
         query['_timestamp'] = {
-            '$gte': parse_time_string(request_args['start_at'])
+            '$gte': args['start_at']
         }
 
-    if 'end_at' in request_args:
+    if 'end_at' in args:
         if '_timestamp' not in query:
             query['_timestamp'] = {}
-        query['_timestamp']['$lt'] = parse_time_string(request_args['end_at'])
+        query['_timestamp']['$lt'] = args['end_at']
 
-    if 'filter_by' in request_args:
-        key, value = request_args['filter_by'].split(':', 1)
+    for key, value in args.get('filter_by', []):
         query[key] = value
 
     return query
+
+
+def parse_request_args(request_args):
+    args = {}
+
+    if 'start_at' in request_args:
+        args['start_at'] = parse_time_string(request_args['start_at'])
+    if 'end_at' in request_args:
+        args['end_at'] = parse_time_string(request_args['end_at'])
+
+    args['filter_by'] = [
+        f.split(':', 1) for f in request_args.getlist('filter_by')
+    ]
+
+    for key in ['group_by']:
+        if key in request_args:
+            args[key] = request_args[key]
+
+    return args
 
 
 @app.route('/<bucket>', methods=['GET'])
@@ -48,16 +66,17 @@ def query(bucket):
     result = validate_request_args(request.args)
     if not result.is_valid:
         return jsonify(status='error', message=result.message), 400
+    args = parse_request_args(request.args)
 
     collection = open_bucket_collection(bucket)
 
-    query = build_query(request.args)
+    query = build_query(args)
 
     result_data = []
 
-    if 'group_by' in request.args:
+    if 'group_by' in args:
         result = collection.group(
-            key={request.args['group_by']: 1},
+            key={args['group_by']: 1},
             condition=query,
             initial={'count': 0},
             reduce=Code("""
@@ -66,7 +85,7 @@ def query(bucket):
         )
 
         for obj in result:
-            result_data.append({obj[request.args['group_by']]: obj['count']})
+            result_data.append({obj[args['group_by']]: obj['count']})
     else:
         result = collection.find(query).sort("_timestamp", -1)
 
