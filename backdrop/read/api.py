@@ -28,25 +28,6 @@ def open_bucket_collection(bucket):
     return mongo[app.config["DATABASE_NAME"]][bucket]
 
 
-def build_query(args):
-    query = {}
-
-    if 'start_at' in args:
-        query['_timestamp'] = {
-            '$gte': args['start_at']
-        }
-
-    if 'end_at' in args:
-        if '_timestamp' not in query:
-            query['_timestamp'] = {}
-        query['_timestamp']['$lt'] = args['end_at']
-
-    for key, value in args.get('filter_by', []):
-        query[key] = value
-
-    return query
-
-
 def parse_request_args(request_args):
     args = {}
 
