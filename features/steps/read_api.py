@@ -30,13 +30,14 @@ def step(context, query):
 def step(context, expected_status):
     assert_that(context.response.status_code, is_(int(expected_status)))
 
-
-@then('the JSON should have "{n}" result(s)')
+step_matcher("re")
+@then('the JSON should have "(?P<n>\d+)" results?')
 def step(context, n):
     the_data = json.loads(context.response.data)['data']
     assert_that(the_data, has_length(int(n)))
 
 
+step_matcher("parse")
 @then('the "{nth}" result should be "{expected_json}"')
 def step(context, nth, expected_json):
     i = int(re.compile(r'\d+').match(nth).group(0)) - 1
