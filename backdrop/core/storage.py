@@ -32,11 +32,14 @@ class Bucket(object):
     def _collection(self):
         return self._store.database[self.name]
 
-    def store(self, items):
-        if isinstance(items, list):
-            [self._collection.save(item) for item in items]
+    def _store_one(self, record):
+        self._collection.save(record.to_mongo())
+
+    def store(self, records):
+        if isinstance(records, list):
+            [self._store_one(record) for record in records]
         else:
-            self._collection.save(items)
+            self._store_one(records)
 
     def all(self):
         return self._collection.find()

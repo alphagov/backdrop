@@ -3,6 +3,8 @@ from os import getenv
 from dateutil import parser
 from flask import Flask, request, jsonify
 import pytz
+from backdrop.core.records import Record
+
 
 from .validation import validate_post_to_bucket
 from ..core import storage
@@ -42,12 +44,16 @@ def post_to_bucket(bucket_name):
     if not result.is_valid:
         return jsonify(status='error', message=result.message), 400
 
-    for data in incoming_data:
-        if '_timestamp' in data:
-            data['_timestamp'] = \
-                time_string_to_utc_datetime(data['_timestamp'])
+    records = []
+    for datum in incoming_data:
+        if "_timestamp" in datum:
+            datum["_timestamp"] = time_string_to_utc_datetime(
+                datum["_timestamp"]
+            )
 
-    store.get_bucket(bucket_name).store(incoming_data)
+        records.append(Record(datum))
+
+    store.get_bucket(bucket_name).store(records)
 
     return jsonify(status='ok')
 

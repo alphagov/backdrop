@@ -5,6 +5,7 @@ import unittest
 from hamcrest import *
 import pytz
 from mock import patch
+from backdrop.core.records import Record
 
 from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
 from backdrop.write import api
@@ -33,7 +34,7 @@ class PostDataTestCase(unittest.TestCase):
 
         store.get_bucket.assert_called_with("foo-bucket")
         store.get_bucket.return_value.store.assert_called_with(
-            [{"foo": "bar"}]
+            [Record({"foo": "bar"})]
         )
 
     def test_bucket_name_validation(self):
@@ -60,7 +61,7 @@ class PostDataTestCase(unittest.TestCase):
 
         store.get_bucket.assert_called_with("bucket")
         store.get_bucket.return_value.store.assert_called_with(
-            [expected_event_with_time]
+            [Record(expected_event_with_time)]
         )
 
     def test_data_with_empty_keys_400s(self):
@@ -83,7 +84,7 @@ class PostDataTestCase(unittest.TestCase):
 
         assert_that(response, is_ok())
         store.get_bucket.return_value.store.assert_called_with(
-            [{"_id": "foo"}]
+            [Record({"_id": "foo"})]
         )
 
     def test_invalid__id_returns_400(self):
