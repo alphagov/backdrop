@@ -6,6 +6,11 @@ from backdrop.core import storage
 from backdrop.core.records import Record
 
 
+def d(year, month, day, hour, minute, seconds):
+    return datetime.datetime(year, month, day, hour, minute, seconds,
+                             tzinfo=pytz.UTC)
+
+
 class TestMongoIntegration(unittest.TestCase):
     def setUp(self):
         self.store = storage.Store('localhost', 27017, 'backdrop_test')
@@ -89,28 +94,18 @@ class TestMongoIntegration(unittest.TestCase):
 
     def test_query_with_timestamps(self):
         my_objects = [
-            {"_timestamp": datetime.datetime(2013, 1, 1, 12, 0, 0,
-                                             tzinfo=pytz.UTC),
-             "month": "Jan"},
-            {"_timestamp": datetime.datetime(2013, 2, 1, 12, 0, 0,
-                                             tzinfo=pytz.UTC),
-             "month": "Feb"},
-            {"_timestamp": datetime.datetime(2013, 3, 1, 12, 0, 0,
-                                             tzinfo=pytz.UTC),
-             "month": "Mar"},
-            {"_timestamp": datetime.datetime(2013, 4, 1, 12, 0, 0,
-                                             tzinfo=pytz.UTC),
-             "month": "Apr"},
-            {"_timestamp": datetime.datetime(2013, 5, 1, 12, 0, 0,
-                                             tzinfo=pytz.UTC),
-             "month": "May"}
+            {"_timestamp": d(2013, 1, 1, 12, 0, 0), "month": "Jan"},
+            {"_timestamp": d(2013, 2, 1, 12, 0, 0), "month": "Feb"},
+            {"_timestamp": d(2013, 3, 1, 12, 0, 0), "month": "Mar"},
+            {"_timestamp": d(2013, 4, 1, 12, 0, 0), "month": "Apr"},
+            {"_timestamp": d(2013, 5, 1, 12, 0, 0), "month": "May"}
         ]
 
         my_records = [Record(obj) for obj in my_objects]
         self.bucket.store(my_records)
 
         query_for_start_at = self.bucket.query(
-            start_at = datetime.datetime(2013, 4, 1, 12, 0, 0)
+            start_at = d(2013, 4, 1, 12, 0, 0)
         )
         assert_that(query_for_start_at,
                     has_item(has_entries({'month': equal_to("Apr")})))
@@ -120,7 +115,7 @@ class TestMongoIntegration(unittest.TestCase):
                     is_not(has_item(has_entries({'month': equal_to("Mar")}))))
 
         query_for_end_at = self.bucket.query(
-            end_at = datetime.datetime(2013, 4, 1, 12, 0, 0)
+            end_at = d(2013, 4, 1, 12, 0, 0)
         )
         assert_that(query_for_end_at,
                     has_item(has_entries({'month': equal_to("Jan")})))
@@ -132,8 +127,8 @@ class TestMongoIntegration(unittest.TestCase):
                     is_not(has_item(has_entries({'month': equal_to("Apr")}))))
 
         query_for_start_and_end_at = self.bucket.query(
-            end_at = datetime.datetime(2013, 3, 1, 12, 0, 0),
-            start_at = datetime.datetime(2013, 2, 1, 12, 0, 0)
+            end_at = d(2013, 3, 1, 12, 0, 0),
+            start_at = d(2013, 2, 1, 12, 0, 0)
         )
         assert_that(query_for_start_and_end_at,
                     has_item(has_entries({'month': equal_to("Feb")})))
@@ -141,3 +136,17 @@ class TestMongoIntegration(unittest.TestCase):
                     is_not(has_item(has_entries({'month': equal_to("Jan")}))))
         assert_that(query_for_start_and_end_at,
                     is_not(has_item(has_entries({'month': equal_to("Mar")}))))
+
+    def test_week_query(self):
+        my_objects = [
+            {'_timestamp': d(2013,1,7,0,0,0), 'release': '1'},
+            {'_timestamp': d(2013,1,8,0,0,0), 'release': '2'},
+            {'_timestamp': d(2013,1,9,0,0,0), 'release': '3'},
+            {'_timestamp': d(2013,1,14,0,0,0), 'release': '4'},
+        ]
+
+        my_records = [Record(obj) for obj in my_objects]
+        self.bucket.store(my_records)
+
+        query_result = self.bucket.query(period='week')
+        assert_that(query_result, has_length(2))

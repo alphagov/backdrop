@@ -77,6 +77,16 @@ class Bucket(object):
             )
 
             result = [{doc[group_by]: doc['count']} for doc in cursor]
+        elif period:
+            cursor = self._collection.group(
+                key=['_week_start_at'],
+                condition=query,
+                initial={'count': 0},
+                reduce=Code("""
+                function(current, previous) { previous.count++; }
+                """)
+            )
+            result = [{doc['_week_start_at']: doc['count']} for doc in cursor]
         else:
             cursor = self._collection.find(query).sort('_timestamp', -1)
 
