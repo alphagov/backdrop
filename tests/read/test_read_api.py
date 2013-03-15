@@ -11,17 +11,17 @@ class ReadApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
-    # @patch('backdrop.core.storage.Bucket.query')
-    # def test_period_query_is_executed(self, mock_query):
-    #     mock_query.return_value = None
-    #     self.app.get('/foo&period=week')
-    #     mock_query.assert_called_with({'foo': 'bar'})
+    @patch('backdrop.core.storage.Bucket.query')
+    def test_period_query_is_executed(self, mock_query):
+        mock_query.return_value = None
+        self.app.get('/foo?period=week')
+        mock_query.assert_called_with(period=u"week")
 
     @patch('backdrop.core.storage.Bucket.query')
     def test_filter_by_query_is_executed(self, mock_query):
         mock_query.return_value = None
         self.app.get('/foo?filter_by=zombies:yes')
-        mock_query.assert_called_with(filter_by=[[u'zombies',u'yes']])
+        mock_query.assert_called_with(filter_by=[[u'zombies', u'yes']])
 
     @patch('backdrop.core.storage.Bucket.query')
     def test_group_by_query_is_executed(self, mock_query):

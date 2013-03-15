@@ -41,6 +41,9 @@ def parse_request_args(request_args):
             f.split(':', 1) for f in request_args.getlist('filter_by')
         ]
 
+    if 'period' in request_args:
+        args['period'] = request_args['period']
+
     for key in ['group_by']:
         if key in request_args:
             args[key] = request_args[key]

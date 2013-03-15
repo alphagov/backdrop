@@ -44,8 +44,13 @@ class Bucket(object):
     def all(self):
         return self._collection.find()
 
-    def query(
-            self, start_at=None, end_at=None, group_by=None, filter_by=None):
+    def query(self,
+              start_at=None,
+              end_at=None,
+              group_by=None,
+              filter_by=None,
+              period=None):
+        
         query = {}
         if start_at:
             query['_timestamp'] = {

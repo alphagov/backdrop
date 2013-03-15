@@ -12,7 +12,7 @@ def validate_request_args(request_args):
         if request_args['filter_by'].find(':') < 0:
             return invalid('filter_by is not valid')
     if 'period' in request_args:
-        if 'start_at' not in request_args or 'end_at' not in request_args:
-            return invalid('periodic grouping requires a start and end at')
+        if request_args['period'] != 'week':
+            return invalid('Unrecognized grouping for period')
 
     return valid()
