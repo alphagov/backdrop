@@ -36,9 +36,10 @@ def parse_request_args(request_args):
     if 'end_at' in request_args:
         args['end_at'] = parse_time_string(request_args['end_at'])
 
-    args['filter_by'] = [
-        f.split(':', 1) for f in request_args.getlist('filter_by')
-    ]
+    if 'filter_by' in request_args:
+        args['filter_by'] = [
+            f.split(':', 1) for f in request_args.getlist('filter_by')
+        ]
 
     for key in ['group_by']:
         if key in request_args:
