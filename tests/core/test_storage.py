@@ -34,6 +34,7 @@ class TestBucket(unittest.TestCase):
         self.bucket = storage.Bucket(self.store, 'my_bucket')
 
     def tearDown(self):
+        # TODO: verify these no longer touch the DB
         self.store.client.drop_database('backdrop_test')
 
     @patch("pymongo.collection.Collection.save")
@@ -58,37 +59,3 @@ class TestBucket(unittest.TestCase):
             call({'name': 'Chico'})
         ])
 
-#    def test_that_a_list_of_objects_get_stored(self):
-#        my_objects = [
-#            {"name": "Groucho"},
-#            {"name": "Harpo"},
-#            {"name": "Chico"}
-#        ]
-#
-#        self.bucket.store(my_objects)
-#
-#        retrieved_objects = self.bucket.all()
-#
-#        assert_that( retrieved_objects, contains(*my_objects) )
-#
-#    def test_stored_object_is_appended_to_bucket(self):
-#        event = {"title": "I'm an event"}
-#        another_event = {"title": "I'm another event"}
-#
-#        self.bucket.store(event)
-#        self.bucket.store(another_event)
-#
-#        retrieved_objects = self.bucket.all()
-#
-#        assert_that( retrieved_objects, contains(event, another_event) )
-#
-#    def test_object_with_id_is_updated(self):
-#        event = { "_id": "event1", "title": "I'm an event"}
-#        updated_event = {"_id": "event1", "title": "I'm another event"}
-#
-#        self.bucket.store(event)
-#        self.bucket.store(updated_event)
-#
-#        retrieved_objects = self.bucket.all()
-#
-#        assert_that( retrieved_objects, only_contains(updated_event) )
