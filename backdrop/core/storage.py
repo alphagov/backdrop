@@ -50,7 +50,7 @@ class Bucket(object):
               group_by=None,
               filter_by=None,
               period=None):
-        
+
         query = {}
         if start_at:
             query['_timestamp'] = {
