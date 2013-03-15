@@ -6,12 +6,17 @@ class Record(object):
     def __init__(self, data):
         self.data = data
         self.meta = {}
+
         if "_timestamp" in self.data:
-            days_since_week_start = datetime.timedelta(
-                days=self.data['_timestamp'].weekday())
-            week_start = self.data['_timestamp'] - days_since_week_start
+            day_of_week = self.data['_timestamp'].weekday()
+            delta_from_week_start = datetime.timedelta(days=day_of_week)
+            week_start = self.data['_timestamp'] - delta_from_week_start
             self.meta['_week_start_at'] = week_start.replace(
-                hour=0, minute=0, second=0, microsecond=0)
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0
+            )
 
     def to_mongo(self):
         return dict(
