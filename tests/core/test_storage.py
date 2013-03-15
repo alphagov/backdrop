@@ -58,4 +58,3 @@ class TestBucket(unittest.TestCase):
             call({'name': 'Harpo'}),
             call({'name': 'Chico'})
         ])
-
