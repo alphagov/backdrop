@@ -38,6 +38,8 @@ def post_to_bucket(bucket_name):
 
     result = validate_post_to_bucket(incoming_data, bucket_name)
 
+    # TODO: We currently don't test that incoming data gets validated
+    # feels too heavy to be in the controller anyway - pull out later?
     if not result.is_valid:
         return jsonify(status='error', message=result.message), 400
 
