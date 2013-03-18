@@ -1,7 +1,7 @@
 import datetime
 from pymongo.mongo_client import MongoClient
 import pytz
-from backdrop.core.repository import Repository
+from backdrop.core.repository import Repository, build_query
 
 
 def utc(dt):
@@ -70,30 +70,12 @@ class Bucket(object):
             result.append(doc)
         return result
 
-    def query(self,
-              start_at=None,
-              end_at=None,
-              group_by=None,
-              filter_by=None,
-              period=None):
+    def query(self, **params):
+        query = build_query(**params)
 
-        query = {}
-        if start_at:
-            query['_timestamp'] = {
-                '$gte': start_at
-            }
-        if end_at:
-            if '_timestamp' not in query:
-                query['_timestamp'] = {}
-            query['_timestamp']['$lt'] = end_at
-
-        if filter_by:
-            for key, value in filter_by:
-                query[key] = value
-
-        if group_by:
-            result = self.execute_grouped_query(group_by, query)
-        elif period:
+        if 'group_by' in params:
+            result = self.execute_grouped_query(params['group_by'], query)
+        elif 'period' in params:
             result = self.execute_period_query(query)
         else:
             result = self.execute_query(query)

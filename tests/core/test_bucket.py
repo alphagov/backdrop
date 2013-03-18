@@ -1,15 +1,9 @@
 import unittest
-import datetime
 from hamcrest import *
 from mock import Mock, call
-import pytz
 from backdrop.core import storage
 from backdrop.core.records import Record
-
-
-def d(year, month, day, hour, minute, seconds):
-    return datetime.datetime(year, month, day, hour, minute, seconds,
-                             tzinfo=pytz.UTC)
+from tests.support.test_helpers import d
 
 
 class TestBucket(unittest.TestCase):

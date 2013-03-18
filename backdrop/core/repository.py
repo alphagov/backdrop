@@ -1,6 +1,23 @@
 from bson import Code
 
 
+def build_query(**params):
+    query = {}
+    if 'start_at' in params:
+        query['_timestamp'] = {
+            '$gte': params['start_at']
+        }
+    if 'end_at' in params:
+        if '_timestamp' not in query:
+            query['_timestamp'] = {}
+        query['_timestamp']['$lt'] = params['end_at']
+
+    if 'filter_by' in params:
+        for key, value in params['filter_by']:
+            query[key] = value
+    return query
+
+
 class Repository(object):
     def __init__(self, collection):
         self._collection = collection
