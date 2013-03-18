@@ -37,6 +37,3 @@ class Repository(object):
 
     def save(self, obj):
         self._collection.save(obj)
-
-    def all(self):
-        return self._collection.find()

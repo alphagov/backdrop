@@ -38,9 +38,6 @@ class Bucket(object):
         else:
             self.repository.save(records.to_mongo())
 
-    def all(self):
-        return self.repository.all()
-
     def _period_group(self, doc):
         start = utc(doc['_week_start_at'])
         return {
