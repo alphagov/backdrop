@@ -99,5 +99,3 @@ class Bucket(object):
             result = self.execute_query(query)
 
         return result
-
-

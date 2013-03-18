@@ -1,5 +1,6 @@
 from bson import Code
 
+
 class Repository(object):
     def __init__(self, collection):
         self._collection = collection

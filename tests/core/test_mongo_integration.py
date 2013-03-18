@@ -73,8 +73,12 @@ class TestMongoIntegration(unittest.TestCase):
 
         self.bucket.store(my_records)
         query_result = self.bucket.query(filter_by=[['name', 'Chico']])
-        assert_that(query_result, contains(has_entries({'name': equal_to('Chico')})))
-        assert_that(query_result, is_not(has_item(has_entries({'name': equal_to('Harpo')}))))
+        assert_that(
+            query_result,
+            contains(has_entries({'name': equal_to('Chico')})))
+        assert_that(
+            query_result,
+            is_not(has_item(has_entries({'name': equal_to('Harpo')}))))
 
     def test_group_by_query(self):
         my_objects = [
@@ -89,8 +93,10 @@ class TestMongoIntegration(unittest.TestCase):
         self.bucket.store(my_records)
 
         query_result = self.bucket.query(group_by = "name")
-        assert_that(query_result, has_item(has_entries({'Max': equal_to(3)})))
-        assert_that(query_result, has_item(has_entries({'Gareth': equal_to(2)})))
+        assert_that(query_result,
+                    has_item(has_entries({'Max': equal_to(3)})))
+        assert_that(query_result,
+                    has_item(has_entries({'Gareth': equal_to(2)})))
 
     def test_query_with_timestamps(self):
         my_objects = [

@@ -40,7 +40,6 @@ class TestRequestValidation(TestCase):
         })
         assert_that(validation_result.is_valid, is_(True))
 
-
     def test_accepts_period_with_start_at_and_end_at_present(self):
         validation_result = validate_request_args({
             'period': 'week',
