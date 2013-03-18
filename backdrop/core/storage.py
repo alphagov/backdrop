@@ -1,6 +1,11 @@
 from bson.code import Code
+import datetime
 from pymongo.mongo_client import MongoClient
 import pytz
+
+
+def utc(dt):
+    return dt.replace(tzinfo=pytz.UTC)
 
 
 class Store(object):
@@ -44,6 +49,14 @@ class Bucket(object):
     def all(self):
         return self._collection.find()
 
+    def _period_group(self, doc):
+        start = utc(doc['_week_start_at'])
+        return {
+            '_start_at': start,
+            '_end_at': start + datetime.timedelta(days=7),
+            'count': doc['count']
+        }
+
     def query(self,
               start_at=None,
               end_at=None,
@@ -86,7 +99,7 @@ class Bucket(object):
                 function(current, previous) { previous.count++; }
                 """)
             )
-            result = [{doc['_week_start_at']: doc['count']} for doc in cursor]
+            result = [self._period_group(doc) for doc in cursor]
         else:
             cursor = self._collection.find(query).sort('_timestamp', -1)
 
@@ -94,8 +107,7 @@ class Bucket(object):
                 # stringify the id
                 doc['_id'] = str(doc['_id'])
                 if '_timestamp' in doc:
-                    doc['_timestamp'] = doc['_timestamp'].replace(
-                        tzinfo=pytz.UTC)
+                    doc['_timestamp'] = utc(doc['_timestamp'])
                 result.append(doc)
 
         return result

@@ -139,10 +139,10 @@ class TestMongoIntegration(unittest.TestCase):
 
     def test_week_query(self):
         my_objects = [
-            {'_timestamp': d(2013,1,7,0,0,0), 'release': '1'},
-            {'_timestamp': d(2013,1,8,0,0,0), 'release': '2'},
-            {'_timestamp': d(2013,1,9,0,0,0), 'release': '3'},
-            {'_timestamp': d(2013,1,14,0,0,0), 'release': '4'},
+            {'_timestamp': d(2013, 1, 7, 0, 0, 0), 'release': '1'},
+            {'_timestamp': d(2013, 1, 8, 0, 0, 0), 'release': '2'},
+            {'_timestamp': d(2013, 1, 9, 0, 0, 0), 'release': '3'},
+            {'_timestamp': d(2013, 1, 14, 0, 0, 0), 'release': '4'},
         ]
 
         my_records = [Record(obj) for obj in my_objects]
@@ -150,3 +150,13 @@ class TestMongoIntegration(unittest.TestCase):
 
         query_result = self.bucket.query(period='week')
         assert_that(query_result, has_length(2))
+        assert_that(query_result, has_item(has_entries({
+            "_start_at": equal_to(d(2013, 1, 7, 0, 0, 0)),
+            "_end_at": equal_to(d(2013, 1, 14, 0, 0, 0)),
+            "count": equal_to(3)
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "_start_at": equal_to(d(2013, 1, 14, 0, 0, 0)),
+            "_end_at": equal_to(d(2013, 1, 21, 0, 0, 0)),
+            "count": equal_to(1)
+        })))
