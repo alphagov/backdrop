@@ -1,7 +1,7 @@
-from bson.code import Code
 import datetime
 from pymongo.mongo_client import MongoClient
 import pytz
+from backdrop.core.repository import Repository
 
 
 def utc(dt):
@@ -30,24 +30,16 @@ class Store(object):
 
 class Bucket(object):
     def __init__(self, store, name):
-        self._store = store
-        self.name = name
-
-    @property
-    def _collection(self):
-        return self._store.database[self.name]
-
-    def _store_one(self, record):
-        self._collection.save(record.to_mongo())
+        self.repository = Repository(store.database[name])
 
     def store(self, records):
         if isinstance(records, list):
-            [self._store_one(record) for record in records]
+            [self.repository.save(record.to_mongo()) for record in records]
         else:
-            self._store_one(records)
+            self.repository.save(records.to_mongo())
 
     def all(self):
-        return self._collection.find()
+        return self.repository.all()
 
     def _period_group(self, doc):
         start = utc(doc['_week_start_at'])
@@ -56,6 +48,27 @@ class Bucket(object):
             '_end_at': start + datetime.timedelta(days=7),
             'count': doc['count']
         }
+
+    def execute_grouped_query(self, group_by, query):
+        cursor = self.repository.group(group_by, query)
+        result = [{doc[group_by]: doc['count']} for doc in cursor]
+        return result
+
+    def execute_period_query(self, query):
+        cursor = self.repository.group('_week_start_at', query)
+        result = [self._period_group(doc) for doc in cursor]
+        return result
+
+    def execute_query(self, query):
+        result = []
+        cursor = self.repository.find(query)
+        for doc in cursor:
+            # stringify the id
+            doc['_id'] = str(doc['_id'])
+            if '_timestamp' in doc:
+                doc['_timestamp'] = utc(doc['_timestamp'])
+            result.append(doc)
+        return result
 
     def query(self,
               start_at=None,
@@ -78,36 +91,13 @@ class Bucket(object):
             for key, value in filter_by:
                 query[key] = value
 
-        result = []
         if group_by:
-            cursor = self._collection.group(
-                key=[group_by],
-                condition=query,
-                initial={'count': 0},
-                reduce=Code("""
-                function(current, previous) { previous.count++; }
-                """)
-            )
-
-            result = [{doc[group_by]: doc['count']} for doc in cursor]
+            result = self.execute_grouped_query(group_by, query)
         elif period:
-            cursor = self._collection.group(
-                key=['_week_start_at'],
-                condition=query,
-                initial={'count': 0},
-                reduce=Code("""
-                function(current, previous) { previous.count++; }
-                """)
-            )
-            result = [self._period_group(doc) for doc in cursor]
+            result = self.execute_period_query(query)
         else:
-            cursor = self._collection.find(query).sort('_timestamp', -1)
-
-            for doc in cursor:
-                # stringify the id
-                doc['_id'] = str(doc['_id'])
-                if '_timestamp' in doc:
-                    doc['_timestamp'] = utc(doc['_timestamp'])
-                result.append(doc)
+            result = self.execute_query(query)
 
         return result
+
+
