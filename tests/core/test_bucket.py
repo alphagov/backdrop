@@ -12,7 +12,7 @@ def d(year, month, day, hour, minute, seconds):
                              tzinfo=pytz.UTC)
 
 
-class TestMongoIntegration(unittest.TestCase):
+class TestBucket(unittest.TestCase):
     def setUp(self):
         mock_repository = Mock()
         self.bucket = storage.Bucket(mock_repository)
