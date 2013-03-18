@@ -44,9 +44,8 @@ def parse_request_args(request_args):
     if 'period' in request_args:
         args['period'] = request_args['period']
 
-    for key in ['group_by']:
-        if key in request_args:
-            args[key] = request_args[key]
+    if 'group_by' in request_args:
+        args['group_by'] = request_args['group_by']
 
     return args
 
