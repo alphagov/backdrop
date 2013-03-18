@@ -17,7 +17,7 @@ class Store(object):
         return self._mongo.alive()
 
     def get_bucket(self, name):
-        return Bucket(self, name)
+        return Bucket(Repository(self.database[name]))
 
     @property
     def client(self):
@@ -29,8 +29,8 @@ class Store(object):
 
 
 class Bucket(object):
-    def __init__(self, store, name):
-        self.repository = Repository(store.database[name])
+    def __init__(self, repository):
+        self.repository = repository
 
     def store(self, records):
         if isinstance(records, list):

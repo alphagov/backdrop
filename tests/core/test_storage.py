@@ -32,7 +32,7 @@ class TestStore(unittest.TestCase):
 class TestBucket(unittest.TestCase):
     def setUp(self):
         self.store = storage.Store('localhost', 27017, 'backdrop_test')
-        self.bucket = storage.Bucket(self.store, 'my_bucket')
+        self.bucket = self.store.get_bucket('my_bucket')
 
     def tearDown(self):
         # TODO: verify these no longer touch the DB
