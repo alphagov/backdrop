@@ -103,3 +103,7 @@ class TestBucket(unittest.TestCase):
             "_end_at": equal_to(d(2013, 1, 21, 0, 0, 0)),
             "count": equal_to(1)
         })))
+
+    def test_week_and_group_query(self):
+        # TODO: FINISH TEST
+        pass

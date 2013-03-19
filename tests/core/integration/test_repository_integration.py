@@ -79,3 +79,71 @@ class TestRepositoryIntegration(unittest.TestCase):
             {"value": "1", "count": 1},
             {"value": "K", "count": 1}
         ))
+
+    def test_grouping_by_multiple_keys(self):
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": 'Q',
+                                    "suite": "diamonds",
+                                    "hand": 2})
+
+        result = self.repo.multi_group(["value", "suite"], {})
+
+        assert_that(result, has_items(
+            {
+                "1": {
+                    "hearts": {
+                        "count": 2.0
+                    },
+                    "clubs": {
+                        "count": 2.0
+                    },
+                    "diamonds": {
+                        "count": 2.0
+                    }
+                }
+            },
+            {
+                "Q": {
+                    "diamonds": {
+                        "count": 1.0
+                    }
+                }
+            },
+            {
+                "K": {
+                "hearts": {
+                    "count": 2.0
+                },
+                "diamonds": {
+                    "count": 1.0
+                }
+            }
+        }
+        ))
