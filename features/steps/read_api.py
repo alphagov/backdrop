@@ -17,6 +17,9 @@ def step(context, fixture_name, bucket_name):
             if '_timestamp' in obj:
                 obj['_timestamp'] = parser.parse(obj['_timestamp'])\
                     .astimezone(pytz.utc)
+            if '_week_start_at' in obj:
+                obj['_week_start_at'] = parser.parse(obj['_week_start_at']) \
+                    .astimezone(pytz.utc)
             context.client.storage()[bucket_name].save(obj)
     context.bucket = bucket_name
 

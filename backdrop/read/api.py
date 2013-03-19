@@ -62,11 +62,9 @@ def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
         return jsonify(status='error', message=result.message), 400
-    args = parse_request_args(request.args)
-
     bucket = store.get_bucket(bucket_name)
 
-    result_data = bucket.query(**args)
+    result_data = bucket.query(**(parse_request_args(request.args)))
 
     # Taken from flask.helpers.jsonify to add JSONEncoder
     # NB. this can be removed once fix #471 works it's way into a release

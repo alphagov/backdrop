@@ -66,3 +66,12 @@ Feature: the performance platform read api
     Scenario: invalid request parameters
          When I go to "/foo?start_at=not+a+date"
          then I should get back a status of "400"
+
+    Scenario: grouping data by time period - week
+        Given "stored_timestamps.json" is in "weekly" bucket
+         when I go to "/weekly?period=week"
+         then I should get back a status of "200"
+          and the JSON should have "2" results
+          and the "1st" result should be "{"count": 3.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00"}"
+          and the "2nd" result should be "{"count": 2.0, "_start_at": "2013-03-18T00:00:00+00:00", "_end_at" : "2013-03-25T00:00:00+00:00"}"
+
