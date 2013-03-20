@@ -89,3 +89,9 @@ Feature: the performance platform read api
          then I should get back a status of "200"
          and the JSON should have "2" results
          and the "1st" result should be "{"count": 2.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00", "name": { "alpha": { "count" : 2.0 }, "beta": { "count" : 1.0 } } }"
+
+    Scenario: grouping data by time period (week) and a name that doesn't exist
+        Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
+         when I go to "/weekly?period=week&group_by=wibble"
+         then I should get back a status of "200"
+         and the JSON should have "0" results

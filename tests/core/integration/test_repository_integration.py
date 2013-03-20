@@ -209,3 +209,44 @@ class TestRepositoryIntegration(unittest.TestCase):
                 }
             }
         ))
+
+    def test_grouping_on_non_existent_keys(self):
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": 'Q',
+                                    "suite": "diamonds",
+                                    "hand": 2})
+
+        result1 = self.repo.multi_group("wibble", "value", {})
+        result2 = self.repo.multi_group("value", "wibble", {})
+
+        assert_that(result1, is_([]))
+        assert_that(result2, is_([]))
+
+

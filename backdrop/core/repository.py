@@ -59,6 +59,8 @@ class Repository(object):
             lambda row: row[outer_key])
 
         for outer_value, outer_groups in grouped_by_outer_value:
+            if outer_value is None:
+                return []
             outer_group = {key2: {}}
             outer_group[key1] = outer_value
 
@@ -68,6 +70,8 @@ class Repository(object):
 
             inner_group_count = 0
             for inner_value, inner_grouping in inner_group:
+                if inner_value is None:
+                    return []
                 outer_group[key2][inner_value] = {"count": 0}
                 inner_group_count += 1
                 for elements in inner_grouping:
