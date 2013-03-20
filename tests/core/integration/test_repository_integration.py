@@ -248,5 +248,3 @@ class TestRepositoryIntegration(unittest.TestCase):
 
         assert_that(result1, is_([]))
         assert_that(result2, is_([]))
-
-
