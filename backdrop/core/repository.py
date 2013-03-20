@@ -65,12 +65,16 @@ class Repository(object):
             inner_group = groupby(sorted(
                 outer_groups, key=lambda row: row[inner_key]),
                 lambda row: row[inner_key])
+
+            inner_group_count = 0
             for inner_value, inner_grouping in inner_group:
                 outer_group[key2][inner_value] = {"count": 0}
+                inner_group_count += 1
                 for elements in inner_grouping:
                     outer_group[key2][inner_value]["count"]\
                         += elements["count"]
 
+            outer_group["count"] = inner_group_count
             nested_grouping.append(outer_group)
 
         return nested_grouping

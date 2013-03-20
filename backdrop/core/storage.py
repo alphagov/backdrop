@@ -50,7 +50,7 @@ class Bucket(object):
         result = []
         cursor = self.repository.multi_group(key1, key2, query)
         for doc in cursor:
-            week_start_at = doc.pop('_week_start_at')
+            week_start_at = utc(doc.pop('_week_start_at'))
             doc['_start_at'] = week_start_at
             doc['_end_at'] = week_start_at + datetime.timedelta(days=7)
             result.append(doc)

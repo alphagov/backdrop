@@ -119,6 +119,23 @@ class TestRepositoryIntegration(unittest.TestCase):
             "a", {1: {"count": 1}}
         )))
 
+    def test_count_of_outer_elements_should_be_added(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 3, 17, 0, 0, 0),
+            "a": 1,
+            "b": 2
+        })
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 3, 24, 0, 0, 0),
+            "a": 1,
+            "b": 2
+        })
+
+        result = self.repo.multi_group("_week_start_at", "a", {})
+        assert_that(result, has_item(has_entry(
+            "count", 1
+        )))
+
     def test_grouping_by_multiple_keys(self):
         self.mongo_collection.save({"value": '1',
                                     "suite": "hearts",
@@ -157,6 +174,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         assert_that(result, has_items(
             {
                 "value": '1',
+                "count": 3,
                 "suite": {
                     "hearts": {
                         "count": 2.0
@@ -171,6 +189,7 @@ class TestRepositoryIntegration(unittest.TestCase):
             },
             {
                 "value": 'Q',
+                "count": 1,
                 "suite": {
                     "diamonds": {
                         "count": 1.0
@@ -179,6 +198,7 @@ class TestRepositoryIntegration(unittest.TestCase):
             },
             {
                 "value": 'K',
+                "count": 2,
                 "suite": {
                     "hearts": {
                         "count": 2.0

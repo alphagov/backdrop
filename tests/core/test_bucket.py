@@ -1,9 +1,21 @@
 import unittest
+import datetime
 from hamcrest import *
 from mock import Mock, call
+import pytz
 from backdrop.core import storage
 from backdrop.core.records import Record
-from tests.support.test_helpers import d
+
+
+def d(year, month, day, hour, minute, second):
+    return datetime.datetime(year=year, month=month, day=day,
+                             hour=hour, minute=minute, second=second)
+
+
+def d_tz(year, month, day, hour, minute, second):
+    return datetime.datetime(year=year, month=month, day=day,
+                             hour=hour, minute=minute, second=second,
+                             tzinfo=pytz.UTC)
 
 
 class TestBucket(unittest.TestCase):
@@ -94,13 +106,13 @@ class TestBucket(unittest.TestCase):
 
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
-            "_start_at": equal_to(d(2013, 1, 7, 0, 0, 0)),
-            "_end_at": equal_to(d(2013, 1, 14, 0, 0, 0)),
+            "_start_at": equal_to(d_tz(2013, 1, 7, 0, 0, 0)),
+            "_end_at": equal_to(d_tz(2013, 1, 14, 0, 0, 0)),
             "count": equal_to(3)
         })))
         assert_that(query_result, has_item(has_entries({
-            "_start_at": equal_to(d(2013, 1, 14, 0, 0, 0)),
-            "_end_at": equal_to(d(2013, 1, 21, 0, 0, 0)),
+            "_start_at": equal_to(d_tz(2013, 1, 14, 0, 0, 0)),
+            "_end_at": equal_to(d_tz(2013, 1, 21, 0, 0, 0)),
             "count": equal_to(1)
         })))
 
@@ -144,10 +156,10 @@ class TestBucket(unittest.TestCase):
             }
         )))
         assert_that(query_result, has_item(has_entry(
-            "_start_at", d(2013, 1, 7, 0, 0, 0))))
+            "_start_at", d_tz(2013, 1, 7, 0, 0, 0))))
         assert_that(query_result, has_item(has_entry(
-            "_end_at", d(2013, 1, 14, 0, 0, 0))))
+            "_end_at", d_tz(2013, 1, 14, 0, 0, 0))))
         assert_that(query_result, has_item(has_entry(
-            "_start_at", d(2013, 1, 14, 0, 0, 0))))
+            "_start_at", d_tz(2013, 1, 14, 0, 0, 0))))
         assert_that(query_result, has_item(has_entry(
-            "_end_at", d(2013, 1, 21, 0, 0, 0))))
+            "_end_at", d_tz(2013, 1, 21, 0, 0, 0))))
