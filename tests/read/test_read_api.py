@@ -30,7 +30,7 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.assert_called_with(group_by=u'zombies')
 
     @patch('backdrop.core.storage.Bucket.query')
-    def test_start_at_is_executed(self, mock_query):
+    def test_start_at_query_is_executed(self, mock_query):
         mock_query.return_value = None
         expected_start_at = datetime.datetime(2012, 12, 12, 8, 12, 43,
                                               tzinfo=pytz.UTC)
@@ -40,7 +40,7 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.assert_called_with(start_at=expected_start_at)
 
     @patch('backdrop.core.storage.Bucket.query')
-    def test_start_at_is_executed(self, mock_query):
+    def test_end_at_query_is_executed(self, mock_query):
         mock_query.return_value = None
         expected_end_at = datetime.datetime(2012, 12, 12, 8, 12, 43,
                                             tzinfo=pytz.UTC)
@@ -48,3 +48,11 @@ class ReadApiTestCase(unittest.TestCase):
             '/foo?end_at=' + urllib.quote("2012-12-12T08:12:43+00:00")
         )
         mock_query.assert_called_with(end_at=expected_end_at)
+
+    @patch('backdrop.core.storage.Bucket.query')
+    def test_group_by_with_period_is_executed(self, mock_query):
+        mock_query.return_value = None
+        self.app.get(
+            '/foo?period=week&group_by=stuff'
+        )
+        mock_query.assert_called_with(period="week", group_by="stuff")
