@@ -41,7 +41,8 @@ class Repository(object):
 
     def multi_group(self, group_by_these, query):
         if len(group_by_these) != 2:
-            raise Exception("Require two fields to group by, but was: %s" % group_by_these)
+            raise Exception("Require two fields to group by, but was: %s"
+                            % group_by_these)
 
         results = self._collection.group(
             key=group_by_these,
@@ -56,18 +57,21 @@ class Repository(object):
         inner_key = group_by_these[1]
         map = []
 
-        grouped_by_outer_value = groupby(sorted(results, key=lambda row: row[outer_key]),
-                    lambda row: row[outer_key])
+        grouped_by_outer_value = groupby(sorted(
+            results, key=lambda row: row[outer_key]),
+            lambda row: row[outer_key])
 
         for outer_value, outer_groups in grouped_by_outer_value:
             outer_group = {outer_value: {}}
 
-            inner_group = groupby(sorted(outer_groups, key=lambda row: row[inner_key]),
+            inner_group = groupby(sorted(
+                outer_groups, key=lambda row: row[inner_key]),
                 lambda row: row[inner_key])
             for inner_value, inner_grouping in inner_group:
                 outer_group[outer_value][inner_value] = {"count": 0}
                 for elements in inner_grouping:
-                    outer_group[outer_value][inner_value]["count"] += elements["count"]
+                    outer_group[outer_value][inner_value]["count"]\
+                        += elements["count"]
 
             map.append(outer_group)
 

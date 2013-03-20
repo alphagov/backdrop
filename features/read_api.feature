@@ -83,9 +83,4 @@ Feature: the performance platform read api
           and the "1st" result should be "{"count": 2.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00"}"
           and the "2nd" result should be "{"count": 1.0, "_start_at": "2013-03-18T00:00:00+00:00", "_end_at" : "2013-03-25T00:00:00+00:00"}"
 
-    Scenario: grouping data by time period (week) and a name
-        Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
-         when I go to "/weekly?period=week&group_by=name"
-         then I should get back a status of "200"
-         and the JSON should have "2" results
-         and the "1st" result should be "{"count": 3.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00", "name": { "alpha": { "_count" : 2.0 }, "beta": { "_count" : 1.0 } } }"
+    

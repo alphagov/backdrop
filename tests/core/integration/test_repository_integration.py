@@ -127,7 +127,7 @@ class TestRepositoryIntegration(unittest.TestCase):
                     "diamonds": {
                         "count": 2.0
                     }
-                }
+                    }
             },
             {
                 "Q": {
@@ -138,12 +138,12 @@ class TestRepositoryIntegration(unittest.TestCase):
             },
             {
                 "K": {
-                "hearts": {
-                    "count": 2.0
-                },
-                "diamonds": {
-                    "count": 1.0
+                    "hearts": {
+                        "count": 2.0
+                    },
+                    "diamonds": {
+                        "count": 1.0
+                    }
                 }
             }
-        }
         ))
