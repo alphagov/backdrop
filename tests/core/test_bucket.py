@@ -105,5 +105,49 @@ class TestBucket(unittest.TestCase):
         })))
 
     def test_week_and_group_query(self):
-        # TODO: FINISH TEST
-        pass
+        self.mock_repository.multi_group.return_value = [
+            {
+                "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                "some_group": {
+                    "val1": {
+                        "count": 1
+                    },
+                    "val2": {
+                        "count": 2
+                    }
+                }
+            },
+            {
+                "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                "some_group": {
+                    "val1": {
+                        "count": 5
+                    },
+                    "val2": {
+                        "count": 6
+                    }
+                }
+            }
+        ]
+        query_result = self.bucket.query(period="week", group_by="some_group")
+        assert_that(query_result, has_length(2))
+        assert_that(query_result, has_item(has_entry(
+            "some_group", {
+                "val1": {"count": 1},
+                "val2": {"count": 2}
+            }
+        )))
+        assert_that(query_result, has_item(has_entry(
+            "some_group", {
+                "val1": {"count": 5},
+                "val2": {"count": 6}
+            }
+        )))
+        assert_that(query_result, has_item(has_entry(
+            "_start_at", d(2013, 1, 7, 0, 0, 0))))
+        assert_that(query_result, has_item(has_entry(
+            "_end_at", d(2013, 1, 14, 0, 0, 0))))
+        assert_that(query_result, has_item(has_entry(
+            "_start_at", d(2013, 1, 14, 0, 0, 0))))
+        assert_that(query_result, has_item(has_entry(
+            "_end_at", d(2013, 1, 21, 0, 0, 0))))

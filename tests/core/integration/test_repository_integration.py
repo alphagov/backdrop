@@ -113,7 +113,7 @@ class TestRepositoryIntegration(unittest.TestCase):
                                     "suite": "diamonds",
                                     "hand": 2})
 
-        result = self.repo.multi_group(["value", "suite"], {})
+        result = self.repo.multi_group("value", "suite", {})
 
         assert_that(result, has_items(
             {

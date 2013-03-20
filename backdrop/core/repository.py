@@ -39,13 +39,9 @@ class Repository(object):
     def save(self, obj):
         self._collection.save(obj)
 
-    def multi_group(self, group_by_these, query):
-        if len(group_by_these) != 2:
-            raise Exception("Require two fields to group by, but was: %s"
-                            % group_by_these)
-
+    def multi_group(self, key1, key2, query):
         results = self._collection.group(
-            key=group_by_these,
+            key=[key1, key2],
             condition=query,
             initial={'count': 0},
             reduce=Code("""
@@ -53,9 +49,10 @@ class Repository(object):
                 """)
         )
 
-        outer_key = group_by_these[0]
-        inner_key = group_by_these[1]
-        map = []
+        outer_key = key1
+        inner_key = key2
+
+        nested_grouping = []
 
         grouped_by_outer_value = groupby(sorted(
             results, key=lambda row: row[outer_key]),
@@ -73,6 +70,6 @@ class Repository(object):
                     outer_group[outer_value][inner_value]["count"]\
                         += elements["count"]
 
-            map.append(outer_group)
+            nested_grouping.append(outer_group)
 
-        return map
+        return nested_grouping

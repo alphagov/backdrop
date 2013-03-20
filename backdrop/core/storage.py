@@ -46,6 +46,16 @@ class Bucket(object):
             'count': doc['count']
         }
 
+    def execute_binary_group_query(self, key1, key2, query):
+        result = []
+        cursor = self.repository.multi_group(key1, key2, query)
+        for doc in cursor:
+            week_start_at = doc.pop('_week_start_at')
+            doc['_start_at'] = week_start_at
+            doc['_end_at'] = week_start_at + datetime.timedelta(days=7)
+            result.append(doc)
+        return result
+
     def execute_grouped_query(self, group_by, query):
         cursor = self.repository.group(group_by, query)
         result = [{doc[group_by]: doc['count']} for doc in cursor]
@@ -70,7 +80,13 @@ class Bucket(object):
     def query(self, **params):
         query = build_query(**params)
 
-        if 'group_by' in params:
+        if 'group_by' in params and 'period' in params:
+            result = self.execute_binary_group_query(
+                params['group_by'],
+                params['period'],
+                query
+            )
+        elif 'group_by' in params:
             result = self.execute_grouped_query(params['group_by'], query)
         elif 'period' in params:
             result = self.execute_period_query(query)
