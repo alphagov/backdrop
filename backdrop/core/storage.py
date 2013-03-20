@@ -82,8 +82,8 @@ class Bucket(object):
 
         if 'group_by' in params and 'period' in params:
             result = self.execute_binary_group_query(
+                '_week_start_at',
                 params['group_by'],
-                params['period'],
                 query
             )
         elif 'group_by' in params:
