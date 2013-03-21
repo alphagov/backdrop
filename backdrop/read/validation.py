@@ -14,5 +14,8 @@ def validate_request_args(request_args):
     if 'period' in request_args:
         if request_args['period'] != 'week':
             return invalid('Unrecognized grouping for period')
+        if "group_by" in request_args:
+            if "_week_start_at" == request_args["group_by"]:
+                return invalid('Cannot group on two equal keys')
 
     return valid()
