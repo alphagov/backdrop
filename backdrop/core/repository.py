@@ -41,6 +41,8 @@ class Repository(object):
         self._collection.save(obj)
 
     def multi_group(self, key1, key2, query):
+        if key1 == key2:
+            raise GroupingError("Cannot group on two equal keys")
         results = self._collection.group(
             key=[key1, key2],
             condition=query,
@@ -77,3 +79,7 @@ class Repository(object):
         output[key].update(self._recursive_merge(output[key], keys[1:], value))
 
         return output
+
+
+class GroupingError(StandardError):
+    pass

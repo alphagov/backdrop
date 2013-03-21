@@ -2,7 +2,7 @@ import unittest
 import datetime
 from hamcrest import *
 from pymongo import MongoClient
-from backdrop.core.repository import Repository
+from backdrop.core.repository import Repository, GroupingError
 from tests.support.test_helpers import d
 
 HOST = 'localhost'
@@ -248,3 +248,47 @@ class TestRepositoryIntegration(unittest.TestCase):
 
         assert_that(result1, is_([]))
         assert_that(result2, is_([]))
+
+    def test_multi_grouping_on_empty_collection_returns_empty_list(self):
+        assert_that(list(self.mongo_collection.find({})), is_([]))
+        assert_that(self.repo.multi_group('a', 'b', {}), is_([]))
+
+    def test_multi_grouping_on_same_key_raises_exception(self):
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 2})
+        self.mongo_collection.save({"value": 'Q',
+                                    "suite": "diamonds",
+                                    "hand": 2})
+
+        try:
+            self.repo.multi_group("suite", "suite", {})
+            #fail if exception not raised
+            assert_that(False)
+        except GroupingError, e:
+            assert_that(str(e), is_("Cannot group on two equal keys"))
