@@ -46,7 +46,7 @@ class Bucket(object):
             'count': doc['count']
         }
 
-    def execute_binary_group_query(self, key1, key2, query):
+    def execute_twofold_group_query(self, key1, key2, query):
         result = []
         cursor = self.repository.multi_group(key1, key2, query)
         for doc in cursor:
@@ -81,7 +81,7 @@ class Bucket(object):
         query = build_query(**params)
 
         if 'group_by' in params and 'period' in params:
-            result = self.execute_binary_group_query(
+            result = self.execute_twofold_group_query(
                 '_week_start_at',
                 params['group_by'],
                 query
