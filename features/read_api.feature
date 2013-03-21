@@ -101,3 +101,9 @@ Feature: the performance platform read api
          when I go to "/weekly?period=week&group_by=_week_start_at"
          then I should get back a status of "400"
           and I should get back a message: "{ "status": "error", "message": "Cannot group on two equal keys" }"
+
+    Scenario: filtering by a field name starting with "$" is not allowed because of security reasons
+        Given "licensing.json" is in "weekly" bucket
+         when I go to "/weekly?filter_by=$where:function(){}"
+         then I should get back a status of "400"
+          and I should get back a message: "{ "status": "error", "message": "filter_by is not valid" }"
