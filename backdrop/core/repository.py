@@ -81,5 +81,5 @@ class Repository(object):
         return output
 
 
-class GroupingError(StandardError):
+class GroupingError(ValueError):
     pass
