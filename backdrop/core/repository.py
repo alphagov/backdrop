@@ -56,9 +56,7 @@ class Repository(object):
             if result[key1] is None or result[key2] is None:
                 return []
 
-        output = {}
-        for result in results:
-            output = nested_merge(output, [key1, key2], result)
+        output = nested_merge([key1, key2], results)
 
         result = []
         for key1_value, value in sorted(output.items()):
@@ -75,12 +73,19 @@ class GroupingError(ValueError):
     pass
 
 
-def nested_merge(output, keys, value):
+def nested_merge(keys, results):
+    output = {}
+    for result in results:
+        output = _inner_merge(output, keys, result)
+    return output
+
+
+def _inner_merge(output, keys, value):
     if len(keys) == 0:
         return value
     key = value.pop(keys[0])
     if key not in output:
         output[key] = {}
-    output[key].update(nested_merge(output[key], keys[1:], value))
+    output[key].update(_inner_merge(output[key], keys[1:], value))
 
     return output
