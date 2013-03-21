@@ -1,5 +1,6 @@
 from itertools import groupby
 from bson import Code
+from pprint import pprint
 
 
 def build_query(**params):
@@ -49,36 +50,30 @@ class Repository(object):
                 """)
         )
 
-        outer_key = key1
-        inner_key = key2
-
-        nested_grouping = []
-
-        grouped_by_outer_value = groupby(sorted(
-            results, key=lambda row: row[outer_key]),
-            lambda row: row[outer_key])
-
-        for outer_value, outer_groups in grouped_by_outer_value:
-            if outer_value is None:
+        for result in results:
+            if result[key1] is None or result[key2] is None:
                 return []
-            outer_group = {key2: {}}
-            outer_group[key1] = outer_value
 
-            inner_group = groupby(sorted(
-                outer_groups, key=lambda row: row[inner_key]),
-                lambda row: row[inner_key])
+        output = {}
+        for result in results:
+            output = self._recursive_merge(output, [key1, key2], result)
 
-            inner_group_count = 0
-            for inner_value, inner_grouping in inner_group:
-                if inner_value is None:
-                    return []
-                outer_group[key2][inner_value] = {"count": 0}
-                inner_group_count += 1
-                for elements in inner_grouping:
-                    outer_group[key2][inner_value]["count"]\
-                        += elements["count"]
+        result = []
+        for key1_value, value in sorted(output.items()):
+            result.append({
+                key1: key1_value,
+                "count": len(value),
+                key2: value
+            })
 
-            outer_group["count"] = inner_group_count
-            nested_grouping.append(outer_group)
+        return result
 
-        return nested_grouping
+    def _recursive_merge(self, output, keys, value):
+        if len(keys) == 0:
+            return value
+        key = value.pop(keys[0])
+        if key not in output:
+            output[key] = {}
+        output[key].update(self._recursive_merge(output[key], keys[1:], value))
+
+        return output
