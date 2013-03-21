@@ -31,9 +31,9 @@ class Repository(object):
         return self._collection.group(
             key=[group_by],
             condition=query,
-            initial={'count': 0},
+            initial={'_count': 0},
             reduce=Code("""
-                function(current, previous) { previous.count++; }
+                function(current, previous) { previous._count++; }
                 """)
         )
 
@@ -46,9 +46,9 @@ class Repository(object):
         results = self._collection.group(
             key=[key1, key2],
             condition=query,
-            initial={'count': 0},
+            initial={'_count': 0},
             reduce=Code("""
-                function(current, previous) { previous.count++; }
+                function(current, previous) { previous._count++; }
                 """)
         )
 
@@ -56,30 +56,37 @@ class Repository(object):
             if result[key1] is None or result[key2] is None:
                 return []
 
-        output = {}
-        for result in results:
-            output = self._recursive_merge(output, [key1, key2], result)
+        output = nested_merge([key1, key2], results)
 
         result = []
         for key1_value, value in sorted(output.items()):
             result.append({
                 key1: key1_value,
-                "count": len(value),
+                "_count": sum(doc['_count'] for doc in value.values()),
+                "_group_count": len(value),
                 key2: value
             })
 
         return result
 
-    def _recursive_merge(self, output, keys, value):
-        if len(keys) == 0:
-            return value
-        key = value.pop(keys[0])
-        if key not in output:
-            output[key] = {}
-        output[key].update(self._recursive_merge(output[key], keys[1:], value))
-
-        return output
-
 
 class GroupingError(ValueError):
     pass
+
+
+def nested_merge(keys, results):
+    output = {}
+    for result in results:
+        output = _inner_merge(output, keys, result)
+    return output
+
+
+def _inner_merge(output, keys, value):
+    if len(keys) == 0:
+        return value
+    key = value.pop(keys[0])
+    if key not in output:
+        output[key] = {}
+    output[key].update(_inner_merge(output[key], keys[1:], value))
+
+    return output

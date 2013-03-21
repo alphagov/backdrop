@@ -43,7 +43,7 @@ class Bucket(object):
         return {
             '_start_at': start,
             '_end_at': start + datetime.timedelta(days=7),
-            'count': doc['count']
+            '_count': doc['_count']
         }
 
     def execute_weekly_group_query(self, key2, query):
@@ -59,7 +59,7 @@ class Bucket(object):
 
     def execute_grouped_query(self, group_by, query):
         cursor = self.repository.group(group_by, query)
-        result = [{doc[group_by]: doc['count']} for doc in cursor]
+        result = [{doc[group_by]: doc['_count']} for doc in cursor]
         return result
 
     def execute_period_query(self, query):

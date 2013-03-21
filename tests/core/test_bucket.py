@@ -56,8 +56,8 @@ class TestBucket(unittest.TestCase):
 
     def test_group_by_query(self):
         self.mock_repository.group.return_value = [
-            {"name": "Max", "count": 3 },
-            {"name": "Gareth", "count": 2 }
+            {"name": "Max", "_count": 3 },
+            {"name": "Gareth", "_count": 2 }
         ]
 
         query_result = self.bucket.query(group_by = "name")
@@ -95,8 +95,8 @@ class TestBucket(unittest.TestCase):
 
     def test_week_query(self):
         self.mock_repository.group.return_value = [
-            {"_week_start_at": d(2013, 1, 7, 0, 0, 0), "count": 3 },
-            {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "count": 1 },
+            {"_week_start_at": d(2013, 1, 7, 0, 0, 0), "_count": 3 },
+            {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "_count": 1 },
         ]
 
         query_result = self.bucket.query(period='week')
@@ -108,12 +108,12 @@ class TestBucket(unittest.TestCase):
         assert_that(query_result, has_item(has_entries({
             "_start_at": equal_to(d_tz(2013, 1, 7, 0, 0, 0)),
             "_end_at": equal_to(d_tz(2013, 1, 14, 0, 0, 0)),
-            "count": equal_to(3)
+            "_count": equal_to(3)
         })))
         assert_that(query_result, has_item(has_entries({
             "_start_at": equal_to(d_tz(2013, 1, 14, 0, 0, 0)),
             "_end_at": equal_to(d_tz(2013, 1, 21, 0, 0, 0)),
-            "count": equal_to(1)
+            "_count": equal_to(1)
         })))
 
     def test_week_and_group_query(self):
@@ -122,10 +122,10 @@ class TestBucket(unittest.TestCase):
                 "_week_start_at": d(2013, 1, 7, 0, 0, 0),
                 "some_group": {
                     "val1": {
-                        "count": 1
+                        "_count": 1
                     },
                     "val2": {
-                        "count": 2
+                        "_count": 2
                     }
                 }
             },
@@ -133,10 +133,10 @@ class TestBucket(unittest.TestCase):
                 "_week_start_at": d(2013, 1, 14, 0, 0, 0),
                 "some_group": {
                     "val1": {
-                        "count": 5
+                        "_count": 5
                     },
                     "val2": {
-                        "count": 6
+                        "_count": 6
                     }
                 }
             }
@@ -145,14 +145,14 @@ class TestBucket(unittest.TestCase):
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entry(
             "some_group", {
-                "val1": {"count": 1},
-                "val2": {"count": 2}
+                "val1": {"_count": 1},
+                "val2": {"_count": 2}
             }
         )))
         assert_that(query_result, has_item(has_entry(
             "some_group", {
-                "val1": {"count": 5},
-                "val2": {"count": 6}
+                "val1": {"_count": 5},
+                "val2": {"_count": 6}
             }
         )))
         assert_that(query_result, has_item(has_entry(

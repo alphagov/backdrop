@@ -63,9 +63,9 @@ class TestRepositoryIntegration(unittest.TestCase):
         results = self.repo.group("plays", {})
 
         assert_that(results, only_contains(
-            has_entries({"plays": "guitar", "count": 2}),
-            has_entries({"plays": "bass", "count": 1}),
-            has_entries({"plays": "drums", "count": 1})
+            has_entries({"plays": "guitar", "_count": 2}),
+            has_entries({"plays": "bass", "_count": 1}),
+            has_entries({"plays": "drums", "_count": 1})
         ))
 
     def test_group_with_query(self):
@@ -78,8 +78,8 @@ class TestRepositoryIntegration(unittest.TestCase):
         results = self.repo.group("value", {"suite": "diamonds"})
 
         assert_that(results, only_contains(
-            {"value": "1", "count": 1},
-            {"value": "K", "count": 1}
+            {"value": "1", "_count": 1},
+            {"value": "K", "_count": 1}
         ))
 
     def test_key1_is_pulled_to_the_top_of_outer_group(self):
@@ -116,7 +116,7 @@ class TestRepositoryIntegration(unittest.TestCase):
 
         result = self.repo.multi_group("_week_start_at", "a", {})
         assert_that(result, has_item(has_entry(
-            "a", {1: {"count": 1}}
+            "a", {1: {"_count": 1}}
         )))
 
     def test_count_of_outer_elements_should_be_added(self):
@@ -133,7 +133,7 @@ class TestRepositoryIntegration(unittest.TestCase):
 
         result = self.repo.multi_group("_week_start_at", "a", {})
         assert_that(result, has_item(has_entry(
-            "count", 1
+            "_count", 1
         )))
 
     def test_grouping_by_multiple_keys(self):
@@ -174,37 +174,40 @@ class TestRepositoryIntegration(unittest.TestCase):
         assert_that(result, has_items(
             {
                 "value": '1',
-                "count": 3,
+                "_count": 6,
+                "_group_count": 3,
                 "suite": {
                     "hearts": {
-                        "count": 2.0
+                        "_count": 2.0
                     },
                     "clubs": {
-                        "count": 2.0
+                        "_count": 2.0
                     },
                     "diamonds": {
-                        "count": 2.0
+                        "_count": 2.0
                     }
                     }
             },
             {
                 "value": 'Q',
-                "count": 1,
+                "_count": 1,
+                "_group_count": 1,
                 "suite": {
                     "diamonds": {
-                        "count": 1.0
+                        "_count": 1.0
                     }
                 }
             },
             {
                 "value": 'K',
-                "count": 2,
+                "_count": 3,
+                "_group_count": 2,
                 "suite": {
                     "hearts": {
-                        "count": 2.0
+                        "_count": 2.0
                     },
                     "diamonds": {
-                        "count": 1.0
+                        "_count": 1.0
                     }
                 }
             }
