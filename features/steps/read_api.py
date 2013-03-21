@@ -17,6 +17,9 @@ def step(context, fixture_name, bucket_name):
             if '_timestamp' in obj:
                 obj['_timestamp'] = parser.parse(obj['_timestamp'])\
                     .astimezone(pytz.utc)
+            if '_week_start_at' in obj:
+                obj['_week_start_at'] = parser.parse(obj['_week_start_at']) \
+                    .astimezone(pytz.utc)
             context.client.storage()[bucket_name].save(obj)
     context.bucket = bucket_name
 
@@ -31,10 +34,16 @@ def step(context, expected_status):
     assert_that(context.response.status_code, is_(int(expected_status)))
 
 
-@then('the JSON should have "{n}" result(s)')
+step_matcher("re")
+
+
+@then('the JSON should have "(?P<n>\d+)" results?')
 def step(context, n):
     the_data = json.loads(context.response.data)['data']
     assert_that(the_data, has_length(int(n)))
+
+
+step_matcher("parse")
 
 
 @then('the "{nth}" result should be "{expected_json}"')

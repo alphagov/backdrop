@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hamcrest import assert_that, is_
+from hamcrest import assert_that, is_, instance_of
 from backdrop.read.api import validate_request_args
 
 
@@ -39,3 +39,11 @@ class TestRequestValidation(TestCase):
             'filter_by': 'foo:bar'
         })
         assert_that(validation_result.is_valid, is_(True))
+
+    def test_accepts_period_with_start_at_and_end_at_present(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'start_at': '2010-01-01T00:10:10+00:00',
+            'end_at': '2010-01-07T00:10:10+00:00',
+        })
+        assert_that( validation_result.is_valid, is_(True) )

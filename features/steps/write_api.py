@@ -1,5 +1,7 @@
 import os
 from behave import *
+import datetime
+from dateutil import parser
 from flask import json
 from hamcrest import *
 
@@ -26,4 +28,11 @@ def step(context, bucket_name):
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
     result = context.client.storage()[context.bucket].find({key: value})
+    assert_that(list(result), has_length(int(amount)))
+
+
+@then('the stored data should contain "{amount}" "{key}" on "{time}"')
+def step(context, amount, key, time):
+    time_query = parser.parse(time)
+    result = context.client.storage()[context.bucket].find({key: time_query})
     assert_that(list(result), has_length(int(amount)))

@@ -1,0 +1,74 @@
+[
+    {
+        "_timestamp": "2013-03-20T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-03-21T11:10:10+00:00",
+        "flavour": "lime"
+    },
+    {
+        "_timestamp": "2013-03-22T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-03-23T10:10:10+00:00",
+        "flavour": "lime"
+    },
+    {
+        "_timestamp": "2013-03-24T10:10:10+00:00",
+        "flavour": "lime"
+    },
+    {
+        "_timestamp": "2013-03-25T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-03-26T10:10:10+00:00",
+        "flavour": "beetroot"
+    },
+    {
+        "_timestamp": "2013-03-27T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-03-28T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-03-29T11:10:10+00:00",
+        "flavour": "lime"
+    },
+    {
+        "_timestamp": "2013-03-30T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-03-31T10:10:10+00:00",
+        "flavour": "lime"
+    },
+    {
+        "_timestamp": "2013-04-01T10:10:10+00:00",
+        "flavour": "lime"
+    },
+    {
+        "_timestamp": "2013-04-02T10:10:10+00:00",
+        "flavour": "lemon"
+    },
+    {
+        "_timestamp": "2013-04-03T10:10:10+00:00",
+        "flavour": "beetroot"
+    },
+    {
+        "_timestamp": "2013-04-03T10:10:10+00:00",
+        "flavour": "beetroot"
+    },
+    {
+        "_timestamp": "2013-04-03T10:10:10+00:00",
+        "flavour": "cherry"
+    },
+    {
+        "_timestamp": "2013-04-04T10:10:10+00:00",
+        "flavour": "lemon"
+    }
+]

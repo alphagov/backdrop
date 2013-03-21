@@ -1,5 +1,7 @@
 import json
+import datetime
 from hamcrest.core.base_matcher import BaseMatcher
+import pytz
 
 
 class IsResponseWithStatus(BaseMatcher):
@@ -47,3 +49,8 @@ class IsErrorResponse(BaseMatcher):
 
 def is_error_response():
     return IsErrorResponse()
+
+
+def d(year, month, day, hour, minute, seconds):
+    return datetime.datetime(year, month, day, hour, minute, seconds,
+                             tzinfo=pytz.UTC)
