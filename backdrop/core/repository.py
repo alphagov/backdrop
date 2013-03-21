@@ -28,14 +28,7 @@ class Repository(object):
         return self._collection.find(query).sort('_timestamp', -1)
 
     def group(self, group_by, query):
-        return self._collection.group(
-            key=[group_by],
-            condition=query,
-            initial={'_count': 0},
-            reduce=Code("""
-                function(current, previous) { previous._count++; }
-                """)
-        )
+        return self._group([group_by], query)
 
     def save(self, obj):
         self._collection.save(obj)
@@ -43,18 +36,7 @@ class Repository(object):
     def multi_group(self, key1, key2, query):
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._collection.group(
-            key=[key1, key2],
-            condition=query,
-            initial={'_count': 0},
-            reduce=Code("""
-                function(current, previous) { previous._count++; }
-                """)
-        )
-
-        for result in results:
-            if result[key1] is None or result[key2] is None:
-                return []
+        results = self._group([key1, key2], query)
 
         output = nested_merge([key1, key2], results)
 
@@ -68,6 +50,21 @@ class Repository(object):
             })
 
         return result
+
+    def _group(self, keys, query):
+        results = self._collection.group(
+            key=keys,
+            condition=query,
+            initial={'_count': 0},
+            reduce=Code("""
+                function(current, previous) { previous._count++; }
+                """)
+        )
+        for result in results:
+            for key in keys:
+                if result[key] is None:
+                    return []
+        return results
 
 
 class GroupingError(ValueError):

@@ -230,6 +230,27 @@ class TestRepositoryIntegration(unittest.TestCase):
                                     "suite": "diamonds",
                                     "hand": 1})
 
+        result1 = self.repo.group('wibble', {})
+
+        assert_that(result1, is_([]))
+
+    def test_multi_grouping_on_non_existent_keys(self):
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": '1',
+                                    "suite": "clubs",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "hearts",
+                                    "hand": 1})
+        self.mongo_collection.save({"value": 'K',
+                                    "suite": "diamonds",
+                                    "hand": 1})
+
         self.mongo_collection.save({"value": '1',
                                     "suite": "hearts",
                                     "hand": 2})
