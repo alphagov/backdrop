@@ -62,7 +62,8 @@ class Repository(object):
         for key1_value, value in sorted(output.items()):
             result.append({
                 key1: key1_value,
-                "_count": len(value),
+                "_count": sum(doc['_count'] for doc in value.values()),
+                "_group_count": len(value),
                 key2: value
             })
 

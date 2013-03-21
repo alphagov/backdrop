@@ -174,7 +174,8 @@ class TestRepositoryIntegration(unittest.TestCase):
         assert_that(result, has_items(
             {
                 "value": '1',
-                "_count": 3,
+                "_count": 6,
+                "_group_count": 3,
                 "suite": {
                     "hearts": {
                         "_count": 2.0
@@ -190,6 +191,7 @@ class TestRepositoryIntegration(unittest.TestCase):
             {
                 "value": 'Q',
                 "_count": 1,
+                "_group_count": 1,
                 "suite": {
                     "diamonds": {
                         "_count": 1.0
@@ -198,7 +200,8 @@ class TestRepositoryIntegration(unittest.TestCase):
             },
             {
                 "value": 'K',
-                "_count": 2,
+                "_count": 3,
+                "_group_count": 2,
                 "suite": {
                     "hearts": {
                         "_count": 2.0
