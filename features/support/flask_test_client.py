@@ -6,7 +6,7 @@ class FlaskTestClient(object):
             self._storage = flask_app.mongo[
                 flask_app.app.config['DATABASE_NAME']]
         else:
-            self._storage = flask_app.store.database
+            self._storage = flask_app.db.connection
 
     def get(self, url):
         return self._client.get(url)

@@ -1,36 +1,16 @@
 import datetime
-from pymongo.mongo_client import MongoClient
 import pytz
-from backdrop.core.repository import Repository, build_query
+from .database import Repository, build_query
 
 
 def utc(dt):
     return dt.replace(tzinfo=pytz.UTC)
 
 
-class Store(object):
-    def __init__(self, host, port, name):
-        self._mongo = MongoClient(host, port)
-        self.name = name
-
-    def alive(self):
-        return self._mongo.alive()
-
-    def get_bucket(self, name):
-        return Bucket(Repository(self.database[name]))
-
-    @property
-    def client(self):
-        return self._mongo
-
-    @property
-    def database(self):
-        return self.client[self.name]
-
-
 class Bucket(object):
-    def __init__(self, repository):
-        self.repository = repository
+    def __init__(self, db, bucket_name):
+        self.bucket_name = bucket_name
+        self.repository = db.get_repository(bucket_name)
 
     def store(self, records):
         if isinstance(records, list):

@@ -1,6 +1,6 @@
 from unittest import TestCase
 from hamcrest import *
-from backdrop.core.repository import build_query
+from backdrop.core.database import build_query
 from tests.support.test_helpers import d
 
 

@@ -3,7 +3,7 @@ import datetime
 from hamcrest import *
 from mock import Mock, call
 import pytz
-from backdrop.core import storage
+from backdrop.core import bucket
 from backdrop.core.records import Record
 
 
@@ -20,8 +20,10 @@ def d_tz(year, month, day, hour, minute, second):
 
 class TestBucket(unittest.TestCase):
     def setUp(self):
+        mock_database = Mock()
         mock_repository = Mock()
-        self.bucket = storage.Bucket(mock_repository)
+        mock_database.get_repository.return_value = mock_repository
+        self.bucket = bucket.Bucket(mock_database, 'test_bucket')
         self.mock_repository = mock_repository
         self.mock_repository.find.return_value = []
         self.mock_repository.group.return_value = []

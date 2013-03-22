@@ -4,7 +4,8 @@ from flask import Flask, request, jsonify
 from backdrop.core import records
 
 from .validation import validate_post_to_bucket
-from ..core import storage
+from ..core import database
+from ..core.bucket import Bucket
 
 app = Flask(__name__)
 
@@ -13,7 +14,7 @@ app.config.from_object(
     "backdrop.write.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
-store = storage.Store(
+db = database.Database(
     app.config['MONGO_HOST'],
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
@@ -22,7 +23,7 @@ store = storage.Store(
 
 @app.route('/_status')
 def health_check():
-    if store.alive():
+    if db.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
         return jsonify(status='error',
@@ -48,7 +49,8 @@ def post_to_bucket(bucket_name):
     for datum in incoming_data:
         incoming_records.append(records.parse(datum))
 
-    store.get_bucket(bucket_name).store(incoming_records)
+    bucket = Bucket(db, bucket_name)
+    bucket.store(incoming_records)
 
     return jsonify(status='ok')
 

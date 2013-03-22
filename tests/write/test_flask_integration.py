@@ -24,7 +24,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
-    @patch("backdrop.write.api.store")
+    @patch("backdrop.core.bucket.Bucket.store")
     def test_data_gets_stored(self, store):
         self.app.post(
             '/foo-bucket',
@@ -32,8 +32,7 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        store.get_bucket.assert_called_with("foo-bucket")
-        store.get_bucket.return_value.store.assert_called_with(
+        store.assert_called_with(
             [Record({"foo": "bar"})]
         )
 
@@ -47,7 +46,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request() )
         assert_that( response, is_error_response())
 
-    @patch("backdrop.write.api.store")
+    @patch("backdrop.core.bucket.Bucket.store")
     def test__timestamps_get_stored_as_utc_datetimes(self, store):
         expected_event_with_time = {
             u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
@@ -59,8 +58,7 @@ class PostDataTestCase(unittest.TestCase):
             content_type = "application/json"
         )
 
-        store.get_bucket.assert_called_with("bucket")
-        store.get_bucket.return_value.store.assert_called_with(
+        store.assert_called_with(
             [Record(expected_event_with_time)]
         )
 
@@ -74,7 +72,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
-    @patch("backdrop.write.api.store")
+    @patch("backdrop.core.bucket.Bucket.store")
     def test__id_gets_stored(self, store):
         response = self.app.post(
             '/foo',
@@ -83,7 +81,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that(response, is_ok())
-        store.get_bucket.return_value.store.assert_called_with(
+        store.assert_called_with(
             [Record({"_id": "foo"})]
         )
 

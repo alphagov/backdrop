@@ -1,6 +1,7 @@
 from itertools import groupby
 from bson import Code
 from pprint import pprint
+from pymongo import MongoClient
 
 
 def build_query(**params):
@@ -23,9 +24,29 @@ def build_query(**params):
     return query
 
 
+class Database(object):
+    def __init__(self, host, port, name):
+        self._mongo = MongoClient(host, port)
+        self.name = name
+
+    def alive(self):
+        return self._mongo.alive()
+
+    def get_repository(self, bucket_name):
+        return Repository(self._mongo[self.name][bucket_name])
+
+    @property
+    def connection(self):
+        return self._mongo[self.name]
+
+
 class Repository(object):
     def __init__(self, collection):
         self._collection = collection
+
+    @property
+    def name(self):
+        return self._collection.name
 
     def find(self, query):
         return self._collection.find(query).sort('_timestamp', -1)

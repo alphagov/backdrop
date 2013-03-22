@@ -2,7 +2,7 @@ import unittest
 import datetime
 from hamcrest import *
 from pymongo import MongoClient
-from backdrop.core.repository import Repository, GroupingError
+from backdrop.core.database import Repository, GroupingError
 from tests.support.test_helpers import d
 
 HOST = 'localhost'

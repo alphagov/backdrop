@@ -7,7 +7,8 @@ from flask import Flask, jsonify, request
 import pytz
 
 from .validation import validate_request_args
-from ..core import storage
+from ..core import database
+from ..core.bucket import Bucket
 
 
 app = Flask(__name__)
@@ -17,7 +18,7 @@ app.config.from_object(
     "backdrop.read.config.%s" % getenv("GOVUK_ENV", "development")
 )
 
-store = storage.Store(
+db = database.Database(
     app.config['MONGO_HOST'],
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
@@ -62,8 +63,8 @@ def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
         return jsonify(status='error', message=result.message), 400
-    bucket = store.get_bucket(bucket_name)
 
+    bucket = Bucket(db, bucket_name)
     result_data = bucket.query(**(parse_request_args(request.args)))
 
     # Taken from flask.helpers.jsonify to add JSONEncoder
