@@ -12,9 +12,7 @@ def build_query(**params):
     query = {}
     if 'start_at' in params:
         query = ensure_has_timestamp(query)
-        query['_timestamp'] = {
-            '$gte': params['start_at']
-        }
+        query['_timestamp']['$gte'] = params['start_at']
     if 'end_at' in params:
         query = ensure_has_timestamp(query)
         query['_timestamp']['$lt'] = params['end_at']
