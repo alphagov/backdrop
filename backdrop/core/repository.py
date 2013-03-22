@@ -4,14 +4,19 @@ from pprint import pprint
 
 
 def build_query(**params):
+    def ensure_has_timestamp(q):
+        if '_timestamp' not in q:
+            q['_timestamp'] = {}
+        return q
+
     query = {}
     if 'start_at' in params:
+        query = ensure_has_timestamp(query)
         query['_timestamp'] = {
             '$gte': params['start_at']
         }
     if 'end_at' in params:
-        if '_timestamp' not in query:
-            query['_timestamp'] = {}
+        query = ensure_has_timestamp(query)
         query['_timestamp']['$lt'] = params['end_at']
 
     if 'filter_by' in params:
