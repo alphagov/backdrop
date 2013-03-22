@@ -52,3 +52,9 @@ def step(context, nth, expected_json):
     the_data = json.loads(context.response.data)['data']
     expected = json.loads(expected_json)
     assert_that(the_data[i], is_(expected))
+
+@then('the "{nth}" result should have "{key}" equaling "{value}"')
+def step(context, nth, key, value):
+    i = int(re.compile(r'\d+').match(nth).group(0)) - 1
+    the_data = json.loads(context.response.data)['data']
+    assert_that(the_data[i][key], is_(value))

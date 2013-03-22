@@ -47,3 +47,21 @@ class TestRequestValidation(TestCase):
             'end_at': '2010-01-07T00:10:10+00:00',
         })
         assert_that( validation_result.is_valid, is_(True) )
+
+    def test_accepts_ascending_sort_order(self):
+        validation_result = validate_request_args({
+            'sort': 'foo:ascending',
+        })
+        assert_that( validation_result.is_valid, is_(True) )
+
+    def test_accepts_descending_sort_order(self):
+        validation_result = validate_request_args({
+            'sort': 'foo:descending',
+        })
+        assert_that( validation_result.is_valid, is_(True) )
+
+    def test_rejects_unknown_sort_order(self):
+        validation_result = validate_request_args({
+            'sort': 'foo:random',
+        })
+        assert_that( validation_result.is_valid, is_(False) )

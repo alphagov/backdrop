@@ -47,6 +47,9 @@ def parse_request_args(request_args):
 
     if 'group_by' in request_args:
         args['group_by'] = request_args['group_by']
+    
+    if 'sort' in request_args:
+        args['sort'] = request_args['sort'].split(':', 1)
 
     return args
 
