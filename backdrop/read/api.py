@@ -58,7 +58,7 @@ class JsonEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-@app.route('/<bucket_name>/', methods=['GET'])
+@app.route('/<bucket_name>', methods=['GET'])
 def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
