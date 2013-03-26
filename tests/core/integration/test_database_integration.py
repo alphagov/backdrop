@@ -377,6 +377,19 @@ class TestRepositoryIntegration(unittest.TestCase):
             self.repo.find,
             {}, sort=["value"])
 
+    def test_sorted_query_with_alphanumeric(self):
+        self.mongo_collection.save({'val': 'a'})
+        self.mongo_collection.save({'val': 'b'})
+        self.mongo_collection.save({'val': 'c'})
+
+        result = self.repo.find({}, sort=['val', 'descending'])
+        assert_that(list(result), contains(
+            has_entry('val', 'c'),
+            has_entry('val', 'b'),
+            has_entry('val', 'a')
+        ))
+
+
     def test_sorted_group_ascending(self):
         self.mongo_collection.save({"suite": "clubs"})
         self.mongo_collection.save({"suite": "hearts"})
