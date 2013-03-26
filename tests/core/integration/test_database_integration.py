@@ -2,7 +2,8 @@ import unittest
 import datetime
 from hamcrest import *
 from pymongo import MongoClient
-from backdrop.core.database import Repository, GroupingError
+from backdrop.core.database import Repository, GroupingError, \
+    InvalidSortError
 from tests.support.test_helpers import d
 
 HOST = 'localhost'
@@ -316,3 +317,49 @@ class TestRepositoryIntegration(unittest.TestCase):
             assert_that(False)
         except GroupingError, e:
             assert_that(str(e), is_("Cannot group on two equal keys"))
+
+    def test_sorted_query_ascending(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+        result = self.repo.find({}, sort = ["value", "ascending"])
+
+        assert_that(list(result), contains(
+            has_entry('value', 2),
+            has_entry('value', 6),
+            has_entry('value', 9),
+        ))
+
+    def test_sorted_query_descending(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+        result = self.repo.find({}, sort = ["value", "descending"])
+
+        assert_that(list(result), contains(
+            has_entry('value', 9),
+            has_entry('value', 6),
+            has_entry('value', 2),
+        ))
+
+    def test_sorted_query_nonsense(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.find,
+            {}, sort=["value", "coolness"])
+
+    def test_sorted_query_not_enough_args(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.find,
+            {}, sort=["value"])

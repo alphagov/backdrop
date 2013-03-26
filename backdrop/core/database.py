@@ -1,7 +1,7 @@
 from itertools import groupby
 from bson import Code
 from pprint import pprint
-from pymongo import MongoClient
+import pymongo
 
 
 def build_query(**params):
@@ -26,7 +26,7 @@ def build_query(**params):
 
 class Database(object):
     def __init__(self, host, port, name):
-        self._mongo = MongoClient(host, port)
+        self._mongo = pymongo.MongoClient(host, port)
         self.name = name
 
     def alive(self):
@@ -48,8 +48,19 @@ class Repository(object):
     def name(self):
         return self._collection.name
 
-    def find(self, query):
-        return self._collection.find(query).sort('_timestamp', -1)
+    def find(self, query, sort=None):
+        cursor = self._collection.find(query)
+        if sort:
+            if len(sort) != 2:
+                raise InvalidSortError("Expected a key and direction")
+            if sort[1] not in ["ascending", "descending"]:
+                raise InvalidSortError(sort[1])
+            sort_options = {
+                "ascending": pymongo.ASCENDING,
+                "descending": pymongo.DESCENDING
+            }
+            cursor.sort(sort[0], sort_options[sort[1]])
+        return cursor
 
     def group(self, group_by, query):
         return self._group([group_by], query)
@@ -92,6 +103,10 @@ class Repository(object):
 
 
 class GroupingError(ValueError):
+    pass
+
+
+class InvalidSortError(ValueError):
     pass
 
 
