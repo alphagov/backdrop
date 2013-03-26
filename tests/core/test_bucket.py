@@ -5,17 +5,7 @@ from mock import Mock, call
 import pytz
 from backdrop.core import bucket
 from backdrop.core.records import Record
-
-
-def d(year, month, day, hour, minute, second):
-    return datetime.datetime(year=year, month=month, day=day,
-                             hour=hour, minute=minute, second=second)
-
-
-def d_tz(year, month, day, hour, minute, second):
-    return datetime.datetime(year=year, month=month, day=day,
-                             hour=hour, minute=minute, second=second,
-                             tzinfo=pytz.UTC)
+from tests.support.test_helpers import d, d_tz
 
 
 class TestBucket(unittest.TestCase):

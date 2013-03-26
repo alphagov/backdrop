@@ -4,7 +4,7 @@ from hamcrest import *
 from pymongo import MongoClient
 from backdrop.core.database import Repository, GroupingError, \
     InvalidSortError
-from tests.support.test_helpers import d
+from tests.support.test_helpers import d, d_tz
 
 HOST = 'localhost'
 PORT = 27017
@@ -85,12 +85,12 @@ class TestRepositoryIntegration(unittest.TestCase):
 
     def test_key1_is_pulled_to_the_top_of_outer_group(self):
         self.mongo_collection.save({
-            "_week_start_at": d(2013, 3, 17, 0, 0, 0),
+            "_week_start_at": d_tz(2013, 3, 17, 0, 0, 0),
             "a": 1,
             "b": 2
         })
         self.mongo_collection.save({
-            "_week_start_at": d(2013, 3, 24, 0, 0, 0),
+            "_week_start_at": d_tz(2013, 3, 24, 0, 0, 0),
             "a": 1,
             "b": 2
         })
@@ -105,12 +105,12 @@ class TestRepositoryIntegration(unittest.TestCase):
 
     def test_should_use_second_key_for_inner_group_name(self):
         self.mongo_collection.save({
-            "_week_start_at": d(2013, 3, 17, 0, 0, 0),
+            "_week_start_at": d_tz(2013, 3, 17, 0, 0, 0),
             "a": 1,
             "b": 2
         })
         self.mongo_collection.save({
-            "_week_start_at": d(2013, 3, 24, 0, 0, 0),
+            "_week_start_at": d_tz(2013, 3, 24, 0, 0, 0),
             "a": 1,
             "b": 2
         })
@@ -122,12 +122,12 @@ class TestRepositoryIntegration(unittest.TestCase):
 
     def test_count_of_outer_elements_should_be_added(self):
         self.mongo_collection.save({
-            "_week_start_at": d(2013, 3, 17, 0, 0, 0),
+            "_week_start_at": d_tz(2013, 3, 17, 0, 0, 0),
             "a": 1,
             "b": 2
         })
         self.mongo_collection.save({
-            "_week_start_at": d(2013, 3, 24, 0, 0, 0),
+            "_week_start_at": d_tz(2013, 3, 24, 0, 0, 0),
             "a": 1,
             "b": 2
         })

@@ -51,6 +51,11 @@ def is_error_response():
     return IsErrorResponse()
 
 
-def d(year, month, day, hour, minute, seconds):
+def d_tz(year, month, day, hour=0, minute=0, seconds=0):
     return datetime.datetime(year, month, day, hour, minute, seconds,
                              tzinfo=pytz.UTC)
+
+
+def d(year, month, day, hour=0, minute=0, second=0):
+    return datetime.datetime(year=year, month=month, day=day,
+                             hour=hour, minute=minute, second=second)
