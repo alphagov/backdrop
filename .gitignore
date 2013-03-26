@@ -5,3 +5,6 @@ assets/*
 !assets/.gitkeep
 .idea
 *.tar.gz
+.coverage
+build
+coverage.xml
