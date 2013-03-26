@@ -24,11 +24,12 @@ source $VIRTUALENV_DIR/bin/activate
 pip install -r requirements.txt
 pip install -r requirements_for_tests.txt
 
-nosetests -v
+nosetests -v --with-xunit --with-coverage --cover-package=backdrop --cover-inclusive
 display_result $? 1 "Unit tests"
+python -m coverage.__main__ xml --include=backdrop*
 
-behave --no-color
+behave
 display_result $? 2 "Feature tests"
 
-$(dirname $0)/pep-it.sh
+$(dirname $0)/pep-it.sh > pep8.out
 display_result $? 3 "Code style check"
