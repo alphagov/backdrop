@@ -83,7 +83,7 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['sort'], is_(["foo", "ascending"]))
-    
+
     def test_sort_will_use_first_argument_only(self):
         request_args = MultiDict([
             ("sort", "foo:descending"),
