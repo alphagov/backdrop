@@ -34,6 +34,7 @@ def parse_request_args(request_args):
 
     if 'start_at' in request_args:
         args['start_at'] = parse_time_string(request_args['start_at'])
+
     if 'end_at' in request_args:
         args['end_at'] = parse_time_string(request_args['end_at'])
 

@@ -56,3 +56,16 @@ class ReadApiTestCase(unittest.TestCase):
             '/foo?period=week&group_by=stuff'
         )
         mock_query.assert_called_with(period="week", group_by="stuff")
+
+    @patch('backdrop.core.bucket.Bucket.query')
+    def test_sort_query_is_executed(self, mock_query):
+        mock_query.return_value = None
+        self.app.get(
+            '/foo?sort=value:ascending'
+        )
+        mock_query.assert_called_with(sort=["value", "ascending"])
+
+        self.app.get(
+            '/foo?sort=value:descending'
+        )
+        mock_query.assert_called_with(sort=["value", "descending"])
