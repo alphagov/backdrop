@@ -363,3 +363,77 @@ class TestRepositoryIntegration(unittest.TestCase):
             InvalidSortError,
             self.repo.find,
             {}, sort=["value"])
+
+    def test_sorted_group_ascending(self):
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "diamonds"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+
+        result = self.repo.group("suite", {}, sort=["suite", "ascending"])
+
+        assert_that(list(result), contains(
+            has_entry("suite", "clubs"),
+            has_entry("suite", "diamonds"),
+            has_entry("suite", "hearts")
+        ))
+
+    def test_sorted_group_descending(self):
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "diamonds"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+
+        result = self.repo.group("suite", {}, sort=["suite", "descending"])
+
+        assert_that(list(result), contains(
+            has_entry("suite", "hearts"),
+            has_entry("suite", "diamonds"),
+            has_entry("suite", "clubs")
+        ))
+
+    def test_sorted_group_nonsense(self):
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "diamonds"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.group,
+            "suite", {}, sort=["suite", "coolness"])
+
+    def test_sorted_group_not_enough_args(self):
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "diamonds"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.group,
+            "suite", {}, sort=["suite"])
+
+    def test_sorted_group_by_count(self):
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "diamonds"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+
+        result = self.repo.group("suite", {}, sort=["_count", "ascending"])
+
+        assert_that(list(result), contains(
+            has_entry("suite", "diamonds"),
+            has_entry("suite", "hearts"),
+            has_entry("suite", "clubs")
+        ))
