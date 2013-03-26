@@ -10,10 +10,18 @@ def validate_request_args(request_args):
             return invalid('end_at is not a valid datetime')
     if 'filter_by' in request_args:
         if request_args['filter_by'].find(':') < 0:
-            return invalid('filter_by is not valid') # FIXME
+            return invalid('filter_by is not valid')
+        if request_args['filter_by'].startswith("$"):
+            return invalid('filter_by is not valid')
     if 'period' in request_args:
         if request_args['period'] != 'week':
             return invalid('Unrecognized grouping for period')
+        if "group_by" in request_args:
+            if "_week_start_at" == request_args["group_by"]:
+                return invalid('Cannot group on two equal keys')
+    if "group_by" in request_args:
+        if request_args["group_by"].startswith("_"):
+            return invalid('Cannot group by internal fields')
     if 'sort' in request_args:
         if request_args['sort'].find(':') < 0:
             return invalid('sort has invalid argument')

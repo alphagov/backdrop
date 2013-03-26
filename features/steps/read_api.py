@@ -34,6 +34,13 @@ def step(context, expected_status):
     assert_that(context.response.status_code, is_(int(expected_status)))
 
 
+@then('I should get back a message: "{expected_message}"')
+def step(context, expected_message):
+    assert_that(
+        json.loads(context.response.data),
+        is_(json.loads(expected_message)))
+
+
 step_matcher("re")
 
 
