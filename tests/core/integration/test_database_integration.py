@@ -318,6 +318,19 @@ class TestRepositoryIntegration(unittest.TestCase):
         except GroupingError, e:
             assert_that(str(e), is_("Cannot group on two equal keys"))
 
+    def test_sorted_query_default_sort_order(self):
+        self.mongo_collection.save({"_timestamp": d(2012, 12, 13)})
+        self.mongo_collection.save({"_timestamp": d(2012, 12, 12)})
+        self.mongo_collection.save({"_timestamp": d(2012, 12, 16)})
+
+        result = self.repo.find({})
+
+        assert_that(list(result), contains(
+            has_entry("_timestamp", d(2012, 12, 16)),
+            has_entry("_timestamp", d(2012, 12, 13)),
+            has_entry("_timestamp", d(2012, 12, 12)),
+        ))
+
     def test_sorted_query_ascending(self):
         self.mongo_collection.save({"value": 6})
         self.mongo_collection.save({"value": 2})

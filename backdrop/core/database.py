@@ -59,11 +59,14 @@ class Repository(object):
         cursor = self._collection.find(query)
         if sort is not None:
             self._validate_sort(sort)
-            sort_options = {
-                "ascending": pymongo.ASCENDING,
-                "descending": pymongo.DESCENDING
-            }
-            cursor.sort(sort[0], sort_options[sort[1]])
+        else:
+            sort = ["_timestamp", "descending"]
+        sort_options = {
+            "ascending": pymongo.ASCENDING,
+            "descending": pymongo.DESCENDING
+        }
+        cursor.sort(sort[0], sort_options[sort[1]])
+
         return cursor
 
     def group(self, group_by, query, sort=None):
