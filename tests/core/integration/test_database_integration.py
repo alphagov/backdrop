@@ -389,7 +389,6 @@ class TestRepositoryIntegration(unittest.TestCase):
             has_entry('val', 'a')
         ))
 
-
     def test_sorted_group_ascending(self):
         self.mongo_collection.save({"suite": "clubs"})
         self.mongo_collection.save({"suite": "hearts"})
@@ -462,4 +461,17 @@ class TestRepositoryIntegration(unittest.TestCase):
             has_entry("suite", "diamonds"),
             has_entry("suite", "hearts"),
             has_entry("suite", "clubs")
+        ))
+
+    def test_periodic_group_is_sorted_by__week_start_at(self):
+        self.mongo_collection.save({"_week_start_at": d(2013, 3, 17),
+                                    'val': 1})
+        self.mongo_collection.save({"_week_start_at": d(2013, 3, 24),
+                                    'val': 7})
+
+        result = self.repo.multi_group('_week_start_at', 'val', {})
+
+        assert_that(list(result), contains(
+            has_entry('_week_start_at', d(2013, 3, 24)),
+            has_entry('_week_start_at', d(2013, 3, 17))
         ))

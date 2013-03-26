@@ -85,7 +85,7 @@ class Repository(object):
         output = nested_merge([key1, key2], results)
 
         result = []
-        for key1_value, value in sorted(output.items()):
+        for key1_value, value in sorted(output.items(), reverse=True):
             result.append({
                 key1: key1_value,
                 "_count": sum(doc['_count'] for doc in value.values()),
