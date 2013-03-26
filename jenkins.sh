@@ -26,7 +26,7 @@ pip install -r requirements_for_tests.txt
 
 nosetests -v --with-xunit --with-coverage --cover-package=backdrop --cover-inclusive
 display_result $? 1 "Unit tests"
-python -m coverage xml --include=backdrop*
+python -m coverage.__main__ xml --include=backdrop*
 
 behave --no-color
 display_result $? 2 "Feature tests"
