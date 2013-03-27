@@ -479,3 +479,12 @@ class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
             has_entry('_week_start_at', d(2013, 3, 17)),
             has_entry('_week_start_at', d(2013, 3, 24)),
         ))
+
+    def test_query_with_limit(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+        result = self.repo.find({}, limit=2)
+
+        assert_that(result.count(with_limit_and_skip=True), is_(2))

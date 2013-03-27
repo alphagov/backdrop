@@ -65,3 +65,21 @@ class TestRequestValidation(TestCase):
             'sort_by': 'foo:random',
         })
         assert_that( validation_result.is_valid, is_(False) )
+
+    def test_accepts_valid_limit(self):
+        validation_result = validate_request_args({
+            'limit': '3'
+        })
+        assert_that( validation_result.is_valid, is_(True) )
+
+    def test_rejects_invalid_limit(self):
+        validation_result = validate_request_args({
+            'limit': 'not_a_number'
+        })
+        assert_that( validation_result.is_valid, is_(False) )
+
+    def test_rejects_invalid_limit(self):
+        validation_result = validate_request_args({
+            'limit': '-3'
+        })
+        assert_that( validation_result.is_valid, is_(False) )

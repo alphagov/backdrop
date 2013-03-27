@@ -28,5 +28,12 @@ def validate_request_args(request_args):
         sort_order = request_args['sort_by'].split(':', 1)[1]
         if sort_order not in ['ascending', 'descending']:
             return invalid('unknown sort order')
+    if 'limit' in request_args:
+        try:
+            limit = int(request_args['limit'])
+            if limit < 0:
+                raise ValueError()
+        except ValueError:
+            return invalid('Limit must be a positive integer')
 
     return valid()

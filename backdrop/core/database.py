@@ -55,7 +55,7 @@ class Repository(object):
         if sort[1] not in ["ascending", "descending"]:
             raise InvalidSortError(sort[1])
 
-    def find(self, query, sort=None):
+    def find(self, query, sort=None, limit=None):
         cursor = self._collection.find(query)
         if sort is not None:
             self._validate_sort(sort)
@@ -66,6 +66,8 @@ class Repository(object):
             "descending": pymongo.DESCENDING
         }
         cursor.sort(sort[0], sort_options[sort[1]])
+        if limit:
+            cursor.limit(limit)
 
         return cursor
 

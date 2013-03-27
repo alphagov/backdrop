@@ -65,14 +65,14 @@ class TestBucket(unittest.TestCase):
         self.bucket.query(start_at = d(2013, 4, 1, 12, 0, 0))
         self.mock_repository.find.assert_called_with(
             {"_timestamp": {"$gte": d(2013, 4, 1, 12, 0, 0)}},
-            sort=None)
+            sort=None, limit=None)
 
     def test_query_with_end_at(self):
         self.bucket.query(end_at = d(2013, 4, 1, 12, 0, 0))
 
         self.mock_repository.find.assert_called_with(
             {"_timestamp": {"$lt": d(2013, 4, 1, 12, 0, 0)}},
-            sort=None)
+            sort=None, limit=None)
 
     def test_query_with_start_at_and__end_at(self):
         self.bucket.query(
@@ -85,7 +85,7 @@ class TestBucket(unittest.TestCase):
                 "$gte": d(2013, 2, 1, 12, 0, 0),
                 "$lt": d(2013, 3, 1, 12, 0, 0)
             }
-        }, sort=None)
+        }, sort=None, limit=None)
 
     def test_query_with_sort(self):
         self.bucket.query(
@@ -93,7 +93,7 @@ class TestBucket(unittest.TestCase):
         )
 
         self.mock_repository.find.assert_called_with(
-            {}, sort=["keyname", "descending"]
+            {}, sort=["keyname", "descending"], limit=None
         )
 
     def test_week_query(self):
@@ -166,3 +166,8 @@ class TestBucket(unittest.TestCase):
             "_start_at", d_tz(2013, 1, 14, 0, 0, 0))))
         assert_that(query_result, has_item(has_entry(
             "_end_at", d_tz(2013, 1, 21, 0, 0, 0))))
+
+    def test_query_with_limit(self):
+        self.bucket.query(limit=5)
+
+        self.mock_repository.find.assert_called_with({}, sort=None, limit=5)

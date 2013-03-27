@@ -93,3 +93,12 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['sort_by'], is_(["foo", "descending"]))
+
+    def test_limit_is_parsed(self):
+        request_args = MultiDict([
+            ("limit", "123")
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['limit'], is_(123))

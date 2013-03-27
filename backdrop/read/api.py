@@ -52,6 +52,8 @@ def parse_request_args(request_args):
     if 'sort_by' in request_args:
         args['sort_by'] = request_args['sort_by'].split(':', 1)
 
+    if 'limit' in request_args:
+        args['limit'] = int(request_args['limit'])
     return args
 
 
