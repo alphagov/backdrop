@@ -344,7 +344,6 @@ class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
         self.mongo_collection.save({"suite": "clubs"})
         self.mongo_collection.save({"suite": "hearts"})
 
-
     def test_sorted_query_default_sort_order(self):
         self.mongo_collection.save({"_timestamp": d(2012, 12, 13)})
         self.mongo_collection.save({"_timestamp": d(2012, 12, 12)})
