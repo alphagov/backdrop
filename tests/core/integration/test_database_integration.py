@@ -459,6 +459,15 @@ class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
             has_entry("suite", "clubs")
         ))
 
+    def test_sorted_group_by_nonexistent_key(self):
+        self.setup_playing_cards()
+
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.group,
+            "suite", {}, sort=["bleh", "ascending"]
+        )
+
     def test_periodic_group_is_sorted_by__week_start_at(self):
         self.mongo_collection.save({"_week_start_at": d(2013, 3, 17),
                                     'val': 1})

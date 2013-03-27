@@ -114,7 +114,11 @@ class Repository(object):
                 "ascending": lambda a, b: cmp(a, b),
                 "descending": lambda a, b: cmp(b, a)
             }
-            results.sort(cmp=sorters[sort[1]], key=lambda a: a[sort[0]])
+            sorter = sorters[sort[1]]
+            try:
+                results.sort(cmp=sorter, key=lambda a: a[sort[0]])
+            except KeyError:
+                raise InvalidSortError('Invalid sort key {0}'.format(sort[0]))
 
         return results
 
