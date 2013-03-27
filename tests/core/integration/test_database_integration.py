@@ -488,3 +488,13 @@ class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
         result = self.repo.find({}, limit=2)
 
         assert_that(result.count(with_limit_and_skip=True), is_(2))
+
+    def test_query_with_limit_and_sort(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+        result = self.repo.find({}, sort=["value", "ascending"], limit=1)
+
+        assert_that(result.count(with_limit_and_skip=True), is_(1))
+        assert_that(list(result)[0], has_entry('value', 2))
