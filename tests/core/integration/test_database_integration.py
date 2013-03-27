@@ -1,5 +1,6 @@
 import unittest
 import datetime
+from abc import ABCMeta
 from hamcrest import *
 from pymongo import MongoClient
 from backdrop.core.database import Repository, GroupingError, \
@@ -12,7 +13,9 @@ DB_NAME = 'performance_platform_test'
 BUCKET = 'test_repository_integration'
 
 
-class TestRepositoryIntegration(unittest.TestCase):
+class RepositoryIntegrationTest(unittest.TestCase):
+    __metaclass__ = ABCMeta
+
     def setUp(self):
         self.repo = Repository(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
@@ -20,6 +23,8 @@ class TestRepositoryIntegration(unittest.TestCase):
     def tearDown(self):
         self.mongo_collection.drop()
 
+
+class TestRepositoryIntegration(RepositoryIntegrationTest):
     def test_save(self):
         thing_to_save = {'name': 'test_document'}
         another_thing_to_save = {'name': '2nd_test_document'}
@@ -32,7 +37,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         assert_that(results, has_item(another_thing_to_save))
 
     def test_save_updates_document_with_id(self):
-        a_document = { "_id": "event1", "title": "I'm an event"}
+        a_document = {"_id": "event1", "title": "I'm an event"}
         updated_document = {"_id": "event1", "title": "I'm another event"}
 
         self.repo.save(a_document)
@@ -318,6 +323,28 @@ class TestRepositoryIntegration(unittest.TestCase):
         except GroupingError, e:
             assert_that(str(e), is_("Cannot group on two equal keys"))
 
+
+class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
+    def setUp(self):
+        super(TestRepositoryIntegrationSorting, self).setUp()
+
+    def tearDown(self):
+        super(TestRepositoryIntegrationSorting, self).tearDown()
+
+    def setup_numeric_values(self):
+        self.mongo_collection.save({"value": 6})
+        self.mongo_collection.save({"value": 2})
+        self.mongo_collection.save({"value": 9})
+
+    def setup_playing_cards(self):
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "diamonds"})
+        self.mongo_collection.save({"suite": "clubs"})
+        self.mongo_collection.save({"suite": "hearts"})
+
+
     def test_sorted_query_default_sort_order(self):
         self.mongo_collection.save({"_timestamp": d(2012, 12, 13)})
         self.mongo_collection.save({"_timestamp": d(2012, 12, 12)})
@@ -336,7 +363,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         self.mongo_collection.save({"value": 2})
         self.mongo_collection.save({"value": 9})
 
-        result = self.repo.find({}, sort = ["value", "ascending"])
+        result = self.repo.find({}, sort=["value", "ascending"])
 
         assert_that(list(result), contains(
             has_entry('value', 2),
@@ -345,11 +372,9 @@ class TestRepositoryIntegration(unittest.TestCase):
         ))
 
     def test_sorted_query_descending(self):
-        self.mongo_collection.save({"value": 6})
-        self.mongo_collection.save({"value": 2})
-        self.mongo_collection.save({"value": 9})
+        self.setup_numeric_values()
 
-        result = self.repo.find({}, sort = ["value", "descending"])
+        result = self.repo.find({}, sort=["value", "descending"])
 
         assert_that(list(result), contains(
             has_entry('value', 9),
@@ -358,9 +383,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         ))
 
     def test_sorted_query_nonsense(self):
-        self.mongo_collection.save({"value": 6})
-        self.mongo_collection.save({"value": 2})
-        self.mongo_collection.save({"value": 9})
+        self.setup_numeric_values()
 
         self.assertRaises(
             InvalidSortError,
@@ -368,9 +391,7 @@ class TestRepositoryIntegration(unittest.TestCase):
             {}, sort=["value", "coolness"])
 
     def test_sorted_query_not_enough_args(self):
-        self.mongo_collection.save({"value": 6})
-        self.mongo_collection.save({"value": 2})
-        self.mongo_collection.save({"value": 9})
+        self.setup_numeric_values()
 
         self.assertRaises(
             InvalidSortError,
@@ -390,12 +411,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         ))
 
     def test_sorted_group_ascending(self):
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "diamonds"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
+        self.setup_playing_cards()
 
         result = self.repo.group("suite", {}, sort=["suite", "ascending"])
 
@@ -406,12 +422,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         ))
 
     def test_sorted_group_descending(self):
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "diamonds"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
+        self.setup_playing_cards()
 
         result = self.repo.group("suite", {}, sort=["suite", "descending"])
 
@@ -422,12 +433,7 @@ class TestRepositoryIntegration(unittest.TestCase):
         ))
 
     def test_sorted_group_nonsense(self):
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "diamonds"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
+        self.setup_playing_cards()
 
         self.assertRaises(
             InvalidSortError,
@@ -435,12 +441,7 @@ class TestRepositoryIntegration(unittest.TestCase):
             "suite", {}, sort=["suite", "coolness"])
 
     def test_sorted_group_not_enough_args(self):
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "diamonds"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
+        self.setup_playing_cards()
 
         self.assertRaises(
             InvalidSortError,
@@ -448,12 +449,7 @@ class TestRepositoryIntegration(unittest.TestCase):
             "suite", {}, sort=["suite"])
 
     def test_sorted_group_by_count(self):
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "diamonds"})
-        self.mongo_collection.save({"suite": "clubs"})
-        self.mongo_collection.save({"suite": "hearts"})
+        self.setup_playing_cards()
 
         result = self.repo.group("suite", {}, sort=["_count", "ascending"])
 
