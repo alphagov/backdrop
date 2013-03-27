@@ -52,17 +52,33 @@ def step(context, n):
 
 step_matcher("parse")
 
+def parse_position(nth, data):
+    match = re.compile(r'\d+').match(nth)
+    if match:
+        return int(match.group(0)) - 1
+    elif nth == "last":
+        return len(data) - 1
+    elif nth == "first":
+        return 0
+    else:
+        raise IndexError(nth)
 
 @then('the "{nth}" result should be "{expected_json}"')
 def step(context, nth, expected_json):
-    i = int(re.compile(r'\d+').match(nth).group(0)) - 1
     the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
     expected = json.loads(expected_json)
     assert_that(the_data[i], is_(expected))
 
 
 @then('the "{nth}" result should have "{key}" equaling "{value}"')
 def step(context, nth, key, value):
-    i = int(re.compile(r'\d+').match(nth).group(0)) - 1
     the_data = json.loads(context.response.data)['data']
-    assert_that(the_data[i][key], is_(value))
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i][key], equal_to(value))
+
+@then('the "{nth}" result should have "{key}" equaling the integer "{value}"')
+def step(context, nth, key, value):
+    the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i][key], equal_to(int(value)))
