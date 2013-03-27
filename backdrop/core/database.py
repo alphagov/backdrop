@@ -60,7 +60,7 @@ class Repository(object):
         if sort is not None:
             self._validate_sort(sort)
         else:
-            sort = ["_timestamp", "descending"]
+            sort = ["_timestamp", "ascending"]
         sort_options = {
             "ascending": pymongo.ASCENDING,
             "descending": pymongo.DESCENDING
@@ -85,7 +85,7 @@ class Repository(object):
         output = nested_merge([key1, key2], results)
 
         result = []
-        for key1_value, value in sorted(output.items(), reverse=True):
+        for key1_value, value in sorted(output.items()):
             result.append({
                 key1: key1_value,
                 "_count": sum(doc['_count'] for doc in value.values()),

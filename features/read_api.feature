@@ -18,7 +18,7 @@ Feature: the performance platform read api
          when I go to "/foo?start_at=2012-12-13T01:01:01%2B00:00"
          then I should get back a status of "200"
           and the JSON should have "4" results
-          and the "1st" result should be "{"_timestamp": "2012-12-19T01:01:01+00:00", "licence_name": "Temporary events notice", "interaction": "success", "authority": "Westminster", "type": "success", "_id": "1238"}"
+          and the "1st" result should be "{"_timestamp": "2012-12-13T01:01:01+00:00", "authority": "Westminster", "interaction": "success", "licence_name": "Temporary events notice", "_id": "1236", "type": "success"}"
 
     Scenario: querying for data BEFORE a certain point
         Given "licensing.json" is in "foo" bucket

@@ -326,9 +326,9 @@ class TestRepositoryIntegration(unittest.TestCase):
         result = self.repo.find({})
 
         assert_that(list(result), contains(
-            has_entry("_timestamp", d(2012, 12, 16)),
-            has_entry("_timestamp", d(2012, 12, 13)),
             has_entry("_timestamp", d(2012, 12, 12)),
+            has_entry("_timestamp", d(2012, 12, 13)),
+            has_entry("_timestamp", d(2012, 12, 16)),
         ))
 
     def test_sorted_query_ascending(self):
@@ -472,6 +472,6 @@ class TestRepositoryIntegration(unittest.TestCase):
         result = self.repo.multi_group('_week_start_at', 'val', {})
 
         assert_that(list(result), contains(
+            has_entry('_week_start_at', d(2013, 3, 17)),
             has_entry('_week_start_at', d(2013, 3, 24)),
-            has_entry('_week_start_at', d(2013, 3, 17))
         ))
