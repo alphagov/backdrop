@@ -52,6 +52,7 @@ def step(context, n):
 
 step_matcher("parse")
 
+
 def parse_position(nth, data):
     match = re.compile(r'\d+').match(nth)
     if match:
@@ -62,6 +63,7 @@ def parse_position(nth, data):
         return 0
     else:
         raise IndexError(nth)
+
 
 @then('the "{nth}" result should be "{expected_json}"')
 def step(context, nth, expected_json):
@@ -76,6 +78,7 @@ def step(context, nth, key, value):
     the_data = json.loads(context.response.data)['data']
     i = parse_position(nth, the_data)
     assert_that(the_data[i][key], equal_to(value))
+
 
 @then('the "{nth}" result should have "{key}" equaling the integer "{value}"')
 def step(context, nth, key, value):
