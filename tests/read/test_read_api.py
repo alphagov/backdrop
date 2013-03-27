@@ -61,11 +61,11 @@ class ReadApiTestCase(unittest.TestCase):
     def test_sort_query_is_executed(self, mock_query):
         mock_query.return_value = None
         self.app.get(
-            '/foo?sort=value:ascending'
+            '/foo?sort_by=value:ascending'
         )
-        mock_query.assert_called_with(sort=["value", "ascending"])
+        mock_query.assert_called_with(sort_by=["value", "ascending"])
 
         self.app.get(
-            '/foo?sort=value:descending'
+            '/foo?sort_by=value:descending'
         )
-        mock_query.assert_called_with(sort=["value", "descending"])
+        mock_query.assert_called_with(sort_by=["value", "descending"])

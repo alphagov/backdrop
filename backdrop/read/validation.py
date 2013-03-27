@@ -22,10 +22,10 @@ def validate_request_args(request_args):
     if "group_by" in request_args:
         if request_args["group_by"].startswith("_"):
             return invalid('Cannot group by internal fields')
-    if 'sort' in request_args:
-        if request_args['sort'].find(':') < 0:
+    if 'sort_by' in request_args:
+        if request_args['sort_by'].find(':') < 0:
             return invalid('sort has invalid argument')
-        sort_order = request_args['sort'].split(':', 1)[1]
+        sort_order = request_args['sort_by'].split(':', 1)[1]
         if sort_order not in ['ascending', 'descending']:
             return invalid('unknown sort order')
 

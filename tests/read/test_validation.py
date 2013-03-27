@@ -50,18 +50,18 @@ class TestRequestValidation(TestCase):
 
     def test_accepts_ascending_sort_order(self):
         validation_result = validate_request_args({
-            'sort': 'foo:ascending',
+            'sort_by': 'foo:ascending',
         })
         assert_that( validation_result.is_valid, is_(True) )
 
     def test_accepts_descending_sort_order(self):
         validation_result = validate_request_args({
-            'sort': 'foo:descending',
+            'sort_by': 'foo:descending',
         })
         assert_that( validation_result.is_valid, is_(True) )
 
     def test_rejects_unknown_sort_order(self):
         validation_result = validate_request_args({
-            'sort': 'foo:random',
+            'sort_by': 'foo:random',
         })
         assert_that( validation_result.is_valid, is_(False) )

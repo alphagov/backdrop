@@ -78,18 +78,18 @@ class Test_parse_request_args(unittest.TestCase):
 
     def test_sort_is_parsed(self):
         request_args = MultiDict([
-            ("sort", "foo:ascending")])
+            ("sort_by", "foo:ascending")])
 
         args = parse_request_args(request_args)
 
-        assert_that(args['sort'], is_(["foo", "ascending"]))
+        assert_that(args['sort_by'], is_(["foo", "ascending"]))
 
     def test_sort_will_use_first_argument_only(self):
         request_args = MultiDict([
-            ("sort", "foo:descending"),
-            ("sort", "foo:ascending"),
+            ("sort_by", "foo:descending"),
+            ("sort_by", "foo:ascending"),
         ])
 
         args = parse_request_args(request_args)
 
-        assert_that(args['sort'], is_(["foo", "descending"]))
+        assert_that(args['sort_by'], is_(["foo", "descending"]))
