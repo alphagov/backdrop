@@ -88,7 +88,7 @@ Feature: the performance platform read api
          when I go to "/weekly?period=week&group_by=name"
          then I should get back a status of "200"
          and the JSON should have "2" results
-         and the "1st" result should be "{"_count": 3.0, "_group_count": 2.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00", "name": { "alpha": { "_count" : 2.0 }, "beta": { "_count" : 1.0 } } }"
+         and the "1st" result should have "values" with item "{"_start_at": "2013-03-11T00:00:00+00:00", "_end_at": "2013-03-18T00:00:00+00:00", "_count": 2.0}"
 
     Scenario: grouping data by time period (week) and a name that doesn't exist
         Given "stored_timestamps_for_filtering.json" is in "weekly" bucket

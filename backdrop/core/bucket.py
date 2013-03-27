@@ -29,11 +29,19 @@ class Bucket(object):
     def execute_weekly_group_query(self, key2, query):
         key1 = '_week_start_at'
         result = []
-        cursor = self.repository.multi_group(key1, key2, query)
+        cursor = self.repository.multi_group(key2, key1, query)
         for doc in cursor:
-            week_start_at = utc(doc.pop('_week_start_at'))
-            doc['_start_at'] = week_start_at
-            doc['_end_at'] = week_start_at + datetime.timedelta(days=7)
+            time_series = doc.pop("_week_start_at")
+            doc['values'] = []
+            for start_at, value in sorted(time_series.items()):
+                start_at = utc(start_at)
+                value.update({
+                    "_start_at": start_at,
+                    "_end_at": start_at + datetime.timedelta(days=7)
+                })
+
+                doc['values'].append(value)
+
             result.append(doc)
         return result
 

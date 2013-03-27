@@ -85,3 +85,10 @@ def step(context, nth, key, value):
     the_data = json.loads(context.response.data)['data']
     i = parse_position(nth, the_data)
     assert_that(the_data[i][key], equal_to(int(value)))
+
+
+@then('the "{nth}" result should have "{key}" with item "{value}"')
+def step(context, nth, key, value):
+    the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i][key], has_item(json.loads(value)))

@@ -149,47 +149,55 @@ class TestBucket(unittest.TestCase):
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
-                "_week_start_at": d(2013, 1, 7, 0, 0, 0),
-                "some_group": {
-                    "val1": {
-                        "_count": 1
-                    },
-                    "val2": {
-                        "_count": 2
-                    }
-                }
+                "_week_start_at": {
+                    d(2013, 1, 7, 0, 0, 0): { "_count": 1 },
+                    d(2013, 1, 14, 0, 0, 0): { "_count": 5 }
+                },
+                "_count": 6,
+                "_group_count": 2,
+                "some_group": "val1",
             },
             {
-                "_week_start_at": d(2013, 1, 14, 0, 0, 0),
-                "some_group": {
-                    "val1": {
-                        "_count": 5
-                    },
-                    "val2": {
-                        "_count": 6
-                    }
-                }
+                "_week_start_at": {
+                    d(2013, 1, 7, 0, 0, 0): { "_count": 2 },
+                    d(2013, 1, 14, 0, 0, 0): { "_count": 6 }
+                },
+                "_count": 8,
+                "_group_count": 2,
+                "some_group": "val2",
             }
         ]
         query_result = self.bucket.query(period="week", group_by="some_group")
         assert_that(query_result, has_length(2))
-        assert_that(query_result, has_item(has_entry(
-            "some_group", {
-                "val1": {"_count": 1},
-                "val2": {"_count": 2}
-            }
-        )))
-        assert_that(query_result, has_item(has_entry(
-            "some_group", {
-                "val1": {"_count": 5},
-                "val2": {"_count": 6}
-            }
-        )))
-        assert_that(query_result, has_item(has_entry(
-            "_start_at", d_tz(2013, 1, 7, 0, 0, 0))))
-        assert_that(query_result, has_item(has_entry(
-            "_end_at", d_tz(2013, 1, 14, 0, 0, 0))))
-        assert_that(query_result, has_item(has_entry(
-            "_start_at", d_tz(2013, 1, 14, 0, 0, 0))))
-        assert_that(query_result, has_item(has_entry(
-            "_end_at", d_tz(2013, 1, 21, 0, 0, 0))))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 7, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_count": 1
+            }),
+            "some_group": "val1"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 21, 0, 0, 0),
+                "_count": 5
+            }),
+            "some_group": "val1"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 7, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_count": 2
+            }),
+            "some_group": "val2"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 21, 0, 0, 0),
+                "_count": 6
+            }),
+            "some_group": "val2"
+        })))
