@@ -47,9 +47,9 @@ class Bucket(object):
         result = [self._period_group(doc) for doc in cursor]
         return result
 
-    def execute_query(self, query):
+    def execute_query(self, query, sort=None):
         result = []
-        cursor = self.repository.find(query)
+        cursor = self.repository.find(query, sort=sort)
         for doc in cursor:
             # stringify the id
             doc['_id'] = str(doc['_id'])
@@ -60,6 +60,7 @@ class Bucket(object):
 
     def query(self, **params):
         query = build_query(**params)
+        sort_by = params.get('sort_by')
 
         if 'group_by' in params and 'period' in params:
             result = self.execute_weekly_group_query(params['group_by'], query)
@@ -68,6 +69,6 @@ class Bucket(object):
         elif 'period' in params:
             result = self.execute_period_query(query)
         else:
-            result = self.execute_query(query)
+            result = self.execute_query(query, sort_by)
 
         return result
