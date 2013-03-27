@@ -67,9 +67,11 @@ class TestBucket(unittest.TestCase):
         self.mock_repository.group.assert_called_once_with("name", {})
 
         assert_that(query_result,
-                    has_item(has_entries({'Max': equal_to(3)})))
+                    has_item(has_entries({'name': equal_to('Max'),
+                                          '_count': equal_to(3)})))
         assert_that(query_result,
-                    has_item(has_entries({'Gareth': equal_to(2)})))
+                    has_item(has_entries({'name': equal_to('Gareth'),
+                                          '_count': equal_to(2)})))
 
     def test_query_with_start_at(self):
         self.bucket.query(start_at = d(2013, 4, 1, 12, 0, 0))
