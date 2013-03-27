@@ -31,5 +31,5 @@ python -m coverage.__main__ xml --include=backdrop*
 behave --tags=-wip --stop
 display_result $? 2 "Feature tests"
 
-$(dirname $0)/pep-it.sh > pep8.out
+$(dirname $0)/pep-it.sh | tee pep8.out
 display_result $? 3 "Code style check"
