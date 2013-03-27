@@ -467,6 +467,16 @@ class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
             "suite", {}, sort=["bleh", "ascending"]
         )
 
+    def test_sorted_group_by_with_limit(self):
+        self.setup_playing_cards()
+
+        result = self.repo.group(
+            "suite", {}, sort=["_count", "ascending"], limit=1)
+
+        assert_that(list(result), contains(
+            has_entry("suite", "diamonds")
+        ))
+
     def test_periodic_group_is_sorted_by__week_start_at(self):
         self.mongo_collection.save({"_week_start_at": d(2013, 3, 17),
                                     'val': 1})

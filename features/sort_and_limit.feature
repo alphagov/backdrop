@@ -24,12 +24,12 @@ Feature: sorting and limiting
 
 
 
-    Scenario: Sort grouped query on a key
+    Scenario: Sort grouped query on a key and limit
         Given "sort_and_limit.json" is in "foo" bucket
-         when I go to "/foo?group_by=type&sort_by=_count:ascending"
+         when I go to "/foo?group_by=type&sort_by=_count:ascending&limit=1"
          then I should get back a status of "200"
+          and the JSON should have "1" result
           and the "1st" result should have "type" equaling "domestic"
-          and the "2nd" result should have "type" equaling "wild"
 
 # Scenario: Group and Sort the data on a key that has a numeric value in ascending order  
          

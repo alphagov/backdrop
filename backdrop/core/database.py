@@ -71,10 +71,10 @@ class Repository(object):
 
         return cursor
 
-    def group(self, group_by, query, sort=None):
+    def group(self, group_by, query, sort=None, limit=None):
         if sort is not None:
             self._validate_sort(sort)
-        return self._group([group_by], query, sort)
+        return self._group([group_by], query, sort, limit)
 
     def save(self, obj):
         self._collection.save(obj)
@@ -97,7 +97,7 @@ class Repository(object):
 
         return result
 
-    def _group(self, keys, query, sort=None):
+    def _group(self, keys, query, sort=None, limit=None):
         results = self._collection.group(
             key=keys,
             condition=query,
@@ -121,6 +121,8 @@ class Repository(object):
                 results.sort(cmp=sorter, key=lambda a: a[sort[0]])
             except KeyError:
                 raise InvalidSortError('Invalid sort key {0}'.format(sort[0]))
+        if limit is not None:
+            results = results[:limit]
 
         return results
 
