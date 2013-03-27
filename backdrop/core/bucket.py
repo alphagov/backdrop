@@ -39,7 +39,8 @@ class Bucket(object):
 
     def execute_grouped_query(self, group_by, query):
         cursor = self.repository.group(group_by, query)
-        result = [{doc[group_by]: doc['_count']} for doc in cursor]
+        result = [{group_by: doc[group_by], '_count': doc['_count']} for doc
+                  in cursor]
         return result
 
     def execute_period_query(self, query):

@@ -46,22 +46,22 @@ Feature: the performance platform read api
          when I go to "/foo?group_by=authority"
          then I should get back a status of "200"
           and the JSON should have "2" results
-          and the "1st" result should be "{"Westminster": 4}"
-          and the "2nd" result should be "{"Camden": 2}"
+          and the "1st" result should be "{"authority": "Westminster", "_count": 4}"
+          and the "2nd" result should be "{"authority": "Camden", "_count": 2}"
 
     Scenario: extracting data for a representation
         Given "licensing_2.json" is in "foo" bucket
          when I go to "/foo?group_by=authority&filter_by=licence_name:Temporary%20events%20notice"
          then I should get back a status of "200"
           and the JSON should have "2" results
-          and the "1st" result should be "{"Westminster": 3}"
+          and the "1st" result should be "{"authority": "Westminster", "_count": 3}"
 
         Given "licensing_2.json" is in "foo" bucket
          when I go to "/foo?group_by=licence_name&filter_by=authority:Westminster"
          then I should get back a status of "200"
           and the JSON should have "2" results
-          and the "1st" result should be "{"Temporary events notice": 3}"
-          and the "2nd" result should be "{"Cat herding licence": 1}"
+          and the "1st" result should be "{"licence_name": "Temporary events notice", "_count": 3}"
+          and the "2nd" result should be "{"licence_name": "Cat herding licence", "_count": 1}"
 
     Scenario: invalid request parameters
          When I go to "/foo?start_at=not+a+date"
