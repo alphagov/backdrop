@@ -54,7 +54,8 @@ class TestBucket(unittest.TestCase):
 
         query_result = self.bucket.query(group_by = "name")
 
-        self.mock_repository.group.assert_called_once_with("name", {})
+        self.mock_repository.group.assert_called_once_with(
+            "name", {}, None)
 
         assert_that(query_result,
                     has_item(has_entries({'name': equal_to('Max'),
@@ -62,6 +63,20 @@ class TestBucket(unittest.TestCase):
         assert_that(query_result,
                     has_item(has_entries({'name': equal_to('Gareth'),
                                           '_count': equal_to(2)})))
+
+    def test_sorted_group_by_query(self):
+        self.mock_repository.group.return_value = [
+            {"name": "Max", "_count": 3 },
+            {"name": "Gareth", "_count": 2 }
+        ]
+
+        self.bucket.query(
+            group_by="name",
+            sort_by=["name", "ascending"]
+        )
+
+        self.mock_repository.group.assert_called_once_with(
+            "name", {}, ["name", "ascending"])
 
     def test_query_with_start_at(self):
         self.bucket.query(start_at = d(2013, 4, 1, 12, 0, 0))
@@ -97,6 +112,11 @@ class TestBucket(unittest.TestCase):
         self.mock_repository.find.assert_called_with(
             {}, sort=["keyname", "descending"], limit=None
         )
+
+    def test_query_with_limit(self):
+        self.bucket.query(limit=5)
+
+        self.mock_repository.find.assert_called_with({}, sort=None, limit=5)
 
     def test_week_query(self):
         self.mock_repository.group.return_value = [
@@ -168,8 +188,3 @@ class TestBucket(unittest.TestCase):
             "_start_at", d_tz(2013, 1, 14, 0, 0, 0))))
         assert_that(query_result, has_item(has_entry(
             "_end_at", d_tz(2013, 1, 21, 0, 0, 0))))
-
-    def test_query_with_limit(self):
-        self.bucket.query(limit=5)
-
-        self.mock_repository.find.assert_called_with({}, sort=None, limit=5)
