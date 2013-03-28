@@ -211,6 +211,34 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             has_entry("_count", 1),
         ))
 
+    def test_sorted_multi_group_query_ascending_with_limit(self):
+        results = self.repo.multi_group(
+            "person",
+            "_week_start_at",
+            {},
+            sort=["_count", "ascending"],
+            limit=2
+        )
+
+        assert_that(results, contains(
+            has_entry("_count", 1),
+            has_entry("_count", 1),
+        ))
+
+    def test_sorted_multi_group_query_descending_with_limit(self):
+        results = self.repo.multi_group(
+            "person",
+            "_week_start_at",
+            {},
+            sort=["_count", "descending"],
+            limit=2
+        )
+
+        assert_that(results, contains(
+            has_entry("_count", 2),
+            has_entry("_count", 1),
+        ))
+
 
 class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def setup_numeric_values(self):

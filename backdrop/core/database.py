@@ -77,10 +77,10 @@ class Repository(object):
     def save(self, obj):
         self._collection.save(obj)
 
-    def multi_group(self, key1, key2, query, sort=None):
+    def multi_group(self, key1, key2, query, sort=None, limit=None):
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._group([key1, key2], query, sort)
+        results = self._group([key1, key2], query, sort, limit)
 
         return results
 

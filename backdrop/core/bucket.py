@@ -26,11 +26,11 @@ class Bucket(object):
             '_count': doc['_count']
         }
 
-    def execute_weekly_group_query(self, key2, query, sort=None):
+    def execute_weekly_group_query(self, key2, query, sort=None, limit=None):
         key1 = '_week_start_at'
         result = []
         cursor = self.repository.multi_group(
-            key2, key1, query, sort=sort)
+            key2, key1, query, sort=sort, limit=limit)
         for doc in cursor:
             doc['values'] = doc['_subgroup']
             del doc['_subgroup']
@@ -74,7 +74,8 @@ class Bucket(object):
         limit = params.get('limit')
 
         if group_by and 'period' in params:
-            result = self.execute_weekly_group_query(group_by, query, sort_by)
+            result = self.execute_weekly_group_query(
+                group_by, query, sort_by, limit)
         elif group_by:
             result = self.execute_grouped_query(
                 group_by, query, sort_by, limit)

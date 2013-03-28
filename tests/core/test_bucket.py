@@ -255,4 +255,42 @@ class TestBucket(unittest.TestCase):
         )
 
         self.mock_repository.multi_group.assert_called_with(
-            "some_group", "_week_start_at", {}, sort=["_count", "descending"])
+            "some_group",
+            "_week_start_at",
+            {},
+            sort=["_count", "descending"],
+            limit=None
+        )
+
+    def test_sorted_week_and_group_query_with_limit(self):
+        self.mock_repository.multi_group.return_value = [
+            {
+                "some_group": "val1",
+                "_count": 6,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 1
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 5
+                    }
+                ]
+            }
+        ]
+
+        self.bucket.query(
+            period="week",
+            group_by="some_group",
+            sort_by=["_count", "descending"],
+            limit=1
+        )
+
+        self.mock_repository.multi_group.assert_called_with(
+            "some_group",
+            "_week_start_at",
+            {},
+            sort=["_count", "descending"],
+            limit=1)
