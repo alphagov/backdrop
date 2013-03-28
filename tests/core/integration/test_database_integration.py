@@ -60,277 +60,125 @@ class TestRepositoryIntegration(RepositoryIntegrationTest):
             has_entries({"name": "John", "plays": "guitar"}),
         ))
 
-    def test_group(self):
-        self.mongo_collection.save({"name": "George", "plays": "guitar"})
-        self.mongo_collection.save({"name": "John", "plays": "guitar"})
-        self.mongo_collection.save({"name": "Paul", "plays": "bass"})
-        self.mongo_collection.save({"name": "Ringo", "plays": "drums"})
 
-        results = self.repo.group("plays", {})
+class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
+    def setUp(self):
+        super(TestRepositoryIntegrationGrouping, self).setUp()
+        people = ["Jack", "Jill", "John", "Jane"]
+        places = ["Kettering", "Kew", "Kennington", "Kingston"]
+        times = [d_tz(2013, 3, 11), d_tz(2013, 3, 18), d_tz(2013, 3, 25)]
+
+        self._save_location("Jack", "Kettering", d_tz(2013, 3, 11))
+        self._save_location("Jill", "Kennington", d_tz(2013, 3, 25))
+        self._save_location("John", "Kettering", d_tz(2013, 3, 18))
+        self._save_location("John", "Kennington", d_tz(2013, 3, 11))
+        self._save_location("Jane", "Kingston", d_tz(2013, 3, 18))
+
+    def _save_location(self, person, place, time):
+        self.mongo_collection.save({
+            "person": person,
+            "place": place,
+            "_week_start_at": time
+        })
+
+    def tearDown(self):
+        super(TestRepositoryIntegrationGrouping, self).tearDown()
+
+    def test_group(self):
+        results = self.repo.group("place", {})
 
         assert_that(results, only_contains(
-            has_entries({"plays": "guitar", "_count": 2}),
-            has_entries({"plays": "bass", "_count": 1}),
-            has_entries({"plays": "drums", "_count": 1})
+            has_entries({"place": "Kettering", "_count": 2}),
+            has_entries({"place": "Kennington", "_count": 2}),
+            has_entries({"place": "Kingston", "_count": 1})
         ))
 
     def test_group_with_query(self):
-        self.mongo_collection.save({"value": '1', "suite": "hearts"})
-        self.mongo_collection.save({"value": '1', "suite": "diamonds"})
-        self.mongo_collection.save({"value": '1', "suite": "clubs"})
-        self.mongo_collection.save({"value": 'K', "suite": "hearts"})
-        self.mongo_collection.save({"value": 'K', "suite": "diamonds"})
-
-        results = self.repo.group("value", {"suite": "diamonds"})
+        results = self.repo.group("place", {"person": "John"})
 
         assert_that(results, only_contains(
-            {"value": "1", "_count": 1},
-            {"value": "K", "_count": 1}
+            {"place": "Kettering", "_count": 1},
+            {"place": "Kennington", "_count": 1}
         ))
 
     def test_key1_is_pulled_to_the_top_of_outer_group(self):
-        self.mongo_collection.save({
-            "_week_start_at": d_tz(2013, 3, 17, 0, 0, 0),
-            "a": 1,
-            "b": 2
-        })
-        self.mongo_collection.save({
-            "_week_start_at": d_tz(2013, 3, 24, 0, 0, 0),
-            "a": 1,
-            "b": 2
-        })
+        results = self.repo.multi_group("_week_start_at", "person", {})
 
-        result = self.repo.multi_group("_week_start_at", "a", {})
-        assert_that(result, has_item(has_entry(
-            "_week_start_at", datetime.datetime(2013, 3, 17, 0, 0, 0)
+        assert_that(results, has_item(has_entry(
+            "_week_start_at", d(2013, 3, 11)
         )))
-        assert_that(result, has_item(has_entry(
-            "_week_start_at", datetime.datetime(2013, 3, 24, 0, 0, 0)
+        assert_that(results, has_item(has_entry(
+            "_week_start_at", d(2013, 3, 25)
         )))
 
     def test_should_use_second_key_for_inner_group_name(self):
-        self.mongo_collection.save({
-            "_week_start_at": d_tz(2013, 3, 17, 0, 0, 0),
-            "a": 1,
-            "b": 2
-        })
-        self.mongo_collection.save({
-            "_week_start_at": d_tz(2013, 3, 24, 0, 0, 0),
-            "a": 1,
-            "b": 2
-        })
+        results = self.repo.multi_group("_week_start_at", "person", {})
 
-        result = self.repo.multi_group("_week_start_at", "a", {})
-        assert_that(result, has_item(has_entry(
-            "a", {1: {"_count": 1}}
+        assert_that(results, has_item(has_entry(
+            "person", {"Jill": {"_count": 1}}
         )))
 
     def test_count_of_outer_elements_should_be_added(self):
-        self.mongo_collection.save({
-            "_week_start_at": d_tz(2013, 3, 17, 0, 0, 0),
-            "a": 1,
-            "b": 2
-        })
-        self.mongo_collection.save({
-            "_week_start_at": d_tz(2013, 3, 24, 0, 0, 0),
-            "a": 1,
-            "b": 2
-        })
+        results = self.repo.multi_group("_week_start_at", "person", {})
 
-        result = self.repo.multi_group("_week_start_at", "a", {})
-        assert_that(result, has_item(has_entry(
+        assert_that(results, has_item(has_entry(
             "_count", 1
         )))
 
     def test_grouping_by_multiple_keys(self):
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "diamonds",
-                                    "hand": 1})
+        results = self.repo.multi_group("person", "place", {})
 
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": 'Q',
-                                    "suite": "diamonds",
-                                    "hand": 2})
-
-        result = self.repo.multi_group("value", "suite", {})
-
-        assert_that(result, has_items(
-            {
-                "value": '1',
-                "_count": 6,
-                "_group_count": 3,
-                "suite": {
-                    "hearts": {
-                        "_count": 2.0
-                    },
-                    "clubs": {
-                        "_count": 2.0
-                    },
-                    "diamonds": {
-                        "_count": 2.0
-                    }
-                    }
-            },
-            {
-                "value": 'Q',
-                "_count": 1,
-                "_group_count": 1,
-                "suite": {
-                    "diamonds": {
-                        "_count": 1.0
-                    }
-                }
-            },
-            {
-                "value": 'K',
-                "_count": 3,
-                "_group_count": 2,
-                "suite": {
-                    "hearts": {
-                        "_count": 2.0
-                    },
-                    "diamonds": {
-                        "_count": 1.0
-                    }
-                }
+        assert_that(results, has_item({
+            "person": "Jack",
+            "_count": 1,
+            "_group_count": 1,
+            "place": {
+                "Kettering": {"_count": 1}
             }
-        ))
+        }))
+        assert_that(results, has_item({
+            "person": "Jill",
+            "_count": 1,
+            "_group_count": 1,
+            "place": {
+                "Kennington": {"_count": 1}
+            }
+        }))
+        assert_that(results, has_item({
+            "person": "John",
+            "_count": 2,
+            "_group_count": 2,
+            "place": {
+                "Kettering": {"_count": 1},
+                "Kennington": {"_count": 1}
+            }
+        }))
 
     def test_grouping_on_non_existent_keys(self):
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "diamonds",
-                                    "hand": 1})
+        results = self.repo.group("wibble", {})
 
-        result1 = self.repo.group('wibble', {})
-
-        assert_that(result1, is_([]))
+        assert_that(results, is_([]))
 
     def test_multi_grouping_on_non_existent_keys(self):
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "diamonds",
-                                    "hand": 1})
-
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": 'Q',
-                                    "suite": "diamonds",
-                                    "hand": 2})
-
-        result1 = self.repo.multi_group("wibble", "value", {})
-        result2 = self.repo.multi_group("value", "wibble", {})
+        result1 = self.repo.multi_group("wibble", "wobble", {})
+        result2 = self.repo.multi_group("wibble", "person", {})
+        result3 = self.repo.multi_group("person", "wibble", {})
 
         assert_that(result1, is_([]))
         assert_that(result2, is_([]))
+        assert_that(result3, is_([]))
 
     def test_multi_grouping_on_empty_collection_returns_empty_list(self):
+        self.mongo_collection.drop()
         assert_that(list(self.mongo_collection.find({})), is_([]))
         assert_that(self.repo.multi_group('a', 'b', {}), is_([]))
 
     def test_multi_grouping_on_same_key_raises_exception(self):
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 1})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "diamonds",
-                                    "hand": 1})
-
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "hearts",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "diamonds",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": '1',
-                                    "suite": "clubs",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": 'K',
-                                    "suite": "hearts",
-                                    "hand": 2})
-        self.mongo_collection.save({"value": 'Q',
-                                    "suite": "diamonds",
-                                    "hand": 2})
-
-        try:
-            self.repo.multi_group("suite", "suite", {})
-            #fail if exception not raised
-            assert_that(False)
-        except GroupingError, e:
-            assert_that(str(e), is_("Cannot group on two equal keys"))
+        self.assertRaises(GroupingError, self.repo.multi_group,
+                          "person", "person", {})
 
 
 class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
-    def setUp(self):
-        super(TestRepositoryIntegrationSorting, self).setUp()
-
-    def tearDown(self):
-        super(TestRepositoryIntegrationSorting, self).tearDown()
-
     def setup_numeric_values(self):
         self.mongo_collection.save({"value": 6})
         self.mongo_collection.save({"value": 2})
