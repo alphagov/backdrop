@@ -104,3 +104,9 @@ class TestRequestValidation(TestCase):
             "group_by": "foo"
         })
         assert_that( validation_result.is_valid, is_(True) )
+
+    def test_unrecognised_parameters_are_not_allowed(self):
+        validation_result = validate_request_args({
+            "unrecognised_parameter": "value"
+        })
+        assert_that( validation_result.is_valid, is_(False) )
