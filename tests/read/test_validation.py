@@ -72,14 +72,21 @@ class TestRequestValidation(TestCase):
         })
         assert_that( validation_result.is_valid, is_(True) )
 
-    def test_rejects_invalid_limit(self):
+    def test_rejects_non_integer_limit(self):
         validation_result = validate_request_args({
             'limit': 'not_a_number'
         })
         assert_that( validation_result.is_valid, is_(False) )
 
-    def test_rejects_invalid_limit(self):
+    def test_rejects_negative_limit(self):
         validation_result = validate_request_args({
             'limit': '-3'
+        })
+        assert_that( validation_result.is_valid, is_(False) )
+
+    def test_rejects_sort_being_provided_with_period_query(self):
+        validation_result = validate_request_args({
+            "sort_by": "foo:ascending",
+            "period": "week"
         })
         assert_that( validation_result.is_valid, is_(False) )

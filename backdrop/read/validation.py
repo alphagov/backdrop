@@ -19,6 +19,8 @@ def validate_request_args(request_args):
         if "group_by" in request_args:
             if "_week_start_at" == request_args["group_by"]:
                 return invalid('Cannot group on two equal keys')
+        if "sort_by" in request_args:
+            return invalid('Period queries are sorted by time')
     if "group_by" in request_args:
         if request_args["group_by"].startswith("_"):
             return invalid('Cannot group by internal fields')
