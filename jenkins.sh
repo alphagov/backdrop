@@ -24,6 +24,8 @@ source $VIRTUALENV_DIR/bin/activate
 pip install -r requirements.txt
 pip install -r requirements_for_tests.txt
 
+rm coverage.xml .coverage nosetests.xml
+
 nosetests -v --with-xunit --with-coverage --cover-package=backdrop --cover-inclusive
 display_result $? 1 "Unit tests"
 python -m coverage.__main__ xml --include=backdrop*
