@@ -75,3 +75,30 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['group_by'], is_('foobar'))
+
+    def test_sort_is_parsed(self):
+        request_args = MultiDict([
+            ("sort_by", "foo:ascending")])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['sort_by'], is_(["foo", "ascending"]))
+
+    def test_sort_will_use_first_argument_only(self):
+        request_args = MultiDict([
+            ("sort_by", "foo:descending"),
+            ("sort_by", "foo:ascending"),
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['sort_by'], is_(["foo", "descending"]))
+
+    def test_limit_is_parsed(self):
+        request_args = MultiDict([
+            ("limit", "123")
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['limit'], is_(123))

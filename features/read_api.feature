@@ -18,7 +18,7 @@ Feature: the performance platform read api
          when I go to "/foo?start_at=2012-12-13T01:01:01%2B00:00"
          then I should get back a status of "200"
           and the JSON should have "4" results
-          and the "1st" result should be "{"_timestamp": "2012-12-19T01:01:01+00:00", "licence_name": "Temporary events notice", "interaction": "success", "authority": "Westminster", "type": "success", "_id": "1238"}"
+          and the "1st" result should be "{"_timestamp": "2012-12-13T01:01:01+00:00", "authority": "Westminster", "interaction": "success", "licence_name": "Temporary events notice", "_id": "1236", "type": "success"}"
 
     Scenario: querying for data BEFORE a certain point
         Given "licensing.json" is in "foo" bucket
@@ -88,7 +88,7 @@ Feature: the performance platform read api
          when I go to "/weekly?period=week&group_by=name"
          then I should get back a status of "200"
          and the JSON should have "2" results
-         and the "1st" result should be "{"_count": 3.0, "_group_count": 2.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00", "name": { "alpha": { "_count" : 2.0 }, "beta": { "_count" : 1.0 } } }"
+         and the "1st" result should have "values" with item "{"_start_at": "2013-03-11T00:00:00+00:00", "_end_at": "2013-03-18T00:00:00+00:00", "_count": 2.0}"
 
     Scenario: grouping data by time period (week) and a name that doesn't exist
         Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
@@ -100,16 +100,13 @@ Feature: the performance platform read api
         Given "licensing.json" is in "weekly" bucket
          when I go to "/weekly?period=week&group_by=_week_start_at"
          then I should get back a status of "400"
-          and I should get back a message: "{ "status": "error", "message": "Cannot group on two equal keys" }"
 
     Scenario: grouping data by internal fields is not allowed
         Given "licensing.json" is in "weekly" bucket
          when I go to "/weekly?group_by=_anything"
          then I should get back a status of "400"
-          and I should get back a message: "{ "status": "error", "message": "Cannot group by internal fields" }"
 
     Scenario: filtering by a field name starting with "$" is not allowed because of security reasons
         Given "licensing.json" is in "weekly" bucket
          when I go to "/weekly?filter_by=$where:function(){}"
          then I should get back a status of "400"
-          and I should get back a message: "{ "status": "error", "message": "filter_by is not valid" }"

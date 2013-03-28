@@ -30,6 +30,7 @@ def parse_request_args(request_args):
 
     if 'start_at' in request_args:
         args['start_at'] = parse_time_string(request_args['start_at'])
+
     if 'end_at' in request_args:
         args['end_at'] = parse_time_string(request_args['end_at'])
 
@@ -44,6 +45,11 @@ def parse_request_args(request_args):
     if 'group_by' in request_args:
         args['group_by'] = request_args['group_by']
 
+    if 'sort_by' in request_args:
+        args['sort_by'] = request_args['sort_by'].split(':', 1)
+
+    if 'limit' in request_args:
+        args['limit'] = int(request_args['limit'])
     return args
 
 

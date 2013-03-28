@@ -5,17 +5,7 @@ from mock import Mock, call
 import pytz
 from backdrop.core import bucket
 from backdrop.core.records import Record
-
-
-def d(year, month, day, hour, minute, second):
-    return datetime.datetime(year=year, month=month, day=day,
-                             hour=hour, minute=minute, second=second)
-
-
-def d_tz(year, month, day, hour, minute, second):
-    return datetime.datetime(year=year, month=month, day=day,
-                             hour=hour, minute=minute, second=second,
-                             tzinfo=pytz.UTC)
+from tests.support.test_helpers import d, d_tz
 
 
 class TestBucket(unittest.TestCase):
@@ -64,7 +54,8 @@ class TestBucket(unittest.TestCase):
 
         query_result = self.bucket.query(group_by = "name")
 
-        self.mock_repository.group.assert_called_once_with("name", {})
+        self.mock_repository.group.assert_called_once_with(
+            "name", {}, None, None)
 
         assert_that(query_result,
                     has_item(has_entries({'name': equal_to('Max'),
@@ -73,16 +64,37 @@ class TestBucket(unittest.TestCase):
                     has_item(has_entries({'name': equal_to('Gareth'),
                                           '_count': equal_to(2)})))
 
+    def test_sorted_group_by_query(self):
+        self.bucket.query(
+            group_by="name",
+            sort_by=["name", "ascending"]
+        )
+
+        self.mock_repository.group.assert_called_once_with(
+            "name", {}, ["name", "ascending"], None)
+
+    def test_sorted_group_by_query_with_limit(self):
+        self.bucket.query(
+            group_by="name",
+            sort_by=["name", "ascending"],
+            limit=100
+        )
+
+        self.mock_repository.group.assert_called_once_with(
+            "name", {}, ["name", "ascending"], 100)
+
     def test_query_with_start_at(self):
         self.bucket.query(start_at = d(2013, 4, 1, 12, 0, 0))
         self.mock_repository.find.assert_called_with(
-            {"_timestamp": {"$gte": d(2013, 4, 1, 12, 0, 0)}})
+            {"_timestamp": {"$gte": d(2013, 4, 1, 12, 0, 0)}},
+            sort=None, limit=None)
 
     def test_query_with_end_at(self):
         self.bucket.query(end_at = d(2013, 4, 1, 12, 0, 0))
 
         self.mock_repository.find.assert_called_with(
-            {"_timestamp": {"$lt": d(2013, 4, 1, 12, 0, 0)}})
+            {"_timestamp": {"$lt": d(2013, 4, 1, 12, 0, 0)}},
+            sort=None, limit=None)
 
     def test_query_with_start_at_and__end_at(self):
         self.bucket.query(
@@ -95,7 +107,21 @@ class TestBucket(unittest.TestCase):
                 "$gte": d(2013, 2, 1, 12, 0, 0),
                 "$lt": d(2013, 3, 1, 12, 0, 0)
             }
-        })
+        }, sort=None, limit=None)
+
+    def test_query_with_sort(self):
+        self.bucket.query(
+            sort_by=["keyname", "descending"]
+        )
+
+        self.mock_repository.find.assert_called_with(
+            {}, sort=["keyname", "descending"], limit=None
+        )
+
+    def test_query_with_limit(self):
+        self.bucket.query(limit=5)
+
+        self.mock_repository.find.assert_called_with({}, sort=None, limit=5)
 
     def test_week_query(self):
         self.mock_repository.group.return_value = [
@@ -106,7 +132,7 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(period='week')
 
         self.mock_repository.group.assert_called_once_with(
-            "_week_start_at", {})
+            "_week_start_at", {}, limit=None)
 
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
@@ -120,50 +146,159 @@ class TestBucket(unittest.TestCase):
             "_count": equal_to(1)
         })))
 
+    def test_week_query_with_limit(self):
+        self.mock_repository.group.return_value = []
+
+        self.bucket.query(period='week', limit=1)
+
+        self.mock_repository.group.assert_called_once_with(
+            "_week_start_at", {}, limit=1)
+
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
-                "_week_start_at": d(2013, 1, 7, 0, 0, 0),
-                "some_group": {
-                    "val1": {
+                "some_group": "val1",
+                "_count": 6,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
                         "_count": 1
                     },
-                    "val2": {
-                        "_count": 2
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 5
                     }
-                }
+                ]
             },
             {
-                "_week_start_at": d(2013, 1, 14, 0, 0, 0),
-                "some_group": {
-                    "val1": {
-                        "_count": 5
+                "some_group": "val2",
+                "_count": 8,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 2
                     },
-                    "val2": {
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
                         "_count": 6
                     }
-                }
+                ]
             }
         ]
         query_result = self.bucket.query(period="week", group_by="some_group")
         assert_that(query_result, has_length(2))
-        assert_that(query_result, has_item(has_entry(
-            "some_group", {
-                "val1": {"_count": 1},
-                "val2": {"_count": 2}
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 7, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_count": 1
+            }),
+            "some_group": "val1"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 21, 0, 0, 0),
+                "_count": 5
+            }),
+            "some_group": "val1"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 7, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_count": 2
+            }),
+            "some_group": "val2"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 14, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 21, 0, 0, 0),
+                "_count": 6
+            }),
+            "some_group": "val2"
+        })))
+
+    def test_sorted_week_and_group_query(self):
+        self.mock_repository.multi_group.return_value = [
+            {
+                "some_group": "val1",
+                "_count": 6,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 1
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 5
+                    }
+                ]
+            },
+            {
+                "some_group": "val2",
+                "_count": 8,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 2
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 6
+                    }
+                ]
+            },
+        ]
+
+        self.bucket.query(
+            period="week",
+            group_by="some_group",
+            sort_by=["_count", "descending"]
+        )
+
+        self.mock_repository.multi_group.assert_called_with(
+            "some_group",
+            "_week_start_at",
+            {},
+            sort=["_count", "descending"],
+            limit=None
+        )
+
+    def test_sorted_week_and_group_query_with_limit(self):
+        self.mock_repository.multi_group.return_value = [
+            {
+                "some_group": "val1",
+                "_count": 6,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 1
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 5
+                    }
+                ]
             }
-        )))
-        assert_that(query_result, has_item(has_entry(
-            "some_group", {
-                "val1": {"_count": 5},
-                "val2": {"_count": 6}
-            }
-        )))
-        assert_that(query_result, has_item(has_entry(
-            "_start_at", d_tz(2013, 1, 7, 0, 0, 0))))
-        assert_that(query_result, has_item(has_entry(
-            "_end_at", d_tz(2013, 1, 14, 0, 0, 0))))
-        assert_that(query_result, has_item(has_entry(
-            "_start_at", d_tz(2013, 1, 14, 0, 0, 0))))
-        assert_that(query_result, has_item(has_entry(
-            "_end_at", d_tz(2013, 1, 21, 0, 0, 0))))
+        ]
+
+        self.bucket.query(
+            period="week",
+            group_by="some_group",
+            sort_by=["_count", "descending"],
+            limit=1
+        )
+
+        self.mock_repository.multi_group.assert_called_with(
+            "some_group",
+            "_week_start_at",
+            {},
+            sort=["_count", "descending"],
+            limit=1)

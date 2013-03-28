@@ -1,0 +1,32 @@
+[
+	{
+		"name": "aardvark",
+		"value": 8,
+		"type": "wild"
+	},
+	{
+		"name": "buffalo",
+		"value": 7,
+		"type": "wild"
+	},
+	{
+		"name": "cat",
+		"value": 3,
+		"type": "domestic"
+	},
+	{
+		"name": "dog",
+		"value": 3,
+		"type": "domestic"
+	},
+	{
+		"name": "elephant",
+		"value": 8,
+		"type": "wild"
+	},
+	{
+		"name": "frog",
+		"value": 4,
+		"type": "wild"
+	}
+]

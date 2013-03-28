@@ -13,4 +13,4 @@ Feature: end-to-end platform test
          when I post the data to "/flavour_events"
           and I go to "/flavour_events?period=week&group_by=flavour"
          then I should get back a status of "200"
-          and the JSON should have "3" result(s)
+          and the JSON should have "4" result(s)

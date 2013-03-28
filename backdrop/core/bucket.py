@@ -26,31 +26,39 @@ class Bucket(object):
             '_count': doc['_count']
         }
 
-    def execute_weekly_group_query(self, key2, query):
-        key1 = '_week_start_at'
+    def execute_weekly_group_query(self, group_by, query, sort=None,
+                                   limit=None):
+        period_key = '_week_start_at'
         result = []
-        cursor = self.repository.multi_group(key1, key2, query)
+        cursor = self.repository.multi_group(
+            group_by, period_key, query, sort=sort, limit=limit)
         for doc in cursor:
-            week_start_at = utc(doc.pop('_week_start_at'))
-            doc['_start_at'] = week_start_at
-            doc['_end_at'] = week_start_at + datetime.timedelta(days=7)
+            doc['values'] = doc.pop('_subgroup')
+
+            for item in doc['values']:
+                start_at = utc(item.pop("_week_start_at"))
+                item.update({
+                    "_start_at": start_at,
+                    "_end_at": start_at + datetime.timedelta(days=7)
+                })
+
             result.append(doc)
         return result
 
-    def execute_grouped_query(self, group_by, query):
-        cursor = self.repository.group(group_by, query)
+    def execute_grouped_query(self, group_by, query, sort=None, limit=None):
+        cursor = self.repository.group(group_by, query, sort, limit)
         result = [{group_by: doc[group_by], '_count': doc['_count']} for doc
                   in cursor]
         return result
 
-    def execute_period_query(self, query):
-        cursor = self.repository.group('_week_start_at', query)
+    def execute_period_query(self, query, limit=None):
+        cursor = self.repository.group('_week_start_at', query, limit=limit)
         result = [self._period_group(doc) for doc in cursor]
         return result
 
-    def execute_query(self, query):
+    def execute_query(self, query, sort=None, limit=None):
         result = []
-        cursor = self.repository.find(query)
+        cursor = self.repository.find(query, sort=sort, limit=limit)
         for doc in cursor:
             # stringify the id
             doc['_id'] = str(doc['_id'])
@@ -61,14 +69,19 @@ class Bucket(object):
 
     def query(self, **params):
         query = build_query(**params)
+        sort_by = params.get('sort_by')
+        group_by = params.get('group_by')
+        limit = params.get('limit')
 
-        if 'group_by' in params and 'period' in params:
-            result = self.execute_weekly_group_query(params['group_by'], query)
-        elif 'group_by' in params:
-            result = self.execute_grouped_query(params['group_by'], query)
+        if group_by and 'period' in params:
+            result = self.execute_weekly_group_query(
+                group_by, query, sort_by, limit)
+        elif group_by:
+            result = self.execute_grouped_query(
+                group_by, query, sort_by, limit)
         elif 'period' in params:
-            result = self.execute_period_query(query)
+            result = self.execute_period_query(query, limit)
         else:
-            result = self.execute_query(query)
+            result = self.execute_query(query, sort_by, limit)
 
         return result

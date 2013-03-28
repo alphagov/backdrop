@@ -47,3 +47,60 @@ class TestRequestValidation(TestCase):
             'end_at': '2010-01-07T00:10:10+00:00',
         })
         assert_that( validation_result.is_valid, is_(True) )
+
+    def test_rejects_group_by_on_internal_field(self):
+        validation_result = validate_request_args({
+            "group_by": "_internal"
+        })
+        assert_that( validation_result.is_valid, is_(False))
+
+    def test_accepts_ascending_sort_order(self):
+        validation_result = validate_request_args({
+            'sort_by': 'foo:ascending',
+        })
+        assert_that( validation_result.is_valid, is_(True) )
+
+    def test_accepts_descending_sort_order(self):
+        validation_result = validate_request_args({
+            'sort_by': 'foo:descending',
+        })
+        assert_that( validation_result.is_valid, is_(True) )
+
+    def test_rejects_unknown_sort_order(self):
+        validation_result = validate_request_args({
+            'sort_by': 'foo:random',
+        })
+        assert_that( validation_result.is_valid, is_(False) )
+
+    def test_accepts_valid_limit(self):
+        validation_result = validate_request_args({
+            'limit': '3'
+        })
+        assert_that( validation_result.is_valid, is_(True) )
+
+    def test_rejects_non_integer_limit(self):
+        validation_result = validate_request_args({
+            'limit': 'not_a_number'
+        })
+        assert_that( validation_result.is_valid, is_(False) )
+
+    def test_rejects_negative_limit(self):
+        validation_result = validate_request_args({
+            'limit': '-3'
+        })
+        assert_that( validation_result.is_valid, is_(False) )
+
+    def test_rejects_sort_being_provided_with_period_query(self):
+        validation_result = validate_request_args({
+            "sort_by": "foo:ascending",
+            "period": "week"
+        })
+        assert_that( validation_result.is_valid, is_(False) )
+
+    def test_accepts_sort_with_grouped_period_query(self):
+        validation_result = validate_request_args({
+            "sort_by": "foo:ascending",
+            "period": "week",
+            "group_by": "foo"
+        })
+        assert_that( validation_result.is_valid, is_(True) )
