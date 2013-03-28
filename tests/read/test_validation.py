@@ -110,3 +110,16 @@ class TestRequestValidation(TestCase):
             "unrecognised_parameter": "value"
         })
         assert_that( validation_result.is_valid, is_(False) )
+
+    def test_accepts_collect_with_a_grouping(self):
+        validation_result_with_group_by = validate_request_args({
+            "collect": 'foo',
+            "group_by": 'bar'
+        })
+        assert_that(validation_result_with_group_by.is_valid, is_(True))
+
+    def test_rejects_collect_when_there_is_not_grouping(self):
+        validation_result_without_group_by = validate_request_args({
+            "collect": 'foo'
+        })
+        assert_that(validation_result_without_group_by.is_valid, is_(False))

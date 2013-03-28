@@ -69,10 +69,10 @@ class Repository(object):
 
         return cursor
 
-    def group(self, group_by, query, sort=None, limit=None):
+    def group(self, group_by, query, sort=None, limit=None, collect=[]):
         if sort:
             self._validate_sort(sort)
-        return self._group([group_by], query, sort, limit)
+        return self._group([group_by], query, sort, limit, collect)
 
     def save(self, obj):
         self._collection.save(obj)
@@ -84,14 +84,30 @@ class Repository(object):
 
         return results
 
-    def _group(self, keys, query, sort=None, limit=None):
+    def build_collector_code(self, collect):
+        return "\n".join([
+            "if (current.{c}) {{ previous.{c}.push(current.{c}); }}".format(
+                c=collect_me) for collect_me in collect])
+
+    def build_reducer(self, collect):
+        initial = {'_count': 0}
+        for collect_me in collect:
+            initial.update({collect_me: []})
+        reducer_skeleton = "function (current, previous)" + \
+                           "{{ previous._count++; {collectors} }}"
+        reducer_code = reducer_skeleton.format(
+            collectors=self.build_collector_code(collect)
+        )
+        reducer = Code(reducer_code)
+        return (initial, reducer)
+
+    def _group(self, keys, query, sort=None, limit=None, collect=[]):
+        initial, reducer = self.build_reducer(collect)
         results = self._collection.group(
             key=keys,
             condition=query,
-            initial={'_count': 0},
-            reduce=Code("""
-                function(current, previous) { previous._count++; }
-                """)
+            initial=initial,
+            reduce=reducer
         )
         for result in results:
             for key in keys:

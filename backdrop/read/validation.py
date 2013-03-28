@@ -32,6 +32,9 @@ MESSAGES = {
     },
     'limit': {
         'invalid': 'limit must be a positive integer'
+    },
+    'collect': {
+        'no_grouping': 'collect is only allowed when grouping'
     }
 }
 
@@ -45,6 +48,7 @@ def validate_request_args(request_args):
     group_by = request_args.pop('group_by', None)
     sort_by = request_args.pop('sort_by', None)
     limit = request_args.pop('limit', None)
+    collect = request_args.pop('collect', None)
 
     if len(request_args):
         return invalid(MESSAGES['unrecognised'])
@@ -82,5 +86,8 @@ def validate_request_args(request_args):
                 raise ValueError()
         except ValueError:
             return invalid(MESSAGES['limit']['invalid'])
+    if collect:
+        if not group_by:
+            return invalid(MESSAGES['collect']['no_grouping'])
 
     return valid()

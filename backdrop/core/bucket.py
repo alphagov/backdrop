@@ -45,8 +45,9 @@ class Bucket(object):
             result.append(doc)
         return result
 
-    def execute_grouped_query(self, group_by, query, sort=None, limit=None):
-        cursor = self.repository.group(group_by, query, sort, limit)
+    def execute_grouped_query(self, group_by, query,
+                              sort=None, limit=None, collect=None):
+        cursor = self.repository.group(group_by, query, sort, limit, collect)
         result = [{group_by: doc[group_by], '_count': doc['_count']} for doc
                   in cursor]
         return result
@@ -72,13 +73,14 @@ class Bucket(object):
         sort_by = params.get('sort_by')
         group_by = params.get('group_by')
         limit = params.get('limit')
+        collect = params.get('collect')
 
         if group_by and 'period' in params:
             result = self.execute_weekly_group_query(
                 group_by, query, sort_by, limit)
         elif group_by:
             result = self.execute_grouped_query(
-                group_by, query, sort_by, limit)
+                group_by, query, sort_by, limit, collect)
         elif 'period' in params:
             result = self.execute_period_query(query, limit)
         else:
