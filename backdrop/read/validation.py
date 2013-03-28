@@ -2,6 +2,7 @@ from ..core.validation import value_is_valid_datetime_string, valid, invalid
 
 
 MESSAGES = {
+    'unrecognised': 'An unrecognised parameter was provided',
     'start_at': {
         'invalid': 'start_at is not a valid datetime'
     },
@@ -36,38 +37,48 @@ MESSAGES = {
 
 
 def validate_request_args(request_args):
-    if 'start_at' in request_args:
-        if not value_is_valid_datetime_string(request_args['start_at']):
+    request_args = request_args.copy()
+    start_at = request_args.pop('start_at', None)
+    end_at = request_args.pop('end_at', None)
+    filter_by = request_args.pop('filter_by', None)
+    period = request_args.pop('period', None)
+    group_by = request_args.pop('group_by', None)
+    sort_by = request_args.pop('sort_by', None)
+    limit = request_args.pop('limit', None)
+
+    if len(request_args):
+        return invalid(MESSAGES['unrecognised'])
+    if start_at:
+        if not value_is_valid_datetime_string(start_at):
             return invalid(MESSAGES['start_at']['invalid'])
-    if 'end_at' in request_args:
-        if not value_is_valid_datetime_string(request_args['end_at']):
+    if end_at:
+        if not value_is_valid_datetime_string(end_at):
             return invalid(MESSAGES['end_at']['invalid'])
-    if 'filter_by' in request_args:
-        if request_args['filter_by'].find(':') < 0:
+    if filter_by:
+        if filter_by.find(':') < 0:
             return invalid(MESSAGES['filter_by']['colon'])
-        if request_args['filter_by'].startswith('$'):
+        if filter_by.startswith('$'):
             return invalid(MESSAGES['filter_by']['dollar'])
-    if 'period' in request_args:
-        if request_args['period'] != 'week':
+    if period:
+        if period != 'week':
             return invalid(MESSAGES['period']['invalid'])
-        if 'group_by' in request_args:
-            if '_week_start_at' == request_args['group_by']:
+        if group_by:
+            if '_week_start_at' == group_by:
                 return invalid(MESSAGES['period']['group'])
-        if 'sort_by' in request_args and 'group_by' not in request_args:
+        if sort_by and not group_by:
             return invalid(MESSAGES['period']['sort'])
-    if 'group_by' in request_args:
-        if request_args['group_by'].startswith('_'):
+    if group_by:
+        if group_by.startswith('_'):
             return invalid(MESSAGES['group_by']['internal'])
-    if 'sort_by' in request_args:
-        if request_args['sort_by'].find(':') < 0:
+    if sort_by:
+        if sort_by.find(':') < 0:
             return invalid(MESSAGES['sort_by']['colon'])
-        sort_order = request_args['sort_by'].split(':', 1)[1]
+        sort_order = sort_by.split(':', 1)[1]
         if sort_order not in ['ascending', 'descending']:
             return invalid(MESSAGES['sort_by']['direction'])
-    if 'limit' in request_args:
+    if limit:
         try:
-            limit = int(request_args['limit'])
-            if limit < 0:
+            if int(limit) < 0:
                 raise ValueError()
         except ValueError:
             return invalid(MESSAGES['limit']['invalid'])
