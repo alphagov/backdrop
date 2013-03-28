@@ -132,7 +132,7 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(period='week')
 
         self.mock_repository.group.assert_called_once_with(
-            "_week_start_at", {})
+            "_week_start_at", {}, limit=None)
 
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
@@ -145,6 +145,14 @@ class TestBucket(unittest.TestCase):
             "_end_at": equal_to(d_tz(2013, 1, 21, 0, 0, 0)),
             "_count": equal_to(1)
         })))
+
+    def test_week_query_with_limit(self):
+        self.mock_repository.group.return_value = []
+
+        self.bucket.query(period='week', limit=1)
+
+        self.mock_repository.group.assert_called_once_with(
+            "_week_start_at", {}, limit=1)
 
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [

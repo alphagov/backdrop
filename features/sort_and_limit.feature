@@ -45,5 +45,11 @@ Feature: sorting and limiting
           and the JSON should have "1" results
           and the "1st" result should have "authority" equaling "Camden"
 
+    Scenario: Limit periodic query
+        Given "licensing_2.json" is in "foo" bucket
+         when I go to "/foo?period=week&limit=1"
+         then I should get back a status of "200"
+          and the JSON should have "1" result
+          and the "1st" result should have "_start_at" equaling "2012-12-10T00:00:00+00:00"
+
 # Scenario: Group and Sort the data on a key that has a numeric value in ascending order  
-         
