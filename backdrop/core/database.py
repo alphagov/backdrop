@@ -125,34 +125,59 @@ class InvalidSortError(ValueError):
 
 
 def nested_merge(keys, results):
-    output = []
+    groups = []
     for result in results:
-        output = _merge(output, keys, result)
-    return output
+        groups = _merge(groups, keys, result)
+    return groups
 
 
-def _merge(output, keys, result):
-    if len(keys) == 0:
-        return output
-    value = result.pop(keys[0])
-    try:
-        item = next(item for item in output if item[keys[0]] == value)
-    except StopIteration:
-        if len(keys) == 1:
-            # we are a leaf
-            item = result
-            item[keys[0]] = value
+def _merge(groups, keys, result):
+    keys = list(keys)
+    key = keys.pop(0)
+    is_leaf = (len(keys) == 0)
+    value = result.pop(key)
+
+    group = _find_group(group for group in groups if group[key] == value)
+    if not group:
+        if is_leaf:
+            group = _new_leaf_node(key, value, result)
         else:
-            # we are not a leaf
-            item = {
-                keys[0]: value,
-                "_subgroup": []
-            }
-        output.append(item)
-    if len(keys) > 1:
-        # we are not a leaf
-        item['_subgroup'] = _merge(item['_subgroup'], keys[1:], result)
-        item['_subgroup'].sort(key=lambda d: d[keys[1]])
-        item["_count"] = sum(doc.get('_count', 0) for doc in item['_subgroup'])
-        item["_group_count"] = len(item['_subgroup'])
-    return output
+            group = _new_branch_node(key, value)
+        groups.append(group)
+
+    if not is_leaf:
+        _merge_and_sort_subgroup(group, keys, result)
+        _add_branch_node_counts(group)
+    return groups
+
+
+def _find_group(items):
+    """Return the first item in an iterator or None"""
+    try:
+        return next(items)
+    except StopIteration:
+        return
+
+
+def _new_branch_node(key, value):
+    """Create a new node that has further sub-groups"""
+    return {
+        key: value,
+        "_subgroup": []
+    }
+
+
+def _new_leaf_node(key, value, result):
+    """Create a new node that has no further sub-groups"""
+    result[key] = value
+    return result
+
+
+def _merge_and_sort_subgroup(group, keys, result):
+    group['_subgroup'] = _merge(group['_subgroup'], keys, result)
+    group['_subgroup'].sort(key=lambda d: d[keys[0]])
+
+
+def _add_branch_node_counts(group):
+    group['_count'] = sum(doc.get('_count', 0) for doc in group['_subgroup'])
+    group['_group_count'] = len(group['_subgroup'])
