@@ -21,9 +21,6 @@ Feature: sorting and limiting
          then I should get back a status of "200"
           and the JSON should have "3" results
 
-
-
-
     Scenario: Sort grouped query on a key and limit
         Given "sort_and_limit.json" is in "foo" bucket
          when I go to "/foo?group_by=type&sort_by=_count:ascending&limit=1"
@@ -51,5 +48,3 @@ Feature: sorting and limiting
          then I should get back a status of "200"
           and the JSON should have "1" result
           and the "1st" result should have "_start_at" equaling "2012-12-10T00:00:00+00:00"
-
-# Scenario: Group and Sort the data on a key that has a numeric value in ascending order  

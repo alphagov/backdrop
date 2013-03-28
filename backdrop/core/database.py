@@ -55,7 +55,7 @@ class Repository(object):
 
     def find(self, query, sort=None, limit=None):
         cursor = self._collection.find(query)
-        if sort is not None:
+        if sort:
             self._validate_sort(sort)
         else:
             sort = ["_timestamp", "ascending"]
@@ -70,7 +70,7 @@ class Repository(object):
         return cursor
 
     def group(self, group_by, query, sort=None, limit=None):
-        if sort is not None:
+        if sort:
             self._validate_sort(sort)
         return self._group([group_by], query, sort, limit)
 
@@ -100,7 +100,7 @@ class Repository(object):
 
         results = nested_merge(keys, results)
 
-        if sort is not None:
+        if sort:
             sorters = {
                 "ascending": lambda a, b: cmp(a, b),
                 "descending": lambda a, b: cmp(b, a)
@@ -110,7 +110,7 @@ class Repository(object):
                 results.sort(cmp=sorter, key=lambda a: a[sort[0]])
             except KeyError:
                 raise InvalidSortError('Invalid sort key {0}'.format(sort[0]))
-        if limit is not None:
+        if limit:
             results = results[:limit]
 
         return results

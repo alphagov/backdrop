@@ -26,14 +26,14 @@ class Bucket(object):
             '_count': doc['_count']
         }
 
-    def execute_weekly_group_query(self, key2, query, sort=None, limit=None):
-        key1 = '_week_start_at'
+    def execute_weekly_group_query(self, group_by, query, sort=None,
+                                   limit=None):
+        period_key = '_week_start_at'
         result = []
         cursor = self.repository.multi_group(
-            key2, key1, query, sort=sort, limit=limit)
+            group_by, period_key, query, sort=sort, limit=limit)
         for doc in cursor:
-            doc['values'] = doc['_subgroup']
-            del doc['_subgroup']
+            doc['values'] = doc.pop('_subgroup')
 
             for item in doc['values']:
                 start_at = utc(item.pop("_week_start_at"))
