@@ -62,9 +62,9 @@ class TestRepositoryIntegration(RepositoryIntegrationTest):
         ))
 
 
-class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
+class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def setUp(self):
-        super(TestRepositoryIntegrationGrouping, self).setUp()
+        super(TestRepositoryIntegration_Grouping, self).setUp()
         people = ["Jack", "Jill", "John", "Jane"]
         places = ["Kettering", "Kew", "Kennington", "Kingston"]
         times = [d_tz(2013, 3, 11), d_tz(2013, 3, 18), d_tz(2013, 3, 25)]
@@ -83,7 +83,7 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
         })
 
     def tearDown(self):
-        super(TestRepositoryIntegrationGrouping, self).tearDown()
+        super(TestRepositoryIntegration_Grouping, self).tearDown()
 
     def test_group(self):
         results = self.repo.group("place", {})
@@ -134,10 +134,7 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
             "_count": 1,
             "_group_count": 1,
             "_subgroup": [
-                {
-                    "place": "Kettering",
-                    "_count": 1
-                }
+                { "place": "Kettering", "_count": 1 }
             ]
         }))
         assert_that(results, has_item({
@@ -145,10 +142,7 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
             "_count": 1,
             "_group_count": 1,
             "_subgroup": [
-                {
-                    "place": "Kennington",
-                    "_count": 1
-                }
+                { "place": "Kennington", "_count": 1 }
             ]
         }))
         assert_that(results, has_item({
@@ -156,14 +150,8 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
             "_count": 2,
             "_group_count": 2,
             "_subgroup": [
-                {
-                    "place": "Kettering",
-                    "_count": 1
-                },
-                {
-                    "place": "Kennington",
-                    "_count": 1
-                }
+                { "place": "Kennington", "_count": 1 },
+                { "place": "Kettering", "_count": 1 },
             ]
         }))
 
@@ -190,8 +178,41 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
         self.assertRaises(GroupingError, self.repo.multi_group,
                           "person", "person", {})
 
+    def test_multi_group_is_sorted_by_inner_key(self):
+        results = self.repo.multi_group("person", "_week_start_at", {})
 
-class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
+        assert_that(results, has_item(has_entries({
+            "person": "John",
+            "_subgroup": contains(
+                has_entry("_week_start_at", d(2013, 3, 11)),
+                has_entry("_week_start_at", d(2013, 3, 18)),
+            )
+        })))
+
+    def test_sorted_multi_group_query_ascending(self):
+        results = self.repo.multi_group("person", "_week_start_at", {},
+                                        sort=["_count", "ascending"])
+
+        assert_that(results, contains(
+            has_entry("_count", 1),
+            has_entry("_count", 1),
+            has_entry("_count", 1),
+            has_entry("_count", 2),
+        ))
+
+    def test_sorted_multi_group_query_descending(self):
+        results = self.repo.multi_group("person", "_week_start_at", {},
+                                        sort=["_count", "descending"])
+
+        assert_that(results, contains(
+            has_entry("_count", 2),
+            has_entry("_count", 1),
+            has_entry("_count", 1),
+            has_entry("_count", 1),
+        ))
+
+
+class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def setup_numeric_values(self):
         self.mongo_collection.save({"value": 6})
         self.mongo_collection.save({"value": 2})
@@ -336,19 +357,6 @@ class TestRepositoryIntegrationSorting(RepositoryIntegrationTest):
 
         assert_that(list(result), contains(
             has_entry("suite", "diamonds")
-        ))
-
-    def test_periodic_group_is_sorted_by__week_start_at(self):
-        self.mongo_collection.save({"_week_start_at": d(2013, 3, 17),
-                                    'val': 1})
-        self.mongo_collection.save({"_week_start_at": d(2013, 3, 24),
-                                    'val': 7})
-
-        result = self.repo.multi_group('_week_start_at', 'val', {})
-
-        assert_that(list(result), contains(
-            has_entry('_week_start_at', d(2013, 3, 17)),
-            has_entry('_week_start_at', d(2013, 3, 24)),
         ))
 
     def test_query_with_limit(self):

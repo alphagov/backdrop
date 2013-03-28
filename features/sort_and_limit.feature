@@ -31,5 +31,12 @@ Feature: sorting and limiting
           and the JSON should have "1" result
           and the "1st" result should have "type" equaling "domestic"
 
+    Scenario: Sort periodic grouped query on a key
+        Given "licensing_2.json" is in "foo" bucket
+         when I go to "/foo?group_by=authority&period=week&sort_by=_count:descending"
+         then I should get back a status of "200"
+          and the JSON should have "2" results
+          and the "1st" result should have "authority" equaling "Westminster"
+
 # Scenario: Group and Sort the data on a key that has a numeric value in ascending order  
          

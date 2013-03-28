@@ -77,15 +77,10 @@ class Repository(object):
     def save(self, obj):
         self._collection.save(obj)
 
-    def multi_group(self, key1, key2, query):
+    def multi_group(self, key1, key2, query, sort=None):
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._group([key1, key2], query)
-
-        # Add in top level counts
-        for result in results:
-            result["_count"] = sum(doc['_count'] for doc in result['_subgroup'])
-            result["_group_count"] = len(result['_subgroup'])
+        results = self._group([key1, key2], query, sort)
 
         return results
 
@@ -144,14 +139,20 @@ def _merge(output, keys, result):
         item = next(item for item in output if item[keys[0]] == value)
     except StopIteration:
         if len(keys) == 1:
+            # we are a leaf
             item = result
             item[keys[0]] = value
         else:
+            # we are not a leaf
             item = {
                 keys[0]: value,
                 "_subgroup": []
             }
         output.append(item)
     if len(keys) > 1:
+        # we are not a leaf
         item['_subgroup'] = _merge(item['_subgroup'], keys[1:], result)
+        item['_subgroup'].sort(key=lambda d: d[keys[1]])
+        item["_count"] = sum(doc.get('_count', 0) for doc in item['_subgroup'])
+        item["_group_count"] = len(item['_subgroup'])
     return output
