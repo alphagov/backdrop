@@ -1,6 +1,4 @@
-from itertools import groupby
 from bson import Code
-from pprint import pprint
 import pymongo
 
 
@@ -84,18 +82,12 @@ class Repository(object):
             raise GroupingError("Cannot group on two equal keys")
         results = self._group([key1, key2], query)
 
-        output = nested_merge([key1, key2], results)
+        # Add in top level counts
+        for result in results:
+            result["_count"] = sum(doc['_count'] for doc in result['_subgroup'])
+            result["_group_count"] = len(result['_subgroup'])
 
-        result = []
-        for key1_value, value in sorted(output.items()):
-            result.append({
-                key1: key1_value,
-                "_count": sum(doc['_count'] for doc in value.values()),
-                "_group_count": len(value),
-                key2: value
-            })
-
-        return result
+        return results
 
     def _group(self, keys, query, sort=None, limit=None):
         results = self._collection.group(
@@ -110,6 +102,8 @@ class Repository(object):
             for key in keys:
                 if result[key] is None:
                     return []
+
+        results = nested_merge(keys, results)
 
         if sort is not None:
             sorters = {
@@ -136,18 +130,28 @@ class InvalidSortError(ValueError):
 
 
 def nested_merge(keys, results):
-    output = {}
+    output = []
     for result in results:
-        output = _inner_merge(output, keys, result)
+        output = _merge(output, keys, result)
     return output
 
 
-def _inner_merge(output, keys, value):
+def _merge(output, keys, result):
     if len(keys) == 0:
-        return value
-    key = value.pop(keys[0])
-    if key not in output:
-        output[key] = {}
-    output[key].update(_inner_merge(output[key], keys[1:], value))
-
+        return output
+    value = result.pop(keys[0])
+    try:
+        item = next(item for item in output if item[keys[0]] == value)
+    except StopIteration:
+        if len(keys) == 1:
+            item = result
+            item[keys[0]] = value
+        else:
+            item = {
+                keys[0]: value,
+                "_subgroup": []
+            }
+        output.append(item)
+    if len(keys) > 1:
+        item['_subgroup'] = _merge(item['_subgroup'], keys[1:], result)
     return output

@@ -149,22 +149,34 @@ class TestBucket(unittest.TestCase):
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
-                "_week_start_at": {
-                    d(2013, 1, 7, 0, 0, 0): { "_count": 1 },
-                    d(2013, 1, 14, 0, 0, 0): { "_count": 5 }
-                },
+                "some_group": "val1",
                 "_count": 6,
                 "_group_count": 2,
-                "some_group": "val1",
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 1
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 5
+                    }
+                ]
             },
             {
-                "_week_start_at": {
-                    d(2013, 1, 7, 0, 0, 0): { "_count": 2 },
-                    d(2013, 1, 14, 0, 0, 0): { "_count": 6 }
-                },
+                "some_group": "val2",
                 "_count": 8,
                 "_group_count": 2,
-                "some_group": "val2",
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 2
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 6
+                    }
+                ]
             }
         ]
         query_result = self.bucket.query(period="week", group_by="some_group")

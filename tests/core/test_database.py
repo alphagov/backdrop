@@ -5,15 +5,47 @@ from backdrop.core.database import Repository
 
 
 class NestedMergeTestCase(unittest.TestCase):
-    def test_nested_merge_merges_dictionaries(self):
-        dictionaries = [
+    def setUp(self):
+        self.dictionaries = [
             {'a': 1, 'b': 2, 'c': 3},
             {'a': 1, 'b': 1, 'c': 3},
+            {'a': 2, 'b': 1, 'c': 3}
         ]
 
-        output = database.nested_merge(['a', 'b'], dictionaries)
-        assert_that(output, is_({1: {2: {'c': 3}, 1: {'c': 3}}}))
+    def test_nested_merge_merges_dictionaries(self):
 
+        output = database.nested_merge(['a', 'b'], self.dictionaries)
+        assert_that(output, is_([
+            {
+                "a": 1,
+                "_subgroup": [
+                    {
+                        "b": 2,
+                        "c": 3
+                    },
+                    {
+                        "b": 1,
+                        "c": 3
+                    }
+                ]
+            },
+            {
+                "a": 2,
+                "_subgroup": [
+                    {
+                        "b": 1,
+                        "c": 3
+                    }
+                ]
+            }
+        ]))
+
+    def test_nested_merge_squashes_duplicates(self):
+        output = database.nested_merge(['a'], self.dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b': 2, 'c': 3},
+            {'a': 2, 'b': 1, 'c': 3}
+        ]))
 
 class TestDatabase(unittest.TestCase):
     def setUp(self):

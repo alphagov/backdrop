@@ -1,8 +1,9 @@
 import unittest
-import datetime
 from abc import ABCMeta
+
 from hamcrest import *
 from pymongo import MongoClient
+
 from backdrop.core.database import Repository, GroupingError, \
     InvalidSortError
 from tests.support.test_helpers import d, d_tz
@@ -115,7 +116,7 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
         results = self.repo.multi_group("_week_start_at", "person", {})
 
         assert_that(results, has_item(has_entry(
-            "person", {"Jill": {"_count": 1}}
+            "_subgroup", has_item(has_entry("person", "Jill"))
         )))
 
     def test_count_of_outer_elements_should_be_added(self):
@@ -132,26 +133,38 @@ class TestRepositoryIntegrationGrouping(RepositoryIntegrationTest):
             "person": "Jack",
             "_count": 1,
             "_group_count": 1,
-            "place": {
-                "Kettering": {"_count": 1}
-            }
+            "_subgroup": [
+                {
+                    "place": "Kettering",
+                    "_count": 1
+                }
+            ]
         }))
         assert_that(results, has_item({
             "person": "Jill",
             "_count": 1,
             "_group_count": 1,
-            "place": {
-                "Kennington": {"_count": 1}
-            }
+            "_subgroup": [
+                {
+                    "place": "Kennington",
+                    "_count": 1
+                }
+            ]
         }))
         assert_that(results, has_item({
             "person": "John",
             "_count": 2,
             "_group_count": 2,
-            "place": {
-                "Kettering": {"_count": 1},
-                "Kennington": {"_count": 1}
-            }
+            "_subgroup": [
+                {
+                    "place": "Kettering",
+                    "_count": 1
+                },
+                {
+                    "place": "Kennington",
+                    "_count": 1
+                }
+            ]
         }))
 
     def test_grouping_on_non_existent_keys(self):

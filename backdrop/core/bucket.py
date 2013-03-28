@@ -31,16 +31,15 @@ class Bucket(object):
         result = []
         cursor = self.repository.multi_group(key2, key1, query)
         for doc in cursor:
-            time_series = doc.pop("_week_start_at")
-            doc['values'] = []
-            for start_at, value in sorted(time_series.items()):
-                start_at = utc(start_at)
-                value.update({
+            doc['values'] = doc['_subgroup']
+            del doc['_subgroup']
+
+            for item in doc['values']:
+                start_at = utc(item.pop("_week_start_at"))
+                item.update({
                     "_start_at": start_at,
                     "_end_at": start_at + datetime.timedelta(days=7)
                 })
-
-                doc['values'].append(value)
 
             result.append(doc)
         return result
