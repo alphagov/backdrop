@@ -25,10 +25,6 @@ db = database.Database(
 )
 
 
-def open_bucket_collection(bucket):
-    return mongo[app.config["DATABASE_NAME"]][bucket]
-
-
 def parse_request_args(request_args):
     args = {}
 
