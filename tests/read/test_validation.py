@@ -48,6 +48,12 @@ class TestRequestValidation(TestCase):
         })
         assert_that( validation_result.is_valid, is_(True) )
 
+    def test_rejects_group_by_on_internal_field(self):
+        validation_result = validate_request_args({
+            "group_by": "_internal"
+        })
+        assert_that( validation_result.is_valid, is_(False))
+
     def test_accepts_ascending_sort_order(self):
         validation_result = validate_request_args({
             'sort_by': 'foo:ascending',
@@ -90,3 +96,11 @@ class TestRequestValidation(TestCase):
             "period": "week"
         })
         assert_that( validation_result.is_valid, is_(False) )
+
+    def test_accepts_sort_with_grouped_period_query(self):
+        validation_result = validate_request_args({
+            "sort_by": "foo:ascending",
+            "period": "week",
+            "group_by": "foo"
+        })
+        assert_that( validation_result.is_valid, is_(True) )
