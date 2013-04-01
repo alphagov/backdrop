@@ -1,3 +1,6 @@
+from logging import FileHandler
+import logging
+from logging.handlers import RotatingFileHandler
 from os import getenv
 
 from flask import Flask, request, jsonify
@@ -7,11 +10,16 @@ from .validation import validate_post_to_bucket
 from ..core import database
 from ..core.bucket import Bucket
 
+
+def environment():
+    return getenv("GOVUK_ENV", "development")
+
+
 app = Flask(__name__)
 
 # Configuration
 app.config.from_object(
-    "backdrop.write.config.%s" % getenv("GOVUK_ENV", "development")
+    "backdrop.write.config.%s" % environment()
 )
 
 db = database.Database(
@@ -23,6 +31,7 @@ db = database.Database(
 
 @app.route('/_status')
 def health_check():
+    log_request()
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
@@ -32,6 +41,8 @@ def health_check():
 
 @app.route('/<bucket_name>', methods=['POST'])
 def post_to_bucket(bucket_name):
+    log_request()
+
     if not request.json:
         return jsonify(status='error', message='Request must be JSON'), 400
 
@@ -52,7 +63,19 @@ def post_to_bucket(bucket_name):
     bucket = Bucket(db, bucket_name)
     bucket.store(incoming_records)
 
+
+
     return jsonify(status='ok')
+
+
+def log_request():
+    app.logger.info("%s %s" % (request.method, request.url))
+
+
+def setup_logger():
+    handler = FileHandler("log/%s.log" % environment())
+    handler.setLevel(app.config["LOG_LEVEL"])
+    app.logger.addHandler(handler)
 
 
 def prep_data(incoming_json):
@@ -64,4 +87,5 @@ def prep_data(incoming_json):
 
 def start(port):
     app.debug = True
+    setup_logger()
     app.run(host='0.0.0.0', port=port)
