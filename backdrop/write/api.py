@@ -3,7 +3,9 @@ import logging
 from os import getenv
 
 from flask import Flask, request, jsonify
+from werkzeug.exceptions import HTTPException
 from backdrop.core import records
+from backdrop.core.log_handler import get_log_file_handler
 
 from .validation import validate_post_to_bucket
 from ..core import database
@@ -11,11 +13,8 @@ from ..core.bucket import Bucket
 
 
 def setup_logger():
-    handler = FileHandler("log/%s.write.log" % environment())
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s [%(levelname)s] -> %(message)s"))
     # TODO: get logging level from config
-    app.logger.addHandler(handler)
+    app.logger.addHandler(get_log_file_handler(environment()))
     app.logger.setLevel(logging.DEBUG)
     app.logger.info("Logging for Backdrop Write API started")
 
@@ -49,6 +48,14 @@ def request_prehandler():
     app.logger.info(log_this)
 
 
+@app.errorhandler(500)
+@app.errorhandler(405)
+@app.errorhandler(404)
+def exception_handler(e):
+    app.logger.exception(e)
+    return jsonify(status='error', message=''), e.code
+
+
 @app.route('/_status')
 def health_check():
     if db.alive():
@@ -61,6 +68,7 @@ def health_check():
 @app.route('/<bucket_name>', methods=['POST'])
 def post_to_bucket(bucket_name):
     if not request.json:
+        app.logger.error("Request must be JSON")
         return jsonify(status='error', message='Request must be JSON'), 400
 
     incoming_data = prep_data(request.json)
@@ -70,6 +78,7 @@ def post_to_bucket(bucket_name):
     # TODO: We currently don't test that incoming data gets validated
     # feels too heavy to be in the controller anyway - pull out later?
     if not result.is_valid:
+        app.logger.error(result.message)
         return jsonify(status='error', message=result.message), 400
 
     incoming_records = []
@@ -92,6 +101,6 @@ def prep_data(incoming_json):
 
 def start(port):
     # this method only gets run on dev
-    app.debug = True
+    # app.debug = True
     app.run(host='0.0.0.0', port=port)
     app.logger.info("Backdrop Write API started")
