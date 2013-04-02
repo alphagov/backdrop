@@ -1,6 +1,7 @@
 from unittest import TestCase
 from hamcrest import assert_that, is_, instance_of
 from backdrop.read.api import validate_request_args
+from werkzeug.datastructures import MultiDict
 
 
 class TestRequestValidation(TestCase):
@@ -139,9 +140,9 @@ class TestRequestValidation(TestCase):
         assert_that(validation_result_without_group_by.is_valid, is_(False))
 
     def test_rejects_collect_when_any_is_not_valid(self):
-        validation_result_without_group_by = validate_request_args({
-            "group_by": 'bar',
-            "collect": 'foo',
-            "collect": '$foo'
-        })
+        validation_result_without_group_by = validate_request_args(MultiDict([
+            ("group_by", 'bar'),
+            ("collect", '$foo'),
+            ("collect", 'foo')
+        ]))
         assert_that(validation_result_without_group_by.is_valid, is_(False))
