@@ -11,4 +11,5 @@ Feature: collect fields into grouped responses
          Given "licensing_2.json" is in "foo" bucket
           when I go to "/foo?collect=authority&group_by=licence_name"
           then I should get back a status of "200"
-          and the "1st" result should have "authority" equaling "Westminster"
+          and the "1st" result should have "authority" with item ""Westminster""
+          and the "1st" result should have "authority" with item ""Camden""

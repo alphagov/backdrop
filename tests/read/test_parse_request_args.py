@@ -103,11 +103,21 @@ class Test_parse_request_args(unittest.TestCase):
 
         assert_that(args['limit'], is_(123))
 
-    def test_collect_is_parsed(self):
+    def test_one_collect_is_parsed(self):
         request_args = MultiDict([
             ("collect", "some_key")
         ])
 
         args = parse_request_args(request_args)
 
-        assert_that(args['collect'], is_("some_key"))
+        assert_that(args['collect'], is_(["some_key"]))
+
+    def test_two_collects_are_parsed(self):
+        request_args = MultiDict([
+            ("collect", "some_key"),
+            ("collect", "some_other_key")
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['collect'], is_(["some_key", "some_other_key"]))

@@ -52,7 +52,7 @@ def parse_request_args(request_args):
         args['limit'] = int(request_args['limit'])
 
     if 'collect' in request_args:
-        args['collect'] = request_args['collect']
+        args['collect'] = request_args.getlist('collect')
     return args
 
 
