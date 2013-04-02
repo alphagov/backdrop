@@ -110,3 +110,15 @@ class ApiHealthCheckTestCase(unittest.TestCase):
 
         entity = json.loads(response.data)
         assert_that(entity["status"], is_("ok"))
+
+
+class RequestLoggingTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = api.app.test_client()
+        self.stored_bucket = None
+        self.stored_data = None
+
+    @patch("backdrop.write.api.app.logger.info")
+    def test_logging_for_every_request(self, mock_log):
+        self.app.get("/_status")
+        mock_log.assert_called_with("GET http://localhost/_status")

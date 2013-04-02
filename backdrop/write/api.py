@@ -29,9 +29,13 @@ db = database.Database(
 )
 
 
+@app.before_request
+def request_prehandler():
+    app.logger.info("%s %s" % (request.method, request.url))
+
+
 @app.route('/_status')
 def health_check():
-    log_request()
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
@@ -41,8 +45,6 @@ def health_check():
 
 @app.route('/<bucket_name>', methods=['POST'])
 def post_to_bucket(bucket_name):
-    log_request()
-
     if not request.json:
         return jsonify(status='error', message='Request must be JSON'), 400
 
@@ -63,13 +65,7 @@ def post_to_bucket(bucket_name):
     bucket = Bucket(db, bucket_name)
     bucket.store(incoming_records)
 
-
-
     return jsonify(status='ok')
-
-
-def log_request():
-    app.logger.info("%s %s" % (request.method, request.url))
 
 
 def setup_logger():
