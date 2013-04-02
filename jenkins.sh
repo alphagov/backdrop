@@ -30,7 +30,7 @@ nosetests -v --with-xunit --with-coverage --cover-package=backdrop --cover-inclu
 display_result $? 1 "Unit tests"
 python -m coverage.__main__ xml --include=backdrop*
 
-behave --tags=-wip --stop
+behave --tags=-pending --stop
 display_result $? 2 "Feature tests"
 
 $(dirname $0)/pep-it.sh | tee pep8.out
