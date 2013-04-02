@@ -1,9 +1,7 @@
-from logging import FileHandler
 import logging
 from os import getenv
 
 from flask import Flask, request, jsonify
-from werkzeug.exceptions import HTTPException
 from backdrop.core import records
 from backdrop.core.log_handler import get_log_file_handler
 
