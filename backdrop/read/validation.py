@@ -1,6 +1,7 @@
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
 import re
 
+MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
 MESSAGES = {
     'unrecognised': 'An unrecognised parameter was provided',
     'start_at': {
@@ -92,7 +93,7 @@ def validate_request_args(request_args):
     if collect:
         if not group_by:
             return invalid(MESSAGES['collect']['no_grouping'])
-        if not re.match('[A-Za-z-_]+', collect):
+        if not MONGO_FIELD_REGEX.match(collect):
             return invalid(MESSAGES['collect']['invalid'])
         if collect.startswith('_'):
             return invalid(MESSAGES['collect']['internal'])

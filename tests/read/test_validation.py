@@ -135,7 +135,7 @@ class TestRequestValidation(TestCase):
     def test_rejects_collect_when_is_not_valid(self):
         validation_result_without_group_by = validate_request_args({
             "group_by": 'bar',
-            "collect": '$foo'
+            "collect": 'something);while(1){myBadFunction()}'
         })
         assert_that(validation_result_without_group_by.is_valid, is_(False))
 
