@@ -1,5 +1,5 @@
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
-
+import re
 
 MESSAGES = {
     'unrecognised': 'An unrecognised parameter was provided',
@@ -34,7 +34,8 @@ MESSAGES = {
         'invalid': 'limit must be a positive integer'
     },
     'collect': {
-        'no_grouping': 'collect is only allowed when grouping'
+        'no_grouping': 'collect is only allowed when grouping',
+        'invalid': 'collect must be a valid field name'
     }
 }
 
@@ -89,5 +90,7 @@ def validate_request_args(request_args):
     if collect:
         if not group_by:
             return invalid(MESSAGES['collect']['no_grouping'])
+        if not re.match('[A-Za-z-_]+', collect):
+            return invalid(MESSAGES['collect']['invalid'])
 
     return valid()

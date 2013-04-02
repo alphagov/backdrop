@@ -123,3 +123,25 @@ class TestRequestValidation(TestCase):
             "collect": 'foo'
         })
         assert_that(validation_result_without_group_by.is_valid, is_(False))
+
+    def test_accepts_collect_when_is_valid(self):
+        validation_result_without_group_by = validate_request_args({
+            "group_by": 'bar',
+            "collect": '_-aAbBzZ-_'
+        })
+        assert_that(validation_result_without_group_by.is_valid, is_(True))
+
+    def test_rejects_collect_when_is_not_valid(self):
+        validation_result_without_group_by = validate_request_args({
+            "group_by": 'bar',
+            "collect": '$foo'
+        })
+        assert_that(validation_result_without_group_by.is_valid, is_(False))
+
+    def test_rejects_collect_when_any_is_not_valid(self):
+        validation_result_without_group_by = validate_request_args({
+            "group_by": 'bar',
+            "collect": 'foo',
+            "collect": '$foo'
+        })
+        assert_that(validation_result_without_group_by.is_valid, is_(False))
