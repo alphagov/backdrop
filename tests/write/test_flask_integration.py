@@ -122,3 +122,8 @@ class RequestLoggingTestCase(unittest.TestCase):
     def test_logging_for_every_request(self, mock_log):
         self.app.get("/_status")
         mock_log.assert_called_with("GET http://localhost/_status")
+
+    @patch("backdrop.write.api.app.logger.info")
+    def test_logging_for_request_with_no_route(self, mock_log):
+        self.app.get("/i_do_not_exist")
+        mock_log.assert_called_with("GET http://localhost/i_do_not_exist")
