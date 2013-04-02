@@ -8,3 +8,4 @@ assets/*
 .coverage
 build
 coverage.xml
+*.log

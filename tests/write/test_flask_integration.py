@@ -110,3 +110,30 @@ class ApiHealthCheckTestCase(unittest.TestCase):
 
         entity = json.loads(response.data)
         assert_that(entity["status"], is_("ok"))
+
+
+class RequestLoggingTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = api.app.test_client()
+        self.stored_bucket = None
+        self.stored_data = None
+
+    @patch("backdrop.write.api.app.logger.info")
+    def test_logging_for_every_request(self, mock_log):
+        self.app.get("/_status")
+        mock_log.assert_called_with("GET http://localhost/_status")
+
+    @patch("backdrop.write.api.app.logger.info")
+    def test_logging_for_request_with_no_route(self, mock_log):
+        self.app.get("/i_do_not_exist")
+        mock_log.assert_called_with("GET http://localhost/i_do_not_exist")
+
+    @patch("backdrop.write.api.app.logger.info")
+    def test_logging_length_or_request_json(self, mock_log):
+        self.app.post(
+            '/foo',
+            data = '[{"_id": "foo"},{"_id": "bar"}]',
+            content_type = "application/json"
+        )
+        mock_log.assert_called_with(
+            "POST http://localhost/foo JSON length: 2")
