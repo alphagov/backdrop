@@ -158,7 +158,7 @@ def insert_collected_values(collected, group):
 def convert_collected_values_to_list(collect, groups):
     for group in groups:
         for collected_field in collect:
-            group[collected_field] = list(group[collected_field])
+            group[collected_field] = sorted(list(group[collected_field]))
 
 
 def nested_merge(keys, collect, results):

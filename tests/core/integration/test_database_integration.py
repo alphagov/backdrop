@@ -171,7 +171,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["John", "Jack"]
+            "person": ["Jack", "John"]
         })))
 
     def test_grouping_with_collect_two_fields(self):
@@ -179,8 +179,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["John", "Jack"],
-            "hair": ["dark", "blond", "red"]
+            "person": ["Jack", "John"],
+            "hair": ["blond", "dark", "red"]
         })))
 
     def test_grouping_on_non_existent_keys(self):
@@ -277,7 +277,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["John", "Jack"]
+            "person": ["Jack", "John"]
         })))
 
 
