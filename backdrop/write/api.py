@@ -3,7 +3,6 @@ import logging
 from os import getenv
 
 from flask import Flask, request, jsonify
-from requests.packages.urllib3 import response
 from backdrop.core import records
 
 from .validation import validate_post_to_bucket
