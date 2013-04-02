@@ -26,6 +26,39 @@ class Bucket(object):
             '_count': doc['_count']
         }
 
+    def __collect_all_periods(self, result):
+        periods = set()
+        for each in result:
+            for value in each["values"]:
+                periods.add((value["_start_at"], value["_end_at"]))
+        return periods
+
+    def __find_missing_periods(self, periods, single_group):
+        periods = periods.copy()
+        for value in single_group["values"]:
+            periods.remove((value["_start_at"], value["_end_at"]))
+        return periods
+
+    def __create_missing_period_entry(self, start_at, end_at):
+        return {
+            "_start_at": start_at,
+            "_end_at": end_at,
+            "_count": 0
+        }
+
+    def __fill_in_missing_periods(self, result):
+        all_periods = self.__collect_all_periods(result)
+        for each_group in result:
+            missing_periods = \
+                self.__find_missing_periods(all_periods, each_group)
+            for start_at, end_at in missing_periods:
+                each_group["values"].append(
+                    self.__create_missing_period_entry(start_at, end_at)
+                )
+            each_group["values"] = sorted(each_group["values"],
+                                          key=lambda v: v["_start_at"])
+        return result
+
     def execute_weekly_group_query(self, group_by, query, sort=None,
                                    limit=None):
         period_key = '_week_start_at'
@@ -43,6 +76,9 @@ class Bucket(object):
                 })
 
             result.append(doc)
+
+        result = self.__fill_in_missing_periods(result)
+
         return result
 
     def execute_grouped_query(self, group_by, query, sort=None, limit=None):

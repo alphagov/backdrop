@@ -222,6 +222,57 @@ class TestBucket(unittest.TestCase):
             "some_group": "val2"
         })))
 
+    def test_period_group_query_adds_missing_periods_in_correct_order(self):
+        self.mock_repository.multi_group.return_value = [
+            {
+                "some_group": "val1",
+                "_count": 6,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
+                        "_count": 1
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 5
+                    }
+                ]
+            },
+            {
+                "some_group": "val2",
+                "_count": 8,
+                "_group_count": 2,
+                "_subgroup": [
+                    {
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 6
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 21, 0, 0, 0),
+                        "_count": 1
+                    }
+                ]
+            }
+        ]
+        query_result = self.bucket.query(period="week", group_by="some_group")
+        assert_that(query_result, has_item(has_entries({
+            "values": has_item({
+                "_start_at": d_tz(2013, 1, 21, 0, 0, 0),
+                "_end_at": d_tz(2013, 1, 28, 0, 0, 0),
+                "_count": 0
+            }),
+            "some_group": "val1"
+        })))
+        assert_that(query_result, has_item(has_entries({
+            "values": contains(
+                has_entry("_start_at", d_tz(2013, 1, 7, 0, 0, 0)),
+                has_entry("_start_at", d_tz(2013, 1, 14, 0, 0, 0)),
+                has_entry("_start_at", d_tz(2013, 1, 21, 0, 0, 0))
+            ),
+            "some_group": "val2"
+        })))
+
     def test_sorted_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
