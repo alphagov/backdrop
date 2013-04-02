@@ -16,7 +16,7 @@ def setup_logger():
     # TODO: get logging level from config
     app.logger.addHandler(
         get_log_file_handler("log/%s.write.log" % environment()))
-    app.logger.setLevel(logging.DEBUG)
+    app.logger.setLevel(logging._levelNames[app.config['LOG_LEVEL']])
     app.logger.info("Logging for Backdrop Write API started")
 
 

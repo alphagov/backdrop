@@ -16,7 +16,7 @@ from ..core.bucket import Bucket
 def setup_logging():
     env = getenv("GOVUK_ENV", "development")
     app.logger.addHandler(get_log_file_handler("log/%s.read.log" % env))
-    app.logger.setLevel(logging.DEBUG)
+    app.logger.setLevel(logging._levelNames[app.config['LOG_LEVEL']])
     app.logger.info("Backdrop read API logging started")
 
 
