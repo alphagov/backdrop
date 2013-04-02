@@ -69,10 +69,10 @@ class Repository(object):
 
         return cursor
 
-    def group(self, group_by, query, sort=None, limit=None, collect=[]):
+    def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
             self._validate_sort(sort)
-        return self._group([group_by], query, sort, limit, collect)
+        return self._group([group_by], query, sort, limit, collect or [])
 
     def save(self, obj):
         self._collection.save(obj)
@@ -101,8 +101,8 @@ class Repository(object):
         reducer = Code(reducer_code)
         return (initial, reducer)
 
-    def _group(self, keys, query, sort=None, limit=None, collect=[]):
-        initial, reducer = self.build_reducer(collect)
+    def _group(self, keys, query, sort=None, limit=None, collect=None):
+        initial, reducer = self.build_reducer(collect or [])
         results = self._collection.group(
             key=keys,
             condition=query,
