@@ -1,6 +1,7 @@
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
+import re
 
-
+MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
 MESSAGES = {
     'unrecognised': 'An unrecognised parameter was provided',
     'start_at': {
@@ -32,6 +33,12 @@ MESSAGES = {
     },
     'limit': {
         'invalid': 'limit must be a positive integer'
+    },
+    'collect': {
+        'no_grouping': 'collect is only allowed when grouping',
+        'invalid': 'collect must be a valid field name',
+        'internal': 'Cannot collect internal fields, internal fields start '
+                    'with an underscore'
     }
 }
 
@@ -45,6 +52,7 @@ def validate_request_args(request_args):
     group_by = request_args.pop('group_by', None)
     sort_by = request_args.pop('sort_by', None)
     limit = request_args.pop('limit', None)
+    collect = request_args.pop('collect', None)
 
     if len(request_args):
         return invalid(MESSAGES['unrecognised'])
@@ -82,5 +90,12 @@ def validate_request_args(request_args):
                 raise ValueError()
         except ValueError:
             return invalid(MESSAGES['limit']['invalid'])
+    if collect:
+        if not group_by:
+            return invalid(MESSAGES['collect']['no_grouping'])
+        if not MONGO_FIELD_REGEX.match(collect):
+            return invalid(MESSAGES['collect']['invalid'])
+        if collect.startswith('_'):
+            return invalid(MESSAGES['collect']['internal'])
 
     return valid()

@@ -67,18 +67,21 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         super(TestRepositoryIntegration_Grouping, self).setUp()
         people = ["Jack", "Jill", "John", "Jane"]
         places = ["Kettering", "Kew", "Kennington", "Kingston"]
+        hair = ["red", "dark", "blond"]
         times = [d_tz(2013, 3, 11), d_tz(2013, 3, 18), d_tz(2013, 3, 25)]
 
-        self._save_location("Jack", "Kettering", d_tz(2013, 3, 11))
-        self._save_location("Jill", "Kennington", d_tz(2013, 3, 25))
-        self._save_location("John", "Kettering", d_tz(2013, 3, 18))
-        self._save_location("John", "Kennington", d_tz(2013, 3, 11))
-        self._save_location("Jane", "Kingston", d_tz(2013, 3, 18))
+        self._save_location("Jack", "Kettering", "red", d_tz(2013, 3, 11))
+        self._save_location("Jill", "Kennington", "blond", d_tz(2013, 3, 25))
+        self._save_location("John", "Kettering", "blond", d_tz(2013, 3, 18))
+        self._save_location("John", "Kettering", "dark", d_tz(2013, 3, 18))
+        self._save_location("John", "Kennington", "dark", d_tz(2013, 3, 11))
+        self._save_location("Jane", "Kingston", "red", d_tz(2013, 3, 18))
 
-    def _save_location(self, person, place, time):
+    def _save_location(self, person, place, hair, time):
         self.mongo_collection.save({
             "person": person,
             "place": place,
+            "hair": hair,
             "_week_start_at": time
         })
 
@@ -89,7 +92,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.group("place", {})
 
         assert_that(results, only_contains(
-            has_entries({"place": "Kettering", "_count": 2}),
+            has_entries({"place": "Kettering", "_count": 3}),
             has_entries({"place": "Kennington", "_count": 2}),
             has_entries({"place": "Kingston", "_count": 1})
         ))
@@ -98,7 +101,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.group("place", {"person": "John"})
 
         assert_that(results, only_contains(
-            {"place": "Kettering", "_count": 1},
+            {"place": "Kettering", "_count": 2},
             {"place": "Kennington", "_count": 1}
         ))
 
@@ -147,13 +150,38 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         }))
         assert_that(results, has_item({
             "person": "John",
-            "_count": 2,
+            "_count": 3,
             "_group_count": 2,
             "_subgroup": [
                 { "place": "Kennington", "_count": 1 },
-                { "place": "Kettering", "_count": 1 },
+                { "place": "Kettering", "_count": 2 },
             ]
         }))
+
+    def test_grouping_with_collect(self):
+        results = self.repo.group("person", {}, None, None, ["place"])
+
+        assert_that(results, has_item(has_entries({
+            "person": "John",
+            "place": ["Kettering", "Kennington"]
+        })))
+
+    def test_grouping_with_collect(self):
+        results = self.repo.group("place", {}, None, None, ["person"])
+
+        assert_that(results, has_item(has_entries({
+            "place": "Kettering",
+            "person": ["Jack", "John"]
+        })))
+
+    def test_grouping_with_collect_two_fields(self):
+        results = self.repo.group("place", {}, None, None, ["person", "hair"])
+
+        assert_that(results, has_item(has_entries({
+            "place": "Kettering",
+            "person": ["Jack", "John"],
+            "hair": ["blond", "dark", "red"]
+        })))
 
     def test_grouping_on_non_existent_keys(self):
         results = self.repo.group("wibble", {})
@@ -197,7 +225,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             has_entry("_count", 1),
             has_entry("_count", 1),
             has_entry("_count", 1),
-            has_entry("_count", 2),
+            has_entry("_count", 3),
         ))
 
     def test_sorted_multi_group_query_descending(self):
@@ -205,7 +233,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
                                         sort=["_count", "descending"])
 
         assert_that(results, contains(
-            has_entry("_count", 2),
+            has_entry("_count", 3),
             has_entry("_count", 1),
             has_entry("_count", 1),
             has_entry("_count", 1),
@@ -235,9 +263,22 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         )
 
         assert_that(results, contains(
-            has_entry("_count", 2),
+            has_entry("_count", 3),
             has_entry("_count", 1),
         ))
+
+    def test_multi_group_with_collect(self):
+        results = self.repo.multi_group(
+            "place",
+            "_week_start_at",
+            {},
+            collect=["person"]
+        )
+
+        assert_that(results, has_item(has_entries({
+            "place": "Kettering",
+            "person": ["Jack", "John"]
+        })))
 
 
 class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):

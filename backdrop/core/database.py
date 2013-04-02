@@ -69,36 +69,53 @@ class Repository(object):
 
         return cursor
 
-    def group(self, group_by, query, sort=None, limit=None):
+    def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
             self._validate_sort(sort)
-        return self._group([group_by], query, sort, limit)
+        return self._group([group_by], query, sort, limit, collect or [])
 
     def save(self, obj):
         self._collection.save(obj)
 
-    def multi_group(self, key1, key2, query, sort=None, limit=None):
+    def multi_group(self, key1, key2, query,
+                    sort=None, limit=None, collect=None):
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._group([key1, key2], query, sort, limit)
+        results = self._group([key1, key2], query, sort, limit, collect or [])
 
         return results
 
-    def _group(self, keys, query, sort=None, limit=None):
+    def build_collector_code(self, collect):
+        return "\n".join([
+            "if (current.{c}) {{ previous.{c}.push(current.{c}); }}".format(
+                c=collect_me) for collect_me in collect])
+
+    def build_reducer(self, collect):
+        initial = {'_count': 0}
+        for collect_me in collect:
+            initial.update({collect_me: []})
+        reducer_skeleton = "function (current, previous)" + \
+                           "{{ previous._count++; {collectors} }}"
+        reducer_code = reducer_skeleton.format(
+            collectors=self.build_collector_code(collect)
+        )
+        reducer = Code(reducer_code)
+        return (initial, reducer)
+
+    def _group(self, keys, query, sort=None, limit=None, collect=None):
+        initial, reducer = self.build_reducer(collect or [])
         results = self._collection.group(
             key=keys,
             condition=query,
-            initial={'_count': 0},
-            reduce=Code("""
-                function(current, previous) { previous._count++; }
-                """)
+            initial=initial,
+            reduce=reducer
         )
         for result in results:
             for key in keys:
                 if result[key] is None:
                     return []
 
-        results = nested_merge(keys, results)
+        results = nested_merge(keys, collect, results)
 
         if sort:
             sorters = {
@@ -124,10 +141,36 @@ class InvalidSortError(ValueError):
     pass
 
 
-def nested_merge(keys, results):
+def extract_collected_values(collect, result):
+    collected = {}
+    for collect_field in collect:
+        collected[collect_field] = result.pop(collect_field)
+    return collected, result
+
+
+def insert_collected_values(collected, group):
+    for collect_field in collected.keys():
+        if collect_field not in group:
+            group[collect_field] = set()
+        group[collect_field].update(collected[collect_field])
+
+
+def convert_collected_values_to_list(collect, groups):
+    for group in groups:
+        for collected_field in collect:
+            group[collected_field] = sorted(list(group[collected_field]))
+
+
+def nested_merge(keys, collect, results):
     groups = []
     for result in results:
-        groups = _merge(groups, keys, result)
+        collected, result = extract_collected_values(collect, result)
+
+        groups, group = _merge(groups, keys, result)
+
+        insert_collected_values(collected, group)
+
+    convert_collected_values_to_list(collect, groups)
     return groups
 
 
@@ -148,7 +191,7 @@ def _merge(groups, keys, result):
     if not is_leaf:
         _merge_and_sort_subgroup(group, keys, result)
         _add_branch_node_counts(group)
-    return groups
+    return groups, group
 
 
 def _find_group(items):
@@ -174,7 +217,7 @@ def _new_leaf_node(key, value, result):
 
 
 def _merge_and_sort_subgroup(group, keys, result):
-    group['_subgroup'] = _merge(group['_subgroup'], keys, result)
+    group['_subgroup'], _ = _merge(group['_subgroup'], keys, result)
     group['_subgroup'].sort(key=lambda d: d[keys[0]])
 
 

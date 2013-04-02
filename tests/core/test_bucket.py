@@ -55,7 +55,7 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(group_by = "name")
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, None, None)
+            "name", {}, None, None, [])
 
         assert_that(query_result,
                     has_item(has_entries({'name': equal_to('Max'),
@@ -71,7 +71,7 @@ class TestBucket(unittest.TestCase):
         )
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, ["name", "ascending"], None)
+            "name", {}, ["name", "ascending"], None, [])
 
     def test_sorted_group_by_query_with_limit(self):
         self.bucket.query(
@@ -81,7 +81,18 @@ class TestBucket(unittest.TestCase):
         )
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, ["name", "ascending"], 100)
+            "name", {}, ["name", "ascending"], 100, [])
+
+    def test_group_by_query_with_collect(self):
+        self.bucket.query(
+            group_by="name",
+            sort_by=None,
+            limit=None,
+            collect=["key"]
+        )
+
+        self.mock_repository.group.assert_called_once_with(
+            "name", {}, None, None, ["key"])
 
     def test_query_with_start_at(self):
         self.bucket.query(start_at = d(2013, 4, 1, 12, 0, 0))
@@ -267,7 +278,8 @@ class TestBucket(unittest.TestCase):
             "_week_start_at",
             {},
             sort=["_count", "descending"],
-            limit=None
+            limit=None,
+            collect=[]
         )
 
     def test_sorted_week_and_group_query_with_limit(self):
@@ -293,7 +305,8 @@ class TestBucket(unittest.TestCase):
             period="week",
             group_by="some_group",
             sort_by=["_count", "descending"],
-            limit=1
+            limit=1,
+            collect=[]
         )
 
         self.mock_repository.multi_group.assert_called_with(
@@ -301,4 +314,5 @@ class TestBucket(unittest.TestCase):
             "_week_start_at",
             {},
             sort=["_count", "descending"],
-            limit=1)
+            limit=1,
+            collect=[])
