@@ -1,6 +1,5 @@
 from logging import FileHandler
 import logging
-from logging.handlers import RotatingFileHandler
 from os import getenv
 
 from flask import Flask, request, jsonify
@@ -72,8 +71,9 @@ def post_to_bucket(bucket_name):
 
 
 def setup_logger():
-    handler = FileHandler("log/%s.log" % environment())
-    handler.setLevel(app.config["LOG_LEVEL"])
+    handler = FileHandler("log/%s.write.log" % environment())
+    # TODO: get logging level from config
+    handler.setLevel(logging.DEBUG)
     app.logger.addHandler(handler)
 
 
@@ -88,3 +88,4 @@ def start(port):
     app.debug = True
     setup_logger()
     app.run(host='0.0.0.0', port=port)
+    app.logger.info("Backdrop Write API started")
