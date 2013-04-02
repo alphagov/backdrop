@@ -13,10 +13,10 @@ from ..core.bucket import Bucket
 
 
 def setup_logger():
-    # TODO: get logging level from config
+    log_level = logging._levelNames[app.config['LOG_LEVEL']]
     app.logger.addHandler(
-        get_log_file_handler("log/%s.write.log" % environment()))
-    app.logger.setLevel(logging._levelNames[app.config['LOG_LEVEL']])
+        get_log_file_handler("log/%s.write.log" % environment(), log_level))
+    app.logger.setLevel(log_level)
     app.logger.info("Logging for Backdrop Write API started")
 
 
