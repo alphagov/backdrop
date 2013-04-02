@@ -266,6 +266,19 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             has_entry("_count", 1),
         ))
 
+    def test_multi_group_with_collect(self):
+        results = self.repo.multi_group(
+            "place",
+            "_week_start_at",
+            {},
+            collect=["person"]
+        )
+
+        assert_that(results, has_item(has_entries({
+            "place": "Kettering",
+            "person": ["Jack", "John"]
+        })))
+
 
 class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def setup_numeric_values(self):

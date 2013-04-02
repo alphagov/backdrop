@@ -13,7 +13,7 @@ class NestedMergeTestCase(unittest.TestCase):
         ]
 
     def test_nested_merge_merges_dictionaries(self):
-        output = database.nested_merge(['a', 'b'], self.dictionaries)
+        output = database.nested_merge(['a', 'b'], [], self.dictionaries)
 
         assert_that(output[0], is_({
             "a": 1,
@@ -34,7 +34,7 @@ class NestedMergeTestCase(unittest.TestCase):
         }))
 
     def test_nested_merge_squashes_duplicates(self):
-        output = database.nested_merge(['a'], self.dictionaries)
+        output = database.nested_merge(['a'], [], self.dictionaries)
         assert_that(output, is_([
             {'a': 1, 'b': 2, 'c': 3},
             {'a': 2, 'b': 1, 'c': 3}

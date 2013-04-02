@@ -278,7 +278,8 @@ class TestBucket(unittest.TestCase):
             "_week_start_at",
             {},
             sort=["_count", "descending"],
-            limit=None
+            limit=None,
+            collect=[]
         )
 
     def test_sorted_week_and_group_query_with_limit(self):
@@ -304,7 +305,8 @@ class TestBucket(unittest.TestCase):
             period="week",
             group_by="some_group",
             sort_by=["_count", "descending"],
-            limit=1
+            limit=1,
+            collect=[]
         )
 
         self.mock_repository.multi_group.assert_called_with(
@@ -312,4 +314,5 @@ class TestBucket(unittest.TestCase):
             "_week_start_at",
             {},
             sort=["_count", "descending"],
-            limit=1)
+            limit=1,
+            collect=[])

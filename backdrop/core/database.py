@@ -77,10 +77,11 @@ class Repository(object):
     def save(self, obj):
         self._collection.save(obj)
 
-    def multi_group(self, key1, key2, query, sort=None, limit=None):
+    def multi_group(self, key1, key2, query,
+                    sort=None, limit=None, collect=None):
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._group([key1, key2], query, sort, limit)
+        results = self._group([key1, key2], query, sort, limit, collect or [])
 
         return results
 
@@ -114,7 +115,7 @@ class Repository(object):
                 if result[key] is None:
                     return []
 
-        results = nested_merge(keys, results)
+        results = nested_merge(keys, collect, results)
 
         if sort:
             sorters = {
@@ -140,10 +141,20 @@ class InvalidSortError(ValueError):
     pass
 
 
-def nested_merge(keys, results):
+def nested_merge(keys, collect, results):
     groups = []
     for result in results:
-        groups = _merge(groups, keys, result)
+        collected = {}
+        for collect_field in collect:
+            collected[collect_field] = result.pop(collect_field)
+
+        group = _merge(groups, keys, result)
+
+        for collect_field in collect:
+            if collect_field not in group:
+                group[collect_field] = list()
+            group[collect_field].extend(collected[collect_field])
+
     return groups
 
 
@@ -164,7 +175,7 @@ def _merge(groups, keys, result):
     if not is_leaf:
         _merge_and_sort_subgroup(group, keys, result)
         _add_branch_node_counts(group)
-    return groups
+    return group
 
 
 def _find_group(items):
@@ -190,7 +201,7 @@ def _new_leaf_node(key, value, result):
 
 
 def _merge_and_sort_subgroup(group, keys, result):
-    group['_subgroup'] = _merge(group['_subgroup'], keys, result)
+    _merge(group['_subgroup'], keys, result)
     group['_subgroup'].sort(key=lambda d: d[keys[0]])
 
 
