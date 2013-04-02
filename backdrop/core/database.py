@@ -141,19 +141,28 @@ class InvalidSortError(ValueError):
     pass
 
 
+def extract_collected_values(collect, result):
+    collected = {}
+    for collect_field in collect:
+        collected[collect_field] = result.pop(collect_field)
+    return collected, result
+
+
+def insert_collected_values(collected, group):
+    for collect_field in collected.keys():
+        if collect_field not in group:
+            group[collect_field] = list()
+        group[collect_field].extend(collected[collect_field])
+
+
 def nested_merge(keys, collect, results):
     groups = []
     for result in results:
-        collected = {}
-        for collect_field in collect:
-            collected[collect_field] = result.pop(collect_field)
+        collected, result = extract_collected_values(collect, result)
 
-        group = _merge(groups, keys, result)
+        groups, group = _merge(groups, keys, result)
 
-        for collect_field in collect:
-            if collect_field not in group:
-                group[collect_field] = list()
-            group[collect_field].extend(collected[collect_field])
+        insert_collected_values(collected, group)
 
     return groups
 
@@ -175,7 +184,7 @@ def _merge(groups, keys, result):
     if not is_leaf:
         _merge_and_sort_subgroup(group, keys, result)
         _add_branch_node_counts(group)
-    return group
+    return groups, group
 
 
 def _find_group(items):
@@ -201,7 +210,7 @@ def _new_leaf_node(key, value, result):
 
 
 def _merge_and_sort_subgroup(group, keys, result):
-    _merge(group['_subgroup'], keys, result)
+    group['_subgroup'], _ = _merge(group['_subgroup'], keys, result)
     group['_subgroup'].sort(key=lambda d: d[keys[0]])
 
 
