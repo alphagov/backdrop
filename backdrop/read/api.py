@@ -1,14 +1,23 @@
 import datetime
 import json
+import logging
 from os import getenv
 
 from dateutil import parser
 from flask import Flask, jsonify, request
 import pytz
+from backdrop.core.log_handler import get_log_file_handler
 
 from .validation import validate_request_args
 from ..core import database
 from ..core.bucket import Bucket
+
+
+def setup_logging():
+    env = getenv("GOVUK_ENV", "development")
+    app.logger.addHandler(get_log_file_handler("log/%s.read.log" % env))
+    app.logger.setLevel(logging.DEBUG)
+    app.logger.info("Backdrop read API logging started")
 
 
 app = Flask(__name__)
@@ -23,6 +32,9 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+
+
+setup_logging()
 
 
 def parse_request_args(request_args):
@@ -60,10 +72,19 @@ class JsonEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+@app.errorhandler(500)
+@app.errorhandler(405)
+@app.errorhandler(404)
+def exception_handler(e):
+    app.logger.exception(e)
+    return jsonify(status='error', message=''), e.code
+
+
 @app.route('/<bucket_name>', methods=['GET'])
 def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
+        app.logger.error(result.message)
         return jsonify(status='error', message=result.message), 400
 
     bucket = Bucket(db, bucket_name)
