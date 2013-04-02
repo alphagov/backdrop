@@ -31,7 +31,10 @@ db = database.Database(
 
 @app.before_request
 def request_prehandler():
-    app.logger.info("%s %s" % (request.method, request.url))
+    log_this = "%s %s" % (request.method, request.url)
+    if request.json:
+        log_this += " JSON length: %i" % (len(request.json))
+    app.logger.info(log_this)
 
 
 @app.route('/_status')
