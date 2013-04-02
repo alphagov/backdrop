@@ -151,8 +151,14 @@ def extract_collected_values(collect, result):
 def insert_collected_values(collected, group):
     for collect_field in collected.keys():
         if collect_field not in group:
-            group[collect_field] = list()
-        group[collect_field].extend(collected[collect_field])
+            group[collect_field] = set()
+        group[collect_field].update(collected[collect_field])
+
+
+def convert_collected_values_to_list(collect, groups):
+    for group in groups:
+        for collected_field in collect:
+            group[collected_field] = list(group[collected_field])
 
 
 def nested_merge(keys, collect, results):
@@ -164,6 +170,7 @@ def nested_merge(keys, collect, results):
 
         insert_collected_values(collected, group)
 
+    convert_collected_values_to_list(collect, groups)
     return groups
 
 

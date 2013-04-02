@@ -73,6 +73,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         self._save_location("Jack", "Kettering", "red", d_tz(2013, 3, 11))
         self._save_location("Jill", "Kennington", "blond", d_tz(2013, 3, 25))
         self._save_location("John", "Kettering", "blond", d_tz(2013, 3, 18))
+        self._save_location("John", "Kettering", "dark", d_tz(2013, 3, 18))
         self._save_location("John", "Kennington", "dark", d_tz(2013, 3, 11))
         self._save_location("Jane", "Kingston", "red", d_tz(2013, 3, 18))
 
@@ -91,7 +92,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.group("place", {})
 
         assert_that(results, only_contains(
-            has_entries({"place": "Kettering", "_count": 2}),
+            has_entries({"place": "Kettering", "_count": 3}),
             has_entries({"place": "Kennington", "_count": 2}),
             has_entries({"place": "Kingston", "_count": 1})
         ))
@@ -100,7 +101,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.group("place", {"person": "John"})
 
         assert_that(results, only_contains(
-            {"place": "Kettering", "_count": 1},
+            {"place": "Kettering", "_count": 2},
             {"place": "Kennington", "_count": 1}
         ))
 
@@ -149,11 +150,11 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         }))
         assert_that(results, has_item({
             "person": "John",
-            "_count": 2,
+            "_count": 3,
             "_group_count": 2,
             "_subgroup": [
                 { "place": "Kennington", "_count": 1 },
-                { "place": "Kettering", "_count": 1 },
+                { "place": "Kettering", "_count": 2 },
             ]
         }))
 
@@ -170,7 +171,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["Jack", "John"]
+            "person": ["John", "Jack"]
         })))
 
     def test_grouping_with_collect_two_fields(self):
@@ -178,8 +179,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["Jack", "John"],
-            "hair": ["red", "blond"]
+            "person": ["John", "Jack"],
+            "hair": ["dark", "blond", "red"]
         })))
 
     def test_grouping_on_non_existent_keys(self):
@@ -224,7 +225,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             has_entry("_count", 1),
             has_entry("_count", 1),
             has_entry("_count", 1),
-            has_entry("_count", 2),
+            has_entry("_count", 3),
         ))
 
     def test_sorted_multi_group_query_descending(self):
@@ -232,7 +233,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
                                         sort=["_count", "descending"])
 
         assert_that(results, contains(
-            has_entry("_count", 2),
+            has_entry("_count", 3),
             has_entry("_count", 1),
             has_entry("_count", 1),
             has_entry("_count", 1),
@@ -262,7 +263,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         )
 
         assert_that(results, contains(
-            has_entry("_count", 2),
+            has_entry("_count", 3),
             has_entry("_count", 1),
         ))
 
@@ -276,7 +277,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["Jack", "John"]
+            "person": ["John", "Jack"]
         })))
 
 
