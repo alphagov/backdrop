@@ -3,11 +3,22 @@ import logging
 from os import getenv
 
 from flask import Flask, request, jsonify
+from requests.packages.urllib3 import response
 from backdrop.core import records
 
 from .validation import validate_post_to_bucket
 from ..core import database
 from ..core.bucket import Bucket
+
+
+def setup_logger():
+    handler = FileHandler("log/%s.write.log" % environment())
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] -> %(message)s"))
+    # TODO: get logging level from config
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.DEBUG)
+    app.logger.info("Logging for Backdrop Write API started")
 
 
 def environment():
@@ -26,6 +37,9 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+
+
+setup_logger()
 
 
 @app.before_request
@@ -70,13 +84,6 @@ def post_to_bucket(bucket_name):
     return jsonify(status='ok')
 
 
-def setup_logger():
-    handler = FileHandler("log/%s.write.log" % environment())
-    # TODO: get logging level from config
-    handler.setLevel(logging.DEBUG)
-    app.logger.addHandler(handler)
-
-
 def prep_data(incoming_json):
     if isinstance(incoming_json, list):
         return incoming_json
@@ -85,7 +92,7 @@ def prep_data(incoming_json):
 
 
 def start(port):
+    # this method only gets run on dev
     app.debug = True
-    setup_logger()
     app.run(host='0.0.0.0', port=port)
     app.logger.info("Backdrop Write API started")
