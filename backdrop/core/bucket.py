@@ -26,15 +26,8 @@ class Bucket(object):
             '_count': doc['_count']
         }
 
-    def __collect_all_periods(self, result):
-        periods = set()
-        for each in result:
-            for value in each["values"]:
-                periods.add((value["_start_at"], value["_end_at"]))
-        return periods
-
     def __find_missing_periods(self, periods, single_group):
-        periods = periods.copy()
+        periods = list(periods)
         for value in single_group["values"]:
             periods.remove((value["_start_at"], value["_end_at"]))
         return periods
@@ -45,6 +38,32 @@ class Bucket(object):
             "_end_at": end_at,
             "_count": 0
         }
+
+    def __find_period_range(self, result):
+        min_period, max_period = None, None
+        for each in result:
+            for value in each["values"]:
+                if not min_period:
+                    min_period = value["_start_at"]
+                min_period = min(min_period, value["_start_at"])
+                if not max_period:
+                    max_period = value["_end_at"]
+                max_period = max(max_period, value["_end_at"])
+        return min_period, max_period
+
+    def __collect_all_periods(self, result):
+        min_period, max_period = self.__find_period_range(result)
+        periods = []
+
+        dt = min_period
+        end = max_period
+        step = datetime.timedelta(days=7)
+
+        while dt < end:
+            periods.append((dt, dt + step))
+            dt += step
+
+        return periods
 
     def __fill_in_missing_periods(self, result):
         all_periods = self.__collect_all_periods(result)

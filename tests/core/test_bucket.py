@@ -232,10 +232,6 @@ class TestBucket(unittest.TestCase):
                     {
                         "_week_start_at": d(2013, 1, 7, 0, 0, 0),
                         "_count": 1
-                    },
-                    {
-                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
-                        "_count": 5
                     }
                 ]
             },
@@ -244,10 +240,6 @@ class TestBucket(unittest.TestCase):
                 "_count": 8,
                 "_group_count": 2,
                 "_subgroup": [
-                    {
-                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
-                        "_count": 6
-                    },
                     {
                         "_week_start_at": d(2013, 1, 21, 0, 0, 0),
                         "_count": 1
