@@ -1,3 +1,4 @@
+import pprint
 import unittest
 from abc import ABCMeta
 
@@ -446,3 +447,51 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
 
         assert_that(result.count(with_limit_and_skip=True), is_(1))
         assert_that(list(result)[0], has_entry('value', 2))
+
+    def test_period_query_for_data_with_no__week_start_at(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "bar"
+        })
+        self.mongo_collection.save({
+            "foo": "bar2"
+        })
+
+        result = self.repo.group('_week_start_at', {})
+
+        assert_that(result, has_item(has_entry("_count", 1)))
+
+    def test_multigroup_query_for_data_with_different_missing_fields(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+        })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {})
+
+        assert_that(result, is_([]))
+
+    def test_multigroup_query_for_data_with_different_missing_fields(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+        })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {},
+                                       collect=["foo"])
+
+        assert_that(result, has_item(has_entry("_count", 1)))
+        assert_that(result, has_item(has_entry("_group_count", 1)))
