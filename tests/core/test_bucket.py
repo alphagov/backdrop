@@ -1,3 +1,4 @@
+import pprint
 import unittest
 import datetime
 from hamcrest import *
@@ -359,3 +360,32 @@ class TestBucket(unittest.TestCase):
             sort=["_count", "descending"],
             limit=1,
             collect=[])
+
+    def test_what_happens_when__week_start_at_is_not_on_a_monday(self):
+        multi_group_results = [
+            {
+                "is": "Monday",
+                "_subgroup": [
+                    {"_week_start_at": d(2013, 4, 1)}
+                ]
+            },
+            {
+                "is": "also Monday",
+                "_subgroup": [
+                    {"_week_start_at": d(2013, 4, 8)}
+                ]
+            },
+            {
+                "is": "Tuesday",
+                "_subgroup": [
+                    {"_week_start_at": d(2013, 4, 9)}
+                ]
+            },
+        ]
+
+        self.mock_repository.multi_group.return_value = \
+            multi_group_results
+
+        result = self.bucket.query(period='week', group_by='d')
+
+        assert_that(result, is_(instance_of(list)))
