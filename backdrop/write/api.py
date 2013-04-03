@@ -66,7 +66,7 @@ def health_check():
 
 @app.route('/<bucket_name>', methods=['POST'])
 def post_to_bucket(bucket_name):
-    if not request.json:
+    if request.json is None:
         app.logger.error("Request must be JSON")
         return jsonify(status='error', message='Request must be JSON'), 400
 
