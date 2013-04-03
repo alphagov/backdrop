@@ -25,6 +25,18 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.core.bucket.Bucket.store")
+    def test_empty_list_gets_stored(self, store):
+        self.app.post(
+            '/foo-bucket',
+            data='[]',
+            content_type="application/json"
+        )
+
+        store.assert_called_with(
+            []
+        )
+
+    @patch("backdrop.core.bucket.Bucket.store")
     def test_data_gets_stored(self, store):
         self.app.post(
             '/foo-bucket',
