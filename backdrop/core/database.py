@@ -110,10 +110,11 @@ class Repository(object):
             initial=initial,
             reduce=reducer
         )
-        for result in results:
-            for key in keys:
-                if result[key] is None:
-                    return []
+
+        results = [
+            result for result in results
+            if all(result[key] is not None for key in keys)
+        ]
 
         results = nested_merge(keys, collect, results)
 
