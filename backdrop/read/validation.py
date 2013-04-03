@@ -19,7 +19,8 @@ MESSAGES = {
         'invalid': 'Unrecognised grouping for period. Supported periods '
                    'include: week',
         'group': 'Cannot group on two equal keys',
-        'sort': 'Period queries are sorted by time'
+        'sort': 'Cannot use sort_by for period queries - period queries '
+                'are always sorted by time'
     },
     'group_by': {
         'internal': 'Cannot group by internal fields, internal fields start '
