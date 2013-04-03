@@ -102,9 +102,6 @@ class Repository(object):
         reducer = Code(reducer_code)
         return (initial, reducer)
 
-    def some_exists(self, predicate, sequence):
-        return len([key for key in sequence if predicate(key)]) == 0
-
     def _group(self, keys, query, sort=None, limit=None, collect=None):
         initial, reducer = self.build_reducer(collect or [])
         results = self._collection.group(
@@ -114,8 +111,10 @@ class Repository(object):
             reduce=reducer
         )
 
-        results = filter(lambda result: self.some_exists(
-            lambda key: result[key] is None, keys), results)
+        results = [
+            result for result in results
+            if all(result[key] is not None for key in keys)
+        ]
 
         results = nested_merge(keys, collect, results)
 
