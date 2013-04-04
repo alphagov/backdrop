@@ -105,8 +105,7 @@ class Repository(object):
     def _require_keys_in_query(self, keys, query):
         for key in keys:
             if key not in query:
-                query[key] = {}
-            query[key]['$ne'] = None
+                query[key] = {"$ne": None}
         return query
 
     def _group(self, keys, query, sort=None, limit=None, collect=None):

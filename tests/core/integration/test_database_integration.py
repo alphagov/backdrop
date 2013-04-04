@@ -20,8 +20,6 @@ class RepositoryIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.repo = Repository(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
-
-    def tearDown(self):
         self.mongo_collection.drop()
 
 
@@ -63,7 +61,7 @@ class TestRepositoryIntegration(RepositoryIntegrationTest):
 
 
 class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
-    def setUp(self):
+    def setUpPeopleLocationData(self):
         super(TestRepositoryIntegration_Grouping, self).setUp()
         people = ["Jack", "Jill", "John", "Jane"]
         places = ["Kettering", "Kew", "Kennington", "Kingston"]
@@ -85,10 +83,9 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_week_start_at": time
         })
 
-    def tearDown(self):
-        super(TestRepositoryIntegration_Grouping, self).tearDown()
-
     def test_group(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.group("place", {})
 
         assert_that(results, only_contains(
@@ -98,6 +95,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         ))
 
     def test_group_with_query(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.group("place", {"person": "John"})
 
         assert_that(results, only_contains(
@@ -106,6 +105,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         ))
 
     def test_key1_is_pulled_to_the_top_of_outer_group(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("_week_start_at", "person", {})
 
         assert_that(results, has_item(has_entry(
@@ -116,6 +117,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         )))
 
     def test_should_use_second_key_for_inner_group_name(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("_week_start_at", "person", {})
 
         assert_that(results, has_item(has_entry(
@@ -123,6 +126,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         )))
 
     def test_count_of_outer_elements_should_be_added(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("_week_start_at", "person", {})
 
         assert_that(results, has_item(has_entry(
@@ -130,6 +135,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         )))
 
     def test_grouping_by_multiple_keys(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("person", "place", {})
 
         assert_that(results, has_item({
@@ -159,22 +166,28 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         }))
 
     def test_grouping_with_collect(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.group("person", {}, None, None, ["place"])
 
         assert_that(results, has_item(has_entries({
             "person": "John",
-            "place": ["Kettering", "Kennington"]
+            "place": has_items("Kettering", "Kennington")
         })))
 
-    def test_grouping_with_collect(self):
+    def test_another_grouping_with_collect(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.group("place", {}, None, None, ["person"])
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["Jack", "John"]
+            "person": has_items("Jack", "John")
         })))
 
     def test_grouping_with_collect_two_fields(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.group("place", {}, None, None, ["person", "hair"])
 
         assert_that(results, has_item(has_entries({
@@ -184,11 +197,15 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         })))
 
     def test_grouping_on_non_existent_keys(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.group("wibble", {})
 
         assert_that(results, is_([]))
 
     def test_multi_grouping_on_non_existent_keys(self):
+        self.setUpPeopleLocationData()
+
         result1 = self.repo.multi_group("wibble", "wobble", {})
         result2 = self.repo.multi_group("wibble", "person", {})
         result3 = self.repo.multi_group("person", "wibble", {})
@@ -198,7 +215,6 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         assert_that(result3, is_([]))
 
     def test_multi_grouping_on_empty_collection_returns_empty_list(self):
-        self.mongo_collection.drop()
         assert_that(list(self.mongo_collection.find({})), is_([]))
         assert_that(self.repo.multi_group('a', 'b', {}), is_([]))
 
@@ -207,6 +223,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
                           "person", "person", {})
 
     def test_multi_group_is_sorted_by_inner_key(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("person", "_week_start_at", {})
 
         assert_that(results, has_item(has_entries({
@@ -218,6 +236,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         })))
 
     def test_sorted_multi_group_query_ascending(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("person", "_week_start_at", {},
                                         sort=["_count", "ascending"])
 
@@ -229,6 +249,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         ))
 
     def test_sorted_multi_group_query_descending(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group("person", "_week_start_at", {},
                                         sort=["_count", "descending"])
 
@@ -240,6 +262,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         ))
 
     def test_sorted_multi_group_query_ascending_with_limit(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group(
             "person",
             "_week_start_at",
@@ -254,6 +278,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         ))
 
     def test_sorted_multi_group_query_descending_with_limit(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group(
             "person",
             "_week_start_at",
@@ -268,6 +294,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         ))
 
     def test_multi_group_with_collect(self):
+        self.setUpPeopleLocationData()
+
         results = self.repo.multi_group(
             "place",
             "_week_start_at",
@@ -279,6 +307,65 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "place": "Kettering",
             "person": ["Jack", "John"]
         })))
+
+
+class TestRepositoryIntegration_MultiGroupWithMissingFields(
+        RepositoryIntegrationTest):
+    def test_query_for_data_with_different_missing_fields_no_results(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+        })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {})
+
+        assert_that(result, is_([]))
+
+    def test_query_for_data_with_different_missing_fields_some_results(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+        })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {},
+                                       collect=["foo"])
+
+        assert_that(result, has_item(has_entry("_count", 1)))
+        assert_that(result, has_item(has_entry("_group_count", 1)))
+
+    def test_query_for_data_with_different_missing_fields_with_filter(self):
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+        })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {"bar": "2"},
+                                       collect=["foo"])
+
+        assert_that(result, has_item(has_entry("_count", 1)))
+        assert_that(result, has_item(has_entry("_group_count", 1)))
 
 
 class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
@@ -459,38 +546,3 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         result = self.repo.group('_week_start_at', {})
 
         assert_that(result, has_item(has_entry("_count", 1)))
-
-    def test_multigroup_query_for_data_with_different_missing_fields(self):
-        self.mongo_collection.save({
-            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
-            "foo": "1",
-        })
-        self.mongo_collection.save({
-            "foo": "12",
-            "bar": "2"
-        })
-
-        result = self.repo.multi_group("_week_start_at", "bar", {})
-
-        assert_that(result, is_([]))
-
-    def test_multigroup_query_for_data_with_different_missing_fields(self):
-        self.mongo_collection.save({
-            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
-            "foo": "1",
-        })
-        self.mongo_collection.save({
-            "foo": "12",
-            "bar": "2"
-        })
-        self.mongo_collection.save({
-            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
-            "foo": "12",
-            "bar": "2"
-        })
-
-        result = self.repo.multi_group("_week_start_at", "bar", {},
-                                       collect=["foo"])
-
-        assert_that(result, has_item(has_entry("_count", 1)))
-        assert_that(result, has_item(has_entry("_group_count", 1)))
