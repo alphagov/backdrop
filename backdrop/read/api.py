@@ -84,6 +84,13 @@ def exception_handler(e):
     app.logger.exception(e)
     return jsonify(status='error', message=''), e.code
 
+@app.route('/_status')
+def health_check():
+    if db.alive():
+        return jsonify(status='ok', message='database seems fine')
+    else:
+        return jsonify(status='error',
+                       message='cannot connect to database'), 500
 
 @app.route('/<bucket_name>', methods=['GET'])
 def query(bucket_name):
