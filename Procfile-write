@@ -1,1 +1,1 @@
-web: {{virtualenv-path}}/bin/gunicorn -blocalhost:3039 backdrop.write.api:app
+web: venv/bin/gunicorn -blocalhost:3039 backdrop.write.api:app
