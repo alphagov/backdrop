@@ -286,7 +286,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),
             "foo": "1",
-            })
+        })
         self.mongo_collection.save({
             "foo": "12",
             "bar": "2"
@@ -302,7 +302,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),
             "foo": "1",
-            })
+        })
         self.mongo_collection.save({
             "foo": "12",
             "bar": "2"
@@ -325,7 +325,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),
             "foo": "1",
-            })
+        })
         self.mongo_collection.save({
             "foo": "12",
             "bar": "2"
