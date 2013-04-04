@@ -51,4 +51,3 @@ class TestDatabase(unittest.TestCase):
     def test_getting_a_repository(self):
         repository = self.db.get_repository('my_bucket')
         assert_that(repository, instance_of(Repository))
-        assert_that(repository.name, 'my_bucket')
