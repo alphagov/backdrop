@@ -1,3 +1,4 @@
+import pprint
 import unittest
 import datetime
 from hamcrest import *
@@ -359,3 +360,36 @@ class TestBucket(unittest.TestCase):
             sort=["_count", "descending"],
             limit=1,
             collect=[])
+
+    def test_blows_up_when_weeks_do_not_start_on_monday(self):
+        multi_group_results = [
+            {
+                "is": "Monday",
+                "_subgroup": [
+                    {"_week_start_at": d(2013, 4, 1)}
+                ]
+            },
+            {
+                "is": "also Monday",
+                "_subgroup": [
+                    {"_week_start_at": d(2013, 4, 8)}
+                ]
+            },
+            {
+                "is": "Tuesday",
+                "_subgroup": [
+                    {"_week_start_at": d(2013, 4, 9)}
+                ]
+            },
+        ]
+
+        self.mock_repository.multi_group.return_value = \
+            multi_group_results
+
+        try:
+            self.bucket.query(period='week', group_by='d')
+            assert_that(False)
+        except ValueError as e:
+            assert_that(str(e), is_(
+                "Weeks MUST start on Monday. Corrupt Data: 2013-04-09 00:00:00"
+            ))

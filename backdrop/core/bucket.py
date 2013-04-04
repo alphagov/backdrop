@@ -90,7 +90,11 @@ class Bucket(object):
             doc['values'] = doc.pop('_subgroup')
 
             for item in doc['values']:
-                start_at = utc(item.pop("_week_start_at"))
+                week_start_at = item.pop("_week_start_at")
+                if week_start_at.weekday() is not 0:
+                    raise ValueError('Weeks MUST start on Monday. '
+                                     'Corrupt Data: ' + str(week_start_at))
+                start_at = utc(week_start_at)
                 item.update({
                     "_start_at": start_at,
                     "_end_at": start_at + datetime.timedelta(days=7)
