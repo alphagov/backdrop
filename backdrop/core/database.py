@@ -102,19 +102,22 @@ class Repository(object):
         reducer = Code(reducer_code)
         return (initial, reducer)
 
+    def _require_keys_in_query(self, keys, query):
+        for key in keys:
+            if key not in query:
+                query[key] = {}
+            query[key]['$ne'] = None
+        return query
+
     def _group(self, keys, query, sort=None, limit=None, collect=None):
         initial, reducer = self.build_reducer(collect or [])
+
         results = self._collection.group(
             key=keys,
-            condition=query,
+            condition=self._require_keys_in_query(keys, query),
             initial=initial,
             reduce=reducer
         )
-
-        results = [
-            result for result in results
-            if all(result[key] is not None for key in keys)
-        ]
 
         results = nested_merge(keys, collect, results)
 
