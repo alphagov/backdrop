@@ -280,6 +280,68 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "person": ["Jack", "John"]
         })))
 
+    def test_query_for_data_with_different_missing_fields_no_results(self):
+        self.mongo_collection.drop()
+
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+            })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {})
+
+        assert_that(result, is_([]))
+
+    def test_query_for_data_with_different_missing_fields_some_results(self):
+        self.mongo_collection.drop()
+
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+            })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {},
+                                       collect=["foo"])
+
+        assert_that(result, has_item(has_entry("_count", 1)))
+        assert_that(result, has_item(has_entry("_group_count", 1)))
+
+    def test_query_for_data_with_different_missing_fields_with_filter(self):
+        self.mongo_collection.drop()
+
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "1",
+            })
+        self.mongo_collection.save({
+            "foo": "12",
+            "bar": "2"
+        })
+        self.mongo_collection.save({
+            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
+            "foo": "12",
+            "bar": "2"
+        })
+
+        result = self.repo.multi_group("_week_start_at", "bar", {"bar": "2"},
+                                       collect=["foo"])
+
+        assert_that(result, has_item(has_entry("_count", 1)))
+        assert_that(result, has_item(has_entry("_group_count", 1)))
+
 
 class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def setup_numeric_values(self):
@@ -459,38 +521,3 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         result = self.repo.group('_week_start_at', {})
 
         assert_that(result, has_item(has_entry("_count", 1)))
-
-    def test_multigroup_query_for_data_with_different_missing_fields(self):
-        self.mongo_collection.save({
-            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
-            "foo": "1",
-        })
-        self.mongo_collection.save({
-            "foo": "12",
-            "bar": "2"
-        })
-
-        result = self.repo.multi_group("_week_start_at", "bar", {})
-
-        assert_that(result, is_([]))
-
-    def test_multigroup_query_for_data_with_different_missing_fields(self):
-        self.mongo_collection.save({
-            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
-            "foo": "1",
-        })
-        self.mongo_collection.save({
-            "foo": "12",
-            "bar": "2"
-        })
-        self.mongo_collection.save({
-            "_week_start_at": d(2013, 4, 2, 0, 0, 0),
-            "foo": "12",
-            "bar": "2"
-        })
-
-        result = self.repo.multi_group("_week_start_at", "bar", {},
-                                       collect=["foo"])
-
-        assert_that(result, has_item(has_entry("_count", 1)))
-        assert_that(result, has_item(has_entry("_group_count", 1)))
