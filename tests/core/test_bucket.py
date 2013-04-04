@@ -361,7 +361,7 @@ class TestBucket(unittest.TestCase):
             limit=1,
             collect=[])
 
-    def test_what_happens_when__week_start_at_is_not_on_a_monday(self):
+    def test_blows_up_when_weeks_dont_start_on_monday(self):
         multi_group_results = [
             {
                 "is": "Monday",
@@ -386,6 +386,8 @@ class TestBucket(unittest.TestCase):
         self.mock_repository.multi_group.return_value = \
             multi_group_results
 
-        result = self.bucket.query(period='week', group_by='d')
-
-        assert_that(result, is_(instance_of(list)))
+        try:
+            self.bucket.query(period='week', group_by='d')
+            assert_that(False)
+        except ValueError as e:
+            assert_that(str(e), is_("Weeks MUST start on Monday. Corrupt Data"))
