@@ -20,8 +20,6 @@ class RepositoryIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.repo = Repository(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
-
-    def tearDown(self):
         self.mongo_collection.drop()
 
 
@@ -281,8 +279,6 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         })))
 
     def test_query_for_data_with_different_missing_fields_no_results(self):
-        self.mongo_collection.drop()
-
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),
             "foo": "1",
@@ -297,8 +293,6 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         assert_that(result, is_([]))
 
     def test_query_for_data_with_different_missing_fields_some_results(self):
-        self.mongo_collection.drop()
-
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),
             "foo": "1",
@@ -320,8 +314,6 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         assert_that(result, has_item(has_entry("_group_count", 1)))
 
     def test_query_for_data_with_different_missing_fields_with_filter(self):
-        self.mongo_collection.drop()
-
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),
             "foo": "1",
