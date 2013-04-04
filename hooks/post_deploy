@@ -1,4 +1,4 @@
-#!/usr/local/env bash
+#!/usr/bin/env bash
 
 BACKDROP_APP=$(echo $GOVUK_APP_NAME | cut -d . -f 1)
 
