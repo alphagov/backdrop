@@ -39,7 +39,8 @@ MESSAGES = {
         'no_grouping': 'collect is only allowed when grouping',
         'invalid': 'collect must be a valid field name',
         'internal': 'Cannot collect internal fields, internal fields start '
-                    'with an underscore'
+                    'with an underscore',
+        'groupby_field': "Cannot collect by a field that is used for group_by"
     }
 }
 
@@ -98,5 +99,7 @@ def validate_request_args(request_args):
             return invalid(MESSAGES['collect']['invalid'])
         if collect.startswith('_'):
             return invalid(MESSAGES['collect']['internal'])
+        if collect == group_by:
+            return invalid(MESSAGES['collect']['groupby_field'])
 
     return valid()

@@ -153,3 +153,10 @@ class TestRequestValidation(TestCase):
             "collect": '_internal_field'
         })
         assert_that(validation_result_without_group_by.is_valid, is_(False))
+
+    def test_rejects_collect_when_the_same_field_name_is_used(self):
+        validation_result_without_group_by = validate_request_args({
+            "group_by": 'a_field',
+            "collect": 'a_field'
+        })
+        assert_that(validation_result_without_group_by.is_valid, is_(False))
