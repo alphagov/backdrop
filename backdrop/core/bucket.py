@@ -93,7 +93,7 @@ class Bucket(object):
                 week_start_at = item.pop("_week_start_at")
                 if week_start_at.weekday() is not 0:
                     raise ValueError('Weeks MUST start on Monday. '
-                                     'Corrupt Data')
+                                     'Corrupt Data: ' + str(week_start_at))
                 start_at = utc(week_start_at)
                 item.update({
                     "_start_at": start_at,

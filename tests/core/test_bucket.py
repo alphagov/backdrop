@@ -361,7 +361,7 @@ class TestBucket(unittest.TestCase):
             limit=1,
             collect=[])
 
-    def test_blows_up_when_weeks_dont_start_on_monday(self):
+    def test_blows_up_when_weeks_do_not_start_on_monday(self):
         multi_group_results = [
             {
                 "is": "Monday",
@@ -390,4 +390,6 @@ class TestBucket(unittest.TestCase):
             self.bucket.query(period='week', group_by='d')
             assert_that(False)
         except ValueError as e:
-            assert_that(str(e), is_("Weeks MUST start on Monday. Corrupt Data"))
+            assert_that(str(e), is_(
+                "Weeks MUST start on Monday. Corrupt Data: 2013-04-09 00:00:00"
+            ))
