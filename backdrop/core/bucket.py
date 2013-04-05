@@ -84,6 +84,34 @@ class Bucket(object):
                                           key=lambda v: v["_start_at"])
         return result
 
+
+
+    def _next_monday(self, timestamp):
+        day_of_week = timestamp.weekday()
+        delta = datetime.timedelta(days=7-day_of_week)
+        return timestamp + delta
+
+    def _previous_monday(self, timestamp):
+        day_of_week = timestamp.weekday()
+        delta = datetime.timedelta(days=day_of_week)
+        return timestamp - delta
+
+    def _create_week_timeseries(self, start_at, end_at, results):
+        timestamp = self._previous_monday(start_at)
+        end_at = self._next_monday(end_at)
+        delta = datetime.timedelta(days=7)
+        output = []
+        while timestamp < end_at:
+            if results[0]['_week_start_at'] == timestamp:
+                output.append(results.pop(0))
+            else:
+                output.append(self.__create_missing_period_entry(timestamp, timestamp + delta))
+            timestamp += delta
+
+        return output
+
+
+
     def execute_weekly_group_query(self, group_by, query, sort=None,
                                    limit=None, collect=None):
         period_key = '_week_start_at'
@@ -112,6 +140,8 @@ class Bucket(object):
         cursor = self.repository.group('_week_start_at', query, limit=limit)
         [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
         result = [self._period_group(doc) for doc in cursor]
+        if query.get("start_at") and query.get("end_at"):
+            result = self._create_week_timeseries(query['start_at'], query['end_at'], result)
         return result
 
     def execute_query(self, query, sort=None, limit=None):

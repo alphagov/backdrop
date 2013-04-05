@@ -178,6 +178,28 @@ class TestBucket(unittest.TestCase):
             period='week'
         )
 
+    # def test_period_query_adds_missing_periods_in_correct_order(self):
+    #     self.mock_repository.group.return_value = [
+    #         {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "_count": 32 },
+    #         {"_week_start_at": d(2013, 1, 21, 0, 0, 0), "_count": 45},
+    #         {"_week_start_at": d(2013, 2,  4, 0, 0, 0), "_count": 17 },
+    #     ]
+    #
+    #     result = self.bucket.query(period='week',
+    #                       start_at=d(2013, 1, 7, 0, 0, 0),
+    #                       end_at=d(2013, 2, 18, 0, 0, 0))
+    #
+    #     print(result)
+    #
+    #     assert_that(result, contains(
+    #         has_entries({"_start_at": d_tz(2013, 1,  7), "_count": 0}),
+    #         has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 32}),
+    #         has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 45}),
+    #         has_entries({"_start_at": d_tz(2013, 1, 28), "_count": 0}),
+    #         has_entries({"_start_at": d_tz(2013, 2,  4), "_count": 17}),
+    #         has_entries({"_start_at": d_tz(2013, 2, 11), "_count": 0}),
+    #     ))
+
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
