@@ -1,4 +1,5 @@
 import datetime
+import pprint
 import pytz
 from .database import Repository, build_query
 
@@ -25,6 +26,11 @@ class Bucket(object):
             '_end_at': start + datetime.timedelta(days=7),
             '_count': doc['_count']
         }
+
+    def _ensure_monday(self, week_start_at):
+        if week_start_at.weekday() is not 0:
+            raise ValueError('Weeks MUST start on Monday. '
+                             'Corrupt Data: ' + str(week_start_at))
 
     def __find_missing_periods(self, periods, single_group):
         periods = list(periods)
@@ -87,18 +93,9 @@ class Bucket(object):
             collect=collect or []
         )
         for doc in cursor:
-            doc['values'] = doc.pop('_subgroup')
-
-            for item in doc['values']:
-                week_start_at = item.pop("_week_start_at")
-                if week_start_at.weekday() is not 0:
-                    raise ValueError('Weeks MUST start on Monday. '
-                                     'Corrupt Data: ' + str(week_start_at))
-                start_at = utc(week_start_at)
-                item.update({
-                    "_start_at": start_at,
-                    "_end_at": start_at + datetime.timedelta(days=7)
-                })
+            subgroup = doc.pop('_subgroup')
+            [self._ensure_monday(item['_week_start_at']) for item in subgroup]
+            doc['values'] = [self._period_group(item) for item in subgroup]
 
             result.append(doc)
 
@@ -113,6 +110,7 @@ class Bucket(object):
 
     def execute_period_query(self, query, limit=None):
         cursor = self.repository.group('_week_start_at', query, limit=limit)
+        [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
         result = [self._period_group(doc) for doc in cursor]
         return result
 

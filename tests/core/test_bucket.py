@@ -166,6 +166,18 @@ class TestBucket(unittest.TestCase):
         self.mock_repository.group.assert_called_once_with(
             "_week_start_at", {}, limit=1)
 
+    def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
+        self.mock_repository.group.return_value = [
+            {"_week_start_at": d(2013, 1, 7, 0, 0, 0), "_count": 3 },
+            {"_week_start_at": d(2013, 1, 8, 0, 0, 0), "_count": 1 },
+        ]
+
+        self.assertRaises(
+            ValueError,
+            self.bucket.query,
+            period='week'
+        )
+
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
@@ -361,24 +373,24 @@ class TestBucket(unittest.TestCase):
             limit=1,
             collect=[])
 
-    def test_blows_up_when_weeks_do_not_start_on_monday(self):
+    def test_period_group_query_fails_when_weeks_do_not_start_on_monday(self):
         multi_group_results = [
             {
                 "is": "Monday",
                 "_subgroup": [
-                    {"_week_start_at": d(2013, 4, 1)}
+                    {"_week_start_at": d(2013, 4, 1), "_count": 1}
                 ]
             },
             {
                 "is": "also Monday",
                 "_subgroup": [
-                    {"_week_start_at": d(2013, 4, 8)}
+                    {"_week_start_at": d(2013, 4, 8), "_count": 1}
                 ]
             },
             {
                 "is": "Tuesday",
                 "_subgroup": [
-                    {"_week_start_at": d(2013, 4, 9)}
+                    {"_week_start_at": d(2013, 4, 9), "_count": 1}
                 ]
             },
         ]
