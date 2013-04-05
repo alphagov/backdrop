@@ -52,7 +52,7 @@ class MongoDriver(object):
 
         cursor.sort(key, self.sort_options[direction])
 
-    def find(self, limit, query, sort):
+    def find(self, query, sort, limit):
         cursor = self._collection.find(query)
         self._apply_sorting(cursor, sort[0], sort[1])
         if limit:
@@ -114,7 +114,7 @@ class Repository(object):
 
         self._validate_sort(sort)
 
-        return self._mongo_driver.find(limit, query, sort)
+        return self._mongo_driver.find(query, sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
