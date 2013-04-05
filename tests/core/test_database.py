@@ -1,7 +1,8 @@
 import unittest
-from hamcrest import assert_that, is_, instance_of
+from hamcrest import assert_that, is_
+from mock import Mock
 from backdrop.core import database
-from backdrop.core.database import Repository
+from backdrop.core.database import Repository, InvalidSortError
 
 
 class NestedMergeTestCase(unittest.TestCase):
@@ -41,13 +42,67 @@ class NestedMergeTestCase(unittest.TestCase):
         ]))
 
 
-class TestDatabase(unittest.TestCase):
+class TestRepository(unittest.TestCase):
     def setUp(self):
-        self.db = database.Database('localhost', 27017, 'backdrop_test')
+        self.mongo = Mock()
+        self.repo = Repository(self.mongo)
 
-    def test_alive(self):
-        assert_that(self.db.alive(), is_(True))
+    def test_save(self):
+        self.repo.save({"name": "Gummo"})
 
-    def test_getting_a_repository(self):
-        repository = self.db.get_repository('my_bucket')
-        assert_that(repository, instance_of(Repository))
+        self.mongo.save.assert_called_once_with({"name": "Gummo"})
+
+    # =========================
+    # Tests for repository.find
+    # =========================
+    def test_find(self):
+        self.mongo.find.return_value = "a_cursor"
+
+        results = self.repo.find({"plays": "guitar"}, ["name", "ascending"])
+
+        self.mongo.find.assert_called_once_with({"plays": "guitar"},
+                                                ["name", "ascending"], None)
+        assert_that(results, is_("a_cursor"))
+
+    def test_find_with_descending_sort(self):
+        self.mongo.find.return_value = "a_cursor"
+
+        results = self.repo.find({"plays": "guitar"}, ["name", "descending"])
+
+        self.mongo.find.assert_called_once_with({"plays": "guitar"},
+                                                ["name", "descending"], None)
+        assert_that(results, is_("a_cursor"))
+
+    def test_find_with_default_sorting(self):
+        self.mongo.find.return_value = "a_cursor"
+
+        results = self.repo.find({"plays": "guitar"})
+
+        self.mongo.find.assert_called_once_with({"plays": "guitar"},
+                                                ["_timestamp", "ascending"],
+                                                None)
+        assert_that(results, is_("a_cursor"))
+
+    def test_find_with_limit(self):
+        self.mongo.find.return_value = "a_cursor"
+
+        results = self.repo.find({"plays": "guitar"}, limit=10)
+
+        self.mongo.find.assert_called_once_with({"plays": "guitar"},
+                                                ["_timestamp", "ascending"],
+                                                10)
+        assert_that(results, is_("a_cursor"))
+
+    def test_sort_raises_error_if_sort_does_not_have_two_elements(self):
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.find,
+            {}, ["a_key"]
+        )
+
+    def test_sort_raises_error_if_sort_direction_invalid(self):
+        self.assertRaises(
+            InvalidSortError,
+            self.repo.find,
+            {}, ["a_key", "blah"]
+        )
