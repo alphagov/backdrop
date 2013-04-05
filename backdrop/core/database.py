@@ -31,7 +31,7 @@ class Database(object):
         return self._mongo.alive()
 
     def get_repository(self, bucket_name):
-        return Repository(self._mongo[self.name][bucket_name])
+        return Repository(MongoDriver(self._mongo[self.name][bucket_name]))
 
     @property
     def connection(self):
@@ -73,7 +73,7 @@ class MongoDriver(object):
             reduce=self._build_reducer_function(collect)
         )
 
-    def build_collector_code(self, collect):
+    def _build_collector_code(self, collect):
         return "\n".join([
             "if (current.{c}) {{ previous.{c}.push(current.{c}); }}".format(
                 c=collect_me) for collect_me in collect])
@@ -88,7 +88,7 @@ class MongoDriver(object):
         reducer_skeleton = "function (current, previous)" + \
                            "{{ previous._count++; {collectors} }}"
         reducer_code = reducer_skeleton.format(
-            collectors=self.build_collector_code(collect)
+            collectors=self._build_collector_code(collect)
         )
         reducer = Code(reducer_code)
         return reducer
@@ -98,8 +98,8 @@ class MongoDriver(object):
 
 
 class Repository(object):
-    def __init__(self, collection):
-        self._mongo_driver = MongoDriver(collection)
+    def __init__(self, mongo):
+        self._mongo = mongo
 
     def _validate_sort(self, sort):
         if len(sort) != 2:
@@ -114,7 +114,7 @@ class Repository(object):
 
         self._validate_sort(sort)
 
-        return self._mongo_driver.find(query, sort, limit)
+        return self._mongo.find(query, sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
@@ -122,7 +122,7 @@ class Repository(object):
         return self._group([group_by], query, sort, limit, collect or [])
 
     def save(self, obj):
-        self._mongo_driver.save(obj)
+        self._mongo.save(obj)
 
     def multi_group(self, key1, key2, query,
                     sort=None, limit=None, collect=None):
@@ -139,7 +139,7 @@ class Repository(object):
         return query
 
     def _group(self, keys, query, sort=None, limit=None, collect=None):
-        results = self._mongo_driver.group(keys, query, collect)
+        results = self._mongo.group(keys, query, collect)
 
         results = nested_merge(keys, collect, results)
 

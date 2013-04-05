@@ -154,7 +154,9 @@ class RepositoryIntegrationTest(unittest.TestCase):
     __metaclass__ = ABCMeta
 
     def setUp(self):
-        self.repo = Repository(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        mongo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        self.repo = Repository(mongo)
+
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
         self.mongo_collection.drop()
 
