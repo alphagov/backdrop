@@ -1,3 +1,4 @@
+from pprint import pprint
 import unittest
 from abc import ABCMeta
 
@@ -5,13 +6,148 @@ from hamcrest import *
 from pymongo import MongoClient
 
 from backdrop.core.database import Repository, GroupingError, \
-    InvalidSortError
+    InvalidSortError, MongoDriver
 from tests.support.test_helpers import d, d_tz
 
 HOST = 'localhost'
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 BUCKET = 'test_repository_integration'
+
+
+class TestMongoDriver(unittest.TestCase):
+    def setUp(self):
+        self.repo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+
+        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+        self.mongo_collection.drop()
+
+    def test_save(self):
+        thing_to_save = {'name': 'test_document'}
+        another_thing_to_save = {'name': '2nd_test_document'}
+
+        self.repo.save(thing_to_save)
+        self.repo.save(another_thing_to_save)
+
+        results = self.mongo_collection.find()
+        assert_that(results, has_item(thing_to_save))
+        assert_that(results, has_item(another_thing_to_save))
+
+    def test_save_updates_document_with_id(self):
+        a_document = {"_id": "event1", "title": "I'm an event"}
+        updated_document = {"_id": "event1", "title": "I'm another event"}
+
+        self.repo.save(a_document)
+        self.repo.save(updated_document)
+
+        saved_documents = self.mongo_collection.find()
+
+        assert_that(saved_documents, only_contains(updated_document))
+
+    def test_find(self):
+        self._setup_people()
+
+        results = self.repo.find(query={"plays": "guitar"},
+                                 sort=["name", "ascending"], limit=None)
+
+        assert_that(results, contains(
+            has_entries({"name": "George", "plays": "guitar"}),
+            has_entries({"name": "John", "plays": "guitar"}),
+        ))
+
+    def test_find_sort_descending(self):
+        self._setup_people()
+
+        results = self.repo.find(query={"plays": "guitar"},
+                                 sort=["name", "descending"], limit=None)
+
+        assert_that(results, contains(
+            has_entries({"name": "John", "plays": "guitar"}),
+            has_entries({"name": "George", "plays": "guitar"}),
+        ))
+
+    def test_find_with_limit(self):
+        self._setup_people()
+
+        results = self.repo.find(query={"plays": {"$ne": "guitar"}},
+                                 sort=["name", "descending"], limit=1)
+
+        assert_that(results, contains(
+            has_entries({"name": "Ringo", "plays": "drums"})
+        ))
+
+    def test_group(self):
+        self._setupMusicalInstruments()
+
+        results = self.repo.group(keys=["type"], query={}, collect=[])
+
+        assert_that(results, contains_inanyorder(
+            has_entries({"_count": is_(2), "type": "wind"}),
+            has_entries({"_count": is_(3), "type": "string"})
+        ))
+
+    def test_group_with_query(self):
+        self._setupMusicalInstruments()
+
+        results = self.repo.group(keys=["type"], query={"range": "high"},
+                                  collect=[])
+
+        assert_that(results, contains_inanyorder(
+            has_entries({"_count": is_(1), "type": "wind"}),
+            has_entries({"_count": is_(2), "type": "string"})
+        ))
+
+    def test_group_and_collect_additional_properties(self):
+        self._setupMusicalInstruments()
+
+        results = self.repo.group(keys=["type"], query={}, collect=["range"])
+
+        assert_that(results, contains(
+            has_entries(
+                {"_count": is_(2), "type": "wind", "range": ["high", "low"]}),
+            has_entries({"_count": is_(3), "type": "string",
+                         "range": ["high", "high", "low"]})
+        ))
+
+    def test_group_without_keys(self):
+        self._setup_people()
+
+        results = self.repo.group(keys=[], query={}, collect=[])
+
+        assert_that(results, contains(
+            has_entries({"_count": is_(4)}),
+        ))
+
+    # this responsibility does not belong here
+    def test_group_ignores_documents_without_grouping_keys(self):
+        self._setup_people()
+        self.mongo_collection.save({"name": "Yoko"})
+
+        results = self.repo.group(keys=["plays"], query={}, collect=[])
+
+        assert_that(results, contains(
+            has_entries({"_count": is_(2), "plays": "guitar"}),
+            has_entries({"_count": is_(1), "plays": "bass"}),
+            has_entries({"_count": is_(1), "plays": "drums"}),
+        ))
+
+    def _setup_people(self):
+        self.mongo_collection.save({"name": "George", "plays": "guitar"})
+        self.mongo_collection.save({"name": "John", "plays": "guitar"})
+        self.mongo_collection.save({"name": "Paul", "plays": "bass"})
+        self.mongo_collection.save({"name": "Ringo", "plays": "drums"})
+
+    def _setupMusicalInstruments(self):
+        self.mongo_collection.save(
+            {"instrument": "flute", "type": "wind", "range": "high"})
+        self.mongo_collection.save(
+            {"instrument": "contrabassoon", "type": "wind", "range": "low"})
+        self.mongo_collection.save(
+            {"instrument": "violin", "type": "string", "range": "high"})
+        self.mongo_collection.save(
+            {"instrument": "viola", "type": "string", "range": "high"})
+        self.mongo_collection.save(
+            {"instrument": "cello", "type": "string", "range": "low"})
 
 
 class RepositoryIntegrationTest(unittest.TestCase):
@@ -44,7 +180,7 @@ class TestRepositoryIntegration(RepositoryIntegrationTest):
 
         saved_documents = self.mongo_collection.find()
 
-        assert_that( saved_documents, only_contains(updated_document) )
+        assert_that(saved_documents, only_contains(updated_document))
 
     def test_find(self):
         self.mongo_collection.save({"name": "George", "plays": "guitar"})
@@ -144,7 +280,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_count": 1,
             "_group_count": 1,
             "_subgroup": [
-                { "place": "Kettering", "_count": 1 }
+                {"place": "Kettering", "_count": 1}
             ]
         }))
         assert_that(results, has_item({
@@ -152,7 +288,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_count": 1,
             "_group_count": 1,
             "_subgroup": [
-                { "place": "Kennington", "_count": 1 }
+                {"place": "Kennington", "_count": 1}
             ]
         }))
         assert_that(results, has_item({
@@ -160,8 +296,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_count": 3,
             "_group_count": 2,
             "_subgroup": [
-                { "place": "Kennington", "_count": 1 },
-                { "place": "Kettering", "_count": 2 },
+                {"place": "Kennington", "_count": 1},
+                {"place": "Kettering", "_count": 2},
             ]
         }))
 
