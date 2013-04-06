@@ -49,7 +49,7 @@ def exception_handler(e):
     return jsonify(status='error', message=''), e.code
 
 
-@app.route('/_status')
+@app.route('/_status', methods=['GET', 'HEAD'])
 def health_check():
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
