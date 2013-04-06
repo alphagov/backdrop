@@ -5,6 +5,12 @@ Feature: the performance platform write api
          When I go to "/_status"
          then I should get back a status of "200"
 
+    Scenario: posting to the health check URL
+        Given I have the data in "dinosaur.json"
+         when I post the data to "/_status"
+         # Bah, this should be a 405
+         then I should get back a status of "400"
+
     Scenario: posting to a reserved bucket name
         Given I have the data in "dinosaur.json"
          when I post the data to "/_bucket"
