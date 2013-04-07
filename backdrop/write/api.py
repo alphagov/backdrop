@@ -60,6 +60,21 @@ def health_check():
 
 @app.route('/<bucket_name>', methods=['POST'])
 def post_to_bucket(bucket_name):
+    def extract_bearer_token(header):
+        if header is None or len(header) < 8:
+            return ''
+        # Strip the leading "Bearer " from the header value
+        return header[7:]
+
+    expected_token = app.config['TOKENS'].get(bucket_name, None)
+    auth_header = request.headers.get('Authorization', None)
+    request_token = extract_bearer_token(auth_header)
+
+    if request_token != expected_token:
+        app.logger.error("expected <%s> but was <%s>" %
+                        (expected_token, request_token))
+        return jsonify(status='error', message='Forbidden'), 403
+
     if request.json is None:
         app.logger.error("Request must be JSON")
         return jsonify(status='error', message='Request must be JSON'), 400

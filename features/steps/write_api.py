@@ -21,7 +21,8 @@ def step(context, bucket_name):
     context.response = context.client.post(
         bucket_name,
         data=context.data_to_post,
-        content_type="application/json"
+        content_type="application/json",
+        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
     )
 
 

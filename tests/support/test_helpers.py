@@ -24,6 +24,10 @@ def is_bad_request():
     return has_status(400)
 
 
+def is_unauthorized():
+    return has_status(403)
+
+
 def is_ok():
     return has_status(200)
 
