@@ -37,13 +37,6 @@ class Bucket(object):
             periods.remove((value["_start_at"], value["_end_at"]))
         return periods
 
-    def __create_missing_period_entry(self, start_at, end_at):
-        return {
-            "_start_at": start_at,
-            "_end_at": end_at,
-            "_count": 0
-        }
-
     def __find_period_range(self, result):
         min_period, max_period = None, None
         for each in result:
@@ -77,13 +70,11 @@ class Bucket(object):
                 self.__find_missing_periods(all_periods, each_group)
             for start_at, end_at in missing_periods:
                 each_group["values"].append(
-                    self.__create_missing_period_entry(start_at, end_at)
+                    self._create_empty_entry(start_at)
                 )
             each_group["values"] = sorted(each_group["values"],
                                           key=lambda v: v["_start_at"])
         return result
-
-
 
     def _next_monday(self, timestamp):
         day_of_week = timestamp.weekday()
@@ -95,6 +86,13 @@ class Bucket(object):
         delta = datetime.timedelta(days=day_of_week)
         return timestamp - delta
 
+    def _create_empty_entry(self, start):
+        return {
+            "_start_at": start,
+            "_end_at": start + datetime.timedelta(days=7),
+            "_count": 0
+        }
+
     def _create_week_timeseries(self, start_at, end_at, results):
         timestamp = self._previous_monday(start_at)
         end_at = self._next_monday(end_at)
@@ -104,19 +102,18 @@ class Bucket(object):
             if len(results) > 0 and results[0]['_start_at'] == timestamp:
                 output.append(results.pop(0))
             else:
-                output.append(self.__create_missing_period_entry(timestamp, timestamp + delta))
+                output.append(self._create_empty_entry(timestamp))
             timestamp += delta
 
         return output
 
-
-
-    def execute_weekly_group_query(self, group_by, query, sort=None,
+    def execute_weekly_group_query(self, group_by, params, sort=None,
                                    limit=None, collect=None):
         period_key = '_week_start_at'
         result = []
         cursor = self.repository.multi_group(
-            group_by, period_key, query, sort=sort, limit=limit,
+            group_by, period_key, build_query(**params),
+            sort=sort, limit=limit,
             collect=collect or []
         )
         for doc in cursor:
@@ -126,7 +123,10 @@ class Bucket(object):
 
             result.append(doc)
 
-        result = self.__fill_in_missing_periods(result)
+        if params.get("start_at") and params.get("end_at"):
+            for i, group in enumerate(result):
+                result[i]['values'] = self._create_week_timeseries(
+                    params['start_at'], params['end_at'], group['values'])
 
         return result
 
@@ -136,11 +136,13 @@ class Bucket(object):
                                      collect or [])
 
     def execute_period_query(self, params, limit=None):
-        cursor = self.repository.group('_week_start_at', build_query(**params), limit=limit)
+        cursor = self.repository.group('_week_start_at', build_query(**params),
+                                       limit=limit)
         [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
         result = [self._period_group(doc) for doc in cursor]
         if params.get("start_at") and params.get("end_at"):
-            result = self._create_week_timeseries(params['start_at'], params['end_at'], result)
+            result = self._create_week_timeseries(params['start_at'],
+                                                  params['end_at'], result)
         return result
 
     def execute_query(self, query, sort=None, limit=None):
@@ -163,7 +165,7 @@ class Bucket(object):
 
         if group_by and 'period' in params:
             result = self.execute_weekly_group_query(
-                group_by, query, sort_by, limit, collect)
+                group_by, params, sort_by, limit, collect)
         elif group_by:
             result = self.execute_grouped_query(
                 group_by, query, sort_by, limit, collect)
