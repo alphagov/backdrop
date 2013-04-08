@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import relativedelta, MO
 import pytz
 from .database import build_query
 
@@ -77,14 +78,10 @@ class Bucket(object):
         return result
 
     def _next_monday(self, timestamp):
-        day_of_week = timestamp.weekday()
-        delta = datetime.timedelta(days=(7 - day_of_week) % 7)
-        return timestamp + delta
+        return timestamp + relativedelta(weekday=MO)
 
     def _previous_monday(self, timestamp):
-        day_of_week = timestamp.weekday()
-        delta = datetime.timedelta(days=day_of_week)
-        return timestamp - delta
+        return timestamp + relativedelta(weekday=MO(-1))
 
     def _create_empty_entry(self, start):
         return {
