@@ -9,4 +9,5 @@ TOKENS = {
     'flavour_events': 'flavour_events-bearer-token',
     'licensing': 'licensing-bearer-token',
     'my_dinosaur_bucket': 'my_dinosaur_bucket-bearer-token',
+    'reptiles': 'reptiles-bearer-token',
 }
