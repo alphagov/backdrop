@@ -22,10 +22,12 @@ class HTTPTestClient(object):
         return HTTPTestResponse(response)
 
     def post(self, url, **message):
+        headers = dict(message.get("headers", []))
+        headers.update({"Content-type": message['content_type']})
         response = requests.post(
             self.write_url(url),
             data=message['data'],
-            headers={"Content-type": message['content_type']}
+            headers=headers
         )
         return HTTPTestResponse(response)
 
