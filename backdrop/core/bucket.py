@@ -1,7 +1,6 @@
 import datetime
-import pprint
 import pytz
-from .database import Repository, build_query
+from .database import build_query
 
 
 def utc(dt):
@@ -88,7 +87,7 @@ class Bucket(object):
 
     def _next_monday(self, timestamp):
         day_of_week = timestamp.weekday()
-        delta = datetime.timedelta(days=7-day_of_week)
+        delta = datetime.timedelta(days=(7 - day_of_week) % 7)
         return timestamp + delta
 
     def _previous_monday(self, timestamp):
@@ -102,7 +101,7 @@ class Bucket(object):
         delta = datetime.timedelta(days=7)
         output = []
         while timestamp < end_at:
-            if results[0]['_week_start_at'] == timestamp:
+            if len(results) > 0 and results[0]['_start_at'] == timestamp:
                 output.append(results.pop(0))
             else:
                 output.append(self.__create_missing_period_entry(timestamp, timestamp + delta))
@@ -136,12 +135,12 @@ class Bucket(object):
         return self.repository.group(group_by, query, sort, limit,
                                      collect or [])
 
-    def execute_period_query(self, query, limit=None):
-        cursor = self.repository.group('_week_start_at', query, limit=limit)
+    def execute_period_query(self, params, limit=None):
+        cursor = self.repository.group('_week_start_at', build_query(**params), limit=limit)
         [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
         result = [self._period_group(doc) for doc in cursor]
-        if query.get("start_at") and query.get("end_at"):
-            result = self._create_week_timeseries(query['start_at'], query['end_at'], result)
+        if params.get("start_at") and params.get("end_at"):
+            result = self._create_week_timeseries(params['start_at'], params['end_at'], result)
         return result
 
     def execute_query(self, query, sort=None, limit=None):
@@ -169,7 +168,7 @@ class Bucket(object):
             result = self.execute_grouped_query(
                 group_by, query, sort_by, limit, collect)
         elif 'period' in params:
-            result = self.execute_period_query(query, limit)
+            result = self.execute_period_query(params, limit)
         else:
             result = self.execute_query(query, sort_by, limit)
 
