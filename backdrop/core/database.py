@@ -31,20 +31,75 @@ class Database(object):
         return self._mongo.alive()
 
     def get_repository(self, bucket_name):
-        return Repository(self._mongo[self.name][bucket_name])
+        return Repository(MongoDriver(self._mongo[self.name][bucket_name]))
 
     @property
     def connection(self):
         return self._mongo[self.name]
 
 
-class Repository(object):
+class MongoDriver(object):
     def __init__(self, collection):
         self._collection = collection
+        self.sort_options = {
+            "ascending": pymongo.ASCENDING,
+            "descending": pymongo.DESCENDING
+        }
 
-    @property
-    def name(self):
-        return self._collection.name
+    def _apply_sorting(self, cursor, key, direction):
+        if direction not in self.sort_options.keys():
+            raise InvalidSortError(direction)
+
+        cursor.sort(key, self.sort_options[direction])
+
+    def find(self, query, sort, limit):
+        cursor = self._collection.find(query)
+        self._apply_sorting(cursor, sort[0], sort[1])
+        if limit:
+            cursor.limit(limit)
+        return cursor
+
+    def _ignore_docs_without_grouping_keys(self, keys, query):
+        for key in keys:
+            if key not in query:
+                query[key] = {"$ne": None}
+        return query
+
+    def group(self, keys, query, collect):
+        return self._collection.group(
+            key=keys,
+            condition=self._ignore_docs_without_grouping_keys(keys, query),
+            initial=self._build_accumulator_initial_state(collect),
+            reduce=self._build_reducer_function(collect)
+        )
+
+    def _build_collector_code(self, collect):
+        return "\n".join([
+            "if (current.{c}) {{ previous.{c}.push(current.{c}); }}".format(
+                c=collect_me) for collect_me in collect])
+
+    def _build_accumulator_initial_state(self, collect):
+        initial = {'_count': 0}
+        for collect_me in collect:
+            initial.update({collect_me: []})
+        return initial
+
+    def _build_reducer_function(self, collect):
+        reducer_skeleton = "function (current, previous)" + \
+                           "{{ previous._count++; {collectors} }}"
+        reducer_code = reducer_skeleton.format(
+            collectors=self._build_collector_code(collect)
+        )
+        reducer = Code(reducer_code)
+        return reducer
+
+    def save(self, obj):
+        self._collection.save(obj)
+
+
+class Repository(object):
+    def __init__(self, mongo):
+        self._mongo = mongo
 
     def _validate_sort(self, sort):
         if len(sort) != 2:
@@ -54,20 +109,12 @@ class Repository(object):
             raise InvalidSortError(sort[1])
 
     def find(self, query, sort=None, limit=None):
-        cursor = self._collection.find(query)
-        if sort:
-            self._validate_sort(sort)
-        else:
+        if not sort:
             sort = ["_timestamp", "ascending"]
-        sort_options = {
-            "ascending": pymongo.ASCENDING,
-            "descending": pymongo.DESCENDING
-        }
-        cursor.sort(sort[0], sort_options[sort[1]])
-        if limit:
-            cursor.limit(limit)
 
-        return cursor
+        self._validate_sort(sort)
+
+        return self._mongo.find(query, sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
@@ -75,7 +122,7 @@ class Repository(object):
         return self._group([group_by], query, sort, limit, collect or [])
 
     def save(self, obj):
-        self._collection.save(obj)
+        self._mongo.save(obj)
 
     def multi_group(self, key1, key2, query,
                     sort=None, limit=None, collect=None):
@@ -85,23 +132,6 @@ class Repository(object):
 
         return results
 
-    def build_collector_code(self, collect):
-        return "\n".join([
-            "if (current.{c}) {{ previous.{c}.push(current.{c}); }}".format(
-                c=collect_me) for collect_me in collect])
-
-    def build_reducer(self, collect):
-        initial = {'_count': 0}
-        for collect_me in collect:
-            initial.update({collect_me: []})
-        reducer_skeleton = "function (current, previous)" + \
-                           "{{ previous._count++; {collectors} }}"
-        reducer_code = reducer_skeleton.format(
-            collectors=self.build_collector_code(collect)
-        )
-        reducer = Code(reducer_code)
-        return (initial, reducer)
-
     def _require_keys_in_query(self, keys, query):
         for key in keys:
             if key not in query:
@@ -109,14 +139,7 @@ class Repository(object):
         return query
 
     def _group(self, keys, query, sort=None, limit=None, collect=None):
-        initial, reducer = self.build_reducer(collect or [])
-
-        results = self._collection.group(
-            key=keys,
-            condition=self._require_keys_in_query(keys, query),
-            initial=initial,
-            reduce=reducer
-        )
+        results = self._mongo.group(keys, query, collect)
 
         results = nested_merge(keys, collect, results)
 

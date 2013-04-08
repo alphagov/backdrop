@@ -5,7 +5,7 @@ from hamcrest import *
 from pymongo import MongoClient
 
 from backdrop.core.database import Repository, GroupingError, \
-    InvalidSortError
+    InvalidSortError, MongoDriver, Database
 from tests.support.test_helpers import d, d_tz
 
 HOST = 'localhost'
@@ -14,16 +14,13 @@ DB_NAME = 'performance_platform_test'
 BUCKET = 'test_repository_integration'
 
 
-class RepositoryIntegrationTest(unittest.TestCase):
-    __metaclass__ = ABCMeta
-
+class TestMongoDriver(unittest.TestCase):
     def setUp(self):
-        self.repo = Repository(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        self.repo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
         self.mongo_collection.drop()
 
-
-class TestRepositoryIntegration(RepositoryIntegrationTest):
     def test_save(self):
         thing_to_save = {'name': 'test_document'}
         another_thing_to_save = {'name': '2nd_test_document'}
@@ -44,20 +41,127 @@ class TestRepositoryIntegration(RepositoryIntegrationTest):
 
         saved_documents = self.mongo_collection.find()
 
-        assert_that( saved_documents, only_contains(updated_document) )
+        assert_that(saved_documents, only_contains(updated_document))
 
     def test_find(self):
+        self._setup_people()
+
+        results = self.repo.find(query={"plays": "guitar"},
+                                 sort=["name", "ascending"], limit=None)
+
+        assert_that(results, contains(
+            has_entries({"name": "George", "plays": "guitar"}),
+            has_entries({"name": "John", "plays": "guitar"}),
+        ))
+
+    def test_find_sort_descending(self):
+        self._setup_people()
+
+        results = self.repo.find(query={"plays": "guitar"},
+                                 sort=["name", "descending"], limit=None)
+
+        assert_that(results, contains(
+            has_entries({"name": "John", "plays": "guitar"}),
+            has_entries({"name": "George", "plays": "guitar"}),
+        ))
+
+    def test_find_with_limit(self):
+        self._setup_people()
+
+        results = self.repo.find(query={"plays": {"$ne": "guitar"}},
+                                 sort=["name", "descending"], limit=1)
+
+        assert_that(results, contains(
+            has_entries({"name": "Ringo", "plays": "drums"})
+        ))
+
+    def test_group(self):
+        self._setup_musical_instruments()
+
+        results = self.repo.group(keys=["type"], query={}, collect=[])
+
+        assert_that(results, contains_inanyorder(
+            has_entries({"_count": is_(2), "type": "wind"}),
+            has_entries({"_count": is_(3), "type": "string"})
+        ))
+
+    def test_group_with_query(self):
+        self._setup_musical_instruments()
+
+        results = self.repo.group(keys=["type"], query={"range": "high"},
+                                  collect=[])
+
+        assert_that(results, contains_inanyorder(
+            has_entries({"_count": is_(1), "type": "wind"}),
+            has_entries({"_count": is_(2), "type": "string"})
+        ))
+
+    def test_group_and_collect_additional_properties(self):
+        self._setup_musical_instruments()
+
+        results = self.repo.group(keys=["type"], query={}, collect=["range"])
+
+        assert_that(results, contains(
+            has_entries(
+                {"_count": is_(2),
+                 "type": "wind",
+                 "range": ["high", "low"]}),
+            has_entries(
+                {"_count": is_(3),
+                 "type": "string",
+                 "range": ["high", "high", "low"]})
+        ))
+
+    def test_group_without_keys(self):
+        self._setup_people()
+
+        results = self.repo.group(keys=[], query={}, collect=[])
+
+        assert_that(results, contains(
+            has_entries({"_count": is_(4)}),
+        ))
+
+    # this responsibility does not belong here
+    def test_group_ignores_documents_without_grouping_keys(self):
+        self._setup_people()
+        self.mongo_collection.save({"name": "Yoko"})
+
+        results = self.repo.group(keys=["plays"], query={}, collect=[])
+
+        assert_that(results, contains(
+            has_entries({"_count": is_(2), "plays": "guitar"}),
+            has_entries({"_count": is_(1), "plays": "bass"}),
+            has_entries({"_count": is_(1), "plays": "drums"}),
+        ))
+
+    def _setup_people(self):
         self.mongo_collection.save({"name": "George", "plays": "guitar"})
         self.mongo_collection.save({"name": "John", "plays": "guitar"})
         self.mongo_collection.save({"name": "Paul", "plays": "bass"})
         self.mongo_collection.save({"name": "Ringo", "plays": "drums"})
 
-        results = self.repo.find({"plays": "guitar"})
+    def _setup_musical_instruments(self):
+        self.mongo_collection.save(
+            {"instrument": "flute", "type": "wind", "range": "high"})
+        self.mongo_collection.save(
+            {"instrument": "contrabassoon", "type": "wind", "range": "low"})
+        self.mongo_collection.save(
+            {"instrument": "violin", "type": "string", "range": "high"})
+        self.mongo_collection.save(
+            {"instrument": "viola", "type": "string", "range": "high"})
+        self.mongo_collection.save(
+            {"instrument": "cello", "type": "string", "range": "low"})
 
-        assert_that(results, only_contains(
-            has_entries({"name": "George", "plays": "guitar"}),
-            has_entries({"name": "John", "plays": "guitar"}),
-        ))
+
+class RepositoryIntegrationTest(unittest.TestCase):
+    __metaclass__ = ABCMeta
+
+    def setUp(self):
+        mongo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        self.repo = Repository(mongo)
+
+        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+        self.mongo_collection.drop()
 
 
 class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
@@ -144,7 +248,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_count": 1,
             "_group_count": 1,
             "_subgroup": [
-                { "place": "Kettering", "_count": 1 }
+                {"place": "Kettering", "_count": 1}
             ]
         }))
         assert_that(results, has_item({
@@ -152,7 +256,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_count": 1,
             "_group_count": 1,
             "_subgroup": [
-                { "place": "Kennington", "_count": 1 }
+                {"place": "Kennington", "_count": 1}
             ]
         }))
         assert_that(results, has_item({
@@ -160,8 +264,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "_count": 3,
             "_group_count": 2,
             "_subgroup": [
-                { "place": "Kennington", "_count": 1 },
-                { "place": "Kettering", "_count": 2 },
+                {"place": "Kennington", "_count": 1},
+                {"place": "Kettering", "_count": 2},
             ]
         }))
 
@@ -546,3 +650,15 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         result = self.repo.group('_week_start_at', {})
 
         assert_that(result, has_item(has_entry("_count", 1)))
+
+
+class TestDatabase(unittest.TestCase):
+    def setUp(self):
+        self.db = Database('localhost', 27017, 'backdrop_test')
+
+    def test_alive(self):
+        assert_that(self.db.alive(), is_(True))
+
+    def test_getting_a_repository(self):
+        repository = self.db.get_repository('my_bucket')
+        assert_that(repository, instance_of(Repository))

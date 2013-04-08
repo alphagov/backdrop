@@ -1,25 +1,19 @@
 import datetime
 import json
-import logging
 from os import getenv
 
 from dateutil import parser
 from flask import Flask, jsonify, request
 import pytz
-from backdrop.core.log_handler import get_log_file_handler
+
 
 from .validation import validate_request_args
-from ..core import database
+from ..core import database, log_handler
 from ..core.bucket import Bucket
 
 
 def setup_logging():
-    log_level = logging._levelNames[app.config['LOG_LEVEL']]
-    env = getenv("GOVUK_ENV", "development")
-    app.logger.addHandler(get_log_file_handler("log/%s.read.log" % env,
-                                               log_level))
-    app.logger.setLevel(log_level)
-    app.logger.info("Backdrop read API logging started")
+    log_handler.set_up_logging(app, "read", getenv("GOVUK_ENV", "development"))
 
 
 app = Flask(__name__)
@@ -83,6 +77,15 @@ class JsonEncoder(json.JSONEncoder):
 def exception_handler(e):
     app.logger.exception(e)
     return jsonify(status='error', message=''), e.code
+
+
+@app.route('/_status')
+def health_check():
+    if db.alive():
+        return jsonify(status='ok', message='database seems fine')
+    else:
+        return jsonify(status='error',
+                       message='cannot connect to database'), 500
 
 
 @app.route('/<bucket_name>', methods=['GET'])

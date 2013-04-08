@@ -1,21 +1,15 @@
-import logging
 from os import getenv
 
 from flask import Flask, request, jsonify
-from backdrop.core import records
-from backdrop.core.log_handler import get_log_file_handler
 
 from .validation import validate_post_to_bucket
-from ..core import database
+from ..core import database, log_handler, records
 from ..core.bucket import Bucket
 
 
-def setup_logger():
-    log_level = logging._levelNames[app.config['LOG_LEVEL']]
-    app.logger.addHandler(
-        get_log_file_handler("log/%s.write.log" % environment(), log_level))
-    app.logger.setLevel(log_level)
-    app.logger.info("Logging for Backdrop Write API started")
+def setup_logging():
+    log_handler.set_up_logging(app, "write",
+                               getenv("GOVUK_ENV", "development"))
 
 
 def environment():
@@ -36,7 +30,7 @@ db = database.Database(
 )
 
 
-setup_logger()
+setup_logging()
 
 
 @app.before_request
@@ -55,7 +49,7 @@ def exception_handler(e):
     return jsonify(status='error', message=''), e.code
 
 
-@app.route('/_status')
+@app.route('/_status', methods=['GET', 'HEAD'])
 def health_check():
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
