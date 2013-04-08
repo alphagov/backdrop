@@ -33,7 +33,7 @@
         "licence_name": "Temporary events notice",
         "interaction": "success",
         "authority": "Westminster",
-        "type": "success"
+        "type": "failure"
     },
     {
         "_id": "1238",
