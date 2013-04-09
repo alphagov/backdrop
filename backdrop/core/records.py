@@ -1,6 +1,7 @@
-import datetime
 from dateutil import parser
 import pytz
+
+from backdrop.core.timeseries import WEEK
 
 
 class Record(object):
@@ -10,15 +11,7 @@ class Record(object):
         self.meta = {}
 
         if "_timestamp" in self.data:
-            day_of_week = self.data['_timestamp'].weekday()
-            delta_from_week_start = datetime.timedelta(days=day_of_week)
-            week_start = self.data['_timestamp'] - delta_from_week_start
-            self.meta['_week_start_at'] = week_start.replace(
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0
-            )
+            self.meta['_week_start_at'] = WEEK.start(self.data['_timestamp'])
 
     def to_mongo(self):
         return dict(
