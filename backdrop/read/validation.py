@@ -1,8 +1,10 @@
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
 import re
+import api
 
 MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
 MESSAGES = {
+    "disallowed": "querying for raw data has been disallowed",
     'unrecognised': 'An unrecognised parameter was provided',
     'start_at': {
         'invalid': 'start_at is not a valid datetime'
@@ -45,7 +47,20 @@ MESSAGES = {
 }
 
 
+def is_a_raw_query(request_args):
+    if 'group_by' in request_args:
+        return False
+    if 'period' in request_args:
+        return False
+    return True
+
+
 def validate_request_args(request_args):
+
+    if api.app.config['PREVENT_RAW_QUERIES']:
+        if is_a_raw_query(request_args):
+            return invalid(MESSAGES['disallowed'])
+
     request_args = request_args.copy()
     start_at = request_args.pop('start_at', None)
     end_at = request_args.pop('end_at', None)
