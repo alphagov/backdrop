@@ -1,7 +1,7 @@
 from unittest import TestCase
 import datetime
 from hamcrest import assert_that, is_, contains
-from backdrop.core.timeseries import week_start, week_end, timeseries, WEEK
+from backdrop.core.timeseries import timeseries, WEEK
 from tests.support.test_helpers import d, d_tz
 
 
@@ -58,28 +58,28 @@ class TestWeek_start(TestCase):
     def test_that_it_returns_previous_monday_for_midweek(self):
         tuesday = datetime.datetime(2013, 4, 9)
 
-        start = week_start(tuesday)
+        start = WEEK.start(tuesday)
 
         assert_that(start, is_(datetime.datetime(2013, 4, 8)))
 
     def test_that_it_truncates_the_time_part(self):
         tuesday = datetime.datetime(2013, 4, 9, 23, 12)
 
-        start = week_start(tuesday)
+        start = WEEK.start(tuesday)
 
         assert_that(start, is_(datetime.datetime(2013, 4, 8)))
 
     def test_that_it_returns_the_same_day_for_monday(self):
         monday = datetime.datetime(2013, 4, 8, 23, 12)
 
-        start = week_start(monday)
+        start = WEEK.start(monday)
 
         assert_that(start, is_(datetime.datetime(2013, 4, 8)))
 
     def test_that_it_returns_the_same_day_for_monday_midnight(self):
         monday = datetime.datetime(2013, 4, 8, 0, 0)
 
-        start = week_start(monday)
+        start = WEEK.start(monday)
 
         assert_that(start, is_(datetime.datetime(2013, 4, 8)))
 
@@ -88,27 +88,46 @@ class TestWeek_end(TestCase):
     def test_that_it_returns_next_monday_for_midweek(self):
         tuesday = datetime.datetime(2013, 4, 9)
 
-        end = week_end(tuesday)
+        end = WEEK.end(tuesday)
 
         assert_that(end, is_(datetime.datetime(2013, 4, 15)))
 
     def test_that_it_truncates_the_time_part(self):
         tuesday = datetime.datetime(2013, 4, 9, 23, 12)
 
-        end = week_end(tuesday)
+        end = WEEK.end(tuesday)
 
         assert_that(end, is_(datetime.datetime(2013, 4, 15)))
 
     def test_that_it_returns_the_same_day_for_monday_midnight(self):
         monday = datetime.datetime(2013, 4, 8, 0, 0)
 
-        end = week_end(monday)
+        end = WEEK.end(monday)
 
         assert_that(end, is_(datetime.datetime(2013, 4, 8)))
 
     def test_that_it_returns_the_next_monday_for_monday_after_midnight(self):
         monday = datetime.datetime(2013, 4, 8, 23, 12)
 
-        end = week_end(monday)
+        end = WEEK.end(monday)
 
         assert_that(end, is_(datetime.datetime(2013, 4, 15)))
+
+
+class TestWeek_range(TestCase):
+    def test_that_it_produces_a_sequence_of_weekly_time_periods(self):
+        range = WEEK.range(d_tz(2013, 4, 1), d_tz(2013, 4, 15))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 1), d_tz(2013, 4, 8)),
+            (d_tz(2013, 4, 8), d_tz(2013, 4, 15))
+        ))
+
+    def test_that_it_expands_the_limits_of_the_range_if_midweek(self):
+        range = WEEK.range(d_tz(2013, 4, 3), d_tz(2013, 4, 19))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 1), d_tz(2013, 4, 8)),
+            (d_tz(2013, 4, 8), d_tz(2013, 4, 15)),
+            (d_tz(2013, 4, 15), d_tz(2013, 4, 22))
+        ))
