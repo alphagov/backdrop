@@ -11,14 +11,28 @@ BUCKET = 'licensify'
 
 # IMPORTANT:
 #
-# Dates are required to be stored as ISODate so you need to run these postprocessing scripts after loading data into db:
+# Dates are required to be stored as ISODate so you need to run these
+# postprocessing scripts after loading data into db:
 #
-# /usr/bin/mongo your_database --eval "db.your_collection.find({ _timestamp: { \$type: 2}}).forEach(function(doc){ doc._timestamp = new ISODate(doc._timestamp);db.your_collection.save(doc)});"
-# /usr/bin/mongo your_database --eval "db.your_collection.find({ _week_start_at: { \$type: 2}}).forEach(function(doc){ doc._week_start_at = new ISODate(doc._week_start_at);db.your_collection.save(doc)});"
+# /usr/bin/mongo your_database --eval "
+#   db.your_collection.find({ _timestamp: { \$type: 2}}).forEach(
+#     function(doc){
+#       doc._timestamp = new ISODate(doc._timestamp);
+#       db.your_collection.save(doc)
+#     });"
+#
+# /usr/bin/mongo your_database --eval "
+#   db.your_collection.find({ _week_start_at: { \$type: 2}}).forEach(
+#     function(doc){
+#       doc._week_start_at = new ISODate(doc._week_start_at);
+#       db.your_collection.save(doc)
+#     });"
+
 
 def find_last_monday():
-    now = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    return now - datetime.timedelta(days = now.weekday())
+    now = datetime.datetime.now().replace(hour=0, minute=0, second=0,
+                                          microsecond=0)
+    return now - datetime.timedelta(days=now.weekday())
 
 
 def generate_last_n_mondays(n):
@@ -51,8 +65,7 @@ def licence_event():
     return {
         'dataType': 'licenceApplication',
         '_week_start_at': some_monday,
-        '_timestamp': some_monday + \
-                      datetime.timedelta(days=randint(0, 6)),
+        '_timestamp': some_monday + datetime.timedelta(days=randint(0, 6)),
         '_id': 'fake-%i' % i
     }
 
@@ -67,19 +80,19 @@ def authority():
 
 def select_random_licence():
     licences = [
-        { 'name': 'Fake Licence 1', 'code': '1111-1-1', 'payment': True },
-        { 'name': 'Fake Licence 2', 'code': '1111-2-1', 'payment': True },
-        { 'name': 'Fake Licence 3', 'code': '1111-3-1', 'payment': False },
-        { 'name': 'Fake Licence 4', 'code': '1111-3-1', 'payment': True },
-        { 'name': 'Fake Licence 5', 'code': '1111-3-1', 'payment': False },
-        { 'name': 'Fake Licence 6', 'code': '1111-3-1', 'payment': False },
+        {'name': 'Fake Licence 1', 'code': '1111-1-1', 'payment': True},
+        {'name': 'Fake Licence 2', 'code': '1111-2-1', 'payment': True},
+        {'name': 'Fake Licence 3', 'code': '1111-3-1', 'payment': False},
+        {'name': 'Fake Licence 4', 'code': '1111-3-1', 'payment': True},
+        {'name': 'Fake Licence 5', 'code': '1111-3-1', 'payment': False},
+        {'name': 'Fake Licence 6', 'code': '1111-3-1', 'payment': False},
     ]
     return choice(licences)
 
 
 def generate_payment_status(payment):
     if payment:
-        return choice(['Unknown','Success'])
+        return choice(['Unknown', 'Success'])
     else:
         return ""
 
@@ -97,9 +110,9 @@ def licence():
 
 def select_random_interaction():
     interactions = [
-        {'action': 'apply',  'code':1},
-        {'action': 'renew',  'code':2},
-        {'action': 'change', 'code':3},
+        {'action': 'apply', 'code': 1},
+        {'action': 'renew', 'code': 2},
+        {'action': 'change', 'code': 3},
     ]
     return choice(interactions)
 
@@ -107,8 +120,9 @@ def select_random_interaction():
 def interaction(licence_name):
     selected_interaction = select_random_interaction()
     return {
-        'licenceInteractionName': "%s for a %s" % (selected_interaction['action'],
-                                                   licence_name),
+        'licenceInteractionName': "%s for a %s" % (
+        selected_interaction['action'],
+        licence_name),
         'licenceInteractionlgilId': selected_interaction['action'],
         'licenceInteractionlgilSubId': selected_interaction['code']
     }
@@ -122,7 +136,7 @@ argument = sys.argv[1]
 
 licence_apps = []
 
-for i in range(0,10000):
+for i in range(0, 10000):
     licence_application = {}
     licence_application.update(licence_event())
     licence_application.update(authority())
