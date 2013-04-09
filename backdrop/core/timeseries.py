@@ -22,7 +22,8 @@ class Week(object):
             _start += self._delta
 
     def _monday_midnight(self, timestamp):
-        return timestamp.weekday() == 0 and timestamp.time() == time(0, 0, 0, 0)
+        return timestamp.weekday() == 0 \
+            and timestamp.time() == time(0, 0, 0, 0)
 
 
 WEEK = Week()
