@@ -1,10 +1,16 @@
+from dateutil import parser
+import api
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
 import re
-import api
 
 MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
 MESSAGES = {
-    "disallowed": "querying for raw data has been disallowed",
+    "disallowed": {
+        "no_grouping": "querying for raw data has been disallowed",
+        "non-midnight": "start_at and end_at must be at midnight",
+        "non-week-length": "difference between start_at and end_at must be 7 "
+                           "days"
+    },
     'unrecognised': 'An unrecognised parameter was provided',
     'start_at': {
         'invalid': 'start_at is not a valid datetime'
@@ -55,11 +61,25 @@ def is_a_raw_query(request_args):
     return True
 
 
+def request_length_valid(start_at, end_at):
+    start_at = parser.parse(start_at)
+    end_at = parser.parse(end_at)
+    delta = end_at - start_at
+    return delta.days >= 7
+
+
+def dates_on_midnight(start_at, end_at):
+    start_at = parser.parse(start_at)
+    end_at = parser.parse(end_at)
+    return (start_at.minute + start_at.second + start_at.hour) == 0 \
+        and (end_at.minute + end_at.second + end_at.hour) == 0
+
+
 def validate_request_args(request_args):
 
     if api.app.config['PREVENT_RAW_QUERIES']:
         if is_a_raw_query(request_args):
-            return invalid(MESSAGES['disallowed'])
+            return invalid(MESSAGES['disallowed']['no_grouping'])
 
     request_args = request_args.copy()
     start_at = request_args.pop('start_at', None)
@@ -116,5 +136,12 @@ def validate_request_args(request_args):
             return invalid(MESSAGES['collect']['internal'])
         if collect == group_by:
             return invalid(MESSAGES['collect']['groupby_field'])
+
+    if api.app.config['PREVENT_RAW_QUERIES']:
+        if start_at and end_at:
+            if not request_length_valid(start_at, end_at):
+                return invalid(MESSAGES['disallowed']['non-week-length'])
+            if not dates_on_midnight(start_at, end_at):
+                return invalid(MESSAGES['disallowed']['non-midnight'])
 
     return valid()
