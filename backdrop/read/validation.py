@@ -75,24 +75,57 @@ def dates_on_midnight(start_at, end_at):
         and (end_at.minute + end_at.second + end_at.hour) == 0
 
 
+class ParameterValidator(object):
+    def __init__(self, request_args):
+        self.errors = []
+
+        self.allowed_parameters = set([
+            'start_at',
+            'end_at',
+            'filter_by',
+            'period',
+            'group_by',
+            'sort_by',
+            'limit',
+            'collect'
+        ])
+
+        self.validate(request_args)
+
+    def _invalid(self, request_args):
+        bad_params = set(request_args.keys()) - self.allowed_parameters
+        contains_invalid_params = len(bad_params) > 0
+        return contains_invalid_params
+
+    def invalid(self):
+        return len(self.errors) > 0
+
+    def validate(self, request_args):
+        if self._invalid(request_args):
+            self.errors.append(invalid(
+                "An unrecognised parameter was provided"))
+
+
 def validate_request_args(request_args):
 
     if api.app.config['PREVENT_RAW_QUERIES']:
         if is_a_raw_query(request_args):
             return invalid(MESSAGES['disallowed']['no_grouping'])
 
-    request_args = request_args.copy()
-    start_at = request_args.pop('start_at', None)
-    end_at = request_args.pop('end_at', None)
-    filter_by = request_args.pop('filter_by', None)
-    period = request_args.pop('period', None)
-    group_by = request_args.pop('group_by', None)
-    sort_by = request_args.pop('sort_by', None)
-    limit = request_args.pop('limit', None)
-    collect = request_args.pop('collect', None)
+    request_args_copy = request_args.copy()
 
-    if len(request_args):
-        return invalid(MESSAGES['unrecognised'])
+    start_at =  request_args_copy.pop( 'start_at',  None)
+    end_at =    request_args_copy.pop(   'end_at',    None)
+    filter_by = request_args_copy.pop('filter_by', None)
+    period =    request_args_copy.pop(   'period',    None)
+    group_by =  request_args_copy.pop( 'group_by',  None)
+    sort_by =   request_args_copy.pop(  'sort_by',   None)
+    limit =     request_args_copy.pop(    'limit',     None)
+    collect =   request_args_copy.pop(  'collect',   None)
+
+    pv = ParameterValidator(request_args)
+    if pv.invalid():
+        return pv.errors[0]
     if start_at:
         if not value_is_valid_datetime_string(start_at):
             return invalid(MESSAGES['start_at']['invalid'])
@@ -145,3 +178,11 @@ def validate_request_args(request_args):
                 return invalid(MESSAGES['disallowed']['non-midnight'])
 
     return valid()
+
+
+# def validate(request_args):
+#     errors = [validator.validate(request_args) for validator in get_validators(request_args)]
+#
+#     return len(errors) > 0, errors
+
+
