@@ -7,28 +7,6 @@ import re
 MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
 
 
-def is_a_raw_query(request_args):
-    if 'group_by' in request_args:
-        return False
-    if 'period' in request_args:
-        return False
-    return True
-
-
-def request_length_valid(start_at, end_at):
-    start_at = parser.parse(start_at)
-    end_at = parser.parse(end_at)
-    delta = end_at - start_at
-    return delta.days >= 7
-
-
-def dates_on_midnight(start_at, end_at):
-    start_at = parser.parse(start_at)
-    end_at = parser.parse(end_at)
-    return (start_at.minute + start_at.second + start_at.hour) == 0 \
-        and (end_at.minute + end_at.second + end_at.hour) == 0
-
-
 class Validator(object):
     def __init__(self, request_args, **context):
         self.errors = []
@@ -152,8 +130,15 @@ class CollectValidator(Validator):
 
 
 class RawQueryValidator(Validator):
+    def _is_a_raw_query(self, request_args):
+        if 'group_by' in request_args:
+            return False
+        if 'period' in request_args:
+            return False
+        return True
+
     def validate(self, request_args, context):
-        if is_a_raw_query(request_args):
+        if self._is_a_raw_query(request_args):
             self.add_error("querying for raw data is not allowed")
 
 
