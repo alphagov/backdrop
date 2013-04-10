@@ -13,7 +13,7 @@ class IsInvalidWithMessage(BaseMatcher):
 
     def describe_to(self, description):
         description.append_text(
-            "failed with message {message}".format(
+            "invalid validation with message: {message}".format(
                 message=self.expected_message
             )
         )
@@ -23,8 +23,8 @@ class IsInvalidWithMessage(BaseMatcher):
             mismatch_description.append_text("valid")
         else:
             mismatch_description.append_text(
-                "invalid with message {message}".format(
-                    message=self.expected_message
+                "invalid validation with message: {message}".format(
+                    message=validation_result.message
                 )
             )
 

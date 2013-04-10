@@ -121,6 +121,17 @@ class DatetimeValidator(Validator):
                                % context['param_name'])
 
 
+class PositiveIntegerValidator(Validator):
+    def validate(self, request_args, context):
+        if context['param_name'] in request_args:
+            try:
+                if int(request_args[context['param_name']]) < 0:
+                    raise ValueError()
+            except ValueError:
+                self.add_error("%s must be a positive integer"
+                               % context['param_name'])
+
+
 class FilterByValidator(Validator):
     def validate(self, request_args, context):
         filter_by = request_args.get('filter_by', None)
@@ -142,8 +153,51 @@ class ParameterMustBeThisValidator(Validator):
                                'Supported periods include: week')
 
 
-def validate_request_args(request_args):
+class SortByValidator(Validator):
+    def _unrecognised_direction(self, sort_by):
+        return not re.match(r'^.+:(ascending|descending)$', sort_by)
 
+    def validate(self, request_args, context):
+        if 'sort_by' in request_args:
+            if 'period' in request_args and 'group_by' not in request_args:
+                self.add_error("Cannot sort for period queries without "
+                               "group_by. Period queries are always sorted "
+                               "by time.")
+            if request_args['sort_by'].find(':') < 0:
+                self.add_error(
+                    'sort_by must be a field name and sort direction separated'
+                    ' by a colon (:) eg. authority:ascending')
+            if self._unrecognised_direction(request_args['sort_by']):
+                self.add_error('Unrecognised sort direction. Supported '
+                               'directions include: ascending, descending')
+
+
+class GroupByValidator(Validator):
+    def validate(self, request_args, context):
+        if 'group_by' in request_args:
+            if request_args['group_by'].startswith('_'):
+                self.add_error('Cannot group by internal fields, '
+                               'internal fields start with an underscore')
+
+
+class CollectValidator(Validator):
+    def validate(self, request_args, context):
+        if 'collect' in request_args:
+            if 'group_by' not in request_args:
+                self.add_error('collect is only allowed when grouping')
+            if not MONGO_FIELD_REGEX.match(request_args['collect']):
+                self.add_error('collect must be a valid field name')
+            if request_args['collect'].startswith('_'):
+                self.add_error('Cannot collect internal fields, '
+                               'internal fields start '
+                               'with an underscore')
+            if 'group_by' in request_args:
+                if request_args['collect'] == request_args['group_by']:
+                    self.add_error("Cannot collect by a field that is "
+                                   "used for group_by")
+
+
+def validate_request_args(request_args):
     if api.app.config['PREVENT_RAW_QUERIES']:
         if is_a_raw_query(request_args):
             return invalid(MESSAGES['disallowed']['no_grouping'])
@@ -152,56 +206,23 @@ def validate_request_args(request_args):
 
     start_at = request_args_copy.pop('start_at', None)
     end_at = request_args_copy.pop('end_at', None)
-    period = request_args_copy.pop('period', None)
-    group_by = request_args_copy.pop('group_by', None)
-    sort_by = request_args_copy.pop('sort_by', None)
-    limit = request_args_copy.pop('limit', None)
-    collect = request_args_copy.pop('collect', None)
 
     validators = [
         ParameterValidator(request_args),
         DatetimeValidator(request_args, param_name='start_at'),
         DatetimeValidator(request_args, param_name='end_at'),
         FilterByValidator(request_args),
-        ParameterMustBeThisValidator(request_args, param_name='period', must_be_this='week')
+        ParameterMustBeThisValidator(request_args, param_name='period',
+                                     must_be_this='week'),
+        SortByValidator(request_args),
+        GroupByValidator(request_args),
+        PositiveIntegerValidator(request_args, param_name='limit'),
+        CollectValidator(request_args),
     ]
 
     for validator in validators:
         if validator.invalid():
             return validator.errors[0]
-
-    if period:
-        # if period != 'week':
-        #     return invalid(MESSAGES['period']['invalid'])
-        if group_by:
-            if group_by == '_week_start_at':
-                return invalid(MESSAGES['period']['group'])
-        if sort_by and not group_by:
-            return invalid(MESSAGES['period']['sort'])
-    if group_by:
-        if group_by.startswith('_'):
-            return invalid(MESSAGES['group_by']['internal'])
-    if sort_by:
-        if sort_by.find(':') < 0:
-            return invalid(MESSAGES['sort_by']['colon'])
-        sort_order = sort_by.split(':', 1)[1]
-        if sort_order not in ['ascending', 'descending']:
-            return invalid(MESSAGES['sort_by']['direction'])
-    if limit:
-        try:
-            if int(limit) < 0:
-                raise ValueError()
-        except ValueError:
-            return invalid(MESSAGES['limit']['invalid'])
-    if collect:
-        if not group_by:
-            return invalid(MESSAGES['collect']['no_grouping'])
-        if not MONGO_FIELD_REGEX.match(collect):
-            return invalid(MESSAGES['collect']['invalid'])
-        if collect.startswith('_'):
-            return invalid(MESSAGES['collect']['internal'])
-        if collect == group_by:
-            return invalid(MESSAGES['collect']['groupby_field'])
 
     if api.app.config['PREVENT_RAW_QUERIES']:
         if start_at and end_at:
