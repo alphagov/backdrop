@@ -213,3 +213,11 @@ class TestRequestValidation(TestCase):
         assert_that(validation_result, is_invalid_with_message(
             'Cannot collect internal fields, internal fields start '
             'with an underscore'))
+
+    def test_dates_are_real_days(self):
+        validation_result = validate_request_args({
+            'start_at': '2013-13-70T00:00:00Z'
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "start_at is not a valid datetime"))

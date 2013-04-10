@@ -6,6 +6,7 @@ ValidationResult object.
 """
 from collections import namedtuple
 import re
+from dateutil import parser
 
 RESERVED_KEYWORDS = (
     '_timestamp',
@@ -17,13 +18,25 @@ VALID_KEYWORD = re.compile('^[a-z0-9_\.-]+$')
 VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
 
 
-def value_is_valid_datetime_string(value):
+def _is_real_date(value):
+    try:
+        parser.parse(value)
+        return True
+    except ValueError:
+        return False
+
+
+def _is_valid_format(value):
     time_pattern = re.compile(
         "[0-9]{4}-[0-9]{2}-[0-9]{2}"
         "T[0-9]{2}:[0-9]{2}:[0-9]{2}"
         "(?:[+-][0-9]{2}:?[0-9]{2}|Z)"
     )
     return bool(time_pattern.match(value))
+
+
+def value_is_valid_datetime_string(value):
+    return _is_valid_format(value) and _is_real_date(value)
 
 
 def value_is_valid(value):
