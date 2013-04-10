@@ -34,3 +34,30 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         assert_that(validation_result,
                     is_invalid_with_message(
                         'The minimum time span for a query is 7 days'))
+
+    def test_that_querying_for_more_than_7_days_is_valid(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'start_at': '2012-01-01T00:00:00Z',
+            'end_at': '2012-01-09T00:00:00Z'
+        })
+        assert_that(validation_result.is_valid,
+                    is_(True))
+
+    def test_that_start_at_must_be_on_midnight(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'start_at': '2012-01-01T00:00:07Z',
+            'end_at': '2012-01-09T00:00:00Z'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message('start_at must be midnight'))
+
+    def test_that_start_at_must_be_on_midnight(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'start_at': '2012-01-01T00:00:00Z',
+            'end_at': '2012-01-09T09:00:09Z'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message('end_at must be midnight'))

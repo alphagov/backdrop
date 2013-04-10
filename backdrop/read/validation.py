@@ -1,3 +1,4 @@
+from datetime import time
 from dateutil import parser
 import api
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
@@ -203,7 +204,7 @@ class RawQueryValidator(Validator):
             self.add_error("querying for raw data is not allowed")
 
 
-class MinimumTimeSpanValidator(Validator):
+class TimeSpanValidator(Validator):
     def validate(self, request_args, context):
         if self._is_valid_date_query(request_args):
             start_at = parser.parse(request_args['start_at'])
@@ -211,6 +212,10 @@ class MinimumTimeSpanValidator(Validator):
             delta = end_at - start_at
             if delta.days < context['length']:
                 self.add_error('The minimum time span for a query is 7 days')
+            if start_at.time() != time(0):
+                self.add_error('start_at must be midnight')
+            if end_at.time() != time(0):
+                self.add_error('end_at must be midnight')
 
     def _is_valid_date_query(self, request_args):
         if 'start_at' not in request_args:
@@ -224,13 +229,7 @@ class MinimumTimeSpanValidator(Validator):
         return True
 
 
-
 def validate_request_args(request_args):
-    request_args_copy = request_args.copy()
-
-    start_at = request_args_copy.pop('start_at', None)
-    end_at = request_args_copy.pop('end_at', None)
-
     validators = [
         ParameterValidator(request_args),
         DatetimeValidator(request_args, param_name='start_at'),
@@ -246,28 +245,10 @@ def validate_request_args(request_args):
 
     if api.app.config['PREVENT_RAW_QUERIES']:
         validators.append(RawQueryValidator(request_args))
-        validators.append(MinimumTimeSpanValidator(request_args, length=7))
-
-
+        validators.append(TimeSpanValidator(request_args, length=7))
 
     for validator in validators:
         if validator.invalid():
             return validator.errors[0]
 
-    if api.app.config['PREVENT_RAW_QUERIES']:
-        # if is_a_raw_query(request_args):
-        #     return invalid(MESSAGES['disallowed']['no_grouping'])
-        if start_at and end_at:
-            # if not request_length_valid(start_at, end_at):
-            #     return invalid(MESSAGES['disallowed']['non-week-length'])
-            if not dates_on_midnight(start_at, end_at):
-                return invalid(MESSAGES['disallowed']['non-midnight'])
-
     return valid()
-
-
-# def validate(request_args):
-#     errors = [validator.validate(request_args) for
-#       validator in get_validators(request_args)]
-#
-#     return len(errors) > 0, errors
