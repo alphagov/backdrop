@@ -2,6 +2,7 @@ from unittest import TestCase
 from hamcrest import assert_that, is_, instance_of
 from backdrop.read.api import validate_request_args
 from werkzeug.datastructures import MultiDict
+from tests.support.is_invalid_with_message import is_invalid_with_message
 
 
 class TestRequestValidation(TestCase):
@@ -167,6 +168,18 @@ class TestRequestValidation(TestCase):
             'group_by': '_week_start_at'
         })
 
-        assert_that(validation_result.is_valid, is_(False))
-        assert_that(validation_result.message, is_(
+        assert_that(validation_result, is_invalid_with_message(
             "Cannot group on two equal keys"))
+
+    def test_period_must_be_week(self):
+        validation_result = validate_request_args({
+            'period': 'fortnight'
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            'Unrecognised grouping for period. '
+            'Supported periods include: week'))
+
+
+
+

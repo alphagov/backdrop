@@ -76,9 +76,9 @@ def dates_on_midnight(start_at, end_at):
 
 
 class Validator(object):
-    def __init__(self, request_args):
+    def __init__(self, request_args, **context):
         self.errors = []
-        self.validate(request_args)
+        self.validate(request_args, context)
 
     def invalid(self):
         return len(self.errors) > 0
@@ -86,7 +86,7 @@ class Validator(object):
     def add_error(self, message):
         self.errors.append(invalid(message))
 
-    def validate(self, request_args):
+    def validate(self, request_args, context):
         raise NotImplementedError
 
 
@@ -107,48 +107,39 @@ class ParameterValidator(Validator):
     def _unrecognised_parameters(self, request_args):
         return set(request_args.keys()) - self.allowed_parameters
 
-    def validate(self, request_args):
+    def validate(self, request_args, context):
         if len(self._unrecognised_parameters(request_args)) > 0:
-            self.errors.append(invalid(
-                "An unrecognised parameter was provided"))
+            self.add_error("An unrecognised parameter was provided")
 
 
 class DatetimeValidator(Validator):
-    def __init__(self, request_args, param_name):
-        self.param_name = param_name
-        super(DatetimeValidator, self).__init__(request_args)
-
-    def validate(self, request_args):
-        if self.param_name in request_args:
+    def validate(self, request_args, context):
+        if context['param_name'] in request_args:
             if not value_is_valid_datetime_string(
-                    request_args[self.param_name]):
-                self.errors.append(invalid('%s is not a valid datetime'
-                                           % self.param_name))
+                    request_args[context['param_name']]):
+                self.add_error('%s is not a valid datetime'
+                               % context['param_name'])
 
 
 class FilterByValidator(Validator):
-    def validate(self, request_args):
+    def validate(self, request_args, context):
         filter_by = request_args.get('filter_by', None)
         if filter_by:
             if filter_by.find(':') < 0:
-                self.errors.append(invalid(
+                self.add_error(
                     'filter_by must be a field name and value separated by '
-                    'a colon (:) eg. authority:Westminster'))
+                    'a colon (:) eg. authority:Westminster')
             if filter_by.startswith('$'):
-                self.errors.append(invalid(
-                    'filter_by must not start with a $'))
+                self.add_error(
+                    'filter_by must not start with a $')
 
 
 class ParameterMustBeThisValidator(Validator):
-    def __init__(self, request_args, param_name, must_be_this):
-        self.param_name = param_name
-        self.must_be_this = must_be_this
-        super(ParameterMustBeThisValidator, self).__init__(request_args)
-
-    def validate(self, request_args):
-        if self.param_name in request_args:
-            if request_args[self.param_name] != self.must_be_this:
-                self.add_error("Uh oh, spagettios!")
+    def validate(self, request_args, context):
+        if context['param_name'] in request_args:
+            if request_args[context['param_name']] != context['must_be_this']:
+                self.add_error('Unrecognised grouping for period. '
+                               'Supported periods include: week')
 
 
 def validate_request_args(request_args):
@@ -169,10 +160,10 @@ def validate_request_args(request_args):
 
     validators = [
         ParameterValidator(request_args),
-        DatetimeValidator(request_args, 'start_at'),
-        DatetimeValidator(request_args, 'end_at'),
+        DatetimeValidator(request_args, param_name='start_at'),
+        DatetimeValidator(request_args, param_name='end_at'),
         FilterByValidator(request_args),
-        ParameterMustBeThisValidator(request_args, 'period', 'week')
+        ParameterMustBeThisValidator(request_args, param_name='period', must_be_this='week')
     ]
 
     for validator in validators:
