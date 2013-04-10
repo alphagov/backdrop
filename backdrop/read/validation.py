@@ -5,53 +5,6 @@ from ..core.validation import value_is_valid_datetime_string, valid, invalid
 import re
 
 MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
-MESSAGES = {
-    "disallowed": {
-        "no_grouping": "querying for raw data has been disallowed",
-        "non-midnight": "start_at and end_at must be at midnight",
-        "non-week-length": "difference between start_at and end_at must be 7 "
-                           "days"
-    },
-    'unrecognised': 'An unrecognised parameter was provided',
-    'start_at': {
-        'invalid': 'start_at is not a valid datetime'
-    },
-    'end_at': {
-        'invalid': 'end_at is not a valid datetime'
-    },
-    'filter_by': {
-        'colon': 'filter_by must be a field name and value separated by '
-                 'a colon (:) eg. authority:Westminster',
-        'dollar': 'filter_by must not start with a $'
-    },
-    'period': {
-        'invalid': 'Unrecognised grouping for period. Supported periods '
-                   'include: week',
-        'group': 'Cannot group on two equal keys',
-        'sort': 'Cannot use sort_by for period queries - period queries '
-                'are always sorted by time'
-    },
-    'group_by': {
-        'internal': 'Cannot group by internal fields, internal fields start '
-                    'with an underscore'
-    },
-    'sort_by': {
-        'colon': 'sort_by must be a field name and sort direction separated '
-                 'by a colon (:) eg. authority:ascending',
-        'direction': 'Unrecognised sort direction. Supported directions '
-                     'include: ascending, descending'
-    },
-    'limit': {
-        'invalid': 'limit must be a positive integer'
-    },
-    'collect': {
-        'no_grouping': 'collect is only allowed when grouping',
-        'invalid': 'collect must be a valid field name',
-        'internal': 'Cannot collect internal fields, internal fields start '
-                    'with an underscore',
-        'groupby_field': "Cannot collect by a field that is used for group_by"
-    }
-}
 
 
 def is_a_raw_query(request_args):
