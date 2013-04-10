@@ -8,6 +8,7 @@ from mock import patch
 from backdrop.core.records import Record
 
 from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
+from tests.support.test_helpers import is_unauthorized
 from backdrop.write import api
 
 
@@ -15,10 +16,40 @@ class PostDataTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
+    def test_needs_an_authorization_header(self):
+        response = self.app.post(
+            '/foo',
+            data='[]',
+        )
+
+        assert_that( response, is_unauthorized())
+        assert_that( response, is_error_response())
+
+    def test_authorization_header_must_be_correct_format(self):
+        response = self.app.post(
+            '/foo',
+            data='[]',
+            headers=[('Authorization', 'Bearer')],
+        )
+
+        assert_that( response, is_unauthorized())
+        assert_that( response, is_error_response())
+
+    def test_authorization_header_must_match_server_side_value(self):
+        response = self.app.post(
+            '/foo',
+            data='[]',
+            headers=[('Authorization', 'Bearer not-foo-bearer-token')],
+        )
+
+        assert_that( response, is_unauthorized())
+        assert_that( response, is_error_response())
+
     def test_request_must_be_json(self):
         response = self.app.post(
             '/foo',
-            data='foobar'
+            data='foobar',
+            headers=[('Authorization', 'Bearer foo-bearer-token')],
         )
 
         assert_that( response, is_bad_request())
@@ -29,7 +60,8 @@ class PostDataTestCase(unittest.TestCase):
         self.app.post(
             '/foo-bucket',
             data='[]',
-            content_type="application/json"
+            content_type="application/json",
+            headers=[('Authorization', 'Bearer foo-bucket-bearer-token')],
         )
 
         store.assert_called_with(
@@ -41,7 +73,8 @@ class PostDataTestCase(unittest.TestCase):
         self.app.post(
             '/foo-bucket',
             data = '{"foo": "bar"}',
-            content_type = "application/json"
+            content_type = "application/json",
+            headers=[('Authorization', 'Bearer foo-bucket-bearer-token')],
         )
 
         store.assert_called_with(
@@ -52,7 +85,8 @@ class PostDataTestCase(unittest.TestCase):
         response = self.app.post(
             '/_foo-bucket',
             data = '{"foo": "bar"}',
-            content_type = "application/json"
+            content_type = "application/json",
+            headers=[('Authorization', 'Bearer _foo-bucket-bearer-token')],
         )
 
         assert_that( response, is_bad_request() )
@@ -67,7 +101,8 @@ class PostDataTestCase(unittest.TestCase):
         self.app.post(
             '/bucket',
             data = '{"_timestamp": "2014-01-02T03:49:00+00:00"}',
-            content_type = "application/json"
+            content_type = "application/json",
+            headers=[('Authorization', 'Bearer bucket-bearer-token')],
         )
 
         store.assert_called_with(
@@ -78,7 +113,8 @@ class PostDataTestCase(unittest.TestCase):
         response = self.app.post(
             '/foo-bucket',
             data = '{"": ""}',
-            content_type = "application/json"
+            content_type = "application/json",
+            headers=[('Authorization', 'Bearer foo-bucket-bearer-token')],
         )
 
         assert_that( response, is_bad_request())
@@ -89,7 +125,8 @@ class PostDataTestCase(unittest.TestCase):
         response = self.app.post(
             '/foo',
             data = '{"_id": "foo"}',
-            content_type = "application/json"
+            content_type = "application/json",
+            headers=[('Authorization', 'Bearer foo-bearer-token')],
         )
 
         assert_that(response, is_ok())
@@ -101,7 +138,8 @@ class PostDataTestCase(unittest.TestCase):
         response = self.app.post(
             '/foo',
             data = '{"_id": "f o o"}',
-            content_type = "application/json"
+            content_type = "application/json",
+            headers=[('Authorization', 'Bearer foo-bearer-token')],
         )
 
         assert_that( response, is_bad_request())

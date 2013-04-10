@@ -1,6 +1,11 @@
 @use_http_client
 Feature: end-to-end platform test
 
+    Scenario: write data to platform
+        Given I have the data in "dinosaurs.json"
+         when I post the data to "/reptiles"
+         then I should get back a status of "200"
+
     Scenario: write and retrieve data from platform
         Given I have the data in "dinosaurs.json"
          when I post the data to "/reptiles"
