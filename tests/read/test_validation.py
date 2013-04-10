@@ -160,3 +160,13 @@ class TestRequestValidation(TestCase):
             "collect": 'a_field'
         })
         assert_that(validation_result_without_group_by.is_valid, is_(False))
+
+    def test_group_by_cannot_be__week_start_at_if_there_is_a_period(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'group_by': '_week_start_at'
+        })
+
+        assert_that(validation_result.is_valid, is_(False))
+        assert_that(validation_result.message, is_(
+            "Cannot group on two equal keys"))

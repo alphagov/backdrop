@@ -139,6 +139,18 @@ class FilterByValidator(Validator):
                     'filter_by must not start with a $'))
 
 
+class ParameterMustBeThisValidator(Validator):
+    def __init__(self, request_args, param_name, must_be_this):
+        self.param_name = param_name
+        self.must_be_this = must_be_this
+        super(ParameterMustBeThisValidator, self).__init__(request_args)
+
+    def validate(self, request_args):
+        if self.param_name in request_args:
+            if request_args[self.param_name] != self.must_be_this:
+                self.add_error("Uh oh, spagettios!")
+
+
 def validate_request_args(request_args):
 
     if api.app.config['PREVENT_RAW_QUERIES']:
@@ -160,6 +172,7 @@ def validate_request_args(request_args):
         DatetimeValidator(request_args, 'start_at'),
         DatetimeValidator(request_args, 'end_at'),
         FilterByValidator(request_args),
+        ParameterMustBeThisValidator(request_args, 'period', 'week')
     ]
 
     for validator in validators:
@@ -167,10 +180,10 @@ def validate_request_args(request_args):
             return validator.errors[0]
 
     if period:
-        if period != 'week':
-            return invalid(MESSAGES['period']['invalid'])
+        # if period != 'week':
+        #     return invalid(MESSAGES['period']['invalid'])
         if group_by:
-            if '_week_start_at' == group_by:
+            if group_by == '_week_start_at':
                 return invalid(MESSAGES['period']['group'])
         if sort_by and not group_by:
             return invalid(MESSAGES['period']['sort'])
