@@ -75,10 +75,23 @@ def dates_on_midnight(start_at, end_at):
         and (end_at.minute + end_at.second + end_at.hour) == 0
 
 
-class ParameterValidator(object):
+class Validator(object):
     def __init__(self, request_args):
         self.errors = []
+        self.validate(request_args)
 
+    def invalid(self):
+        return len(self.errors) > 0
+
+    def add_error(self, message):
+        self.errors.append(invalid(message))
+
+    def validate(self, request_args):
+        raise NotImplementedError
+
+
+class ParameterValidator(Validator):
+    def __init__(self, request_args):
         self.allowed_parameters = set([
             'start_at',
             'end_at',
@@ -89,21 +102,40 @@ class ParameterValidator(object):
             'limit',
             'collect'
         ])
+        super(ParameterValidator, self).__init__(request_args)
 
-        self.validate(request_args)
-
-    def _invalid(self, request_args):
-        bad_params = set(request_args.keys()) - self.allowed_parameters
-        contains_invalid_params = len(bad_params) > 0
-        return contains_invalid_params
-
-    def invalid(self):
-        return len(self.errors) > 0
+    def _unrecognised_parameters(self, request_args):
+        return set(request_args.keys()) - self.allowed_parameters
 
     def validate(self, request_args):
-        if self._invalid(request_args):
+        if len(self._unrecognised_parameters(request_args)) > 0:
             self.errors.append(invalid(
                 "An unrecognised parameter was provided"))
+
+
+class DatetimeValidator(Validator):
+    def __init__(self, request_args, param_name):
+        self.param_name = param_name
+        super(DatetimeValidator, self).__init__(request_args)
+
+    def validate(self, request_args):
+        if self.param_name in request_args:
+            if not value_is_valid_datetime_string(request_args[self.param_name]):
+                self.errors.append(invalid('%s is not a valid datetime'
+                                           % self.param_name))
+
+
+class FilterByValidator(Validator):
+    def validate(self, request_args):
+        filter_by = request_args.get('filter_by', None)
+        if filter_by:
+            if filter_by.find(':') < 0:
+                self.errors.append(invalid(
+                    'filter_by must be a field name and value separated by '
+                    'a colon (:) eg. authority:Westminster'))
+            if filter_by.startswith('$'):
+                self.errors.append(invalid(
+                    'filter_by must not start with a $'))
 
 
 def validate_request_args(request_args):
@@ -123,20 +155,17 @@ def validate_request_args(request_args):
     limit =     request_args_copy.pop(    'limit',     None)
     collect =   request_args_copy.pop(  'collect',   None)
 
-    pv = ParameterValidator(request_args)
-    if pv.invalid():
-        return pv.errors[0]
-    if start_at:
-        if not value_is_valid_datetime_string(start_at):
-            return invalid(MESSAGES['start_at']['invalid'])
-    if end_at:
-        if not value_is_valid_datetime_string(end_at):
-            return invalid(MESSAGES['end_at']['invalid'])
-    if filter_by:
-        if filter_by.find(':') < 0:
-            return invalid(MESSAGES['filter_by']['colon'])
-        if filter_by.startswith('$'):
-            return invalid(MESSAGES['filter_by']['dollar'])
+    validators = [
+        ParameterValidator(request_args),
+        DatetimeValidator(request_args, 'start_at'),
+        DatetimeValidator(request_args, 'end_at'),
+        FilterByValidator(request_args),
+    ]
+
+    for validator in validators:
+        if validator.invalid():
+            return validator.errors[0]
+
     if period:
         if period != 'week':
             return invalid(MESSAGES['period']['invalid'])
