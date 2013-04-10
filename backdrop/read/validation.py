@@ -120,7 +120,8 @@ class DatetimeValidator(Validator):
 
     def validate(self, request_args):
         if self.param_name in request_args:
-            if not value_is_valid_datetime_string(request_args[self.param_name]):
+            if not value_is_valid_datetime_string(
+                    request_args[self.param_name]):
                 self.errors.append(invalid('%s is not a valid datetime'
                                            % self.param_name))
 
@@ -146,14 +147,13 @@ def validate_request_args(request_args):
 
     request_args_copy = request_args.copy()
 
-    start_at =  request_args_copy.pop( 'start_at',  None)
-    end_at =    request_args_copy.pop(   'end_at',    None)
-    filter_by = request_args_copy.pop('filter_by', None)
-    period =    request_args_copy.pop(   'period',    None)
-    group_by =  request_args_copy.pop( 'group_by',  None)
-    sort_by =   request_args_copy.pop(  'sort_by',   None)
-    limit =     request_args_copy.pop(    'limit',     None)
-    collect =   request_args_copy.pop(  'collect',   None)
+    start_at = request_args_copy.pop('start_at', None)
+    end_at = request_args_copy.pop('end_at', None)
+    period = request_args_copy.pop('period', None)
+    group_by = request_args_copy.pop('group_by', None)
+    sort_by = request_args_copy.pop('sort_by', None)
+    limit = request_args_copy.pop('limit', None)
+    collect = request_args_copy.pop('collect', None)
 
     validators = [
         ParameterValidator(request_args),
@@ -210,8 +210,7 @@ def validate_request_args(request_args):
 
 
 # def validate(request_args):
-#     errors = [validator.validate(request_args) for validator in get_validators(request_args)]
+#     errors = [validator.validate(request_args) for
+#       validator in get_validators(request_args)]
 #
 #     return len(errors) > 0, errors
-
-
