@@ -197,11 +197,35 @@ class CollectValidator(Validator):
                                    "used for group_by")
 
 
-def validate_request_args(request_args):
-    if api.app.config['PREVENT_RAW_QUERIES']:
+class RawQueryValidator(Validator):
+    def validate(self, request_args, context):
         if is_a_raw_query(request_args):
-            return invalid(MESSAGES['disallowed']['no_grouping'])
+            self.add_error("querying for raw data is not allowed")
 
+
+class MinimumTimeSpanValidator(Validator):
+    def validate(self, request_args, context):
+        if self._is_valid_date_query(request_args):
+            start_at = parser.parse(request_args['start_at'])
+            end_at = parser.parse(request_args['end_at'])
+            delta = end_at - start_at
+            if delta.days < context['length']:
+                self.add_error('The minimum time span for a query is 7 days')
+
+    def _is_valid_date_query(self, request_args):
+        if 'start_at' not in request_args:
+            return False
+        if 'end_at' not in request_args:
+            return False
+        if not value_is_valid_datetime_string(request_args['start_at']):
+            return False
+        if not value_is_valid_datetime_string(request_args['end_at']):
+            return False
+        return True
+
+
+
+def validate_request_args(request_args):
     request_args_copy = request_args.copy()
 
     start_at = request_args_copy.pop('start_at', None)
@@ -220,14 +244,22 @@ def validate_request_args(request_args):
         CollectValidator(request_args),
     ]
 
+    if api.app.config['PREVENT_RAW_QUERIES']:
+        validators.append(RawQueryValidator(request_args))
+        validators.append(MinimumTimeSpanValidator(request_args, length=7))
+
+
+
     for validator in validators:
         if validator.invalid():
             return validator.errors[0]
 
     if api.app.config['PREVENT_RAW_QUERIES']:
+        # if is_a_raw_query(request_args):
+        #     return invalid(MESSAGES['disallowed']['no_grouping'])
         if start_at and end_at:
-            if not request_length_valid(start_at, end_at):
-                return invalid(MESSAGES['disallowed']['non-week-length'])
+            # if not request_length_valid(start_at, end_at):
+            #     return invalid(MESSAGES['disallowed']['non-week-length'])
             if not dates_on_midnight(start_at, end_at):
                 return invalid(MESSAGES['disallowed']['non-midnight'])
 
