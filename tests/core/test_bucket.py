@@ -166,6 +166,38 @@ class TestBucket(unittest.TestCase):
         self.mock_repository.group.assert_called_once_with(
             "_week_start_at", {}, limit=1)
 
+    def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
+        self.mock_repository.group.return_value = [
+            {"_week_start_at": d(2013, 1, 7, 0, 0, 0), "_count": 3 },
+            {"_week_start_at": d(2013, 1, 8, 0, 0, 0), "_count": 1 },
+        ]
+
+        self.assertRaises(
+            ValueError,
+            self.bucket.query,
+            period='week'
+        )
+
+    def test_period_query_adds_missing_periods_in_correct_order(self):
+        self.mock_repository.group.return_value = [
+            {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "_count": 32},
+            {"_week_start_at": d(2013, 1, 21, 0, 0, 0), "_count": 45},
+            {"_week_start_at": d(2013, 2,  4, 0, 0, 0), "_count": 17},
+        ]
+
+        result = self.bucket.query(period='week',
+                                   start_at=d_tz(2013, 1, 7, 0, 0, 0),
+                                   end_at=d_tz(2013, 2, 18, 0, 0, 0))
+
+        assert_that(result, contains(
+            has_entries({"_start_at": d_tz(2013, 1,  7), "_count": 0}),
+            has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 32}),
+            has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 45}),
+            has_entries({"_start_at": d_tz(2013, 1, 28), "_count": 0}),
+            has_entries({"_start_at": d_tz(2013, 2,  4), "_count": 17}),
+            has_entries({"_start_at": d_tz(2013, 2, 11), "_count": 0}),
+        ))
+
     def test_week_and_group_query(self):
         self.mock_repository.multi_group.return_value = [
             {
@@ -242,8 +274,12 @@ class TestBucket(unittest.TestCase):
                 "_group_count": 2,
                 "_subgroup": [
                     {
-                        "_week_start_at": d(2013, 1, 7, 0, 0, 0),
-                        "_count": 1
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 23
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 21, 0, 0, 0),
+                        "_count": 41
                     }
                 ]
             },
@@ -253,28 +289,39 @@ class TestBucket(unittest.TestCase):
                 "_group_count": 2,
                 "_subgroup": [
                     {
-                        "_week_start_at": d(2013, 1, 21, 0, 0, 0),
-                        "_count": 1
+                        "_week_start_at": d(2013, 1, 14, 0, 0, 0),
+                        "_count": 31
+                    },
+                    {
+                        "_week_start_at": d(2013, 1, 28, 0, 0, 0),
+                        "_count": 12
                     }
                 ]
             }
         ]
-        query_result = self.bucket.query(period="week", group_by="some_group")
+
+        query_result = self.bucket.query(period="week", group_by="some_group",
+                                         start_at=d_tz(2013, 1, 7, 0, 0, 0),
+                                         end_at=d_tz(2013, 2, 4, 0, 0, 0))
+
         assert_that(query_result, has_item(has_entries({
-            "values": has_item({
-                "_start_at": d_tz(2013, 1, 21, 0, 0, 0),
-                "_end_at": d_tz(2013, 1, 28, 0, 0, 0),
-                "_count": 0
-            }),
-            "some_group": "val1"
-        })))
-        assert_that(query_result, has_item(has_entries({
+            "some_group": "val1",
             "values": contains(
-                has_entry("_start_at", d_tz(2013, 1, 7, 0, 0, 0)),
-                has_entry("_start_at", d_tz(2013, 1, 14, 0, 0, 0)),
-                has_entry("_start_at", d_tz(2013, 1, 21, 0, 0, 0))
+                has_entries({"_start_at": d_tz(2013, 1,  7), "_count": 0}),
+                has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 23}),
+                has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 41}),
+                has_entries({"_start_at": d_tz(2013, 1, 28), "_count": 0}),
             ),
-            "some_group": "val2"
+        })))
+
+        assert_that(query_result, has_item(has_entries({
+            "some_group": "val2",
+            "values": contains(
+                has_entries({"_start_at": d_tz(2013, 1,  7), "_count": 0}),
+                has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 31}),
+                has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 0}),
+                has_entries({"_start_at": d_tz(2013, 1, 28), "_count": 12}),
+            ),
         })))
 
     def test_sorted_week_and_group_query(self):
@@ -361,24 +408,24 @@ class TestBucket(unittest.TestCase):
             limit=1,
             collect=[])
 
-    def test_blows_up_when_weeks_do_not_start_on_monday(self):
+    def test_period_group_query_fails_when_weeks_do_not_start_on_monday(self):
         multi_group_results = [
             {
                 "is": "Monday",
                 "_subgroup": [
-                    {"_week_start_at": d(2013, 4, 1)}
+                    {"_week_start_at": d(2013, 4, 1), "_count": 1}
                 ]
             },
             {
                 "is": "also Monday",
                 "_subgroup": [
-                    {"_week_start_at": d(2013, 4, 8)}
+                    {"_week_start_at": d(2013, 4, 8), "_count": 1}
                 ]
             },
             {
                 "is": "Tuesday",
                 "_subgroup": [
-                    {"_week_start_at": d(2013, 4, 9)}
+                    {"_week_start_at": d(2013, 4, 9), "_count": 1}
                 ]
             },
         ]
