@@ -150,10 +150,13 @@ class TimeSpanValidator(Validator):
             delta = end_at - start_at
             if delta.days < context['length']:
                 self.add_error('The minimum time span for a query is 7 days')
-            if start_at.time() != time(0):
-                self.add_error('start_at must be midnight')
-            if end_at.time() != time(0):
-                self.add_error('end_at must be midnight')
+            if not self._is_monday_midnight(start_at):
+                self.add_error('start_at must be a monday midnight')
+            if not self._is_monday_midnight(end_at):
+                self.add_error('end_at must be a monday midnight')
+
+    def _is_monday_midnight(self, timestamp):
+        return timestamp.time() == time(0) and timestamp.weekday() == 0
 
     def _is_valid_date_query(self, request_args):
         if 'start_at' not in request_args:

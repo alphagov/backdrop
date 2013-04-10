@@ -32,8 +32,8 @@ class ReadApiSecurity(unittest.TestCase):
 
     def test_that_querying_for_more_than_7_days_is_valid(self):
         response = self.app.get("/foo?group_by=pie"
-                                "&start_at=2012-01-01T00:00:00Z"
-                                "&end_at=2012-01-08T00:00:00Z")
+                                "&start_at=2013-04-01T00:00:00Z"
+                                "&end_at=2013-04-08T00:00:00Z")
         assert_that(response, is_ok())
 
     def test_that_non_midnight_values_are_disallowed_for_start_at(self):
