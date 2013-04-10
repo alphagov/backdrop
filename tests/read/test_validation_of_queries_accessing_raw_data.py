@@ -51,7 +51,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
             'end_at': '2013-04-09T00:00:00Z'
         })
         assert_that(validation_result,
-                    is_invalid_with_message('start_at must be a monday midnight'))
+                    is_invalid_with_message(
+                        'start_at must be a monday midnight'))
 
     def test_that_start_at_must_be_a_monday(self):
         validation_result = validate_request_args({
@@ -69,7 +70,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
             'end_at': '2013-04-08T09:00:09Z'
         })
         assert_that(validation_result,
-                    is_invalid_with_message('end_at must be a monday midnight'))
+                    is_invalid_with_message(
+                        'end_at must be a monday midnight'))
 
     def test_that_end_at_must_be_a_monday(self):
         validation_result = validate_request_args({
