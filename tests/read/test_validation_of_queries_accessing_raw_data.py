@@ -52,21 +52,14 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         })
         assert_that(validation_result.is_valid, is_(True))
 
-    def test_that_queries_not_starting_on_midnight_monday_are_disallowed(self):
-        validation_result_not_at_midnight = validate_request_args({
-            'period': 'week',
-            'start_at': '2013-03-31T00:00:59Z',
-            'end_at': '2013-04-08T00:00:00Z'
-        })
+    def test_that_queries_not_starting_on_monday_are_disallowed(self):
         validation_result_not_a_monday = validate_request_args({
             'period': 'week',
-            'start_at': '2013-03-31T00:00:59Z',
+            'start_at': '2013-03-31T00:00:00Z',
             'end_at': '2013-04-08T00:00:00Z'
         })
-        assert_that(validation_result_not_at_midnight, is_invalid_with_message(
-            'start_at must be a monday midnight'))
         assert_that(validation_result_not_a_monday, is_invalid_with_message(
-            'start_at must be a monday midnight'))
+            'start_at must be a monday'))
 
     def test_that_queries_ending_at_midnight_monday_are_allowed(self):
         validation_result = validate_request_args({
@@ -76,18 +69,27 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         })
         assert_that(validation_result.is_valid, is_(True))
 
-    def test_that_queries_not_ending_at_midnight_monday_are_disallowed(self):
-        validation_result_not_at_midnight = validate_request_args({
-            'period': 'week',
-            'start_at': '2013-04-01T00:00:00Z',
-            'end_at': '2013-04-08T00:00:01Z'
-        })
+    def test_that_queries_not_ending_on_monday_are_disallowed(self):
         validation_result_not_a_monday = validate_request_args({
             'period': 'week',
             'start_at': '2013-04-01T00:00:00Z',
             'end_at': '2013-04-09T00:00:00Z'
         })
         assert_that(validation_result_not_a_monday, is_invalid_with_message(
-            'end_at must be a monday midnight'))
-        assert_that(validation_result_not_at_midnight, is_invalid_with_message(
-            'end_at must be a monday midnight'))
+            'end_at must be a monday'))
+
+    def test_that_start_at_with_time_other_than_midnight_is_disallowed(self):
+        validation_result = validate_request_args({
+            'group_by': 'some_key',
+            'start_at': '2013-04-01T00:00:01Z'
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            'start_at must be midnight'))
+
+    def test_that_end_at_with_time_other_than_midnight_is_disallowed(self):
+        validation_result = validate_request_args({
+            'group_by': 'some_key',
+            'end_at': '2013-04-01T00:00:01Z'
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            'end_at must be midnight'))
