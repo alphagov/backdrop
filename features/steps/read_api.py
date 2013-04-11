@@ -9,6 +9,11 @@ import pytz
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
 
+@given('the api is running in protected mode')
+def step(context):
+    context.client.set_config_parameter('PREVENT_RAW_QUERIES', True)
+
+
 @given('"{fixture_name}" is in "{bucket_name}" bucket')
 def step(context, fixture_name, bucket_name):
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
