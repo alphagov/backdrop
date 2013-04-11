@@ -2,7 +2,7 @@ from unittest import TestCase
 from hamcrest import assert_that, is_, instance_of
 from backdrop.read.api import validate_request_args
 from werkzeug.datastructures import MultiDict
-from tests.support.is_invalid_with_message import is_invalid_with_message
+from tests.support.validity_matcher import is_invalid_with_message
 
 
 class TestRequestValidation(TestCase):
