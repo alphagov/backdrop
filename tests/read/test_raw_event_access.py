@@ -4,7 +4,7 @@ from backdrop.read import api
 from tests.support.test_helpers import is_bad_request, is_ok
 
 
-class ReadApiSecurity(unittest.TestCase):
+class TestRawEventAccess(unittest.TestCase):
     def setUp(self):
         api.app.config['PREVENT_RAW_QUERIES'] = True
         self.app = api.app.test_client()
