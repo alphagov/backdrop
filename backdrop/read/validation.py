@@ -142,6 +142,10 @@ class RawQueryValidator(Validator):
             self.add_error("querying for raw data is not allowed")
 
 
+def _is_valid_date(string):
+    return string and value_is_valid_datetime_string(string)
+
+
 class TimeSpanValidator(Validator):
     def validate(self, request_args, context):
         if self._is_valid_date_query(request_args):
@@ -150,33 +154,28 @@ class TimeSpanValidator(Validator):
             delta = end_at - start_at
             if delta.days < context['length']:
                 self.add_error('The minimum time span for a query is 7 days')
-            if not self._is_monday(start_at):
-                self.add_error('start_at must be a monday')
-            if not self._is_monday(end_at):
-                self.add_error('end_at must be a monday')
-
-    def _is_monday(self, timestamp):
-        return timestamp.weekday() == 0
 
     def _is_valid_date_query(self, request_args):
-        if 'start_at' not in request_args:
-            return False
-        if 'end_at' not in request_args:
-            return False
-        if not value_is_valid_datetime_string(request_args['start_at']):
-            return False
-        if not value_is_valid_datetime_string(request_args['end_at']):
-            return False
-        return True
+        return _is_valid_date(request_args.get('start_at')) \
+            and _is_valid_date(request_args.get('end_at'))
 
 
 class MidnightValidator(Validator):
     def validate(self, request_args, context):
-        if context['param_name'] in request_args \
-                and value_is_valid_datetime_string(request_args[context['param_name']]):
-            timestamp = parser.parse(request_args[context['param_name']])
-            if timestamp.time() != time(0):
+        timestamp = request_args.get(context['param_name'])
+        if _is_valid_date(timestamp):
+            if parser.parse(timestamp).time() != time(0):
                 self.add_error('%s must be midnight' % context['param_name'])
+
+
+class MondayValidator(Validator):
+    def validate(self, request_args, context):
+        if 'period' in request_args:
+            timestamp = request_args.get(context['param_name'])
+            if _is_valid_date(timestamp):
+                if (parser.parse(timestamp)).weekday() != 0:
+                    self.add_error('%s must be a monday'
+                                   % context['param_name'])
 
 
 def validate_request_args(request_args):
@@ -196,8 +195,11 @@ def validate_request_args(request_args):
     if api.app.config['PREVENT_RAW_QUERIES']:
         validators.append(RawQueryValidator(request_args))
         validators.append(TimeSpanValidator(request_args, length=7))
-        validators.append(MidnightValidator(request_args, param_name='start_at'))
+        validators.append(
+            MidnightValidator(request_args, param_name='start_at'))
         validators.append(MidnightValidator(request_args, param_name='end_at'))
+        validators.append(MondayValidator(request_args, param_name='start_at'))
+        validators.append(MondayValidator(request_args, param_name='end_at'))
 
     for validator in validators:
         if validator.invalid():
