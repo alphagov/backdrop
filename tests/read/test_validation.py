@@ -1,8 +1,8 @@
 from unittest import TestCase
-from hamcrest import assert_that, is_, instance_of
+from hamcrest import assert_that
 from backdrop.read.api import validate_request_args
 from werkzeug.datastructures import MultiDict
-from tests.support.is_invalid_with_message import is_invalid_with_message
+from tests.support.validity_matcher import is_invalid_with_message, is_valid
 
 
 class TestRequestValidation(TestCase):
@@ -16,7 +16,7 @@ class TestRequestValidation(TestCase):
         validation_result = validate_request_args({
             'start_at': '2000-02-02T00:02:02+00:00'
         })
-        assert_that(validation_result.is_valid, is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_queries_with_badly_formatted_end_at_are_disallowed(self):
         assert_that(
@@ -28,7 +28,7 @@ class TestRequestValidation(TestCase):
         validation_result = validate_request_args({
             'end_at': '2000-02-02T00:02:02+00:00'
         })
-        assert_that(validation_result.is_valid, is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_queries_with_no_colon_in_filter_by_are_disallowed(self):
         assert_that(
@@ -42,7 +42,7 @@ class TestRequestValidation(TestCase):
         validation_result = validate_request_args({
             'filter_by': 'foo:bar'
         })
-        assert_that(validation_result.is_valid, is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_queries_with_will_formatted_starts_and_ends_are_allowed(self):
         validation_result = validate_request_args({
@@ -50,7 +50,7 @@ class TestRequestValidation(TestCase):
             'start_at': '2010-01-01T00:10:10+00:00',
             'end_at': '2010-01-07T00:10:10+00:00',
         })
-        assert_that( validation_result.is_valid, is_(True) )
+        assert_that( validation_result, is_valid() )
 
     def test_queries_with_grouping_on_internal_fields_are_disallowed(self):
         validation_result = validate_request_args({
@@ -64,13 +64,13 @@ class TestRequestValidation(TestCase):
         validation_result = validate_request_args({
             'sort_by': 'foo:ascending',
         })
-        assert_that( validation_result.is_valid, is_(True) )
+        assert_that( validation_result, is_valid() )
 
     def test_queries_with_sort_by_descending_are_allowed(self):
         validation_result = validate_request_args({
             'sort_by': 'foo:descending',
         })
-        assert_that( validation_result.is_valid, is_(True) )
+        assert_that( validation_result, is_valid() )
 
     def test_queries_with_unrecognized_sort_by_values_are_disallowed(self):
         validation_result = validate_request_args({
@@ -84,7 +84,7 @@ class TestRequestValidation(TestCase):
         validation_result = validate_request_args({
             'limit': '3'
         })
-        assert_that( validation_result.is_valid, is_(True) )
+        assert_that( validation_result, is_valid() )
 
     def test_queries_with_non_integer_limit_values_are_disallowed(self):
         validation_result = validate_request_args({
@@ -115,20 +115,21 @@ class TestRequestValidation(TestCase):
             "period": "week",
             "group_by": "foo"
         })
-        assert_that( validation_result.is_valid, is_(True) )
+        assert_that( validation_result, is_valid() )
 
     def test_queries_with_unrecognized_parameters_are_disallowed(self):
         validation_result = validate_request_args({
             "unrecognised_parameter": "value"
         })
-        assert_that( validation_result.is_valid, is_(False) )
+        assert_that( validation_result, is_invalid_with_message(
+            "An unrecognised parameter was provided"))
 
     def test_queries_with_collect_and_group_by_are_allowed(self):
         validation_result_with_group_by = validate_request_args({
             "collect": 'foo',
             "group_by": 'bar'
         })
-        assert_that(validation_result_with_group_by.is_valid, is_(True))
+        assert_that(validation_result_with_group_by, is_valid())
 
     def test_queries_with_collect_and_no_group_by_are_disallowed(self):
         validation_result_without_group_by = validate_request_args({
@@ -143,7 +144,7 @@ class TestRequestValidation(TestCase):
             "group_by": 'bar',
             "collect": 'a_-aAbBzZ-_'
         })
-        assert_that(validation_result_without_group_by.is_valid, is_(True))
+        assert_that(validation_result_without_group_by, is_valid())
 
     def test_queries_with_code_injection_collect_values_are_disallowed(self):
         validation_result_without_group_by = validate_request_args({
