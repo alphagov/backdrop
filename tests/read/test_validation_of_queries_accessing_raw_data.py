@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hamcrest import assert_that, is_
+from hamcrest import assert_that
 from backdrop.read import api
 from backdrop.read.validation import validate_request_args
 from tests.support.validity_matcher import is_invalid_with_message, is_valid
@@ -19,11 +19,11 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
 
     def test_that_grouped_queries_are_allowed(self):
         validation_result = validate_request_args({'group_by': 'some_key'})
-        assert_that(validation_result.is_valid, is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_that_periodic_queries_are_allowed(self):
         validation_result = validate_request_args({'period': 'week'})
-        assert_that(validation_result.is_valid, is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_that_querying_for_less_than_7_days_of_data_is_disallowed(self):
         validation_result = validate_request_args({
@@ -41,8 +41,7 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
             'start_at': '2013-04-01T00:00:00Z',
             'end_at': '2013-04-15T00:00:00Z'
         })
-        assert_that(validation_result.is_valid,
-                    is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_that_query_starting_on_midnight_is_allowed(self):
         result = validate_request_args({
@@ -64,7 +63,7 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
             'start_at': '2013-04-01T00:00:00Z',
             'end_at': '2013-04-08T00:00:00Z'
         })
-        assert_that(validation_result.is_valid, is_(True))
+        assert_that(validation_result, is_valid())
 
     def test_that_period_queries_not_starting_on_monday_are_disallowed(self):
         validation_result_not_a_monday = validate_request_args({
