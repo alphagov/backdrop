@@ -38,7 +38,7 @@ class MultiValueValidator(Validator):
 
 class ParameterValidator(Validator):
     def __init__(self, request_args):
-        self.allowed_parameters = {
+        self.allowed_parameters = set([
             'start_at',
             'end_at',
             'filter_by',
@@ -47,7 +47,7 @@ class ParameterValidator(Validator):
             'sort_by',
             'limit',
             'collect'
-        }
+        ])
         super(ParameterValidator, self).__init__(request_args)
 
     def _unrecognised_parameters(self, request_args):
