@@ -32,17 +32,27 @@ class TestRequestValidation(TestCase):
 
     def test_queries_with_no_colon_in_filter_by_are_disallowed(self):
         assert_that(
-            validate_request_args({'filter_by': 'bar'}),
+            validate_request_args(MultiDict([('filter_by', 'bar')])),
             is_invalid_with_message("filter_by must be a field name and value "
                                     "separated by a colon (:) "
                                     "eg. authority:Westminster")
         )
 
     def test_queries_with_well_formatted_filter_by_are_allowed(self):
-        validation_result = validate_request_args({
-            'filter_by': 'foo:bar'
-        })
+        validation_result = validate_request_args(MultiDict([
+            ('filter_by', 'foo:bar')
+        ]))
         assert_that(validation_result, is_valid())
+
+    def test_subsequent_filter_by_parameters_are_validated(self):
+        validation_result = validate_request_args(MultiDict([
+            ('filter_by', 'foo:bar'),
+            ('filter_by', 'bar'),
+        ]))
+        assert_that(validation_result, is_invalid_with_message(
+            "filter_by must be a field name and value separated by a colon "
+            "(:) eg. authority:Westminster"
+        ))
 
     def test_queries_with_will_formatted_starts_and_ends_are_allowed(self):
         validation_result = validate_request_args({
@@ -125,32 +135,32 @@ class TestRequestValidation(TestCase):
             "An unrecognised parameter was provided"))
 
     def test_queries_with_collect_and_group_by_are_allowed(self):
-        validation_result_with_group_by = validate_request_args({
-            "collect": 'foo',
-            "group_by": 'bar'
-        })
+        validation_result_with_group_by = validate_request_args(MultiDict([
+            ("collect", 'foo'),
+            ("group_by", 'bar')
+        ]))
         assert_that(validation_result_with_group_by, is_valid())
 
     def test_queries_with_collect_and_no_group_by_are_disallowed(self):
-        validation_result_without_group_by = validate_request_args({
-            "collect": 'foo'
-        })
+        validation_result_without_group_by = validate_request_args(MultiDict([
+            ("collect", 'foo')
+        ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message(
-                        'collect is only allowed when grouping'))
+                        'collect can be use only with group_by'))
 
     def test_queries_without_code_injection_collect_values_are_allowed(self):
-        validation_result_without_group_by = validate_request_args({
-            "group_by": 'bar',
-            "collect": 'a_-aAbBzZ-_'
-        })
+        validation_result_without_group_by = validate_request_args(MultiDict([
+            ("group_by", 'bar'),
+            ("collect", 'a_-aAbBzZ-_')
+        ]))
         assert_that(validation_result_without_group_by, is_valid())
 
     def test_queries_with_code_injection_collect_values_are_disallowed(self):
-        validation_result_without_group_by = validate_request_args({
-            "group_by": 'bar',
-            "collect": 'something);while(1){myBadFunction()}'
-        })
+        validation_result_without_group_by = validate_request_args(MultiDict([
+            ("group_by", 'bar'),
+            ("collect", 'something);while(1){myBadFunction()}')
+        ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message(
                         'collect must be a valid field name'))
@@ -159,27 +169,37 @@ class TestRequestValidation(TestCase):
         validation_result_without_group_by = validate_request_args(MultiDict([
             ("group_by", 'bar'),
             ("collect", '$foo'),
-            ("collect", 'foo')
+            ("collect", 'foo'),
         ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message("collect must be a valid field "
                                             "name"))
 
+    def test_subsequent_collect_values_are_validated(self):
+        validation_result = validate_request_args(MultiDict([
+            ("group_by", "foo"),
+            ("collect", "bar"),
+            ("collect", "{}"),
+        ]))
+        assert_that(validation_result,
+                    is_invalid_with_message("collect must be a valid field "
+                                            "name"))
+
     def test_queries_with_internal_collect_values_are_disallowed(self):
-        validation_result_without_group_by = validate_request_args({
-            "group_by": 'bar',
-            "collect": '_internal_field'
-        })
+        validation_result_without_group_by = validate_request_args(MultiDict([
+            ("group_by", 'bar'),
+            ("collect", '_internal_field')
+        ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message("Cannot collect internal fields, "
                                             "internal fields start "
                                             "with an underscore"))
 
     def test_queries_grouping_and_collecting_equal_fields_are_disallowed(self):
-        validation_result_without_group_by = validate_request_args({
-            "group_by": 'a_field',
-            "collect": 'a_field'
-        })
+        validation_result_without_group_by = validate_request_args(MultiDict([
+            ("group_by", 'a_field'),
+            ("collect", 'a_field')
+        ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message(
                         "Cannot collect by a field that is used for group_by"))
@@ -213,10 +233,10 @@ class TestRequestValidation(TestCase):
             'by a colon (:) eg. authority:ascending'))
 
     def test_queries_collecting_internal_fields_are_disallowed(self):
-        validation_result = validate_request_args({
-            'group_by': 'not walruses',
-            'collect': '_walrus'
-        })
+        validation_result = validate_request_args(MultiDict([
+            ('group_by', 'not walruses'),
+            ('collect', '_walrus')
+        ]))
 
         assert_that(validation_result, is_invalid_with_message(
             'Cannot collect internal fields, internal fields start '
