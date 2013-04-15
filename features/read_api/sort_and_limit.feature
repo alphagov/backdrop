@@ -47,4 +47,4 @@ Feature: sorting and limiting
          when I go to "/foo?period=week&limit=1"
          then I should get back a status of "200"
           and the JSON should have "1" result
-          and the "1st" result should have "_start_at" equaling "2012-12-10T00:00:00+00:00"
+          and the "1st" result should have "_start_at" equaling "2012-12-03T00:00:00+00:00"
