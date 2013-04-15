@@ -26,18 +26,19 @@ class MultiValueValidator(Validator):
     def param_name(self, context):
         return context.get('param_name')
 
+    def validate_field_value(self, context):
+        return context.get('validate_field_value')
+
     def validate(self, request_args, context):
         if self.param_name(context) in request_args:
+            validate_field_value = self.validate_field_value(context)
             for value in request_args.getlist(self.param_name(context)):
-                self.validate_field_value(value, request_args, context)
-
-    def validate_field_value(self, value, request_args, context):
-        raise NotImplementedError
+                validate_field_value(value, request_args, context)
 
 
 class ParameterValidator(Validator):
     def __init__(self, request_args):
-        self.allowed_parameters = set([
+        self.allowed_parameters = {
             'start_at',
             'end_at',
             'filter_by',
@@ -46,7 +47,7 @@ class ParameterValidator(Validator):
             'sort_by',
             'limit',
             'collect'
-        ])
+        }
         super(ParameterValidator, self).__init__(request_args)
 
     def _unrecognised_parameters(self, request_args):
@@ -77,9 +78,12 @@ class PositiveIntegerValidator(Validator):
                                % context['param_name'])
 
 
-class FilterByValidator(MultiValueValidator):
-    def param_name(self, context):
-        return 'filter_by'
+class FilterByValidator(Validator):
+    def validate(self, request_args, context):
+        MultiValueValidator(
+            request_args,
+            param_name='filter_by',
+            validate_field_value=self.validate_field_value)
 
     def validate_field_value(self, value, request_args, context):
             if value.find(':') < 0:
@@ -135,9 +139,13 @@ class ParamDependencyValidator(Validator):
                     % (context['param_name'], context['depends_on']))
 
 
-class CollectValidator(MultiValueValidator):
-    def param_name(self, context):
-        return 'collect'
+class CollectValidator(Validator):
+
+    def validate(self, request_args, context):
+        MultiValueValidator(
+            request_args,
+            param_name='collect',
+            validate_field_value=self.validate_field_value)
 
     def validate_field_value(self, value, request_args, _):
         if not MONGO_FIELD_REGEX.match(value):
