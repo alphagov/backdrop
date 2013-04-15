@@ -193,13 +193,14 @@ def validate_request_args(request_args):
     ]
 
     if api.app.config['PREVENT_RAW_QUERIES']:
-        validators.append(RawQueryValidator(request_args))
-        validators.append(TimeSpanValidator(request_args, length=7))
-        validators.append(
-            MidnightValidator(request_args, param_name='start_at'))
-        validators.append(MidnightValidator(request_args, param_name='end_at'))
-        validators.append(MondayValidator(request_args, param_name='start_at'))
-        validators.append(MondayValidator(request_args, param_name='end_at'))
+        validators += [
+            RawQueryValidator(request_args),
+            TimeSpanValidator(request_args, length=7),
+            MidnightValidator(request_args, param_name='start_at'),
+            MidnightValidator(request_args, param_name='end_at'),
+            MondayValidator(request_args, param_name="start_at"),
+            MondayValidator(request_args, param_name="end_at")
+        ]
 
     for validator in validators:
         if validator.invalid():
