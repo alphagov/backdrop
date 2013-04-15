@@ -5,7 +5,8 @@ from os import getenv
 from dateutil import parser
 from flask import Flask, jsonify, request
 import pytz
-from backdrop.core.log_handler import create_request_logger, create_response_logger
+from backdrop.core.log_handler \
+    import create_request_logger, create_response_logger
 
 from .validation import validate_request_args
 from ..core import database, log_handler
@@ -29,9 +30,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-
 setup_logging()
-
 
 app.before_request(create_request_logger(app))
 app.after_request(create_response_logger(app))
