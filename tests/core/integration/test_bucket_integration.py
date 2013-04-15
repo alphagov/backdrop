@@ -7,6 +7,7 @@ from hamcrest import *
 
 from backdrop.core import database, bucket
 from backdrop.core.records import Record
+from tests.support.test_helpers import d_tz
 
 HOST = 'localhost'
 PORT = 27017
@@ -19,6 +20,23 @@ class TestBucketIntegration(unittest.TestCase):
         self.db = database.Database(HOST, PORT, DB_NAME)
         self.bucket = bucket.Bucket(self.db, BUCKET)
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+
+    def setup__timestamp_data(self):
+        self.mongo_collection.save({
+            "_id": 'last',
+            "_timestamp": d_tz(2013, 3, 1),
+            "_week_start_at": d_tz(2013, 2, 25)
+        })
+        self.mongo_collection.save({
+            "_id": 'first',
+            "_timestamp": d_tz(2013, 1, 1),
+            "_week_start_at": d_tz(2012, 12, 31)
+        })
+        self.mongo_collection.save({
+            "_id": 'second',
+            "_timestamp": d_tz(2013, 2, 1),
+            "_week_start_at": d_tz(2013, 1, 28)
+        })
 
     def tearDown(self):
         self.mongo_collection.drop()
@@ -46,4 +64,14 @@ class TestBucketIntegration(unittest.TestCase):
             has_entries({'name': 'Groucho'}),
             has_entries({'name': 'Harpo'}),
             has_entries({'name': 'Chico'})
+        ))
+
+    def test_period_queries_get_sorted_by__week_start_at(self):
+        self.setup__timestamp_data()
+        query = {}
+        result = self.bucket.execute_period_query(query)
+        assert_that(result, contains(
+            has_entry('_start_at', d_tz(2012, 12, 31)),
+            has_entry('_start_at', d_tz(2013, 1, 28)),
+            has_entry('_start_at', d_tz(2013, 2, 25))
         ))
