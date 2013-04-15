@@ -28,7 +28,7 @@ pip install -r requirements_for_tests.txt
 nosetests -v
 display_result $? 1 "Unit tests"
 
-behave
+behave --stop
 display_result $? 2 "Feature tests"
 
 "$basedir/pep-it.sh"
