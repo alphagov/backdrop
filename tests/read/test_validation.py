@@ -1,8 +1,14 @@
 from unittest import TestCase
 from hamcrest import assert_that
-from backdrop.read.api import validate_request_args
+from backdrop.read.api import validate_request_args as _validate_request_args
 from werkzeug.datastructures import MultiDict
 from tests.support.validity_matcher import is_invalid_with_message, is_valid
+
+
+def validate_request_args(request_args):
+    if not isinstance(request_args, MultiDict):
+        request_args = MultiDict(request_args)
+    return _validate_request_args(request_args)
 
 
 class TestRequestValidation(TestCase):
