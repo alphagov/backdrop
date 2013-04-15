@@ -7,6 +7,7 @@ ValidationResult object.
 from collections import namedtuple
 import re
 from dateutil import parser
+import pytz
 
 RESERVED_KEYWORDS = (
     '_timestamp',
@@ -20,7 +21,7 @@ VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
 
 def _is_real_date(value):
     try:
-        parser.parse(value)
+        parser.parse(value).astimezone(pytz.UTC)
         return True
     except ValueError:
         return False

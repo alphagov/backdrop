@@ -1,5 +1,6 @@
 from unittest import TestCase
-from hamcrest import assert_that
+from hamcrest import assert_that, is_
+from backdrop.read import validation
 from backdrop.read.api import validate_request_args
 from werkzeug.datastructures import MultiDict
 from tests.support.validity_matcher import is_invalid_with_message, is_valid
@@ -229,3 +230,19 @@ class TestRequestValidation(TestCase):
 
         assert_that(validation_result, is_invalid_with_message(
             "start_at is not a valid datetime"))
+
+    def test_that_queries_with_invalid_timezone_are_disallowed(self):
+        validation_result = validate_request_args({
+            'start_at': '2013-01-01T00:00:00+24:00'
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "start_at is not a valid datetime"))
+
+
+class TestValidationHelpers(TestCase):
+    def test_timestamp_is_valid_method(self):
+        result = validation.value_is_valid_datetime_string(
+            "2013-01-01T00:00:00+99:99")
+
+        assert_that(result, is_(False))
