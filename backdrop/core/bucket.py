@@ -69,8 +69,9 @@ class Bucket(object):
                                      collect or [])
 
     def execute_period_query(self, params, limit=None):
-        cursor = self.repository.group('_week_start_at', build_query(**params),
-                                       limit=limit)
+        cursor = self.repository.group(
+            '_week_start_at', build_query(**params),
+            sort=["_week_start_at", "ascending"], limit=limit)
         [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
         result = [self._period_group(doc) for doc in cursor]
         if params.get("start_at") and params.get("end_at"):
