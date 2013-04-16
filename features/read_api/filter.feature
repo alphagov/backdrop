@@ -42,4 +42,14 @@ Feature: filtering queries for read api
           and the JSON should have "1" results
           and the "1st" result should be "{"_timestamp": "2012-12-13T01:01:01+00:00", "licence_name": "Temporary events notice", "interaction": "success", "authority": "Westminster", "type": "success", "_id": "1236"}"
 
+    Scenario: querying for boolean kind of data
+        Given "dinosaurs.json" is in "lizards" bucket
+         when I go to "/lizards?filter_by=eats_people:true"
+         then I should get back a status of "200"
+          and the JSON should have "3" results
 
+    Scenario: querying for more boolean data
+        Given "dinosaurs.json" is in "lizards" bucket
+         when I go to "/lizards?group_by=eats_people"
+         then I should get back a status of "200"
+         and the JSON should have "2" results

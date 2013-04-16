@@ -2,21 +2,25 @@
     {
         "type": "dinosaur",
         "size": "big",
-        "name": "t-rex"
+        "name": "t-rex",
+        "eats_people": true
     },
     {
         "type": "dinosaur",
         "size": "big",
-        "name": "sarcosuchus"
+        "name": "sarcosuchus",
+        "eats_people": true
     },
     {
         "type": "dinosaur",
         "size": "medium",
-        "name": "pterodactyl"
+        "name": "pterodactyl",
+        "eats_people": true
     },
     {
         "type": "dinosaur",
         "size": "small",
-        "name": "microraptor"
+        "name": "microraptor",
+        "eats_people": false
     }
 ]
