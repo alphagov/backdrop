@@ -1,5 +1,6 @@
 from bson import Code
 import pymongo
+from backdrop.core import time as backdrop_time
 
 
 def build_query(**params):
@@ -122,6 +123,7 @@ class Repository(object):
         return self._group([group_by], query, sort, limit, collect or [])
 
     def save(self, obj):
+        obj['_updated_at'] = backdrop_time.now()
         self._mongo.save(obj)
 
     def multi_group(self, key1, key2, query,

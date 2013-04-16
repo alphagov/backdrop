@@ -1,8 +1,9 @@
 import unittest
 from hamcrest import assert_that, is_
-from mock import Mock
+from mock import Mock, patch
 from backdrop.core import database
 from backdrop.core.database import Repository, InvalidSortError
+from tests.support.test_helpers import d_tz
 
 
 class NestedMergeTestCase(unittest.TestCase):
@@ -47,10 +48,16 @@ class TestRepository(unittest.TestCase):
         self.mongo = Mock()
         self.repo = Repository(self.mongo)
 
-    def test_save(self):
+    @patch('backdrop.core.time.now')
+    def test_save_document_adding_timestamps(self, now):
+        now.return_value = d_tz(2013, 4, 9, 13, 32, 5)
+
         self.repo.save({"name": "Gummo"})
 
-        self.mongo.save.assert_called_once_with({"name": "Gummo"})
+        self.mongo.save.assert_called_once_with({
+            "name": "Gummo",
+            "_updated_at": d_tz(2013, 4, 9, 13, 32, 5)
+        })
 
     # =========================
     # Tests for repository.find
