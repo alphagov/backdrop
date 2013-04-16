@@ -7,6 +7,7 @@ from flask import Flask, jsonify, request
 import pytz
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
+from werkzeug.exceptions import HTTPException
 
 from .validation import validate_request_args
 from ..core import database, log_handler
@@ -79,7 +80,7 @@ class JsonEncoder(json.JSONEncoder):
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
-    return jsonify(status='error', message=''), e.code
+    return jsonify(status='error', message=e.name), e.code
 
 
 @app.route('/_status')
