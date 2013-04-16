@@ -51,3 +51,9 @@ Feature: filtering queries for read api
          when I go to "/lizards?filter_by=eats_people:true"
          then I should get back a status of "200"
           and the JSON should have "3" results
+
+    Scenario: querying for more boolean data
+        Given "dinosaurs.json" is in "lizards" bucket
+         when I go to "/lizards?group_by=eats_people"
+         then I should get back a status of "200"
+         and the JSON should have "2" results
