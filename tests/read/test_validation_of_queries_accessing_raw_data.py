@@ -46,13 +46,15 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
     def test_that_query_starting_on_midnight_is_allowed(self):
         result = validate_request_args({
             'group_by': 'some_key',
-            'start_at': '2013-01-01T00:00:00+00:00'
+            'start_at': '2013-01-01T00:00:00+00:00',
+            'end_at': '2013-01-08T00:00:00+00:00'
         })
         assert_that(result, is_valid())
 
     def test_that_query_ending_on_midnight_is_allowed(self):
         result = validate_request_args({
             'group_by': 'some_key',
+            'start_at': '2013-01-24T00:00:00+00:00',
             'end_at': '2013-01-31T00:00:00+00:00'
         })
         assert_that(result, is_valid())
@@ -86,7 +88,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
     def test_that_start_at_with_time_other_than_midnight_is_disallowed(self):
         validation_result = validate_request_args({
             'group_by': 'some_key',
-            'start_at': '2013-04-01T00:00:01Z'
+            'start_at': '2013-04-01T00:00:01Z',
+            'end_at': '2013-04-08T00:00:01Z'
         })
         assert_that(validation_result, is_invalid_with_message(
             'start_at must be midnight'))
@@ -94,7 +97,28 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
     def test_that_end_at_with_time_other_than_midnight_is_disallowed(self):
         validation_result = validate_request_args({
             'group_by': 'some_key',
-            'end_at': '2013-04-01T00:00:01Z'
+            'start_at': '2013-04-01T00:00:00Z',
+            'end_at': '2013-04-08T00:00:01Z'
         })
         assert_that(validation_result, is_invalid_with_message(
             'end_at must be midnight'))
+
+    def test_that_start_at_alone_is_disallowed(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'start_at': '2013-04-01T00:00:00Z'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "both 'start_at' and 'end_at' are required for "
+                        "a period query"))
+
+    def test_that_end_at_alone_is_disallowed(self):
+        validation_result = validate_request_args({
+            'period': 'week',
+            'end_at': '2013-04-01T00:00:00Z'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "both 'start_at' and 'end_at' are required for "
+                        "a period query"))
