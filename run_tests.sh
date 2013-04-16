@@ -22,7 +22,6 @@ venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 
 source "$venvdir/bin/activate"
 
-pip install -r requirements.txt
 pip install -r requirements_for_tests.txt
 
 nosetests -v
