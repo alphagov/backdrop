@@ -9,3 +9,5 @@ assets/*
 build
 coverage.xml
 *.log
+nosetests.xml
+pep8.out
