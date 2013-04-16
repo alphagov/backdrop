@@ -14,25 +14,33 @@ def validate_request_args(request_args):
 class TestRequestValidation(TestCase):
     def test_queries_with_badly_formatted_start_at_are_disallowed(self):
         assert_that(
-            validate_request_args({'start_at': 'i am not a time'}),
+            validate_request_args({
+                'start_at': 'i am not a time',
+                'end_at': 'i am not a time'
+            }),
             is_invalid_with_message("start_at is not a valid datetime")
         )
 
     def test_queries_with_well_formatted_start_at_are_allowed(self):
         validation_result = validate_request_args({
-            'start_at': '2000-02-02T00:02:02+00:00'
+            'start_at': '2000-02-02T00:02:02+00:00',
+            'end_at': '2000-02-09T00:02:02+00:00'
         })
         assert_that(validation_result, is_valid())
 
     def test_queries_with_badly_formatted_end_at_are_disallowed(self):
         assert_that(
-            validate_request_args({'end_at': 'foo'}),
+            validate_request_args({
+                'start_at': '2000-02-02T00:02:02+00:00',
+                'end_at': 'foo'
+            }),
             is_invalid_with_message("end_at is not a valid datetime")
         )
 
     def test_queries_with_well_formatted_end_at_are_allowed(self):
         validation_result = validate_request_args({
-            'end_at': '2000-02-02T00:02:02+00:00'
+            'start_at': '2000-02-02T00:02:02+00:00',
+            'end_at': '2000-02-09T00:02:02+00:00'
         })
         assert_that(validation_result, is_valid())
 
@@ -250,7 +258,8 @@ class TestRequestValidation(TestCase):
 
     def test_queries_with_non_existent_dates_are_disallowed(self):
         validation_result = validate_request_args({
-            'start_at': '2013-13-70T00:00:00Z'
+            'start_at': '2013-13-70T00:00:00Z',
+            'end_at': '2013-12-70T00:00:00Z'
         })
 
         assert_that(validation_result, is_invalid_with_message(

@@ -67,6 +67,14 @@ class DatetimeValidator(Validator):
                                % context['param_name'])
 
 
+class PeriodQueryValidator(Validator):
+    def validate(self, request_args, context):
+        if 'start_at' in request_args or 'end_at' in request_args:
+            if not ('start_at' in request_args and 'end_at' in request_args):
+                self.add_error("both 'start_at' and 'end_at' are required "
+                               "for a period query")
+
+
 class PositiveIntegerValidator(Validator):
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
@@ -211,6 +219,7 @@ class MondayValidator(Validator):
 def validate_request_args(request_args):
     validators = [
         ParameterValidator(request_args),
+        PeriodQueryValidator(request_args),
         DatetimeValidator(request_args, param_name='start_at'),
         DatetimeValidator(request_args, param_name='end_at'),
         FilterByValidator(request_args),
