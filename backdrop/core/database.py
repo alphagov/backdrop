@@ -18,6 +18,10 @@ def build_query(**params):
 
     if 'filter_by' in params:
         for key, value in params['filter_by']:
+            if value == "false":
+                value = False
+            if value == "true":
+                value = True
             query[key] = value
     return query
 

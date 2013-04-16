@@ -34,3 +34,11 @@ class TestBuild_query(TestCase):
     def test_build_query_with_multiple_filters(self):
         query = build_query(filter_by= [[ "foo", "bar" ], ["foobar", "yes"]])
         assert_that(query, is_({ "foo": "bar", "foobar": "yes" }))
+
+    def test_build_query_with_false_value(self):
+        query = build_query(filter_by=[["planet", "false"]])
+        assert_that(query, is_({ "planet": False }))
+
+    def test_build_query_with_true_value(self):
+        query = build_query(filter_by=[["planet", "true"]])
+        assert_that(query, is_({ "planet": True }))
