@@ -5,7 +5,9 @@ from os import getenv
 from dateutil import parser
 from flask import Flask, jsonify, request
 import pytz
-
+from backdrop.core.log_handler \
+    import create_request_logger, create_response_logger
+from werkzeug.exceptions import HTTPException
 
 from .validation import validate_request_args
 from ..core import database, log_handler
@@ -29,8 +31,10 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-
 setup_logging()
+
+app.before_request(create_request_logger(app))
+app.after_request(create_response_logger(app))
 
 
 def parse_request_args(request_args):
@@ -76,7 +80,7 @@ class JsonEncoder(json.JSONEncoder):
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
-    return jsonify(status='error', message=''), e.code
+    return jsonify(status='error', message=e.name), e.code
 
 
 @app.route('/_status')

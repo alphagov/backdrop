@@ -23,6 +23,20 @@ class Validator(object):
         raise NotImplementedError
 
 
+class MultiValueValidator(Validator):
+    def param_name(self, context):
+        return context.get('param_name')
+
+    def validate_field_value(self, context):
+        return context.get('validate_field_value')
+
+    def validate(self, request_args, context):
+        if self.param_name(context) in request_args:
+            validate_field_value = self.validate_field_value(context)
+            for value in request_args.getlist(self.param_name(context)):
+                validate_field_value(value, request_args, context)
+
+
 class ParameterValidator(Validator):
     def __init__(self, request_args):
         self.allowed_parameters = set([
@@ -54,6 +68,14 @@ class DatetimeValidator(Validator):
                                % context['param_name'])
 
 
+class PeriodQueryValidator(Validator):
+    def validate(self, request_args, context):
+        if 'start_at' in request_args or 'end_at' in request_args:
+            if not ('start_at' in request_args and 'end_at' in request_args):
+                self.add_error("both 'start_at' and 'end_at' are required "
+                               "for a period query")
+
+
 class PositiveIntegerValidator(Validator):
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
@@ -67,13 +89,17 @@ class PositiveIntegerValidator(Validator):
 
 class FilterByValidator(Validator):
     def validate(self, request_args, context):
-        filter_by = request_args.get('filter_by', None)
-        if filter_by:
-            if filter_by.find(':') < 0:
+        MultiValueValidator(
+            request_args,
+            param_name='filter_by',
+            validate_field_value=self.validate_field_value)
+
+    def validate_field_value(self, value, request_args, context):
+            if value.find(':') < 0:
                 self.add_error(
                     'filter_by must be a field name and value separated by '
                     'a colon (:) eg. authority:Westminster')
-            if filter_by.startswith('$'):
+            if value.startswith('$'):
                 self.add_error(
                     'filter_by must not start with a $')
 
@@ -113,21 +139,33 @@ class GroupByValidator(Validator):
                                'internal fields start with an underscore')
 
 
-class CollectValidator(Validator):
+class ParamDependencyValidator(Validator):
     def validate(self, request_args, context):
-        if 'collect' in request_args:
-            if 'group_by' not in request_args:
-                self.add_error('collect is only allowed when grouping')
-            if not MONGO_FIELD_REGEX.match(request_args['collect']):
-                self.add_error('collect must be a valid field name')
-            if request_args['collect'].startswith('_'):
-                self.add_error('Cannot collect internal fields, '
-                               'internal fields start '
-                               'with an underscore')
-            if 'group_by' in request_args:
-                if request_args['collect'] == request_args['group_by']:
-                    self.add_error("Cannot collect by a field that is "
-                                   "used for group_by")
+        if context['param_name'] in request_args:
+            if context['depends_on'] not in request_args:
+                self.add_error(
+                    '%s can be use only with %s'
+                    % (context['param_name'], context['depends_on']))
+
+
+class CollectValidator(Validator):
+
+    def validate(self, request_args, context):
+        MultiValueValidator(
+            request_args,
+            param_name='collect',
+            validate_field_value=self.validate_field_value)
+
+    def validate_field_value(self, value, request_args, _):
+        if not MONGO_FIELD_REGEX.match(value):
+            self.add_error('collect must be a valid field name')
+        if value.startswith('_'):
+            self.add_error('Cannot collect internal fields, '
+                           'internal fields start '
+                           'with an underscore')
+        if value == request_args.get('group_by'):
+            self.add_error("Cannot collect by a field that is "
+                           "used for group_by")
 
 
 class RawQueryValidator(Validator):
@@ -183,6 +221,7 @@ class MondayValidator(Validator):
 def validate_request_args(request_args):
     validators = [
         ParameterValidator(request_args),
+        PeriodQueryValidator(request_args),
         DatetimeValidator(request_args, param_name='start_at'),
         DatetimeValidator(request_args, param_name='end_at'),
         FilterByValidator(request_args),
@@ -191,6 +230,8 @@ def validate_request_args(request_args):
         SortByValidator(request_args),
         GroupByValidator(request_args),
         PositiveIntegerValidator(request_args, param_name='limit'),
+        ParamDependencyValidator(request_args, param_name='collect',
+                                 depends_on='group_by'),
         CollectValidator(request_args),
     ]
 

@@ -1,6 +1,8 @@
 from os import getenv
 
 from flask import Flask, request, jsonify
+from backdrop.core.log_handler \
+    import create_request_logger, create_response_logger
 
 from .validation import validate_post_to_bucket
 from ..core import database, log_handler, records
@@ -29,16 +31,10 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-
 setup_logging()
 
-
-@app.before_request
-def request_prehandler():
-    log_this = "%s %s" % (request.method, request.url)
-    if request.json:
-        log_this += " JSON length: %i" % (len(request.json))
-    app.logger.info(log_this)
+app.before_request(create_request_logger(app))
+app.after_request(create_response_logger(app))
 
 
 @app.errorhandler(500)
@@ -72,7 +68,7 @@ def post_to_bucket(bucket_name):
 
     if request_token != expected_token:
         app.logger.error("expected <%s> but was <%s>" %
-                        (expected_token, request_token))
+                         (expected_token, request_token))
         return jsonify(status='error', message='Forbidden'), 403
 
     if request.json is None:
@@ -80,6 +76,8 @@ def post_to_bucket(bucket_name):
         return jsonify(status='error', message='Request must be JSON'), 400
 
     incoming_data = prep_data(request.json)
+
+    app.logger.info("request contains %d documents" % len(incoming_data))
 
     result = validate_post_to_bucket(incoming_data, bucket_name)
 
