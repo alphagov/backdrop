@@ -103,6 +103,26 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         assert_that(validation_result, is_invalid_with_message(
             'end_at must be midnight'))
 
+    def test_that_queries_which_are_not_midnight_utc_are_disallowed(self):
+        validation_result = validate_request_args({
+            'group_by': 'some_key',
+            'start_at': '2013-04-01T00:00:00+04:30',
+            'end_at': '2013-04-08T00:00:00+00:00'
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "start_at must be midnight"
+        ))
+
+    def test_that_queries_which_are_midnight_and_not_utc_are_allowed(self):
+        validation_result = validate_request_args({
+            'group_by': 'some_key',
+            'start_at': '2013-04-01T04:30:00+04:30',
+            'end_at': '2013-04-08T00:00:00+00:00'
+        })
+
+        assert_that(validation_result, is_valid())
+
     def test_that_start_at_alone_is_disallowed(self):
         validation_result = validate_request_args({
             'period': 'week',

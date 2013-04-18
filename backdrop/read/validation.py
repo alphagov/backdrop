@@ -1,5 +1,6 @@
-from datetime import time
+from datetime import time, timedelta
 from dateutil import parser
+import pytz
 import api
 from ..core.validation import value_is_valid_datetime_string, valid, invalid
 import re
@@ -202,7 +203,8 @@ class MidnightValidator(Validator):
     def validate(self, request_args, context):
         timestamp = request_args.get(context['param_name'])
         if _is_valid_date(timestamp):
-            if parser.parse(timestamp).time() != time(0):
+            dt = parser.parse(timestamp).astimezone(pytz.UTC)
+            if dt.time() != time(0):
                 self.add_error('%s must be midnight' % context['param_name'])
 
 
@@ -234,13 +236,14 @@ def validate_request_args(request_args):
     ]
 
     if api.app.config['PREVENT_RAW_QUERIES']:
-        validators.append(RawQueryValidator(request_args))
-        validators.append(TimeSpanValidator(request_args, length=7))
-        validators.append(
-            MidnightValidator(request_args, param_name='start_at'))
-        validators.append(MidnightValidator(request_args, param_name='end_at'))
-        validators.append(MondayValidator(request_args, param_name='start_at'))
-        validators.append(MondayValidator(request_args, param_name='end_at'))
+        validators += [
+            RawQueryValidator(request_args),
+            TimeSpanValidator(request_args, length=7),
+            MidnightValidator(request_args, param_name='start_at'),
+            MidnightValidator(request_args, param_name='end_at'),
+            MondayValidator(request_args, param_name="start_at"),
+            MondayValidator(request_args, param_name="end_at")
+        ]
 
     for validator in validators:
         if validator.invalid():
