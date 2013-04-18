@@ -3,6 +3,47 @@ import unittest
 from hamcrest import *
 
 from backdrop.write.validation import validate_data_object
+from tests.support.validity_matcher import is_invalid_with_message
+
+
+class TestValidateDataObject(unittest.TestCase):
+    def test_objects_with_invalid_keys_are_disallowed(self):
+        validation_result = validate_data_object({
+            'foo-bar': 'bar'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message("foo-bar is not a valid key"))
+
+    def test_objects_with_invalid_values_are_disallowed(self):
+        validation_result = validate_data_object({
+            'foo': tuple()
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message("() is not a valid value"))
+
+    def test_objects_with_invalid_timestamps_are_disallowed(self):
+        validation_result = validate_data_object({
+            '_timestamp': 'this is not a timestamp'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "this is not a timestamp is not a valid timestamp"))
+
+    def test_objects_with_invalid_ids_are_disallowed(self):
+        validation_result = validate_data_object({
+            '_id': 'invalid id'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "invalid id is not a valid _id"))
+
+    def test_objects_with_unrecognised_internal_keys_are_disallowed(self):
+        validation_result = validate_data_object({
+            '_unknown': 'whatever'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "Unrecognised internal key provided"))
 
 
 class ValidDateObjectTestCase(unittest.TestCase):

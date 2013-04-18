@@ -1,8 +1,9 @@
-from datetime import time, timedelta
+from datetime import time
 from dateutil import parser
 import pytz
 import api
-from ..core.validation import value_is_valid_datetime_string, valid, invalid
+from ..core.validation import value_is_valid_datetime_string, valid,\
+    invalid, key_is_valid
 import re
 
 MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
@@ -99,6 +100,10 @@ class FilterByValidator(Validator):
                 self.add_error(
                     'filter_by must be a field name and value separated by '
                     'a colon (:) eg. authority:Westminster')
+            if not key_is_valid(value.split(':', 1)[0]):
+                self.add_error(
+                    'Cannot filter by an invalid field name'
+                )
             if value.startswith('$'):
                 self.add_error(
                     'filter_by must not start with a $')
@@ -129,11 +134,15 @@ class SortByValidator(Validator):
             if self._unrecognised_direction(request_args['sort_by']):
                 self.add_error('Unrecognised sort direction. Supported '
                                'directions include: ascending, descending')
+            if not key_is_valid(request_args['sort_by'].split(':', 1)[0]):
+                self.add_error('Cannot sort by an invalid field name')
 
 
 class GroupByValidator(Validator):
     def validate(self, request_args, context):
         if 'group_by' in request_args:
+            if not key_is_valid(request_args['group_by']):
+                self.add_error('Cannot group by an invalid field name')
             if request_args['group_by'].startswith('_'):
                 self.add_error('Cannot group by internal fields, '
                                'internal fields start with an underscore')

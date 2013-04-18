@@ -15,7 +15,7 @@ RESERVED_KEYWORDS = (
     '_end_at',
     '_id'
 )
-VALID_KEYWORD = re.compile('^[a-z0-9_\.-]+$')
+VALID_KEYWORD = re.compile('^[a-z0-9_\.]+$')
 VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
 
 
@@ -48,13 +48,17 @@ def key_is_valid(key):
     key = key.lower()
     if not key:
         return False
-    if key[0] == '_':
-        if key in RESERVED_KEYWORDS:
-            return True
-    else:
-        if VALID_KEYWORD.match(key):
-            return True
+    if VALID_KEYWORD.match(key):
+        return True
     return False
+
+
+def key_is_reserved(key):
+    return key in RESERVED_KEYWORDS
+
+
+def key_is_internal(key):
+    return key.startswith('_')
 
 
 def bucket_is_valid(bucket_name):

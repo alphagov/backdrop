@@ -1,5 +1,6 @@
 from ..core.validation import valid, invalid, bucket_is_valid, key_is_valid,\
-    value_is_valid, value_is_valid_datetime_string, value_is_valid_id
+    value_is_valid, value_is_valid_datetime_string, value_is_valid_id,\
+    key_is_reserved, key_is_internal
 
 
 def validate_post_to_bucket(incoming_data, bucket_name):
@@ -18,6 +19,9 @@ def validate_data_object(obj):
     for key, value in obj.items():
         if not key_is_valid(key):
             return invalid('{0} is not a valid key'.format(key))
+
+        if key_is_internal(key) and not key_is_reserved(key):
+            return invalid('Unrecognised internal key provided')
 
         if not value_is_valid(value):
             return invalid('{0} is not a valid value'.format(value))
