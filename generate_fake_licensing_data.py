@@ -28,6 +28,9 @@ BUCKET = 'licensify'
 #       db.your_collection.save(doc)
 #     });"
 
+USAGE="""
+./generate_fake_licensing_data.py (save_to_db|print_json)
+"""
 
 def find_last_monday():
     now = datetime.datetime.now().replace(hour=0, minute=0, second=0,
@@ -132,6 +135,10 @@ def time_to_str(time):
     return time.strftime('%Y-%m-%dT%H:%M:%S')
 
 
+if len(sys.argv) < 2:
+    print USAGE
+    sys.exit(1)
+
 argument = sys.argv[1]
 
 licence_apps = []
@@ -159,4 +166,5 @@ elif argument == "print_json":
     sys.exit(0)
 
 else:
-    print "missing argument save_to_db | print_json"
+    print USAGE
+    sys.exit(1)
