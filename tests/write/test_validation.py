@@ -19,7 +19,7 @@ class TestValidateDataObject(unittest.TestCase):
             'foo': tuple()
         })
         assert_that(validation_result,
-                    is_invalid_with_message("() is not a valid value"))
+                    is_invalid_with_message("foo has an invalid value"))
 
     def test_objects_with_invalid_timestamps_are_disallowed(self):
         validation_result = validate_data_object({
@@ -27,15 +27,15 @@ class TestValidateDataObject(unittest.TestCase):
         })
         assert_that(validation_result,
                     is_invalid_with_message(
-                        "this is not a timestamp is not a valid timestamp"))
+                        "_timestamp is not a valid timestamp, "
+                        "it must be ISO8601"))
 
     def test_objects_with_invalid_ids_are_disallowed(self):
         validation_result = validate_data_object({
             '_id': 'invalid id'
         })
         assert_that(validation_result,
-                    is_invalid_with_message(
-                        "invalid id is not a valid _id"))
+                    is_invalid_with_message("_id is not a valid id"))
 
     def test_objects_with_unrecognised_internal_keys_are_disallowed(self):
         validation_result = validate_data_object({
@@ -43,7 +43,7 @@ class TestValidateDataObject(unittest.TestCase):
         })
         assert_that(validation_result,
                     is_invalid_with_message(
-                        "Unrecognised internal key provided"))
+                        "_unknown is not a recognised internal field"))
 
 
 class ValidDateObjectTestCase(unittest.TestCase):

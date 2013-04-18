@@ -21,15 +21,16 @@ def validate_data_object(obj):
             return invalid('{0} is not a valid key'.format(key))
 
         if key_is_internal(key) and not key_is_reserved(key):
-            return invalid('Unrecognised internal key provided')
+            return invalid('{0} is not a recognised internal field'.format(key))
 
         if not value_is_valid(value):
-            return invalid('{0} is not a valid value'.format(value))
+            return invalid('{0} has an invalid value'.format(key))
 
         if key == '_timestamp' and not value_is_valid_datetime_string(value):
-            return invalid('{0} is not a valid timestamp'.format(value))
+            return invalid(
+                '_timestamp is not a valid timestamp, it must be ISO8601')
 
         if key == '_id' and not value_is_valid_id(value):
-            return invalid('{0} is not a valid _id'.format(value))
+            return invalid('_id is not a valid id')
 
     return valid()
