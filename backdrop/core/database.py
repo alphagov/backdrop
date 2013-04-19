@@ -79,9 +79,10 @@ class MongoDriver(object):
         )
 
     def _build_collector_code(self, collect):
-        return "\n".join([
-            "if (current.{c} !== undefined) {{ previous.{c}.push(current.{c}); }}".format(
-                c=collect_me) for collect_me in collect])
+        template = "if (current.{c} !== undefined) " \
+                   "{{ previous.{c}.push(current.{c}); }}"
+        code = [template.format(c=collect_me) for collect_me in collect]
+        return "\n".join(code)
 
     def _build_accumulator_initial_state(self, collect):
         initial = {'_count': 0}
