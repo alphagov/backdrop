@@ -44,6 +44,9 @@ class ValidValuesTestCase(unittest.TestCase):
     def test_values_can_be_integers(self):
         assert_that(value_is_valid(1257), is_(True))
 
+    def test_values_can_be_floats(self):
+        assert_that(value_is_valid(123.321), is_(True))
+
     def test_string_values_can_strings(self):
         assert_that(value_is_valid(u"1257"), is_(True))
         assert_that(value_is_valid("1257"), is_(True))
