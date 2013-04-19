@@ -166,8 +166,8 @@ class CollectValidator(Validator):
             validate_field_value=self.validate_field_value)
 
     def validate_field_value(self, value, request_args, _):
-        if not MONGO_FIELD_REGEX.match(value):
-            self.add_error('collect must be a valid field name')
+        if not key_is_valid(value):
+            self.add_error('Cannot collect an invalid field name')
         if value.startswith('_'):
             self.add_error('Cannot collect internal fields, '
                            'internal fields start '
