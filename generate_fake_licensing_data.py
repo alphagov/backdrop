@@ -150,7 +150,8 @@ if __name__ == "__main__":
         licence_application.update(licence_event())
         licence_application.update(authority())
         licence_application.update(licence())
-        licence_application.update(interaction(licence_application['licenceName']))
+        licence_application.update(
+            interaction(licence_application['licenceName']))
         licence_apps.append(licence_application)
 
     if argument == "save_to_db":
@@ -170,4 +171,3 @@ if __name__ == "__main__":
     else:
         print USAGE
         sys.exit(1)
-
