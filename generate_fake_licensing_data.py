@@ -139,32 +139,34 @@ if len(sys.argv) < 2:
     print USAGE
     sys.exit(1)
 
-argument = sys.argv[1]
+if __name__ == "__main__":
+    argument = sys.argv[1]
 
-licence_apps = []
+    licence_apps = []
 
-for i in range(0, 10000):
-    licence_application = {}
-    licence_application.update(licence_event())
-    licence_application.update(authority())
-    licence_application.update(licence())
-    licence_application.update(interaction(licence_application['licenceName']))
-    licence_apps.append(licence_application)
+    for i in range(0, 10000):
+        licence_application = {}
+        licence_application.update(licence_event())
+        licence_application.update(authority())
+        licence_application.update(licence())
+        licence_application.update(interaction(licence_application['licenceName']))
+        licence_apps.append(licence_application)
 
-if argument == "save_to_db":
-    for application in licence_apps:
-        MongoClient(HOST, PORT)[DB_NAME][BUCKET].save(application)
-    sys.exit(0)
+    if argument == "save_to_db":
+        for application in licence_apps:
+            MongoClient(HOST, PORT)[DB_NAME][BUCKET].save(application)
+        sys.exit(0)
 
-elif argument == "print_json":
-    for application in licence_apps:
-        application['_timestamp'] = time_to_str(application['_timestamp'])
-        application['_week_start_at'] = \
-            time_to_str(application['_week_start_at'])
-    for application in licence_apps:
-        print json.dumps(application)
-    sys.exit(0)
+    elif argument == "print_json":
+        for application in licence_apps:
+            application['_timestamp'] = time_to_str(application['_timestamp'])
+            application['_week_start_at'] = \
+                time_to_str(application['_week_start_at'])
+        for application in licence_apps:
+            print json.dumps(application)
+        sys.exit(0)
 
-else:
-    print USAGE
-    sys.exit(1)
+    else:
+        print USAGE
+        sys.exit(1)
+
