@@ -112,6 +112,23 @@ class TestMongoDriver(unittest.TestCase):
                  "range": ["high", "high", "low"]})
         ))
 
+    def test_group_and_collect_with_false_value(self):
+        self.mongo_collection.save({"foo": "one", "bar": False})
+        self.mongo_collection.save({"foo": "two", "bar": True})
+        self.mongo_collection.save({"foo": "two", "bar": True})
+        self.mongo_collection.save({"foo": "one", "bar": False})
+
+        results = self.repo.group(["foo"], {}, ["bar"])
+
+        assert_that(results, contains(
+            has_entries({
+                "bar": [False, False]
+            }),
+            has_entries({
+                "bar": [True, True]
+            })
+        ))
+
     def test_group_without_keys(self):
         self._setup_people()
 
