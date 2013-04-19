@@ -15,7 +15,7 @@ RESERVED_KEYWORDS = (
     '_end_at',
     '_id'
 )
-VALID_KEYWORD = re.compile('^[a-z0-9_\.]+$')
+VALID_KEY = re.compile('^[a-z_\.][a-z0-9_\.]+$')
 VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
 
 
@@ -48,7 +48,7 @@ def key_is_valid(key):
     key = key.lower()
     if not key:
         return False
-    if VALID_KEYWORD.match(key):
+    if VALID_KEY.match(key):
         return True
     return False
 

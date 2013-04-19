@@ -19,6 +19,13 @@ class ValidKeysTestCase(unittest.TestCase):
         assert_that(key_is_valid("son;of;thing"), is_(False))
         assert_that(key_is_valid("son:of:thing"), is_(False))
 
+    def test_keys_must_start_with_letter_or_underscore(self):
+        assert_that(key_is_valid("field"), is_(True))
+        assert_that(key_is_valid("_field"), is_(True))
+        assert_that(key_is_valid("field1"), is_(True))
+        assert_that(key_is_valid("Field1"), is_(True))
+        assert_that(key_is_valid("1field"), is_(False))
+
     def test_key_cannot_be_empty(self):
         assert_that(key_is_valid(""), is_(False))
         assert_that(key_is_valid("    "), is_(False))
