@@ -58,10 +58,10 @@ class PostDataTestCase(unittest.TestCase):
     @patch("backdrop.core.bucket.Bucket.store")
     def test_empty_list_gets_accepted(self, store):
         self.app.post(
-            '/foo-bucket',
+            '/foo_bucket',
             data='[]',
             content_type="application/json",
-            headers=[('Authorization', 'Bearer foo-bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo_bucket-bearer-token')],
         )
 
         store.assert_called_with(
@@ -71,10 +71,10 @@ class PostDataTestCase(unittest.TestCase):
     @patch("backdrop.core.bucket.Bucket.store")
     def test_data_gets_stored(self, store):
         self.app.post(
-            '/foo-bucket',
+            '/foo_bucket',
             data = '{"foo": "bar"}',
             content_type = "application/json",
-            headers=[('Authorization', 'Bearer foo-bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo_bucket-bearer-token')],
         )
 
         store.assert_called_with(
@@ -83,10 +83,10 @@ class PostDataTestCase(unittest.TestCase):
 
     def test_bucket_name_validation(self):
         response = self.app.post(
-            '/_foo-bucket',
+            '/_foo_bucket',
             data = '{"foo": "bar"}',
             content_type = "application/json",
-            headers=[('Authorization', 'Bearer _foo-bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer _foo_bucket-bearer-token')],
         )
 
         assert_that( response, is_bad_request() )
@@ -111,10 +111,10 @@ class PostDataTestCase(unittest.TestCase):
 
     def test_data_with_empty_keys_400s(self):
         response = self.app.post(
-            '/foo-bucket',
+            '/foo_bucket',
             data = '{"": ""}',
             content_type = "application/json",
-            headers=[('Authorization', 'Bearer foo-bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo_bucket-bearer-token')],
         )
 
         assert_that( response, is_bad_request())

@@ -14,7 +14,7 @@ class ValidKeysTestCase(unittest.TestCase):
     def test_keys_can_contain_numbers_and_restricted_punctuation(self):
         assert_that(key_is_valid("name54"), is_(True))
         assert_that(key_is_valid("name_of_thing"), is_(True))
-        assert_that(key_is_valid("son.of.thing"), is_(True))
+        assert_that(key_is_valid("son.of.thing"), is_(False))
         assert_that(key_is_valid("name-of-thing"), is_(False))
         assert_that(key_is_valid("son;of;thing"), is_(False))
         assert_that(key_is_valid("son:of:thing"), is_(False))

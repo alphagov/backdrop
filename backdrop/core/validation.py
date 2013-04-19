@@ -15,8 +15,7 @@ RESERVED_KEYWORDS = (
     '_end_at',
     '_id'
 )
-VALID_KEY = re.compile('^[a-z_\.][a-z0-9_\.]+$')
-VALID_BUCKET_NAME = re.compile('^[a-z0-9\.-][a-z0-9_\.-]*$')
+VALID_KEY = re.compile('^[a-z_][a-z0-9_]+$')
 
 
 def _is_real_date(value):
@@ -62,7 +61,7 @@ def key_is_internal(key):
 
 
 def bucket_is_valid(bucket_name):
-    if VALID_BUCKET_NAME.match(bucket_name):
+    if key_is_valid(bucket_name) and not key_is_internal(bucket_name):
         return True
     return False
 
