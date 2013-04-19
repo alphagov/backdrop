@@ -7,7 +7,8 @@
         "licence_name": "Temporary events notice",
         "interaction": "success",
         "authority": "Westminster",
-        "type": "success"
+        "type": "success",
+        "isPaymentRequired": false
     },
     {
         "_id": "1235",
@@ -17,7 +18,8 @@
         "licence_name": "Temporary events notice",
         "interaction": "success",
         "authority": "Camden",
-        "type": "success"
+        "type": "success",
+        "isPaymentRequired": false
     },
     {
         "_id": "1236",
@@ -27,7 +29,8 @@
         "licence_name": "Temporary events notice",
         "interaction": "success",
         "authority": "Westminster",
-        "type": "success"
+        "type": "success",
+        "isPaymentRequired": false
     },
     {
         "_id": "1237",
@@ -37,7 +40,8 @@
         "licence_name": "Temporary events notice",
         "interaction": "success",
         "authority": "Westminster",
-        "type": "success"
+        "type": "success",
+        "isPaymentRequired": false
     },
     {
         "_id": "1238",
@@ -47,6 +51,7 @@
         "licence_name": "Cat herding licence",
         "interaction": "success",
         "authority": "Westminster",
-        "type": "success"
+        "type": "success",
+        "isPaymentRequired": false
     }
 ]
