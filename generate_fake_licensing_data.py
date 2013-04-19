@@ -28,9 +28,10 @@ BUCKET = 'licensify'
 #       db.your_collection.save(doc)
 #     });"
 
-USAGE="""
+USAGE = """
 ./generate_fake_licensing_data.py (save_to_db|print_json)
 """
+
 
 def find_last_monday():
     now = datetime.datetime.now().replace(hour=0, minute=0, second=0,

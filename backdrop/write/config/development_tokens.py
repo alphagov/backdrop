@@ -1,7 +1,7 @@
 TOKENS = {
-    '_foo-bucket': '_foo-bucket-bearer-token',
+    '_foo_bucket': '_foo_bucket-bearer-token',
     'bucket': 'bucket-bearer-token',
     'foo': 'foo-bearer-token',
-    'foo-bucket': 'foo-bucket-bearer-token',
+    'foo_bucket': 'foo_bucket-bearer-token',
     'licensing': 'licensing-bearer-token'
 }

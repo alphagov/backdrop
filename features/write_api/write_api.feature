@@ -31,7 +31,7 @@ Feature: the performance platform write api
 
     Scenario: tagging data with week start at
         Given I have the data in "timestamps.json"
-         when I post the data to "/data-with-times"
+         when I post the data to "/data_with_times"
          then I should get back a status of "200"
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"
           and the stored data should contain "2" "_week_start_at" on "2013-03-18"

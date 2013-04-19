@@ -46,12 +46,13 @@ class TestRequestValidation(TestCase):
         assert_that(validation_result, is_valid())
 
     def test_queries_with_no_colon_in_filter_by_are_disallowed(self):
-        assert_that(
-            validate_request_args(MultiDict([('filter_by', 'bar')])),
-            is_invalid_with_message("filter_by must be a field name and value "
-                                    "separated by a colon (:) "
-                                    "eg. authority:Westminster")
-        )
+        validation_result = validate_request_args({
+            'filter_by': 'bar'
+        })
+        assert_that( validation_result, is_invalid_with_message(
+            "filter_by must be a field name and value separated by a "
+            "colon (:) eg. authority:Westminster"
+        ))
 
     def test_queries_with_well_formatted_filter_by_are_allowed(self):
         validation_result = validate_request_args(MultiDict([
@@ -69,6 +70,14 @@ class TestRequestValidation(TestCase):
             "(:) eg. authority:Westminster"
         ))
 
+    def test_queries_filtering_by_invalid_field_names_are_disallowed(self):
+        validation_result = validate_request_args({
+            'filter_by': 'with-hyphen:bar'
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            'Cannot filter by an invalid field name'
+        ))
+
     def test_queries_with_will_formatted_starts_and_ends_are_allowed(self):
         validation_result = validate_request_args({
             'period': 'week',
@@ -84,6 +93,12 @@ class TestRequestValidation(TestCase):
         assert_that(validation_result, is_invalid_with_message(
             "Cannot group by internal fields, internal fields "
             "start with an underscore"))
+
+    def test_queries_grouping_on_invalid_field_names_are_disallowed(self):
+        validation_result = validate_request_args({"group_by": "with-hyphen"})
+        assert_that(validation_result, is_invalid_with_message(
+            "Cannot group by an invalid field name"
+        ))
 
     def test_queries_with_sort_by_ascending_are_allowed(self):
         validation_result = validate_request_args({
@@ -104,6 +119,14 @@ class TestRequestValidation(TestCase):
         assert_that( validation_result, is_invalid_with_message(
             'Unrecognised sort direction. Supported directions '
             'include: ascending, descending') )
+
+    def test_queries_sorting_by_invalid_field_names_are_disallowed(self):
+        validation_result = validate_request_args({
+            'sort_by': 'with-hyphen:ascending'
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            'Cannot sort by an invalid field name'
+        ))
 
     def test_queries_with_positive_integer_limit_values_are_allowed(self):
         validation_result = validate_request_args({
@@ -249,7 +272,7 @@ class TestRequestValidation(TestCase):
 
     def test_queries_collecting_internal_fields_are_disallowed(self):
         validation_result = validate_request_args(MultiDict([
-            ('group_by', 'not walruses'),
+            ('group_by', 'not_walruses'),
             ('collect', '_walrus')
         ]))
 

@@ -3,15 +3,10 @@ import unittest
 from hamcrest import *
 
 from backdrop.core.validation import value_is_valid_id,\
-    value_is_valid, key_is_valid, value_is_valid_datetime_string
+    value_is_valid, key_is_valid, value_is_valid_datetime_string, key_is_reserved
 
 
 class ValidKeysTestCase(unittest.TestCase):
-    def test_some_keys_are_reserved_namespace(self):
-        assert_that(key_is_valid("_timestamp"), is_(True))
-        assert_that(key_is_valid("_id"), is_(True))
-        assert_that(key_is_valid("_name"), is_(False))
-
     def test_keys_can_be_case_insensitive(self):
         assert_that(key_is_valid("name"), is_(True))
         assert_that(key_is_valid("NAME"), is_(True))
@@ -19,10 +14,17 @@ class ValidKeysTestCase(unittest.TestCase):
     def test_keys_can_contain_numbers_and_restricted_punctuation(self):
         assert_that(key_is_valid("name54"), is_(True))
         assert_that(key_is_valid("name_of_thing"), is_(True))
-        assert_that(key_is_valid("name-of-thing"), is_(True))
-        assert_that(key_is_valid("son.of.thing"), is_(True))
+        assert_that(key_is_valid("son.of.thing"), is_(False))
+        assert_that(key_is_valid("name-of-thing"), is_(False))
         assert_that(key_is_valid("son;of;thing"), is_(False))
         assert_that(key_is_valid("son:of:thing"), is_(False))
+
+    def test_keys_must_start_with_letter_or_underscore(self):
+        assert_that(key_is_valid("field"), is_(True))
+        assert_that(key_is_valid("_field"), is_(True))
+        assert_that(key_is_valid("field1"), is_(True))
+        assert_that(key_is_valid("Field1"), is_(True))
+        assert_that(key_is_valid("1field"), is_(False))
 
     def test_key_cannot_be_empty(self):
         assert_that(key_is_valid(""), is_(False))
@@ -30,9 +32,20 @@ class ValidKeysTestCase(unittest.TestCase):
         assert_that(key_is_valid("\t"), is_(False))
 
 
+class ReservedKeysTestCase(unittest.TestCase):
+    def test_reserved_keys_are_reserved(self):
+        assert_that(key_is_reserved("_timestamp"), is_(True))
+        assert_that(key_is_reserved("_id"), is_(True))
+        assert_that(key_is_reserved("_name"), is_(False))
+        assert_that(key_is_reserved("name"), is_(False))
+
+
 class ValidValuesTestCase(unittest.TestCase):
     def test_values_can_be_integers(self):
         assert_that(value_is_valid(1257), is_(True))
+
+    def test_values_can_be_floats(self):
+        assert_that(value_is_valid(123.321), is_(True))
 
     def test_string_values_can_strings(self):
         assert_that(value_is_valid(u"1257"), is_(True))
