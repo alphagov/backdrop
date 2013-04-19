@@ -21,7 +21,8 @@ def validate_data_object(obj):
             return invalid('{0} is not a valid key'.format(key))
 
         if key_is_internal(key) and not key_is_reserved(key):
-            return invalid('{0} is not a recognised internal field'.format(key))
+            return invalid(
+                '{0} is not a recognised internal field'.format(key))
 
         if not value_is_valid(value):
             return invalid('{0} has an invalid value'.format(key))
