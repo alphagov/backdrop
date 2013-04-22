@@ -4,8 +4,8 @@ class FlaskTestClient(object):
         self._storage = flask_app.db.connection
         self._config = flask_app.app.config
 
-    def get(self, url):
-        return self._client.get(url)
+    def get(self, url, headers=None):
+        return self._client.get(url, headers=headers)
 
     def post(self, url, **message):
         return self._client.post(url, **message)

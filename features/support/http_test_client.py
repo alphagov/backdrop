@@ -17,8 +17,8 @@ class HTTPTestClient(object):
         self.write = self.run_api("write")
         time.sleep(1)  # wait until processes have started
 
-    def get(self, url):
-        response = requests.get(self.read_url(url))
+    def get(self, url, headers=None):
+        response = requests.get(self.read_url(url), headers=headers)
         return HTTPTestResponse(response)
 
     def post(self, url, **message):
@@ -55,3 +55,4 @@ class HTTPTestResponse:
     def __init__(self, response):
         self.status_code = response.status_code
         self.data = response.text
+        self.headers = response.headers

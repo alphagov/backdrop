@@ -96,6 +96,7 @@ def health_check():
 
 @app.route('/<bucket_name>', methods=['GET'])
 @cache_control.set("max-age=3600, must-revalidate")
+@cache_control.etag
 def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
@@ -114,7 +115,6 @@ def query(bucket_name):
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
-    response.set_etag(hashlib.sha1(json_data).hexdigest())
 
     return response
 
