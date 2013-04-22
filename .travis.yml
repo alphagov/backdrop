@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+# Need mongodb for testing
+services: mongodb
+# command to install dependencies
+install: "pip install -r requirements_for_tests.txt --use-mirrors"
+# command to run tests
+script: nosetests && behave
+branches:
+  except:
+    - master
+    - release
