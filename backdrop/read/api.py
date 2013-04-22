@@ -84,7 +84,7 @@ def exception_handler(e):
     return jsonify(status='error', message=e.name), e.code
 
 
-@app.route('/_status')
+@app.route('/_status', methods=['GET'])
 @cache_control.nocache
 def health_check():
     if db.alive():
