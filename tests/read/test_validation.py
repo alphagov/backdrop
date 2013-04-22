@@ -190,7 +190,7 @@ class TestRequestValidation(TestCase):
     def test_queries_without_code_injection_collect_values_are_allowed(self):
         validation_result_without_group_by = validate_request_args(MultiDict([
             ("group_by", 'bar'),
-            ("collect", 'a_-aAbBzZ-_')
+            ("collect", 'a_aAbBzZ_')
         ]))
         assert_that(validation_result_without_group_by, is_valid())
 
@@ -201,7 +201,16 @@ class TestRequestValidation(TestCase):
         ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message(
-                        'collect must be a valid field name'))
+                        "Cannot collect an invalid field name"))
+
+    def test_queries_collecting_invalid_field_names_are_disallowed(self):
+        validation_result = validate_request_args(MultiDict([
+            ("group_by", "bar"),
+            ("collect", "with-hyphen")
+        ]))
+        assert_that(validation_result, is_invalid_with_message(
+            "Cannot collect an invalid field name"
+        ))
 
     def test_queries_with_multiple_collect_values_as_code_are_disallowed(self):
         validation_result_without_group_by = validate_request_args(MultiDict([
@@ -210,8 +219,8 @@ class TestRequestValidation(TestCase):
             ("collect", 'foo'),
         ]))
         assert_that(validation_result_without_group_by,
-                    is_invalid_with_message("collect must be a valid field "
-                                            "name"))
+                    is_invalid_with_message(
+                        "Cannot collect an invalid field name"))
 
     def test_subsequent_collect_values_are_validated(self):
         validation_result = validate_request_args(MultiDict([
@@ -220,8 +229,8 @@ class TestRequestValidation(TestCase):
             ("collect", "{}"),
         ]))
         assert_that(validation_result,
-                    is_invalid_with_message("collect must be a valid field "
-                                            "name"))
+                    is_invalid_with_message(
+                        "Cannot collect an invalid field name"))
 
     def test_queries_with_internal_collect_values_are_disallowed(self):
         validation_result_without_group_by = validate_request_args(MultiDict([
