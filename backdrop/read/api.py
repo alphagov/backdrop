@@ -10,7 +10,7 @@ from backdrop.core.log_handler \
 from werkzeug.exceptions import HTTPException
 
 from .validation import validate_request_args
-from ..core import database, log_handler
+from ..core import database, log_handler, cache_control
 from ..core.bucket import Bucket
 
 
@@ -84,6 +84,7 @@ def exception_handler(e):
 
 
 @app.route('/_status')
+@cache_control.nocache
 def health_check():
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
@@ -93,6 +94,7 @@ def health_check():
 
 
 @app.route('/<bucket_name>', methods=['GET'])
+@cache_control.set("max-age=3600, must-revalidate")
 def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
