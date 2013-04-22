@@ -1,6 +1,7 @@
 import datetime
 import json
 from os import getenv
+import hashlib
 
 from dateutil import parser
 from flask import Flask, jsonify, request
@@ -113,6 +114,7 @@ def query(bucket_name):
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
+    response.set_etag(hashlib.sha1(json_data).hexdigest())
 
     return response
 
