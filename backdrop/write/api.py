@@ -5,7 +5,7 @@ from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 
 from .validation import validate_post_to_bucket
-from ..core import database, log_handler, records
+from ..core import database, log_handler, records, cache_control
 from ..core.bucket import Bucket
 
 
@@ -45,7 +45,8 @@ def exception_handler(e):
     return jsonify(status='error', message=''), e.code
 
 
-@app.route('/_status', methods=['GET', 'HEAD'])
+@app.route('/_status', methods=['GET'])
+@cache_control.nocache
 def health_check():
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
@@ -55,6 +56,7 @@ def health_check():
 
 
 @app.route('/<bucket_name>', methods=['POST'])
+@cache_control.nocache
 def post_to_bucket(bucket_name):
     def extract_bearer_token(header):
         if header is None or len(header) < 8:

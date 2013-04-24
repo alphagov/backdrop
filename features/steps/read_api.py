@@ -34,6 +34,13 @@ def step(context, query):
     context.response = context.client.get(query)
 
 
+@when('I send another request to "{query}" with the received etag')
+def step(context, query):
+    etag = context.response.headers["ETag"]
+    context.response = context.client.get(query,
+                                          headers={"If-None-Match": etag})
+
+
 @then('I should get back a status of "{expected_status}"')
 def step(context, expected_status):
     assert_that(context.response.status_code, is_(int(expected_status)))
@@ -97,3 +104,8 @@ def step(context, nth, key, value):
     the_data = json.loads(context.response.data)['data']
     i = parse_position(nth, the_data)
     assert_that(the_data[i][key], has_item(json.loads(value)))
+
+
+@then('the "{header}" header should be "{value}"')
+def step(context, header, value):
+    assert_that(context.response.headers.get(header), is_(value))

@@ -1,6 +1,7 @@
 import datetime
 import json
 from os import getenv
+import hashlib
 
 from dateutil import parser
 from flask import Flask, jsonify, request
@@ -10,7 +11,7 @@ from backdrop.core.log_handler \
 from werkzeug.exceptions import HTTPException
 
 from .validation import validate_request_args
-from ..core import database, log_handler
+from ..core import database, log_handler, cache_control
 from ..core.bucket import Bucket
 
 
@@ -83,7 +84,8 @@ def exception_handler(e):
     return jsonify(status='error', message=e.name), e.code
 
 
-@app.route('/_status')
+@app.route('/_status', methods=['GET'])
+@cache_control.nocache
 def health_check():
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
@@ -93,6 +95,8 @@ def health_check():
 
 
 @app.route('/<bucket_name>', methods=['GET'])
+@cache_control.set("max-age=3600, must-revalidate")
+@cache_control.etag
 def query(bucket_name):
     result = validate_request_args(request.args)
     if not result.is_valid:
