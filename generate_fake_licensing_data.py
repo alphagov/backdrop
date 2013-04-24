@@ -7,7 +7,7 @@ import sys
 HOST = 'localhost'
 PORT = 27017
 DB_NAME = 'backdrop'
-BUCKET = 'licensify'
+BUCKET = 'licensing'
 
 # IMPORTANT:
 #
