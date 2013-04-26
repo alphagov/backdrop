@@ -20,6 +20,10 @@ function display_result {
 basedir=$(dirname $0)
 venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 
+if [ ! -d $venvdir ]; then
+  virtualenv $venvdir
+fi
+
 source "$venvdir/bin/activate"
 
 pip install -r requirements_for_tests.txt
