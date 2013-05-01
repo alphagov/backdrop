@@ -6,7 +6,7 @@ from hamcrest import *
 import pytz
 from werkzeug.datastructures import MultiDict
 
-from backdrop.read.api import parse_request_args
+from backdrop.read.query import parse_request_args
 
 
 class Test_parse_request_args(unittest.TestCase):

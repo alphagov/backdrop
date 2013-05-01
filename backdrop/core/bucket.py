@@ -2,7 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta, MO
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
-from .database import build_query
+from .database import build_where_clause
 
 
 def utc(dt):
@@ -40,15 +40,16 @@ class Bucket(object):
                           data=results,
                           default={"_count": 0})
 
-    def execute_weekly_group_query(self, group_by, params, sort=None,
-                                   limit=None, collect=None):
+    def execute_weekly_group_query(self, query):
         period_key = '_week_start_at'
         result = []
+
         cursor = self.repository.multi_group(
-            group_by, period_key, build_query(**params),
-            sort=sort, limit=limit,
-            collect=collect or []
+            query.group_by, period_key, query,
+            sort=query.sort_by, limit=query.limit,
+            collect=query.collect or []
         )
+
         for doc in cursor:
             subgroup = doc.pop('_subgroup')
             [self._ensure_monday(item['_week_start_at']) for item in subgroup]
@@ -56,32 +57,40 @@ class Bucket(object):
 
             result.append(doc)
 
-        if params.get("start_at") and params.get("end_at"):
+        if query.start_at and query.end_at:
             for i, _ in enumerate(result):
                 result[i]['values'] = self._create_week_timeseries(
-                    params['start_at'], params['end_at'], result[i]['values'])
+                    query.start_at, query.end_at, result[i]['values'])
 
         return result
 
-    def execute_grouped_query(self, group_by, query,
-                              sort=None, limit=None, collect=None):
-        return self.repository.group(group_by, query, sort, limit,
-                                     collect or [])
+    def execute_grouped_query(self, query):
+        return self.repository.group(query.group_by,
+                                     query,
+                                     query.sort_by,
+                                     query.limit,
+                                     query.collect or [])
 
-    def execute_period_query(self, params, limit=None):
+    def execute_period_query(self, query):
+        period_key = '_week_start_at'
+        sort = ["_week_start_at", "ascending"]
         cursor = self.repository.group(
-            '_week_start_at', build_query(**params),
-            sort=["_week_start_at", "ascending"], limit=limit)
+            period_key, query,
+            sort=sort, limit=query.limit
+        )
+
         [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
         result = [self._period_group(doc) for doc in cursor]
-        if params.get("start_at") and params.get("end_at"):
-            result = self._create_week_timeseries(params['start_at'],
-                                                  params['end_at'], result)
+        if query.start_at and query.end_at:
+            result = self._create_week_timeseries(query.start_at,
+                                                  query.end_at, result)
         return result
 
-    def execute_query(self, query, sort=None, limit=None):
+    def execute_query(self, query):
+        cursor = self.repository.find(
+            query, sort=query.sort_by, limit=query.limit)
+
         result = []
-        cursor = self.repository.find(query, sort=sort, limit=limit)
         for doc in cursor:
             # stringify the id
             doc['_id'] = str(doc['_id'])
@@ -90,22 +99,14 @@ class Bucket(object):
             result.append(doc)
         return result
 
-    def query(self, **params):
-        query = build_query(**params)
-        sort_by = params.get('sort_by')
-        group_by = params.get('group_by')
-        limit = params.get('limit')
-        collect = params.get('collect')
-
-        if group_by and 'period' in params:
-            result = self.execute_weekly_group_query(
-                group_by, params, sort_by, limit, collect)
-        elif group_by:
-            result = self.execute_grouped_query(
-                group_by, query, sort_by, limit, collect)
-        elif 'period' in params:
-            result = self.execute_period_query(params, limit)
+    def query(self, query):
+        if query.group_by and query.period:
+            result = self.execute_weekly_group_query(query)
+        elif query.group_by:
+            result = self.execute_grouped_query(query)
+        elif query.period:
+            result = self.execute_period_query(query)
         else:
-            result = self.execute_query(query, sort_by, limit)
+            result = self.execute_query(query)
 
         return result

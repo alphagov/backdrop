@@ -5,6 +5,7 @@ from hamcrest import *
 from mock import patch
 import pytz
 from backdrop.read import api
+from backdrop.read.query import Query
 
 
 class ReadApiTestCase(unittest.TestCase):
@@ -15,19 +16,22 @@ class ReadApiTestCase(unittest.TestCase):
     def test_period_query_is_executed(self, mock_query):
         mock_query.return_value = None
         self.app.get('/foo?period=week')
-        mock_query.assert_called_with(period=u"week")
+        mock_query.assert_called_with(
+            Query.create(period=u"week"))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_filter_by_query_is_executed(self, mock_query):
         mock_query.return_value = None
         self.app.get('/foo?filter_by=zombies:yes')
-        mock_query.assert_called_with(filter_by=[[u'zombies', u'yes']])
+        mock_query.assert_called_with(
+            Query.create(filter_by=[[u'zombies', u'yes']]))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_group_by_query_is_executed(self, mock_query):
         mock_query.return_value = None
         self.app.get('/foo?group_by=zombies')
-        mock_query.assert_called_with(group_by=u'zombies')
+        mock_query.assert_called_with(
+            Query.create(group_by=u'zombies'))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_period_query_is_executed(self, mock_query):
@@ -41,8 +45,7 @@ class ReadApiTestCase(unittest.TestCase):
             '&end_at=' + urllib.quote("2012-12-12T08:12:43+00:00")
         )
         mock_query.assert_called_with(
-            start_at=expected_start_at, end_at=expected_end_at
-        )
+            Query.create(start_at=expected_start_at, end_at=expected_end_at))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_group_by_with_period_is_executed(self, mock_query):
@@ -50,7 +53,8 @@ class ReadApiTestCase(unittest.TestCase):
         self.app.get(
             '/foo?period=week&group_by=stuff'
         )
-        mock_query.assert_called_with(period="week", group_by="stuff")
+        mock_query.assert_called_with(
+            Query.create(period="week", group_by="stuff"))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_sort_query_is_executed(self, mock_query):
@@ -58,9 +62,11 @@ class ReadApiTestCase(unittest.TestCase):
         self.app.get(
             '/foo?sort_by=value:ascending'
         )
-        mock_query.assert_called_with(sort_by=["value", "ascending"])
+        mock_query.assert_called_with(
+            Query.create(sort_by=["value", "ascending"]))
 
         self.app.get(
             '/foo?sort_by=value:descending'
         )
-        mock_query.assert_called_with(sort_by=["value", "descending"])
+        mock_query.assert_called_with(
+            Query.create(sort_by=["value", "descending"]))

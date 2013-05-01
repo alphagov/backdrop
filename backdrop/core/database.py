@@ -3,28 +3,28 @@ import pymongo
 from backdrop.core import time as backdrop_time
 
 
-def build_query(**params):
+def build_where_clause(query):
     def ensure_has_timestamp(q):
         if '_timestamp' not in q:
             q['_timestamp'] = {}
         return q
 
-    query = {}
-    if 'start_at' in params:
-        query = ensure_has_timestamp(query)
-        query['_timestamp']['$gte'] = params['start_at']
-    if 'end_at' in params:
-        query = ensure_has_timestamp(query)
-        query['_timestamp']['$lt'] = params['end_at']
+    mongo_query = {}
+    if query.start_at:
+        mongo_query = ensure_has_timestamp(mongo_query)
+        mongo_query['_timestamp']['$gte'] = query.start_at
+    if query.end_at:
+        mongo_query = ensure_has_timestamp(mongo_query)
+        mongo_query['_timestamp']['$lt'] = query.end_at
 
-    if 'filter_by' in params:
-        for key, value in params['filter_by']:
+    if query.filter_by:
+        for key, value in query.filter_by:
             if value == "false":
                 value = False
             if value == "true":
                 value = True
-            query[key] = value
-    return query
+            mongo_query[key] = value
+    return mongo_query
 
 
 class Database(object):
@@ -115,17 +115,19 @@ class Repository(object):
             raise InvalidSortError(sort[1])
 
     def find(self, query, sort=None, limit=None):
+        where = build_where_clause(query)
         if not sort:
             sort = ["_timestamp", "ascending"]
 
         self._validate_sort(sort)
 
-        return self._mongo.find(query, sort, limit)
+        return self._mongo.find(where, sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
+        where = build_where_clause(query)
         if sort:
             self._validate_sort(sort)
-        return self._group([group_by], query, sort, limit, collect or [])
+        return self._group([group_by], where, sort, limit, collect or [])
 
     def save(self, obj):
         obj['_updated_at'] = backdrop_time.now()
@@ -133,9 +135,10 @@ class Repository(object):
 
     def multi_group(self, key1, key2, query,
                     sort=None, limit=None, collect=None):
+        where = build_where_clause(query)
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._group([key1, key2], query, sort, limit, collect or [])
+        results = self._group([key1, key2], where, sort, limit, collect or [])
 
         return results
 
