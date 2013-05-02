@@ -104,7 +104,7 @@ class Query(_Query):
         elif self.group_by:
             result = self.__execute_grouped_query(repository)
         elif self.period:
-            result = self.execute_period_query(repository)
+            result = self.__execute_period_query(repository)
         else:
             result = self.__execute_query(repository)
         return result
@@ -160,7 +160,7 @@ class Query(_Query):
                                 self.limit,
                                 self.collect or [])
 
-    def execute_period_query(self, repository):
+    def __execute_period_query(self, repository):
         period_key = '_week_start_at'
         sort = ["_week_start_at", "ascending"]
         cursor = repository.group(

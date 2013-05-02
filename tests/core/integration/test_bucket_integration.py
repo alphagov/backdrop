@@ -69,8 +69,8 @@ class TestBucketIntegration(unittest.TestCase):
 
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()
-        query = Query.create()
-        result = query.execute_period_query(self.bucket.repository)
+        query = Query.create(period="week")
+        result = query.execute(self.bucket.repository)
         assert_that(result, contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),
