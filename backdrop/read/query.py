@@ -1,7 +1,13 @@
 from collections import namedtuple
+import datetime
 
 from dateutil import parser
 import pytz
+from backdrop.core.timeseries import timeseries, WEEK
+
+
+def utc(dt):
+    return dt.replace(tzinfo=pytz.UTC)
 
 
 def parse_time_string(time_string):
@@ -75,7 +81,6 @@ class Query(_Query):
         args = parse_request_args(request_args)
         return Query(**args)
 
-
     def to_mongo_query(self):
         mongo_query = {}
         if (self.start_at or self.end_at):
@@ -92,3 +97,93 @@ class Query(_Query):
                     filters[1] = False
                 mongo_query.update({filters[0]: filters[1]})
         return mongo_query
+
+    def execute(self, repository):
+        if self.group_by and self.period:
+            result = self.__execute_weekly_group_query(repository)
+        elif self.group_by:
+            result = self.__execute_grouped_query(repository)
+        elif self.period:
+            result = self.execute_period_query(repository)
+        else:
+            result = self.__execute_query(repository)
+        return result
+
+    def _period_group(self, doc):
+        start = utc(doc['_week_start_at'])
+        return {
+            '_start_at': start,
+            '_end_at': start + datetime.timedelta(days=7),
+            '_count': doc['_count']
+        }
+
+    def _ensure_monday(self, week_start_at):
+        if week_start_at.weekday() is not 0:
+            raise ValueError('Weeks MUST start on Monday. '
+                             'Corrupt Data: ' + str(week_start_at))
+
+    def _create_week_timeseries(self, start_at, end_at, results):
+        return timeseries(start=start_at,
+                          end=end_at,
+                          period=WEEK,
+                          data=results,
+                          default={"_count": 0})
+
+    def __execute_weekly_group_query(self, repository):
+        period_key = '_week_start_at'
+        result = []
+
+        cursor = repository.multi_group(
+            self.group_by, period_key, self,
+            sort=self.sort_by, limit=self.limit,
+            collect=self.collect or []
+        )
+
+        for doc in cursor:
+            subgroup = doc.pop('_subgroup')
+            [self._ensure_monday(item['_week_start_at']) for item in subgroup]
+            doc['values'] = [self._period_group(item) for item in subgroup]
+
+            result.append(doc)
+
+        if self.start_at and self.end_at:
+            for i, _ in enumerate(result):
+                result[i]['values'] = self._create_week_timeseries(
+                    self.start_at, self.end_at, result[i]['values'])
+
+        return result
+
+    def __execute_grouped_query(self, repository):
+        return repository.group(self.group_by,
+                                self,
+                                self.sort_by,
+                                self.limit,
+                                self.collect or [])
+
+    def execute_period_query(self, repository):
+        period_key = '_week_start_at'
+        sort = ["_week_start_at", "ascending"]
+        cursor = repository.group(
+            period_key, self,
+            sort=sort, limit=self.limit
+        )
+
+        [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
+        result = [self._period_group(doc) for doc in cursor]
+        if self.start_at and self.end_at:
+            result = self._create_week_timeseries(self.start_at,
+                                                  self.end_at, result)
+        return result
+
+    def __execute_query(self, repository):
+        cursor = repository.find(
+            self, sort=self.sort_by, limit=self.limit)
+
+        result = []
+        for doc in cursor:
+            # stringify the id
+            doc['_id'] = str(doc['_id'])
+            if '_timestamp' in doc:
+                doc['_timestamp'] = utc(doc['_timestamp'])
+            result.append(doc)
+        return result
