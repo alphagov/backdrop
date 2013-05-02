@@ -3,7 +3,11 @@ import unittest
 from hamcrest import *
 
 from backdrop.write.validation import validate_data_object
-from tests.support.validity_matcher import is_invalid_with_message
+from tests.support.validity_matcher import is_invalid_with_message, is_valid
+
+valid_string = 'validstring'
+
+valid_timestamp = '2013-04-01T12:00:00+01:00'
 
 
 class TestValidateDataObject(unittest.TestCase):
@@ -44,6 +48,15 @@ class TestValidateDataObject(unittest.TestCase):
         assert_that(validation_result,
                     is_invalid_with_message(
                         "_unknown is not a recognised internal field"))
+
+    def test_known_internal_fields_are_recognised_as_valid(self):
+        validate = validate_data_object
+
+        assert_that(validate({'_timestamp': valid_timestamp}), is_valid())
+        assert_that(validate({'_start_at': valid_timestamp}), is_valid())
+        assert_that(validate({'_end_at': valid_timestamp}), is_valid())
+        assert_that(validate({'_period': valid_string}), is_valid())
+        assert_that(validate({'_id': valid_string}), is_valid())
 
 
 class ValidDateObjectTestCase(unittest.TestCase):
