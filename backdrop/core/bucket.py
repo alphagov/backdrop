@@ -2,7 +2,6 @@ import datetime
 from dateutil.relativedelta import relativedelta, MO
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
-from .database import build_where_clause
 
 
 def utc(dt):

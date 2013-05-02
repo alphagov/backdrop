@@ -74,3 +74,21 @@ class Query(_Query):
     def parse(cls, request_args):
         args = parse_request_args(request_args)
         return Query(**args)
+
+
+    def to_mongo_query(self):
+        mongo_query = {}
+        if (self.start_at or self.end_at):
+            mongo_query["_timestamp"] = {}
+            if (self.end_at):
+                mongo_query["_timestamp"]["$lt"] = self.end_at
+            if (self.start_at):
+                mongo_query["_timestamp"]["$gte"] = self.start_at
+        if (self.filter_by):
+            for filters in self.filter_by:
+                if filters[1] == "true":
+                    filters[1] = True
+                if filters[1] == "false":
+                    filters[1] = False
+                mongo_query.update({filters[0]: filters[1]})
+        return mongo_query
