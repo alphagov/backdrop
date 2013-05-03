@@ -5,6 +5,7 @@ from dateutil import parser
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
 from tests.read.test_datum import Datum
+from tests.read.test_period_data import PeriodData
 
 
 def utc(dt):
@@ -169,13 +170,13 @@ class Query(_Query):
             sort=sort, limit=self.limit
         )
 
-        [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
+        results = PeriodData()
+        [results.add(doc) for doc in cursor]
 
-        result = [self._period_group(doc) for doc in cursor]
         if self.start_at and self.end_at:
-            result = self._create_week_timeseries(self.start_at,
-                                                  self.end_at, result)
-        return result
+            results.fill_missing_weeks(self.start_at, self.end_at)
+
+        return results
 
     def __execute_query(self, repository):
         cursor = repository.find(

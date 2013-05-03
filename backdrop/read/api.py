@@ -7,6 +7,7 @@ from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.read.query import Query
 from tests.read.test_datum import Datum
+from tests.read.test_period_data import PeriodData
 
 from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
@@ -73,10 +74,13 @@ def query(bucket_name):
     bucket = Bucket(db, bucket_name)
     result_data = bucket.query(Query.parse(request.args))
 
-    if result_data and isinstance(result_data[0], Datum):
+    if result_data and isinstance(result_data, list) and isinstance(result_data[0], Datum):
         json_data = json.dumps({"data": result_data}, cls=Datum.encoder(),
                                 indent=None if request.is_xhr else 2)
     else:
+        if isinstance(result_data, PeriodData):
+            result_data = result_data.data()
+
         # Taken from flask.helpers.jsonify to add JSONEncoder
         # NB. this can be removed once fix #471 works it's way into a release
         # https://github.com/mitsuhiko/flask/pull/471
