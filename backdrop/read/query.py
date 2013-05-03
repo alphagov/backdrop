@@ -170,6 +170,7 @@ class Query(_Query):
         )
 
         [self._ensure_monday(doc['_week_start_at']) for doc in cursor]
+
         result = [self._period_group(doc) for doc in cursor]
         if self.start_at and self.end_at:
             result = self._create_week_timeseries(self.start_at,
