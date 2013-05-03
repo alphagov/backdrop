@@ -30,8 +30,10 @@ class Week(object):
 
 WEEK = Week()
 
+
 def _time_to_index(dt):
     return _time.mktime(dt.replace(tzinfo=pytz.utc).timetuple())
+
 
 def timeseries(start, end, period, data, default):
     data_by_start_at = _index_by_start_at(data)

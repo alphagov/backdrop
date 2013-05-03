@@ -129,7 +129,7 @@ class TestBucket(unittest.TestCase):
         ]
 
         query = Query.create(period='week')
-        query_result = self.bucket.query(query)
+        query_result = self.bucket.query(query).data()
 
         self.mock_repository.group.assert_called_once_with(
             "_week_start_at", query, sort=['_week_start_at', 'ascending'],
@@ -180,7 +180,7 @@ class TestBucket(unittest.TestCase):
                                    start_at=d_tz(2013, 1, 7, 0, 0, 0),
                                    end_at=d_tz(2013, 2, 18, 0, 0, 0)))
 
-        assert_that(result, contains(
+        assert_that(result.data(), contains(
             has_entries({"_start_at": d_tz(2013, 1,  7), "_count": 0}),
             has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 32}),
             has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 45}),

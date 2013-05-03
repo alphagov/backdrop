@@ -1,12 +1,13 @@
 import datetime
 import json
 from os import getenv
+from bson import ObjectId
 
 from flask import Flask, jsonify, request
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.read.query import Query
-from tests.read.test_datum import Datum
+from tests.read.test_datum import SimpleData
 from tests.read.test_period_data import PeriodData
 
 from .validation import validate_request_args
@@ -39,6 +40,8 @@ app.after_request(create_response_logger(app))
 
 class JsonEncoder(json.JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
         return json.JSONEncoder.default(self, obj)
@@ -74,18 +77,16 @@ def query(bucket_name):
     bucket = Bucket(db, bucket_name)
     result_data = bucket.query(Query.parse(request.args))
 
-    if result_data and isinstance(result_data, list) and isinstance(result_data[0], Datum):
-        json_data = json.dumps({"data": result_data}, cls=Datum.encoder(),
-                                indent=None if request.is_xhr else 2)
-    else:
-        if isinstance(result_data, PeriodData):
-            result_data = result_data.data()
+    if isinstance(result_data, PeriodData):
+        result_data = result_data.data()
+    if isinstance(result_data, SimpleData):
+        result_data = result_data.data()
 
-        # Taken from flask.helpers.jsonify to add JSONEncoder
-        # NB. this can be removed once fix #471 works it's way into a release
-        # https://github.com/mitsuhiko/flask/pull/471
-        json_data = json.dumps({"data": result_data}, cls=JsonEncoder,
-                               indent=None if request.is_xhr else 2)
+    # Taken from flask.helpers.jsonify to add JSONEncoder
+    # NB. this can be removed once fix #471 works it's way into a release
+    # https://github.com/mitsuhiko/flask/pull/471
+    json_data = json.dumps({"data": result_data}, cls=JsonEncoder,
+                           indent=None if request.is_xhr else 2)
 
     response = app.response_class(json_data, mimetype='application/json')
 

@@ -8,20 +8,20 @@ from tests.support.test_helpers import d, d_tz
 
 class PeriodData(object):
     def __init__(self):
-        self._datum = []
+        self._data = []
 
     def add(self, document):
-        self._datum.append(self.__create_datum(document))
+        self._data.append(self.__create_datum(document))
 
     def data(self):
-        return tuple(self._datum)
+        return tuple(self._data)
 
     def fill_missing_weeks(self, start, end):
-        self._datum = timeseries(start=start,
-                                 end=end,
-                                 period=WEEK,
-                                 data=self._datum,
-                                 default={"_count": 0})
+        self._data = timeseries(start=start,
+                                end=end,
+                                period=WEEK,
+                                data=self._data,
+                                default={"_count": 0})
 
     def __create_datum(self, doc):
         if doc["_week_start_at"].weekday() is not 0:
@@ -82,14 +82,14 @@ class TestPeriodData(unittest.TestCase):
         assert_that(len(period_data.data()), is_(2))
 
         assert_that(period_data.data()[0], has_entry("_start_at",
-                                                    d_tz(2013, 5, 6)))
+                                                     d_tz(2013, 5, 6)))
         assert_that(period_data.data()[0], has_entry("_end_at",
-                                                    d_tz(2013, 5, 13)))
+                                                     d_tz(2013, 5, 13)))
 
         assert_that(period_data.data()[1], has_entry("_start_at",
-                                                    d_tz(2013, 5, 13)))
+                                                     d_tz(2013, 5, 13)))
         assert_that(period_data.data()[1], has_entry("_end_at",
-                                                    d_tz(2013, 5, 20)))
+                                                     d_tz(2013, 5, 20)))
 
     def test_returned_data_should_be_immutable(self):
         stub_doc = {

@@ -4,7 +4,7 @@ import datetime
 from dateutil import parser
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
-from tests.read.test_datum import Datum
+from tests.read.test_datum import SimpleData
 from tests.read.test_period_data import PeriodData
 
 
@@ -182,4 +182,6 @@ class Query(_Query):
         cursor = repository.find(
             self, sort=self.sort_by, limit=self.limit)
 
-        return [Datum(doc) for doc in cursor]
+        results = SimpleData()
+        [results.add(doc) for doc in cursor]
+        return results

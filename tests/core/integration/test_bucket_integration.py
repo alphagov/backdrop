@@ -71,7 +71,7 @@ class TestBucketIntegration(unittest.TestCase):
         self.setup__timestamp_data()
         query = Query.create(period="week")
         result = query.execute(self.bucket.repository)
-        assert_that(result, contains(
+        assert_that(result.data(), contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),
             has_entry('_start_at', d_tz(2013, 2, 25))
