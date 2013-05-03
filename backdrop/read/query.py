@@ -4,6 +4,7 @@ import datetime
 from dateutil import parser
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
+from tests.read.test_datum import Datum
 
 
 def utc(dt):
@@ -179,11 +180,4 @@ class Query(_Query):
         cursor = repository.find(
             self, sort=self.sort_by, limit=self.limit)
 
-        result = []
-        for doc in cursor:
-            # stringify the id
-            doc['_id'] = str(doc['_id'])
-            if '_timestamp' in doc:
-                doc['_timestamp'] = utc(doc['_timestamp'])
-            result.append(doc)
-        return result
+        return [Datum(doc) for doc in cursor]

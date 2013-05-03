@@ -4,7 +4,8 @@ from bson import ObjectId
 import datetime
 from hamcrest import *
 from json import JSONEncoder
-from tests.support.test_helpers import d_tz
+import pytz
+from tests.support.test_helpers import d_tz, d
 
 
 class DatumEncoder(JSONEncoder):
@@ -20,6 +21,9 @@ class DatumEncoder(JSONEncoder):
 
 class Datum(object):
     def __init__(self, mongo_doc):
+        if "_timestamp" in mongo_doc:
+            mongo_doc["_timestamp"] = \
+                mongo_doc["_timestamp"].replace(tzinfo=pytz.utc)
         self.datum = mongo_doc
 
     @classmethod
@@ -80,3 +84,10 @@ class TestDatum(unittest.TestCase):
                            '',
             ))
         )
+
+    def test_timestamps_should_have_utc_timezones(self):
+        stub_doc = {
+            "_timestamp": d(2013, 5, 5)
+        }
+
+        assert_that(Datum(stub_doc).datum["_timestamp"].tzinfo, is_(pytz.UTC))
