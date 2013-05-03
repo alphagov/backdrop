@@ -1,6 +1,6 @@
 from bson import Code
 import pymongo
-from backdrop.core import time as backdrop_time
+from backdrop.core import backdrop_time as backdrop_time
 
 
 class Database(object):

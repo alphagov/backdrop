@@ -2,6 +2,7 @@ import unittest
 import datetime
 from hamcrest import *
 import pytz
+from backdrop.core.timeseries import timeseries, WEEK
 from tests.support.test_helpers import d, d_tz
 
 
@@ -14,6 +15,13 @@ class PeriodData(object):
 
     def data(self):
         return tuple(self._datum)
+
+    def fill_missing_weeks(self, start, end):
+        self._datum = timeseries(start=start,
+                                 end=end,
+                                 period=WEEK,
+                                 data=self._datum,
+                                 default={"_count": 0})
 
     def __create_datum(self, doc):
         if doc["_week_start_at"].weekday() is not 0:
@@ -38,10 +46,10 @@ class TestPeriodData(unittest.TestCase):
 
         assert_that(len(period_data.data()), is_(1))
         assert_that(period_data.data()[0], has_entry("_count", 42))
-        assert_that(period_data.data()[0],
-                    has_entry("_start_at", d_tz(2013, 5, 6)))
-        assert_that(period_data.data()[0],
-                    has_entry("_end_at", d_tz(2013, 5, 13)))
+        assert_that(period_data.data()[0], has_entry("_start_at",
+                                                     d_tz(2013, 5, 6)))
+        assert_that(period_data.data()[0], has_entry("_end_at",
+                                                     d_tz(2013, 5, 13)))
 
     def test_period_datum_week_start_at_should_be_monday(self):
         stub_doc = {
@@ -96,3 +104,20 @@ class TestPeriodData(unittest.TestCase):
             assert_that(False, "expected an exception")
         except AttributeError as e:
             assert_that(str(e), "'tuple' object has no attribute append")
+
+    def test_filling_data_for_missing_periods(self):
+        stub_doc_1 = {
+            "_week_start_at": d(2013, 4, 1),
+            "_count": 5
+        }
+        stub_doc_2 = {
+            "_week_start_at": d(2013, 4, 15),
+            "_count": 5
+        }
+        period_data = PeriodData()
+        period_data.add(stub_doc_1)
+        period_data.add(stub_doc_2)
+
+        period_data.fill_missing_weeks(d(2013, 4, 1), d(2013, 4, 16))
+
+        assert_that(period_data.data(), has_length(3))

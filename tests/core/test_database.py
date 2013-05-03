@@ -49,7 +49,7 @@ class TestRepository(unittest.TestCase):
         self.mongo = Mock()
         self.repo = Repository(self.mongo)
 
-    @patch('backdrop.core.time.now')
+    @patch('backdrop.core.backdrop_time.now')
     def test_save_document_adding_timestamps(self, now):
         now.return_value = d_tz(2013, 4, 9, 13, 32, 5)
 

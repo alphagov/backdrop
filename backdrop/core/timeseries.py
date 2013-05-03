@@ -1,5 +1,7 @@
 from datetime import timedelta, time
+import time as _time
 from dateutil.relativedelta import relativedelta, MO
+import pytz
 
 
 class Week(object):
@@ -28,13 +30,16 @@ class Week(object):
 
 WEEK = Week()
 
+def _time_to_index(dt):
+    return _time.mktime(dt.replace(tzinfo=pytz.utc).timetuple())
 
 def timeseries(start, end, period, data, default):
     data_by_start_at = _index_by_start_at(data)
 
     def entry(start, end):
-        if start in data_by_start_at:
-            return data_by_start_at[start]
+        time_index = _time_to_index(start)
+        if time_index in data_by_start_at:
+            return data_by_start_at[time_index]
         else:
             return _merge(default, _period_limits(start, end))
 
@@ -49,7 +54,7 @@ def _period_limits(start, end):
 
 
 def _index_by_start_at(data):
-    return dict((d["_start_at"], d) for d in data)
+    return dict((_time_to_index(d["_start_at"]), d) for d in data)
 
 
 def _period_range(start, stop, period):
