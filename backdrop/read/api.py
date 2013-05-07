@@ -74,14 +74,7 @@ def query(bucket_name):
         return jsonify(status='error', message=result.message), 400
 
     bucket = Bucket(db, bucket_name)
-    result_data = bucket.query(Query.parse(request.args))
-
-    if isinstance(result_data, PeriodData):
-        result_data = result_data.data()
-    if isinstance(result_data, SimpleData):
-        result_data = result_data.data()
-    if isinstance(result_data, WeeklyGroupedData):
-        result_data = result_data.data()
+    result_data = bucket.query(Query.parse(request.args)).data()
 
     # Taken from flask.helpers.jsonify to add JSONEncoder
     # NB. this can be removed once fix #471 works it's way into a release

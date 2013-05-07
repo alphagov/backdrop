@@ -52,7 +52,7 @@ class TestBucket(unittest.TestCase):
         ]
 
         query = Query.create(group_by="name")
-        query_result = self.bucket.query(query)
+        query_result = self.bucket.query(query).data()
 
         self.mock_repository.group.assert_called_once_with(
             "name", query, None, None, [])

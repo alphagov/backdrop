@@ -1,10 +1,8 @@
 from collections import namedtuple
-import datetime
 
 from dateutil import parser
 import pytz
-from backdrop.core.timeseries import timeseries, WEEK
-from backdrop.read.response import SimpleData, PeriodData, WeeklyGroupedData
+from backdrop.read.response import *
 
 
 def utc(dt):
@@ -128,11 +126,12 @@ class Query(_Query):
         return results
 
     def __execute_grouped_query(self, repository):
-        return repository.group(self.group_by,
-                                self,
-                                self.sort_by,
-                                self.limit,
-                                self.collect or [])
+        cursor = repository.group(self.group_by, self, self.sort_by,
+                                  self.limit, self.collect or [])
+
+        results = GroupedData()
+        [results.add(doc) for doc in cursor]
+        return results
 
     def __execute_period_query(self, repository):
         period_key = '_week_start_at'

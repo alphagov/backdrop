@@ -53,6 +53,17 @@ class PeriodData(object):
         return datum
 
 
+class GroupedData(object):
+    def __init__(self):
+        self._data = []
+
+    def add(self, document):
+        self._data.append(document)
+
+    def data(self):
+        return tuple(self._data)
+
+
 class WeeklyGroupedData(object):
     def __init__(self):
         self._data = []
