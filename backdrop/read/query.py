@@ -4,7 +4,7 @@ import datetime
 from dateutil import parser
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
-from backdrop.read.response import SimpleData, PeriodData
+from backdrop.read.response import SimpleData, PeriodData, WeeklyGroupedData
 
 
 def utc(dt):
@@ -130,6 +130,11 @@ class Query(_Query):
                           data=results,
                           default={"_count": 0})
 
+    def fill_missing_weeks(self, result):
+        for i, _ in enumerate(result):
+            result[i]['values'] = self._create_week_timeseries(
+                self.start_at, self.end_at, result[i]['values'])
+
     def __execute_weekly_group_query(self, repository):
         period_key = '_week_start_at'
         result = []
@@ -140,19 +145,13 @@ class Query(_Query):
             collect=self.collect or []
         )
 
-        for doc in cursor:
-            subgroup = doc.pop('_subgroup')
-            [self._ensure_monday(item['_week_start_at']) for item in subgroup]
-            doc['values'] = [self._period_group(item) for item in subgroup]
-
-            result.append(doc)
+        results = WeeklyGroupedData()
+        [results.add(doc) for doc in cursor]
 
         if self.start_at and self.end_at:
-            for i, _ in enumerate(result):
-                result[i]['values'] = self._create_week_timeseries(
-                    self.start_at, self.end_at, result[i]['values'])
+            self.fill_missing_weeks(results._data)
 
-        return result
+        return results
 
     def __execute_grouped_query(self, repository):
         return repository.group(self.group_by,

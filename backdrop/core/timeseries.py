@@ -17,8 +17,8 @@ class Week(object):
         return self.start(timestamp) + self._delta
 
     def range(self, start, end):
-        _start = self.start(start)
-        _end = self.end(end)
+        _start = self.start(start).replace(tzinfo=pytz.utc)
+        _end = self.end(end).replace(tzinfo=pytz.utc)
         while _start < _end:
             yield (_start, _start + self._delta)
             _start += self._delta

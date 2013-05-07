@@ -65,7 +65,19 @@ class WeeklyGroupedData(object):
         _datum.update({
             "values":
             [create_period_group(entry) for entry in datum["_subgroup"]]})
+        del datum['_subgroup']
+        _datum.update(datum)
         self._data.append(_datum)
 
     def data(self):
         return tuple(self._data)
+
+    def fill_missing_weeks(self, start_date, end_date):
+        for i, _ in enumerate(self._data):
+            self._data[i]['values'] = timeseries(
+                start=start_date,
+                end=end_date,
+                period=WEEK,
+                data=self._data[i]['values'],
+                default={"Pawel": "is lame lol"}
+            )

@@ -6,7 +6,7 @@ from bson import ObjectId
 from flask import Flask, jsonify, request
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
-from backdrop.read.response import SimpleData, PeriodData
+from backdrop.read.response import SimpleData, PeriodData, WeeklyGroupedData
 from backdrop.read.query import Query
 
 from .validation import validate_request_args
@@ -79,6 +79,8 @@ def query(bucket_name):
     if isinstance(result_data, PeriodData):
         result_data = result_data.data()
     if isinstance(result_data, SimpleData):
+        result_data = result_data.data()
+    if isinstance(result_data, WeeklyGroupedData):
         result_data = result_data.data()
 
     # Taken from flask.helpers.jsonify to add JSONEncoder

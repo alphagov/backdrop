@@ -1,7 +1,4 @@
-import datetime
-from dateutil.relativedelta import relativedelta, MO
 import pytz
-from backdrop.core.timeseries import timeseries, WEEK
 
 
 def utc(dt):

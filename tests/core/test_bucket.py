@@ -223,7 +223,7 @@ class TestBucket(unittest.TestCase):
             }
         ]
         query_result = self.bucket.query(
-            Query.create(period="week", group_by="some_group"))
+            Query.create(period="week", group_by="some_group")).data()
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
             "values": has_item({
@@ -294,7 +294,7 @@ class TestBucket(unittest.TestCase):
 
         query_result = self.bucket.query(Query.create(period="week", group_by="some_group",
                                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
-                                         end_at=d_tz(2013, 2, 4, 0, 0, 0)))
+                                         end_at=d_tz(2013, 2, 4, 0, 0, 0))).data()
 
         assert_that(query_result, has_item(has_entries({
             "some_group": "val1",
@@ -421,9 +421,9 @@ class TestBucket(unittest.TestCase):
             multi_group_results
 
         try:
-            self.bucket.query(Query.create(period='week', group_by='d'))
+            self.bucket.query(Query.create(period='week', group_by='d')).data()
             assert_that(False)
         except ValueError as e:
             assert_that(str(e), is_(
-                "Weeks MUST start on Monday. Corrupt Data: 2013-04-09 00:00:00"
+                "Weeks MUST start on Monday but got date: 2013-04-09 00:00:00"
             ))

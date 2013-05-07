@@ -69,3 +69,40 @@ class TestWeeklyGroupedData(unittest.TestCase):
         except ValueError as e:
             assert_that(str(e), is_("Expected subgroup to have "
                                     "keys '_count' and '_week_start_at'"))
+
+    def test_adding_additional_fields(self):
+        stub_document = {
+            "_subgroup": [{
+                "_count": 1,
+                "_week_start_at": d(2013, 4, 1)
+            }],
+            "some_stuff": "oo stuff"
+        }
+        data = WeeklyGroupedData()
+        data.add(stub_document)
+        assert_that(data.data()[0], has_entry("some_stuff", "oo stuff"))
+
+    def test_filling_data_for_missing_weeks(self):
+        stub_document = {
+            "_subgroup": [
+                {
+                    "_count": 1,
+                    "_week_start_at": d(2013, 4, 1)
+                },
+                {
+                    "_week_start_at": d(2013, 4, 15),
+                    "_count": 5
+                }
+            ]
+        }
+        data = WeeklyGroupedData()
+        data.add(stub_document)
+
+        data.fill_missing_weeks(d(2013, 4, 1), d(2013, 4, 16))
+
+        assert_that(data.data()[0]["values"], has_length(3))
+        assert_that(data.data()[0]["values"], has_items(
+            has_entry("_start_at", d_tz(2013, 4, 1)),
+            has_entry("_start_at", d_tz(2013, 4, 8)),
+            has_entry("_start_at", d_tz(2013, 4, 15))
+        ))
