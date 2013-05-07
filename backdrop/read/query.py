@@ -4,8 +4,7 @@ import datetime
 from dateutil import parser
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
-from tests.read.test_datum import SimpleData
-from tests.read.test_period_data import PeriodData
+from backdrop.read.response import SimpleData, PeriodData
 
 
 def utc(dt):

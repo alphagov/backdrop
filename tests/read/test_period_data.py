@@ -1,37 +1,7 @@
 import unittest
-import datetime
 from hamcrest import *
-import pytz
-from backdrop.core.timeseries import timeseries, WEEK
+from backdrop.read.response import PeriodData
 from tests.support.test_helpers import d, d_tz
-
-
-class PeriodData(object):
-    def __init__(self):
-        self._data = []
-
-    def add(self, document):
-        self._data.append(self.__create_datum(document))
-
-    def data(self):
-        return tuple(self._data)
-
-    def fill_missing_weeks(self, start, end):
-        self._data = timeseries(start=start,
-                                end=end,
-                                period=WEEK,
-                                data=self._data,
-                                default={"_count": 0})
-
-    def __create_datum(self, doc):
-        if doc["_week_start_at"].weekday() is not 0:
-            raise ValueError("Weeks MUST start on Monday but "
-                             "got date: %s" % doc["_week_start_at"])
-        datum = {}
-        datum["_start_at"] = doc["_week_start_at"].replace(tzinfo=pytz.utc)
-        datum["_end_at"] = datum["_start_at"] + datetime.timedelta(days=7)
-        datum["_count"] = doc["_count"]
-        return datum
 
 
 class TestPeriodData(unittest.TestCase):

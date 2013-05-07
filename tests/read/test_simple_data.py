@@ -1,21 +1,7 @@
 import unittest
 from hamcrest import *
-import pytz
+from backdrop.read.response import SimpleData
 from tests.support.test_helpers import d_tz, d
-
-
-class SimpleData(object):
-    def __init__(self):
-        self._data = []
-
-    def add(self, document):
-        if "_timestamp" in document:
-            document["_timestamp"] = \
-                document["_timestamp"].replace(tzinfo=pytz.utc)
-        self._data.append(document)
-
-    def data(self):
-        return tuple(self._data)
 
 
 class TestSimpleData(unittest.TestCase):

@@ -6,9 +6,8 @@ from bson import ObjectId
 from flask import Flask, jsonify, request
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
+from backdrop.read.response import SimpleData, PeriodData
 from backdrop.read.query import Query
-from tests.read.test_datum import SimpleData
-from tests.read.test_period_data import PeriodData
 
 from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
