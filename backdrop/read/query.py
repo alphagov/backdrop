@@ -110,34 +110,8 @@ class Query(_Query):
             result = self.__execute_query(repository)
         return result
 
-    def _period_group(self, doc):
-        start = utc(doc['_week_start_at'])
-        return {
-            '_start_at': start,
-            '_end_at': start + datetime.timedelta(days=7),
-            '_count': doc['_count']
-        }
-
-    def _ensure_monday(self, week_start_at):
-        if week_start_at.weekday() is not 0:
-            raise ValueError('Weeks MUST start on Monday. '
-                             'Corrupt Data: ' + str(week_start_at))
-
-    def _create_week_timeseries(self, start_at, end_at, results):
-        return timeseries(start=start_at,
-                          end=end_at,
-                          period=WEEK,
-                          data=results,
-                          default={"_count": 0})
-
-    def fill_missing_weeks(self, result):
-        for i, _ in enumerate(result):
-            result[i]['values'] = self._create_week_timeseries(
-                self.start_at, self.end_at, result[i]['values'])
-
     def __execute_weekly_group_query(self, repository):
         period_key = '_week_start_at'
-        result = []
 
         cursor = repository.multi_group(
             self.group_by, period_key, self,
@@ -149,7 +123,7 @@ class Query(_Query):
         [results.add(doc) for doc in cursor]
 
         if self.start_at and self.end_at:
-            self.fill_missing_weeks(results._data)
+            results.fill_missing_weeks(self.start_at, self.end_at)
 
         return results
 

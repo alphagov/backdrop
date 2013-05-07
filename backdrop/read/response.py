@@ -79,5 +79,5 @@ class WeeklyGroupedData(object):
                 end=end_date,
                 period=WEEK,
                 data=self._data[i]['values'],
-                default={"Pawel": "is lame lol"}
+                default={"_count": 0}
             )
