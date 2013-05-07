@@ -9,8 +9,7 @@ class TestSimpleData(unittest.TestCase):
         stub_document = {
             "_timestamp": d(2014, 1, 1)
         }
-        data = SimpleData()
-        data.add(stub_document)
+        data = SimpleData([stub_document])
         assert_that(data.data(), has_length(1))
         assert_that(data.data()[0], has_entry("_timestamp",
                                               d_tz(2014, 1, 1)))
@@ -19,8 +18,7 @@ class TestSimpleData(unittest.TestCase):
         stub_doc = {
             "_timestamp": d(2014, 1, 1)
         }
-        data = SimpleData()
-        data.add(stub_doc)
+        data = SimpleData([stub_doc])
         another_data = data.data()
         try:
             another_data.append({"even_more_nonsense": True})

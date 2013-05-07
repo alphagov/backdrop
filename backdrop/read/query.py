@@ -117,8 +117,7 @@ class Query(_Query):
             collect=self.collect or []
         )
 
-        results = WeeklyGroupedData()
-        [results.add(doc) for doc in cursor]
+        results = WeeklyGroupedData(cursor)
 
         if self.start_at and self.end_at:
             results.fill_missing_weeks(self.start_at, self.end_at)
@@ -129,8 +128,7 @@ class Query(_Query):
         cursor = repository.group(self.group_by, self, self.sort_by,
                                   self.limit, self.collect or [])
 
-        results = GroupedData()
-        [results.add(doc) for doc in cursor]
+        results = GroupedData(cursor)
         return results
 
     def __execute_period_query(self, repository):
@@ -141,8 +139,7 @@ class Query(_Query):
             sort=sort, limit=self.limit
         )
 
-        results = PeriodData()
-        [results.add(doc) for doc in cursor]
+        results = PeriodData(cursor)
 
         if self.start_at and self.end_at:
             results.fill_missing_weeks(self.start_at, self.end_at)
@@ -153,6 +150,5 @@ class Query(_Query):
         cursor = repository.find(
             self, sort=self.sort_by, limit=self.limit)
 
-        results = SimpleData()
-        [results.add(doc) for doc in cursor]
+        results = SimpleData(cursor)
         return results

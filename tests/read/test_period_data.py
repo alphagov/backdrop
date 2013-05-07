@@ -11,8 +11,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 42
         }
 
-        period_data = PeriodData()
-        period_data.add(stub_doc)
+        period_data = PeriodData([stub_doc])
 
         assert_that(len(period_data.data()), is_(1))
         assert_that(period_data.data()[0], has_entry("_count", 42))
@@ -28,8 +27,7 @@ class TestPeriodData(unittest.TestCase):
         }
 
         try:
-            period_data = PeriodData()
-            period_data.add(stub_doc)
+            period_data = PeriodData([stub_doc])
             assert_that(False, "expected exception")
         except ValueError as e:
             assert_that(str(e), is_("Weeks MUST start on Monday but got date:"
@@ -45,9 +43,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 66
         }
 
-        period_data = PeriodData()
-        period_data.add(stub_doc)
-        period_data.add(another_stub_doc)
+        period_data = PeriodData([stub_doc, another_stub_doc])
 
         assert_that(len(period_data.data()), is_(2))
 
@@ -66,8 +62,7 @@ class TestPeriodData(unittest.TestCase):
             "_week_start_at": d(2013, 5, 6),
             "_count": 42
         }
-        period_data = PeriodData()
-        period_data.add(stub_doc)
+        period_data = PeriodData([stub_doc])
         the_data = period_data.data()
         try:
             the_data.append({"nonsense": True})
@@ -84,9 +79,7 @@ class TestPeriodData(unittest.TestCase):
             "_week_start_at": d(2013, 4, 15),
             "_count": 5
         }
-        period_data = PeriodData()
-        period_data.add(stub_doc_1)
-        period_data.add(stub_doc_2)
+        period_data = PeriodData([stub_doc_1, stub_doc_2])
 
         period_data.fill_missing_weeks(d(2013, 4, 1), d(2013, 4, 16))
 

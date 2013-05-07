@@ -18,10 +18,12 @@ def create_period_group(doc):
 
 
 class SimpleData(object):
-    def __init__(self):
+    def __init__(self, cursor):
         self._data = []
+        for doc in cursor:
+            self.__add(doc)
 
-    def add(self, document):
+    def __add(self, document):
         if "_timestamp" in document:
             document["_timestamp"] = \
                 document["_timestamp"].replace(tzinfo=pytz.utc)
@@ -32,10 +34,12 @@ class SimpleData(object):
 
 
 class PeriodData(object):
-    def __init__(self):
+    def __init__(self, cursor):
         self._data = []
+        for doc in cursor:
+            self.__add(doc)
 
-    def add(self, document):
+    def __add(self, document):
         self._data.append(self.__create_datum(document))
 
     def data(self):
@@ -54,10 +58,12 @@ class PeriodData(object):
 
 
 class GroupedData(object):
-    def __init__(self):
+    def __init__(self, cursor):
         self._data = []
+        for doc in cursor:
+            self.__add(doc)
 
-    def add(self, document):
+    def __add(self, document):
         self._data.append(document)
 
     def data(self):
@@ -65,10 +71,12 @@ class GroupedData(object):
 
 
 class WeeklyGroupedData(object):
-    def __init__(self):
+    def __init__(self, cursor):
         self._data = []
+        for doc in cursor:
+            self.__add(doc)
 
-    def add(self, datum):
+    def __add(self, datum):
         if "_subgroup" not in datum:
             raise ValueError("Expected document to have key '_subgroup'")
 
