@@ -2,6 +2,7 @@ import datetime
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
 
+
 def create_period_group(doc):
     if "_week_start_at" not in doc or "_count" not in doc:
         raise ValueError("Expected subgroup to have keys '_count'"
@@ -14,6 +15,7 @@ def create_period_group(doc):
     datum["_end_at"] = datum["_start_at"] + datetime.timedelta(days=7)
     datum["_count"] = doc["_count"]
     return datum
+
 
 class SimpleData(object):
     def __init__(self):
@@ -60,10 +62,9 @@ class WeeklyGroupedData(object):
             raise ValueError("Expected document to have key '_subgroup'")
 
         _datum = {}
-        _datum.update({"values":
-                           [create_period_group(entry)
-                            for entry
-                            in datum["_subgroup"]]})
+        _datum.update({
+            "values":
+            [create_period_group(entry) for entry in datum["_subgroup"]]})
         self._data.append(_datum)
 
     def data(self):
