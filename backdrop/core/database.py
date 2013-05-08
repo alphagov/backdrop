@@ -1,30 +1,6 @@
 from bson import Code
 import pymongo
-from backdrop.core import time as backdrop_time
-
-
-def build_query(**params):
-    def ensure_has_timestamp(q):
-        if '_timestamp' not in q:
-            q['_timestamp'] = {}
-        return q
-
-    query = {}
-    if 'start_at' in params:
-        query = ensure_has_timestamp(query)
-        query['_timestamp']['$gte'] = params['start_at']
-    if 'end_at' in params:
-        query = ensure_has_timestamp(query)
-        query['_timestamp']['$lt'] = params['end_at']
-
-    if 'filter_by' in params:
-        for key, value in params['filter_by']:
-            if value == "false":
-                value = False
-            if value == "true":
-                value = True
-            query[key] = value
-    return query
+from backdrop.core import backdrop_time as backdrop_time
 
 
 class Database(object):
@@ -120,12 +96,17 @@ class Repository(object):
 
         self._validate_sort(sort)
 
-        return self._mongo.find(query, sort, limit)
+        return self._mongo.find(query.to_mongo_query(), sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
             self._validate_sort(sort)
-        return self._group([group_by], query, sort, limit, collect or [])
+        return self._group(
+            [group_by],
+            query.to_mongo_query(),
+            sort,
+            limit,
+            collect or [])
 
     def save(self, obj):
         obj['_updated_at'] = backdrop_time.now()
@@ -135,7 +116,12 @@ class Repository(object):
                     sort=None, limit=None, collect=None):
         if key1 == key2:
             raise GroupingError("Cannot group on two equal keys")
-        results = self._group([key1, key2], query, sort, limit, collect or [])
+        results = self._group(
+            [key1, key2],
+            query.to_mongo_query(),
+            sort,
+            limit,
+            collect or [])
 
         return results
 

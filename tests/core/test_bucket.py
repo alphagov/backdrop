@@ -1,11 +1,9 @@
-import pprint
 import unittest
-import datetime
 from hamcrest import *
 from mock import Mock, call
-import pytz
 from backdrop.core import bucket
 from backdrop.core.records import Record
+from backdrop.read.query import Query
 from tests.support.test_helpers import d, d_tz
 
 
@@ -44,7 +42,7 @@ class TestBucket(unittest.TestCase):
         ])
 
     def test_filter_by_query(self):
-        self.bucket.query(filter_by=[['name', 'Chico']])
+        self.bucket.query(Query.create(filter_by=[['name', 'Chico']]))
         self.mock_repository.find.assert_called_once()
 
     def test_group_by_query(self):
@@ -53,10 +51,11 @@ class TestBucket(unittest.TestCase):
             {"name": "Gareth", "_count": 2 }
         ]
 
-        query_result = self.bucket.query(group_by = "name")
+        query = Query.create(group_by="name")
+        query_result = self.bucket.query(query).data()
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, None, None, [])
+            "name", query, None, None, [])
 
         assert_that(query_result,
                     has_item(has_entries({'name': equal_to('Max'),
@@ -66,74 +65,62 @@ class TestBucket(unittest.TestCase):
                                           '_count': equal_to(2)})))
 
     def test_sorted_group_by_query(self):
-        self.bucket.query(
-            group_by="name",
-            sort_by=["name", "ascending"]
-        )
+        query = Query.create(group_by="name",
+                             sort_by=["name", "ascending"])
+        self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, ["name", "ascending"], None, [])
+            "name", query, ["name", "ascending"], None, [])
 
     def test_sorted_group_by_query_with_limit(self):
-        self.bucket.query(
-            group_by="name",
-            sort_by=["name", "ascending"],
-            limit=100
-        )
+        query = Query.create(group_by="name",
+                             sort_by=["name", "ascending"], limit=100)
+        self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, ["name", "ascending"], 100, [])
+            "name", query, ["name", "ascending"], 100, [])
 
     def test_group_by_query_with_collect(self):
-        self.bucket.query(
-            group_by="name",
-            sort_by=None,
-            limit=None,
-            collect=["key"]
-        )
+        query = Query.create(group_by="name", sort_by=None, limit=None,
+                             collect=["key"])
+        self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
-            "name", {}, None, None, ["key"])
+            "name", query, None, None, ["key"])
 
     def test_query_with_start_at(self):
-        self.bucket.query(start_at = d(2013, 4, 1, 12, 0, 0))
+        query = Query.create(start_at=d(2013, 4, 1, 12, 0, 0))
+        self.bucket.query(query)
         self.mock_repository.find.assert_called_with(
-            {"_timestamp": {"$gte": d(2013, 4, 1, 12, 0, 0)}},
-            sort=None, limit=None)
+            query, sort=None, limit=None)
 
     def test_query_with_end_at(self):
-        self.bucket.query(end_at = d(2013, 4, 1, 12, 0, 0))
+        query = Query.create(end_at=d(2013, 4, 1, 12, 0, 0))
+        self.bucket.query(query)
 
         self.mock_repository.find.assert_called_with(
-            {"_timestamp": {"$lt": d(2013, 4, 1, 12, 0, 0)}},
-            sort=None, limit=None)
+            query, sort=None, limit=None)
 
     def test_query_with_start_at_and__end_at(self):
-        self.bucket.query(
-            end_at = d(2013, 3, 1, 12, 0, 0),
-            start_at = d(2013, 2, 1, 12, 0, 0)
-        )
+        query = Query.create(end_at=d(2013, 3, 1, 12, 0, 0),
+                             start_at=d(2013, 2, 1, 12, 0, 0))
+        self.bucket.query(query)
 
-        self.mock_repository.find.assert_called_with({
-            "_timestamp": {
-                "$gte": d(2013, 2, 1, 12, 0, 0),
-                "$lt": d(2013, 3, 1, 12, 0, 0)
-            }
-        }, sort=None, limit=None)
+        self.mock_repository.find.assert_called_with(query, sort=None, limit=None)
 
     def test_query_with_sort(self):
-        self.bucket.query(
-            sort_by=["keyname", "descending"]
-        )
+        query = Query.create(sort_by=["keyname", "descending"])
+        self.bucket.query(query)
 
         self.mock_repository.find.assert_called_with(
-            {}, sort=["keyname", "descending"], limit=None
+            query, sort=["keyname", "descending"], limit=None
         )
 
     def test_query_with_limit(self):
-        self.bucket.query(limit=5)
+        query = Query.create(limit=5)
+        self.bucket.query(query)
 
-        self.mock_repository.find.assert_called_with({}, sort=None, limit=5)
+        self.mock_repository.find.assert_called_with(query, sort=None, limit=5)
 
     def test_week_query(self):
         self.mock_repository.group.return_value = [
@@ -141,10 +128,11 @@ class TestBucket(unittest.TestCase):
             {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "_count": 1 },
         ]
 
-        query_result = self.bucket.query(period='week')
+        query = Query.create(period='week')
+        query_result = self.bucket.query(query).data()
 
         self.mock_repository.group.assert_called_once_with(
-            "_week_start_at", {}, sort=['_week_start_at', 'ascending'],
+            "_week_start_at", query, sort=['_week_start_at', 'ascending'],
             limit=None)
 
         assert_that(query_result, has_length(2))
@@ -162,10 +150,11 @@ class TestBucket(unittest.TestCase):
     def test_week_query_with_limit(self):
         self.mock_repository.group.return_value = []
 
-        self.bucket.query(period='week', limit=1)
+        query = Query.create(period='week', limit=1)
+        self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
-            "_week_start_at", {}, sort=['_week_start_at', 'ascending'],
+            "_week_start_at", query, sort=['_week_start_at', 'ascending'],
             limit=1)
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
@@ -177,7 +166,7 @@ class TestBucket(unittest.TestCase):
         self.assertRaises(
             ValueError,
             self.bucket.query,
-            period='week'
+            Query.create(period='week')
         )
 
     def test_period_query_adds_missing_periods_in_correct_order(self):
@@ -187,11 +176,11 @@ class TestBucket(unittest.TestCase):
             {"_week_start_at": d(2013, 2,  4, 0, 0, 0), "_count": 17},
         ]
 
-        result = self.bucket.query(period='week',
+        result = self.bucket.query(Query.create(period='week',
                                    start_at=d_tz(2013, 1, 7, 0, 0, 0),
-                                   end_at=d_tz(2013, 2, 18, 0, 0, 0))
+                                   end_at=d_tz(2013, 2, 18, 0, 0, 0)))
 
-        assert_that(result, contains(
+        assert_that(result.data(), contains(
             has_entries({"_start_at": d_tz(2013, 1,  7), "_count": 0}),
             has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 32}),
             has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 45}),
@@ -233,7 +222,8 @@ class TestBucket(unittest.TestCase):
                 ]
             }
         ]
-        query_result = self.bucket.query(period="week", group_by="some_group")
+        query_result = self.bucket.query(
+            Query.create(period="week", group_by="some_group")).data()
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
             "values": has_item({
@@ -302,9 +292,9 @@ class TestBucket(unittest.TestCase):
             }
         ]
 
-        query_result = self.bucket.query(period="week", group_by="some_group",
+        query_result = self.bucket.query(Query.create(period="week", group_by="some_group",
                                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
-                                         end_at=d_tz(2013, 2, 4, 0, 0, 0))
+                                         end_at=d_tz(2013, 2, 4, 0, 0, 0))).data()
 
         assert_that(query_result, has_item(has_entries({
             "some_group": "val1",
@@ -360,16 +350,14 @@ class TestBucket(unittest.TestCase):
             },
         ]
 
-        self.bucket.query(
-            period="week",
-            group_by="some_group",
-            sort_by=["_count", "descending"]
-        )
+        query = Query.create(period="week", group_by="some_group",
+                                    sort_by=["_count", "descending"])
+        self.bucket.query(query)
 
         self.mock_repository.multi_group.assert_called_with(
             "some_group",
             "_week_start_at",
-            {},
+            query,
             sort=["_count", "descending"],
             limit=None,
             collect=[]
@@ -394,18 +382,15 @@ class TestBucket(unittest.TestCase):
             }
         ]
 
-        self.bucket.query(
-            period="week",
-            group_by="some_group",
-            sort_by=["_count", "descending"],
-            limit=1,
-            collect=[]
-        )
+        query = Query.create(period="week", group_by="some_group",
+                                    sort_by=["_count", "descending"], limit=1,
+                                    collect=[])
+        self.bucket.query(query)
 
         self.mock_repository.multi_group.assert_called_with(
             "some_group",
             "_week_start_at",
-            {},
+            query,
             sort=["_count", "descending"],
             limit=1,
             collect=[])
@@ -436,9 +421,9 @@ class TestBucket(unittest.TestCase):
             multi_group_results
 
         try:
-            self.bucket.query(period='week', group_by='d')
+            self.bucket.query(Query.create(period='week', group_by='d')).data()
             assert_that(False)
         except ValueError as e:
             assert_that(str(e), is_(
-                "Weeks MUST start on Monday. Corrupt Data: 2013-04-09 00:00:00"
+                "Weeks MUST start on Monday but got date: 2013-04-09 00:00:00"
             ))

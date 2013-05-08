@@ -3,6 +3,7 @@ from hamcrest import assert_that, is_
 from mock import Mock, patch
 from backdrop.core import database
 from backdrop.core.database import Repository, InvalidSortError
+from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
 
@@ -48,7 +49,7 @@ class TestRepository(unittest.TestCase):
         self.mongo = Mock()
         self.repo = Repository(self.mongo)
 
-    @patch('backdrop.core.time.now')
+    @patch('backdrop.core.backdrop_time.now')
     def test_save_document_adding_timestamps(self, now):
         now.return_value = d_tz(2013, 4, 9, 13, 32, 5)
 
@@ -65,7 +66,9 @@ class TestRepository(unittest.TestCase):
     def test_find(self):
         self.mongo.find.return_value = "a_cursor"
 
-        results = self.repo.find({"plays": "guitar"}, ["name", "ascending"])
+        results = self.repo.find(
+            Query.create(filter_by=[["plays", "guitar"]]),
+            sort= ["name", "ascending"])
 
         self.mongo.find.assert_called_once_with({"plays": "guitar"},
                                                 ["name", "ascending"], None)
@@ -74,7 +77,9 @@ class TestRepository(unittest.TestCase):
     def test_find_with_descending_sort(self):
         self.mongo.find.return_value = "a_cursor"
 
-        results = self.repo.find({"plays": "guitar"}, ["name", "descending"])
+        results = self.repo.find(
+            Query.create(filter_by=[["plays", "guitar"]]),
+            sort= ["name", "descending"])
 
         self.mongo.find.assert_called_once_with({"plays": "guitar"},
                                                 ["name", "descending"], None)
@@ -83,7 +88,8 @@ class TestRepository(unittest.TestCase):
     def test_find_with_default_sorting(self):
         self.mongo.find.return_value = "a_cursor"
 
-        results = self.repo.find({"plays": "guitar"})
+        results = self.repo.find(
+            Query.create(filter_by=[["plays", "guitar"]]))
 
         self.mongo.find.assert_called_once_with({"plays": "guitar"},
                                                 ["_timestamp", "ascending"],
@@ -93,7 +99,8 @@ class TestRepository(unittest.TestCase):
     def test_find_with_limit(self):
         self.mongo.find.return_value = "a_cursor"
 
-        results = self.repo.find({"plays": "guitar"}, limit=10)
+        results = self.repo.find(
+            Query.create(filter_by=[["plays", "guitar"]]), limit=10)
 
         self.mongo.find.assert_called_once_with({"plays": "guitar"},
                                                 ["_timestamp", "ascending"],
@@ -104,12 +111,12 @@ class TestRepository(unittest.TestCase):
         self.assertRaises(
             InvalidSortError,
             self.repo.find,
-            {}, ["a_key"]
+            Query.create(), ["a_key"]
         )
 
     def test_sort_raises_error_if_sort_direction_invalid(self):
         self.assertRaises(
             InvalidSortError,
             self.repo.find,
-            {}, ["a_key", "blah"]
+            Query.create(), ["a_key", "blah"]
         )

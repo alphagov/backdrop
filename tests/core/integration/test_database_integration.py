@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 from backdrop.core.database import Repository, GroupingError, \
     InvalidSortError, MongoDriver, Database
+from backdrop.read.query import Query
 from tests.support.test_helpers import d, d_tz
 
 HOST = 'localhost'
@@ -16,7 +17,7 @@ BUCKET = 'test_repository_integration'
 
 class TestMongoDriver(unittest.TestCase):
     def setUp(self):
-        self.repo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        self.mongo_driver = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
 
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
         self.mongo_collection.drop()
@@ -25,8 +26,8 @@ class TestMongoDriver(unittest.TestCase):
         thing_to_save = {'name': 'test_document'}
         another_thing_to_save = {'name': '2nd_test_document'}
 
-        self.repo.save(thing_to_save)
-        self.repo.save(another_thing_to_save)
+        self.mongo_driver.save(thing_to_save)
+        self.mongo_driver.save(another_thing_to_save)
 
         results = self.mongo_collection.find()
         assert_that(results, has_item(thing_to_save))
@@ -36,8 +37,8 @@ class TestMongoDriver(unittest.TestCase):
         a_document = {"_id": "event1", "title": "I'm an event"}
         updated_document = {"_id": "event1", "title": "I'm another event"}
 
-        self.repo.save(a_document)
-        self.repo.save(updated_document)
+        self.mongo_driver.save(a_document)
+        self.mongo_driver.save(updated_document)
 
         saved_documents = self.mongo_collection.find()
 
@@ -46,8 +47,9 @@ class TestMongoDriver(unittest.TestCase):
     def test_find(self):
         self._setup_people()
 
-        results = self.repo.find(query={"plays": "guitar"},
-                                 sort=["name", "ascending"], limit=None)
+        results = self.mongo_driver.find(query={"plays": "guitar"},
+                                         sort=["name", "ascending"],
+                                         limit=None)
 
         assert_that(results, contains(
             has_entries({"name": "George", "plays": "guitar"}),
@@ -57,8 +59,9 @@ class TestMongoDriver(unittest.TestCase):
     def test_find_sort_descending(self):
         self._setup_people()
 
-        results = self.repo.find(query={"plays": "guitar"},
-                                 sort=["name", "descending"], limit=None)
+        results = self.mongo_driver.find(query={"plays": "guitar"},
+                                         sort=["name", "descending"],
+                                         limit=None)
 
         assert_that(results, contains(
             has_entries({"name": "John", "plays": "guitar"}),
@@ -68,8 +71,9 @@ class TestMongoDriver(unittest.TestCase):
     def test_find_with_limit(self):
         self._setup_people()
 
-        results = self.repo.find(query={"plays": {"$ne": "guitar"}},
-                                 sort=["name", "descending"], limit=1)
+        results = self.mongo_driver.find(query={"plays": {"$ne": "guitar"}},
+                                         sort=["name", "descending"],
+                                         limit=1)
 
         assert_that(results, contains(
             has_entries({"name": "Ringo", "plays": "drums"})
@@ -78,7 +82,7 @@ class TestMongoDriver(unittest.TestCase):
     def test_group(self):
         self._setup_musical_instruments()
 
-        results = self.repo.group(keys=["type"], query={}, collect=[])
+        results = self.mongo_driver.group(keys=["type"], query={}, collect=[])
 
         assert_that(results, contains_inanyorder(
             has_entries({"_count": is_(2), "type": "wind"}),
@@ -88,8 +92,9 @@ class TestMongoDriver(unittest.TestCase):
     def test_group_with_query(self):
         self._setup_musical_instruments()
 
-        results = self.repo.group(keys=["type"], query={"range": "high"},
-                                  collect=[])
+        results = self.mongo_driver.group(keys=["type"],
+                                          query={"range": "high"},
+                                          collect=[])
 
         assert_that(results, contains_inanyorder(
             has_entries({"_count": is_(1), "type": "wind"}),
@@ -99,7 +104,7 @@ class TestMongoDriver(unittest.TestCase):
     def test_group_and_collect_additional_properties(self):
         self._setup_musical_instruments()
 
-        results = self.repo.group(keys=["type"], query={}, collect=["range"])
+        results = self.mongo_driver.group(keys=["type"], query={}, collect=["range"])
 
         assert_that(results, contains(
             has_entries(
@@ -118,7 +123,7 @@ class TestMongoDriver(unittest.TestCase):
         self.mongo_collection.save({"foo": "two", "bar": True})
         self.mongo_collection.save({"foo": "one", "bar": False})
 
-        results = self.repo.group(["foo"], {}, ["bar"])
+        results = self.mongo_driver.group(["foo"], {}, ["bar"])
 
         assert_that(results, contains(
             has_entries({
@@ -132,7 +137,7 @@ class TestMongoDriver(unittest.TestCase):
     def test_group_without_keys(self):
         self._setup_people()
 
-        results = self.repo.group(keys=[], query={}, collect=[])
+        results = self.mongo_driver.group(keys=[], query={}, collect=[])
 
         assert_that(results, contains(
             has_entries({"_count": is_(4)}),
@@ -143,7 +148,7 @@ class TestMongoDriver(unittest.TestCase):
         self._setup_people()
         self.mongo_collection.save({"name": "Yoko"})
 
-        results = self.repo.group(keys=["plays"], query={}, collect=[])
+        results = self.mongo_driver.group(keys=["plays"], query={}, collect=[])
 
         assert_that(results, contains(
             has_entries({"_count": is_(2), "plays": "guitar"}),
@@ -207,7 +212,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_group(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("place", {})
+        results = self.repo.group("place", Query.create())
 
         assert_that(results, only_contains(
             has_entries({"place": "Kettering", "_count": 3}),
@@ -218,7 +223,8 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_group_with_query(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("place", {"person": "John"})
+        results = self.repo.group("place",
+                                  Query.create(filter_by= [["person", "John"]]))
 
         assert_that(results, only_contains(
             {"place": "Kettering", "_count": 2},
@@ -228,7 +234,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_key1_is_pulled_to_the_top_of_outer_group(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("_week_start_at", "person", {})
+        results = self.repo.multi_group("_week_start_at", "person", Query.create())
 
         assert_that(results, has_item(has_entry(
             "_week_start_at", d(2013, 3, 11)
@@ -240,7 +246,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_should_use_second_key_for_inner_group_name(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("_week_start_at", "person", {})
+        results = self.repo.multi_group("_week_start_at", "person", Query.create())
 
         assert_that(results, has_item(has_entry(
             "_subgroup", has_item(has_entry("person", "Jill"))
@@ -249,7 +255,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_count_of_outer_elements_should_be_added(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("_week_start_at", "person", {})
+        results = self.repo.multi_group("_week_start_at", "person", Query.create())
 
         assert_that(results, has_item(has_entry(
             "_count", 1
@@ -258,7 +264,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_grouping_by_multiple_keys(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("person", "place", {})
+        results = self.repo.multi_group("person", "place", Query.create())
 
         assert_that(results, has_item({
             "person": "Jack",
@@ -289,7 +295,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_grouping_with_collect(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("person", {}, None, None, ["place"])
+        results = self.repo.group("person", Query.create(), None, None, ["place"])
 
         assert_that(results, has_item(has_entries({
             "person": "John",
@@ -299,7 +305,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_another_grouping_with_collect(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("place", {}, None, None, ["person"])
+        results = self.repo.group("place", Query.create(), None, None, ["person"])
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
@@ -309,7 +315,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_grouping_with_collect_two_fields(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("place", {}, None, None, ["person", "hair"])
+        results = self.repo.group("place", Query.create(), None, None, ["person", "hair"])
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
@@ -320,33 +326,32 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_grouping_on_non_existent_keys(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("wibble", {})
+        results = self.repo.group("wibble", Query.create())
 
         assert_that(results, is_([]))
 
     def test_multi_grouping_on_non_existent_keys(self):
         self.setUpPeopleLocationData()
 
-        result1 = self.repo.multi_group("wibble", "wobble", {})
-        result2 = self.repo.multi_group("wibble", "person", {})
-        result3 = self.repo.multi_group("person", "wibble", {})
+        result1 = self.repo.multi_group("wibble", "wobble", Query.create())
+        result2 = self.repo.multi_group("wibble", "person", Query.create())
+        result3 = self.repo.multi_group("person", "wibble", Query.create())
 
         assert_that(result1, is_([]))
         assert_that(result2, is_([]))
         assert_that(result3, is_([]))
 
     def test_multi_grouping_on_empty_collection_returns_empty_list(self):
-        assert_that(list(self.mongo_collection.find({})), is_([]))
-        assert_that(self.repo.multi_group('a', 'b', {}), is_([]))
+        assert_that(self.repo.multi_group('a', 'b', Query.create()), is_([]))
 
     def test_multi_grouping_on_same_key_raises_exception(self):
         self.assertRaises(GroupingError, self.repo.multi_group,
-                          "person", "person", {})
+                          "person", "person", Query.create())
 
     def test_multi_group_is_sorted_by_inner_key(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("person", "_week_start_at", {})
+        results = self.repo.multi_group("person", "_week_start_at", Query.create())
 
         assert_that(results, has_item(has_entries({
             "person": "John",
@@ -359,7 +364,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_sorted_multi_group_query_ascending(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("person", "_week_start_at", {},
+        results = self.repo.multi_group("person", "_week_start_at", Query.create(),
                                         sort=["_count", "ascending"])
 
         assert_that(results, contains(
@@ -372,7 +377,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_sorted_multi_group_query_descending(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.multi_group("person", "_week_start_at", {},
+        results = self.repo.multi_group("person", "_week_start_at", Query.create(),
                                         sort=["_count", "descending"])
 
         assert_that(results, contains(
@@ -388,7 +393,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.multi_group(
             "person",
             "_week_start_at",
-            {},
+            Query.create(),
             sort=["_count", "ascending"],
             limit=2
         )
@@ -404,7 +409,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.multi_group(
             "person",
             "_week_start_at",
-            {},
+            Query.create(),
             sort=["_count", "descending"],
             limit=2
         )
@@ -420,7 +425,7 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
         results = self.repo.multi_group(
             "place",
             "_week_start_at",
-            {},
+            Query.create(),
             collect=["person"]
         )
 
@@ -442,7 +447,7 @@ class TestRepositoryIntegration_MultiGroupWithMissingFields(
             "bar": "2"
         })
 
-        result = self.repo.multi_group("_week_start_at", "bar", {})
+        result = self.repo.multi_group("_week_start_at", "bar", Query.create())
 
         assert_that(result, is_([]))
 
@@ -461,7 +466,7 @@ class TestRepositoryIntegration_MultiGroupWithMissingFields(
             "bar": "2"
         })
 
-        result = self.repo.multi_group("_week_start_at", "bar", {},
+        result = self.repo.multi_group("_week_start_at", "bar", Query.create(),
                                        collect=["foo"])
 
         assert_that(result, has_item(has_entry("_count", 1)))
@@ -482,7 +487,8 @@ class TestRepositoryIntegration_MultiGroupWithMissingFields(
             "bar": "2"
         })
 
-        result = self.repo.multi_group("_week_start_at", "bar", {"bar": "2"},
+        result = self.repo.multi_group("_week_start_at", "bar",
+                                       Query.create(filter_by= [["bar", "2"]]),
                                        collect=["foo"])
 
         assert_that(result, has_item(has_entry("_count", 1)))
@@ -508,7 +514,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.mongo_collection.save({"_timestamp": d(2012, 12, 12)})
         self.mongo_collection.save({"_timestamp": d(2012, 12, 16)})
 
-        result = self.repo.find({})
+        result = self.repo.find(Query.create())
 
         assert_that(list(result), contains(
             has_entry("_timestamp", d(2012, 12, 12)),
@@ -521,7 +527,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.mongo_collection.save({"value": 2})
         self.mongo_collection.save({"value": 9})
 
-        result = self.repo.find({}, sort=["value", "ascending"])
+        result = self.repo.find(Query.create(), sort=["value", "ascending"])
 
         assert_that(list(result), contains(
             has_entry('value', 2),
@@ -532,7 +538,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def test_sorted_query_descending(self):
         self.setup_numeric_values()
 
-        result = self.repo.find({}, sort=["value", "descending"])
+        result = self.repo.find(Query.create(), sort=["value", "descending"])
 
         assert_that(list(result), contains(
             has_entry('value', 9),
@@ -546,7 +552,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.assertRaises(
             InvalidSortError,
             self.repo.find,
-            {}, sort=["value", "coolness"])
+            Query.create(), sort=["value", "coolness"])
 
     def test_sorted_query_not_enough_args(self):
         self.setup_numeric_values()
@@ -554,14 +560,14 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.assertRaises(
             InvalidSortError,
             self.repo.find,
-            {}, sort=["value"])
+            Query.create(), sort=["value"])
 
     def test_sorted_query_with_alphanumeric(self):
         self.mongo_collection.save({'val': 'a'})
         self.mongo_collection.save({'val': 'b'})
         self.mongo_collection.save({'val': 'c'})
 
-        result = self.repo.find({}, sort=['val', 'descending'])
+        result = self.repo.find(Query.create(), sort=['val', 'descending'])
         assert_that(list(result), contains(
             has_entry('val', 'c'),
             has_entry('val', 'b'),
@@ -571,7 +577,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def test_sorted_group_ascending(self):
         self.setup_playing_cards()
 
-        result = self.repo.group("suite", {}, sort=["suite", "ascending"])
+        result = self.repo.group("suite", Query.create(), sort=["suite", "ascending"])
 
         assert_that(list(result), contains(
             has_entry("suite", "clubs"),
@@ -582,7 +588,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
     def test_sorted_group_descending(self):
         self.setup_playing_cards()
 
-        result = self.repo.group("suite", {}, sort=["suite", "descending"])
+        result = self.repo.group("suite", Query.create(), sort=["suite", "descending"])
 
         assert_that(list(result), contains(
             has_entry("suite", "hearts"),
@@ -596,7 +602,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.assertRaises(
             InvalidSortError,
             self.repo.group,
-            "suite", {}, sort=["suite", "coolness"])
+            "suite", Query.create(), sort=["suite", "coolness"])
 
     def test_sorted_group_not_enough_args(self):
         self.setup_playing_cards()
@@ -604,12 +610,12 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.assertRaises(
             InvalidSortError,
             self.repo.group,
-            "suite", {}, sort=["suite"])
+            "suite", Query.create(), sort=["suite"])
 
     def test_sorted_group_by_count(self):
         self.setup_playing_cards()
 
-        result = self.repo.group("suite", {}, sort=["_count", "ascending"])
+        result = self.repo.group("suite", Query.create(), sort=["_count", "ascending"])
 
         assert_that(list(result), contains(
             has_entry("suite", "diamonds"),
@@ -623,14 +629,14 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.assertRaises(
             InvalidSortError,
             self.repo.group,
-            "suite", {}, sort=["bleh", "ascending"]
+            "suite", Query.create(), sort=["bleh", "ascending"]
         )
 
     def test_sorted_group_by_with_limit(self):
         self.setup_playing_cards()
 
         result = self.repo.group(
-            "suite", {}, sort=["_count", "ascending"], limit=1)
+            "suite", Query.create(), sort=["_count", "ascending"], limit=1)
 
         assert_that(list(result), contains(
             has_entry("suite", "diamonds")
@@ -641,7 +647,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.mongo_collection.save({"value": 2})
         self.mongo_collection.save({"value": 9})
 
-        result = self.repo.find({}, limit=2)
+        result = self.repo.find(Query.create(), limit=2)
 
         assert_that(result.count(with_limit_and_skip=True), is_(2))
 
@@ -650,7 +656,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         self.mongo_collection.save({"value": 2})
         self.mongo_collection.save({"value": 9})
 
-        result = self.repo.find({}, sort=["value", "ascending"], limit=1)
+        result = self.repo.find(Query.create(), sort=["value", "ascending"], limit=1)
 
         assert_that(result.count(with_limit_and_skip=True), is_(1))
         assert_that(list(result)[0], has_entry('value', 2))
@@ -664,7 +670,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
             "foo": "bar2"
         })
 
-        result = self.repo.group('_week_start_at', {})
+        result = self.repo.group('_week_start_at', Query.create())
 
         assert_that(result, has_item(has_entry("_count", 1)))
 
