@@ -6,12 +6,6 @@ from tests.support.validity_matcher import is_invalid_with_message, is_valid
 
 
 class TestValidationOfQueriesAccessingRawData(TestCase):
-    def setUp(self):
-        api.app.config['PREVENT_RAW_QUERIES'] = True
-
-    def tearDown(self):
-        api.app.config['PREVENT_RAW_QUERIES'] = False
-
     def test_non_aggregate_queries_are_invalid(self):
         validation_result = validate_request_args({})
         assert_that(validation_result, is_invalid_with_message(

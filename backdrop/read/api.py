@@ -68,7 +68,10 @@ def health_check():
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
-    result = validate_request_args(request.args)
+    allow_raw_queries = not bool(app.config['PREVENT_RAW_QUERIES'])
+
+    result = validate_request_args(request.args, allow_raw_queries)
+
     if not result.is_valid:
         app.logger.error(result.message)
         return jsonify(status='error', message=result.message), 400

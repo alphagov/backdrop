@@ -9,7 +9,7 @@ from tests.support.validity_matcher import is_invalid_with_message, is_valid
 def validate_request_args(request_args):
     if not isinstance(request_args, MultiDict):
         request_args = MultiDict(request_args)
-    return _validate_request_args(request_args)
+    return _validate_request_args(request_args, raw_queries_allowed=True)
 
 
 class TestRequestValidation(TestCase):
