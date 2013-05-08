@@ -46,6 +46,10 @@ class JsonEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def raw_queries_allowed(bucket_name):
+    return bool(app.config['RAW_QUERIES_ALLOWED'].get(bucket_name, False))
+
+
 @app.errorhandler(500)
 @app.errorhandler(405)
 @app.errorhandler(404)
@@ -68,9 +72,8 @@ def health_check():
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
-    allow_raw_queries = not bool(app.config['PREVENT_RAW_QUERIES'])
-
-    result = validate_request_args(request.args, allow_raw_queries)
+    result = validate_request_args(request.args,
+                                   raw_queries_allowed(bucket_name))
 
     if not result.is_valid:
         app.logger.error(result.message)

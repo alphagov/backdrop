@@ -6,11 +6,11 @@ from tests.support.test_helpers import is_bad_request, is_ok
 
 class TestRawEventAccess(unittest.TestCase):
     def setUp(self):
-        api.app.config['PREVENT_RAW_QUERIES'] = True
+        api.app.config['RAW_QUERIES_ALLOWED']['foo'] = False
         self.app = api.app.test_client()
 
     def tearDown(self):
-        api.app.config['PREVENT_RAW_QUERIES'] = False
+        api.app.config['RAW_QUERIES_ALLOWED']['foo'] = True
 
     def test_that_querying_for_raw_events_is_disabled(self):
         response = self.app.get("/foo?filter_by=foo:bar")
