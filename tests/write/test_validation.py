@@ -53,9 +53,6 @@ class TestValidateDataObject(unittest.TestCase):
         validate = validate_data_object
 
         assert_that(validate({'_timestamp': valid_timestamp}), is_valid())
-        assert_that(validate({'_start_at': valid_timestamp}), is_valid())
-        assert_that(validate({'_end_at': valid_timestamp}), is_valid())
-        assert_that(validate({'_period': valid_string}), is_valid())
         assert_that(validate({'_id': valid_string}), is_valid())
 
 
