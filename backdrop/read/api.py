@@ -47,7 +47,8 @@ class JsonEncoder(json.JSONEncoder):
 
 
 def raw_queries_allowed(bucket_name):
-    return bool(app.config['RAW_QUERIES_ALLOWED'].get(bucket_name, False))
+    raw_queries_config = app.config.get('RAW_QUERIES_ALLOWED', {})
+    return bool(raw_queries_config.get(bucket_name, False))
 
 
 @app.errorhandler(500)
