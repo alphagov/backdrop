@@ -11,9 +11,6 @@ import pytz
 
 RESERVED_KEYWORDS = (
     '_timestamp',
-    '_start_at',
-    '_end_at',
-    '_period',
     '_id'
 )
 VALID_KEY = re.compile('^[a-z_][a-z0-9_]+$')
