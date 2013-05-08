@@ -16,7 +16,7 @@ function display_result {
       echo
     fi
 }
-
+GOVUK_ENV=test
 basedir=$(dirname $0)
 venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 

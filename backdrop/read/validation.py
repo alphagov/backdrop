@@ -227,7 +227,7 @@ class MondayValidator(Validator):
                                    % context['param_name'])
 
 
-def validate_request_args(request_args):
+def validate_request_args(request_args, raw_queries_allowed=False):
     validators = [
         ParameterValidator(request_args),
         PeriodQueryValidator(request_args),
@@ -244,7 +244,7 @@ def validate_request_args(request_args):
         CollectValidator(request_args),
     ]
 
-    if api.app.config['PREVENT_RAW_QUERIES']:
+    if not raw_queries_allowed:
         validators += [
             RawQueryValidator(request_args),
             TimeSpanValidator(request_args, length=7),
