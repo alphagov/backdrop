@@ -1,5 +1,7 @@
+import logging
 from bson import Code
 import pymongo
+from pymongo.errors import AutoReconnect
 from backdrop.core import backdrop_time as backdrop_time
 
 
@@ -75,8 +77,15 @@ class MongoDriver(object):
         reducer = Code(reducer_code)
         return reducer
 
-    def save(self, obj):
-        self._collection.save(obj)
+    def save(self, obj, tries=3):
+        try:
+            self._collection.save(obj)
+        except AutoReconnect:
+            logging.warning("AutoReconnect on save")
+            if tries > 1:
+                self.save(obj, tries-1)
+            else:
+                raise
 
 
 class Repository(object):
