@@ -1,6 +1,13 @@
+import logging
+
 from pymongo import MongoClient
 from splinter import Browser
+
 from features.support.http_test_client import HTTPTestClient
+
+
+logging.getLogger('selenium.webdriver.remote.remote_connection')\
+    .setLevel(logging.WARNING)
 
 
 class SplinterClient(object):

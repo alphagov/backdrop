@@ -1,6 +1,7 @@
 from os import getenv
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 
@@ -99,9 +100,17 @@ def post_to_bucket(bucket_name):
 
     return jsonify(status='ok')
 
-@app.route('/<bucket_name>/upload', methods=['GET'])
+
+@app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
 def get_upload(bucket_name):
-    return ""
+    if request.method == 'GET':
+        return render_template("upload_csv.html")
+    elif request.method == 'POST':
+        file = request.files["file"]
+        data = parse_csv(file.stream)
+        bucket = Bucket(db, bucket_name)
+        bucket.store([records.parse(datum) for datum in data])
+        return "ok"
 
 
 def prep_data(incoming_json):
