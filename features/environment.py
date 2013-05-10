@@ -1,5 +1,6 @@
 import os
 import sys
+from features.support.splinter_client import SplinterClient
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')
@@ -36,6 +37,8 @@ def create_client(feature):
         return FlaskTestClient(write_api)
     if 'use_http_client' in feature.tags:
         return HTTPTestClient(config.DATABASE_NAME)
+    if 'use_splinter_client' in feature.tags:
+        return SplinterClient(config.DATABASE_NAME)
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "

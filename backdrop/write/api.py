@@ -61,7 +61,7 @@ def post_to_bucket(bucket_name):
     def extract_bearer_token(header):
         if header is None or len(header) < 8:
             return ''
-        # Strip the leading "Bearer " from the header value
+            # Strip the leading "Bearer " from the header value
         return header[7:]
 
     expected_token = app.config['TOKENS'].get(bucket_name, None)
@@ -98,6 +98,10 @@ def post_to_bucket(bucket_name):
     bucket.store(incoming_records)
 
     return jsonify(status='ok')
+
+@app.route('/<bucket_name>/upload', methods=['GET'])
+def get_upload(bucket_name):
+    return ""
 
 
 def prep_data(incoming_json):
