@@ -1,6 +1,7 @@
 import datetime
 import pytz
 from backdrop.core.timeseries import timeseries, WEEK
+from dateutil.relativedelta import relativedelta
 
 
 def create_period_group(doc):
@@ -13,6 +14,15 @@ def create_period_group(doc):
     datum = {}
     datum["_start_at"] = doc["_week_start_at"].replace(tzinfo=pytz.utc)
     datum["_end_at"] = datum["_start_at"] + datetime.timedelta(days=7)
+    datum["_count"] = doc["_count"]
+    return datum
+
+
+def create_period_group_month(doc):
+    datum = {}
+    datum["_start_at"] = doc["_month_start_at"].replace(tzinfo=pytz.utc)
+    datum["_end_at"] = (doc["_month_start_at"]
+                        + relativedelta(months=1)).replace(tzinfo=pytz.UTC)
     datum["_count"] = doc["_count"]
     return datum
 
