@@ -83,7 +83,7 @@ class MongoDriver(object):
         except AutoReconnect:
             logging.warning("AutoReconnect on save")
             if tries > 1:
-                self.save(obj, tries-1)
+                self.save(obj, tries - 1)
             else:
                 raise
 
