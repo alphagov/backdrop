@@ -1,3 +1,4 @@
+import logging
 from bson import Code
 import pymongo
 from pymongo.errors import AutoReconnect
@@ -80,6 +81,7 @@ class MongoDriver(object):
         try:
             self._collection.save(obj)
         except AutoReconnect:
+            logging.warning("AutoReconnect on save")
             if tries > 1:
                 self.save(obj, tries-1)
             else:
