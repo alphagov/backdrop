@@ -1,10 +1,38 @@
 import unittest
 from hamcrest import assert_that, is_
 from mock import Mock, patch
+from pymongo.errors import AutoReconnect
 from backdrop.core import database
-from backdrop.core.database import Repository, InvalidSortError
+from backdrop.core.database import Repository, InvalidSortError, MongoDriver
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
+
+
+class DatabaseTestCase(unittest.TestCase):
+    def setUp(self):
+        self.collection = Mock()
+        self.driver = MongoDriver(self.collection)
+
+    def test_save_retries_on_auto_reconnect(self):
+        self.collection.save.side_effect = [AutoReconnect, None]
+
+        self.driver.save({})
+
+        assert_that(self.collection.save.call_count, is_(2))
+
+    def test_save_stops_retrying_after_3_attempts(self):
+        self.collection.save.side_effect = AutoReconnect
+
+        self.assertRaises(AutoReconnect, self.driver.save, {})
+
+        assert_that(self.collection.save.call_count, is_(3))
+
+    def test_save_only_calls_once_on_success(self):
+        self.collection.save.return_value = None
+
+        self.driver.save({})
+
+        assert_that(self.collection.save.call_count, is_(1))
 
 
 class NestedMergeTestCase(unittest.TestCase):

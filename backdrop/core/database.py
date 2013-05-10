@@ -80,8 +80,10 @@ class MongoDriver(object):
         try:
             self._collection.save(obj)
         except AutoReconnect:
-            if tries > 0:
+            if tries > 1:
                 self.save(obj, tries-1)
+            else:
+                raise
 
 
 class Repository(object):
