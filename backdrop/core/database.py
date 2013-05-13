@@ -83,7 +83,7 @@ class MongoDriver(object):
             self._collection.save(obj)
         except AutoReconnect:
             logging.warning("AutoReconnect on save")
-            statsd.incr("db.AutoReconnect")
+            statsd.incr("db.AutoReconnect", bucket=self._collection.name)
             if tries > 1:
                 self.save(obj, tries - 1)
             else:
