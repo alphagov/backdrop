@@ -4,6 +4,7 @@ from backdrop.core.timeseries import timeseries, MONTH
 from backdrop.read.response import create_period_group_month, MonthlyGroupedData
 from tests.support.test_helpers import d
 
+
 class TestMonthlyGroupedData(unittest.TestCase):
     def test_adding_mongo_document(self):
         stub_document = {"_subgroup": []}
@@ -13,9 +14,9 @@ class TestMonthlyGroupedData(unittest.TestCase):
     def test_month_start_at_gets_expanded_into_start_and_end_fields(self):
         stub_document = {
             "_subgroup": [{
-                              "_month_start_at": d(2013, 4, 1),
-                              "_count": 1
-                          }]}
+                "_month_start_at": d(2013, 4, 1),
+                "_count": 1
+            }]}
         data = MonthlyGroupedData([stub_document])
         values = data.data()[0]['values']
         assert_that(values, has_length(1))
@@ -47,11 +48,10 @@ class TestMonthlyGroupedData(unittest.TestCase):
                                     "key '_subgroup'"))
 
     def test_adding_subgroups_of_unrecognized_format_throws_an_error(self):
-        stub_document = {"_subgroup": { "foo": "bar" }}
+        stub_document = {"_subgroup": {"foo": "bar"}}
         try:
             MonthlyGroupedData([stub_document])
             assert_that(False, "Expected an exception")
         except ValueError as e:
             assert_that(str(e), is_("Expected subgroup to have "
                                     "keys '_count' and '_month_start_at'"))
-

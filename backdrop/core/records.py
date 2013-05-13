@@ -5,7 +5,6 @@ from backdrop.core.timeseries import WEEK
 
 
 class Record(object):
-
     def __init__(self, data):
         self.data = data
         self.meta = {}

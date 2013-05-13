@@ -159,9 +159,9 @@ class TestMonth_start(TestCase):
         assert_that(start, is_(d(2013, 12, 1)))
 
     def test_that_it_returns_same_day_for_first_of_month_midnight(self):
-        some_datetime = datetime.datetime(year=2013, month=11, day=1,
-                                             hour=0, minute=0, second=0,
-                                             microsecond=0)
+        some_datetime = datetime.datetime(
+            year=2013, month=11, day=1, hour=0, minute=0, second=0,
+            microsecond=0)
 
         start = MONTH.start(some_datetime)
 

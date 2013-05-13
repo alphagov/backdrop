@@ -27,6 +27,7 @@ class Week(object):
         return timestamp.weekday() == 0 \
             and timestamp.time() == time(0, 0, 0, 0)
 
+
 class Month(object):
     def __init__(self):
         self._delta = relativedelta(months=1)

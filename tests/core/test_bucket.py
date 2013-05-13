@@ -58,11 +58,13 @@ class TestBucket(unittest.TestCase):
             "name", query, None, None, [])
 
         assert_that(query_result,
-                    has_item(has_entries({'name': equal_to('Max'),
-                                          '_count': equal_to(3)})))
+                    has_item(has_entries({
+                        'name': equal_to('Max'),
+                        '_count': equal_to(3)})))
         assert_that(query_result,
-                    has_item(has_entries({'name': equal_to('Gareth'),
-                                          '_count': equal_to(2)})))
+                    has_item(has_entries({
+                        'name': equal_to('Gareth'),
+                        '_count': equal_to(2)})))
 
     def test_sorted_group_by_query(self):
         query = Query.create(group_by="name",
@@ -386,16 +388,16 @@ class TestBucket(unittest.TestCase):
         assert_that(data, has_item(has_entries({"values": has_length(4)})))
 
         first_group = data[0]["values"]
-        assert_that(first_group, has_item(has_entries({"_start_at":
-                                                           d_tz(2013, 3, 1)})))
-        assert_that(first_group, has_item(has_entries({"_start_at":
-                                                           d_tz(2013, 4, 1)})))
+        assert_that(first_group, has_item(has_entries({
+            "_start_at": d_tz(2013, 3, 1)})))
+        assert_that(first_group, has_item(has_entries({
+            "_start_at": d_tz(2013, 4, 1)})))
 
         first_group = data[1]["values"]
-        assert_that(first_group, has_item(has_entries({"_start_at":
-                                                           d_tz(2013, 1, 1)})))
-        assert_that(first_group, has_item(has_entries({"_start_at":
-                                                           d_tz(2013, 2, 1)})))
+        assert_that(first_group, has_item(has_entries({
+            "_start_at": d_tz(2013, 1, 1)})))
+        assert_that(first_group, has_item(has_entries({
+            "_start_at": d_tz(2013, 2, 1)})))
 
     def test_period_group_query_adds_missing_periods_in_correct_order(self):
         self.mock_repository.multi_group.return_value = [
