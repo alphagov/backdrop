@@ -1,7 +1,7 @@
 """
 Add _week_start_at field to all documents in all collections
 """
-from backdrop.core.storage import utc
+from backdrop.core.bucket import utc
 from backdrop.core.records import Record
 import logging
 
