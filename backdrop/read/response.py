@@ -1,6 +1,6 @@
 import datetime
 import pytz
-from backdrop.core.timeseries import timeseries, WEEK
+from backdrop.core.timeseries import timeseries, WEEK, MONTH
 from dateutil.relativedelta import relativedelta
 
 
@@ -19,6 +19,9 @@ def create_period_group(doc):
 
 
 def create_period_group_month(doc):
+    if "_month_start_at" not in doc or "_count" not in doc:
+        raise ValueError("Expected subgroup to have keys '_count' and "
+                         "'_week_start_at'")
     datum = {}
     datum["_start_at"] = doc["_month_start_at"].replace(tzinfo=pytz.utc)
     datum["_end_at"] = (doc["_month_start_at"]
@@ -107,6 +110,35 @@ class WeeklyGroupedData(object):
                 start=start_date,
                 end=end_date,
                 period=WEEK,
+                data=self._data[i]['values'],
+                default={"_count": 0}
+            )
+
+
+class MonthlyGroupedData(object):
+    def __init__(self, cursor):
+        self._data = []
+        for doc in cursor:
+            self.__add(doc)
+
+    def __add(self, doc):
+        if '_subgroup' not in doc:
+            raise ValueError("Expected document to have key '_subgroup'")
+        datum = {}
+        datum.update({
+            "values": [create_period_group_month(subgroup) for
+                       subgroup in doc["_subgroup"]]})
+        self._data.append(datum)
+
+    def data(self):
+        return tuple(self._data)
+
+    def fill_missing_months(self, start_date, end_date):
+        for i, _ in enumerate(self._data):
+            self._data[i]['values'] = timeseries(
+                start=start_date,
+                end=end_date,
+                period=MONTH,
                 data=self._data[i]['values'],
                 default={"_count": 0}
             )
