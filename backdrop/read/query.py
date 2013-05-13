@@ -108,8 +108,15 @@ class Query(_Query):
             result = self.__execute_query(repository)
         return result
 
+    def __get_period_key(self):
+        period_keys = {
+            "week": "_week_start_at",
+            "month": "_month_start_at"
+        }
+        return period_keys[self.period]
+
     def __execute_weekly_group_query(self, repository):
-        period_key = '_week_start_at'
+        period_key = self.__get_period_key()
 
         cursor = repository.multi_group(
             self.group_by, period_key, self,
@@ -117,10 +124,16 @@ class Query(_Query):
             collect=self.collect or []
         )
 
-        results = WeeklyGroupedData(cursor)
+        if self.period == "month":
+            results = MonthlyGroupedData(cursor)
+        else:
+            results = WeeklyGroupedData(cursor)
 
-        if self.start_at and self.end_at:
+        if self.start_at and self.end_at and self.period == "week":
             results.fill_missing_weeks(self.start_at, self.end_at)
+
+        if self.start_at and self.end_at and self.period == "month":
+            results.fill_missing_months(self.start_at, self.end_at)
 
         return results
 
@@ -132,14 +145,14 @@ class Query(_Query):
         return results
 
     def __execute_period_query(self, repository):
-        period_key = '_week_start_at'
-        sort = ["_week_start_at", "ascending"]
+        period_key = self.__get_period_key()
+        sort = [period_key, "ascending"]
         cursor = repository.group(
             period_key, self,
             sort=sort, limit=self.limit
         )
 
-        results = PeriodData(cursor, period="week")
+        results = PeriodData(cursor, period=self.period)
 
         if self.start_at and self.end_at:
             results.fill_missing_periods(self.start_at, self.end_at)

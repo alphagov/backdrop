@@ -21,7 +21,10 @@ def create_period_group(doc):
 def create_period_group_month(doc):
     if "_month_start_at" not in doc or "_count" not in doc:
         raise ValueError("Expected subgroup to have keys '_count' and "
-                         "'_week_start_at'")
+                         "'_month_start_at'")
+    if doc["_month_start_at"].day != 1:
+        raise ValueError("Months MUST start on the 1st but "
+                         "got date: %s" % doc["_month_start_at"])
     datum = {}
     datum["_start_at"] = doc["_month_start_at"].replace(tzinfo=pytz.utc)
     datum["_end_at"] = (doc["_month_start_at"]

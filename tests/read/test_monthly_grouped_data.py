@@ -53,5 +53,5 @@ class TestMonthlyGroupedData(unittest.TestCase):
             assert_that(False, "Expected an exception")
         except ValueError as e:
             assert_that(str(e), is_("Expected subgroup to have "
-                                    "keys '_count' and '_week_start_at'"))
+                                    "keys '_count' and '_month_start_at'"))
 
