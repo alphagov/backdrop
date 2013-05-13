@@ -43,7 +43,8 @@ app.after_request(create_response_logger(app))
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
-    return jsonify(status='error', message=''), e.code
+    code = (e.code if hasattr(e, 'code') else None)
+    return jsonify(status='error', message=''), code
 
 
 @app.route('/_status', methods=['GET'])
