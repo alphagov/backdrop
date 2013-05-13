@@ -1,7 +1,7 @@
 from unittest import TestCase
 import datetime
 from hamcrest import assert_that, is_, contains
-from backdrop.core.timeseries import timeseries, WEEK
+from backdrop.core.timeseries import timeseries, WEEK, MONTH
 from tests.support.test_helpers import d, d_tz
 
 
@@ -130,4 +130,90 @@ class TestWeek_range(TestCase):
             (d_tz(2013, 4, 1), d_tz(2013, 4, 8)),
             (d_tz(2013, 4, 8), d_tz(2013, 4, 15)),
             (d_tz(2013, 4, 15), d_tz(2013, 4, 22))
+        ))
+
+
+class TestMonth_start(TestCase):
+    def test_that_it_returns_first_of_current_month_for_midmonth(self):
+        some_datetime = d(2013, 4, 9)
+
+        start = MONTH.start(some_datetime)
+
+        assert_that(start, is_(d(2013, 4, 1)))
+
+    def test_that_it_truncates_the_time_part(self):
+        some_datetime = d(2013, 5, 7, 10, 12, 13)
+
+        start = MONTH.start(some_datetime)
+
+        assert_that(start.hour, is_(0))
+        assert_that(start.minute, is_(0))
+        assert_that(start.second, is_(0))
+        assert_that(start.microsecond, is_(0))
+
+    def test_that_it_returns_same_day_for_first_of_month(self):
+        some_datetime = d(2013, 12, 1, 12, 32, 34)
+
+        start = MONTH.start(some_datetime)
+
+        assert_that(start, is_(d(2013, 12, 1)))
+
+    def test_that_it_returns_same_day_for_first_of_month_midnight(self):
+        some_datetime = datetime.datetime(year=2013, month=11, day=1,
+                                             hour=0, minute=0, second=0,
+                                             microsecond=0)
+
+        start = MONTH.start(some_datetime)
+
+        assert_that(start, is_(some_datetime))
+
+
+class TestMonth_end(object):
+    def test_that_it_returns_the_end_of_the_current_month(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+        some_other_datetime = d(2013, 10, 4)
+
+        end = MONTH.end(some_datetime)
+        other_end = MONTH.end(some_other_datetime)
+
+        assert_that(end, is_(d(2013, 11, 1)))
+        assert_that(other_end, is_(d(2013, 11, 1)))
+
+    def test_that_it_truncates_the_time_part(self):
+        some_datetime = d(2013, 4, 9, 23, 12)
+
+        end = MONTH.end(some_datetime)
+
+        assert_that(end, is_(d(2013, 5, 1)))
+
+    def test_that_it_returns_the_same_month_for_month_boundary_midnight(self):
+        some_datetime = d(2013, 5, 1, 0, 0)
+
+        end = MONTH.end(some_datetime)
+
+        assert_that(end, is_(d(2013, 5, 1)))
+
+    def test_that_it_returns_the_next_month_for_boundary_after_midnight(self):
+        some_datetime = d(2013, 5, 1, 0, 12)
+
+        end = MONTH.end(some_datetime)
+
+        assert_that(end, is_(d(2013, 6, 1)))
+
+
+class TestMonth_range(TestCase):
+    def test_that_it_produces_a_sequence_of_monthly_time_periods(self):
+        range = MONTH.range(d_tz(2013, 4, 1), d_tz(2013, 6, 1))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 1), d_tz(2013, 5, 1)),
+            (d_tz(2013, 5, 1), d_tz(2013, 6, 1))
+        ))
+
+    def test_that_it_expands_the_limits_of_the_range_if_midmonth(self):
+        range = MONTH.range(d_tz(2013, 4, 3), d_tz(2013, 5, 19))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 1), d_tz(2013, 5, 1)),
+            (d_tz(2013, 5, 1), d_tz(2013, 6, 1)),
         ))

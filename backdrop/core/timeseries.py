@@ -27,8 +27,35 @@ class Week(object):
         return timestamp.weekday() == 0 \
             and timestamp.time() == time(0, 0, 0, 0)
 
+class Month(object):
+    def __init__(self):
+        self._delta = relativedelta(months=1)
+
+    def is_month_boundary(self, t):
+        return t.day == 1 and t.time() == time(0, 0, 0, 0)
+
+    def start(self, timestamp):
+        return timestamp.replace(day=1,
+                                 hour=0,
+                                 minute=0,
+                                 second=0,
+                                 microsecond=0)
+
+    def end(self, timestamp):
+        if self.is_month_boundary(timestamp):
+                return timestamp
+        return self.start(timestamp + self._delta)
+
+    def range(self, start, end):
+        _start = self.start(start).replace(tzinfo=pytz.UTC)
+        _end = self.end(end).replace(tzinfo=pytz.UTC)
+        while (_start < _end):
+            yield (_start, _start + self._delta)
+            _start += self._delta
+
 
 WEEK = Week()
+MONTH = Month()
 
 
 def _time_to_index(dt):
