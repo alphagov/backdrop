@@ -1,7 +1,8 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, render_template, g
 from backdrop import statsd
+from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 
@@ -65,7 +66,7 @@ def post_to_bucket(bucket_name):
     def extract_bearer_token(header):
         if header is None or len(header) < 8:
             return ''
-        # Strip the leading "Bearer " from the header value
+            # Strip the leading "Bearer " from the header value
         return header[7:]
 
     expected_token = app.config['TOKENS'].get(bucket_name, None)
@@ -103,6 +104,18 @@ def post_to_bucket(bucket_name):
     bucket.store(incoming_records)
 
     return jsonify(status='ok')
+
+
+@app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
+def get_upload(bucket_name):
+    if request.method == 'GET':
+        return render_template("upload_csv.html")
+    elif request.method == 'POST':
+        file = request.files["file"]
+        data = parse_csv(file.stream)
+        bucket = Bucket(db, bucket_name)
+        bucket.store([records.parse(datum) for datum in data])
+        return "ok"
 
 
 def prep_data(incoming_json):

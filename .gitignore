@@ -11,3 +11,4 @@ coverage.xml
 *.log
 nosetests.xml
 pep8.out
+tmp/*
