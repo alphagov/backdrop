@@ -26,3 +26,7 @@ class TestStatsd(object):
     def test_gauge(self):
         self.wrapper.gauge('foo.bar', 123, bucket='monkey')
         self.client.gauge.assert_called_with('monkey.foo.bar', 123)
+
+    def test_should_prefix_unknown_when_no_bucket_is_provided(self):
+        self.wrapper.incr('foo.bar')
+        self.client.incr.assert_called_with('unknown.foo.bar')

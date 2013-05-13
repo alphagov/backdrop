@@ -13,8 +13,9 @@ class StatsClient(object):
     def __getattr__(self, item):
         if item in ['timer', 'timing', 'incr', 'decr', 'gauge']:
             def func(stat, *args, **kwargs):
-                if 'bucket' in kwargs:
-                    stat = '%s.%s' % (kwargs.pop('bucket'), stat)
+                bucket = kwargs.pop('bucket', 'unknown')
+                stat = '%s.%s' % (bucket, stat)
+
                 return getattr(self._statsd, item)(stat, *args, **kwargs)
             return func
         else:
