@@ -30,3 +30,4 @@ class TestStatsd(object):
     def test_should_prefix_unknown_when_no_bucket_is_provided(self):
         self.wrapper.incr('foo.bar')
         self.client.incr.assert_called_with('unknown.foo.bar')
+
