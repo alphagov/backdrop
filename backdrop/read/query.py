@@ -99,7 +99,7 @@ class Query(_Query):
 
     def execute(self, repository):
         if self.group_by and self.period:
-            result = self.__execute_weekly_group_query(repository)
+            result = self.__execute_period_group_query(repository)
         elif self.group_by:
             result = self.__execute_grouped_query(repository)
         elif self.period:
@@ -115,7 +115,7 @@ class Query(_Query):
         }
         return period_keys[self.period]
 
-    def __execute_weekly_group_query(self, repository):
+    def __execute_period_group_query(self, repository):
         period_key = self.__get_period_key()
 
         cursor = repository.multi_group(
