@@ -9,6 +9,13 @@ def step(context, filename):
         stream.write(context.text)
 
 
+@given(u'a file named "{filename}" of size "{number}" bytes')
+def step(context, filename, number):
+    filepath = "tmp/%s" % filename
+    with open(filepath, "w") as stream:
+        stream.write("x" * int(number))
+
+
 @when(u'I enter "{filename}" into the file upload field')
 def step(context, filename):
     filepath = "tmp/%s" % filename

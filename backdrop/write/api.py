@@ -1,7 +1,8 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template
-from backdrop.core.parse_csv import parse_csv
+from flask import Flask, request, jsonify, render_template, abort
+from backdrop.core.parse_csv import parse_csv, \
+    MoreValuesThanColumnsException, MissingValuesForSomeColumnsException
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 
@@ -107,11 +108,20 @@ def get_upload(bucket_name):
     if request.method == 'GET':
         return render_template("upload_csv.html")
     elif request.method == 'POST':
+        if request.content_length > 100000:
+            abort(411)
         file = request.files["file"]
-        data = parse_csv(file.stream)
-        bucket = Bucket(db, bucket_name)
-        bucket.store([records.parse(datum) for datum in data])
-        return "ok"
+        try:
+            data = parse_csv(file.stream)
+            bucket = Bucket(db, bucket_name)
+            bucket.store([records.parse(datum) for datum in data])
+        except MoreValuesThanColumnsException:
+            return "Some rows in the csv file contain more values " \
+                   "than the specified number of columns", 400
+        except MissingValuesForSomeColumnsException:
+            return "Some rows in the csv file contain less values " \
+                   "than the specified number of columns", 400
+    return "ok"
 
 
 def prep_data(incoming_json):

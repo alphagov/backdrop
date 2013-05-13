@@ -26,6 +26,16 @@ def step(context, bucket_name):
     )
 
 
+@when('I post the file "{filename}" to "/{bucket_name}/upload"')
+def step(context, filename, bucket_name):
+    context.bucket = bucket_name.replace('/', '')
+    context.response = context.client.post(
+        "/" + bucket_name + "/upload",
+        files={"file": open("tmp/%s" % filename, "r")},
+        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
+    )
+
+
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
     result = context.client.storage()[context.bucket].find({key: value})
