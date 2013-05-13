@@ -139,10 +139,10 @@ class Query(_Query):
             sort=sort, limit=self.limit
         )
 
-        results = PeriodData(cursor)
+        results = PeriodData(cursor, period="week")
 
         if self.start_at and self.end_at:
-            results.fill_missing_weeks(self.start_at, self.end_at)
+            results.fill_missing_periods(self.start_at, self.end_at)
 
         return results
 

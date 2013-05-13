@@ -47,7 +47,8 @@ class SimpleData(object):
 
 
 class PeriodData(object):
-    def __init__(self, cursor):
+    def __init__(self, cursor, period):
+        self.period = period
         self._data = []
         for doc in cursor:
             self.__add(doc)
@@ -58,15 +59,23 @@ class PeriodData(object):
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_weeks(self, start, end):
+    def fill_missing_periods(self, start, end):
+        periods = {
+            "week": WEEK,
+            "month": MONTH
+        }
         self._data = timeseries(start=start,
                                 end=end,
-                                period=WEEK,
+                                period=periods[self.period],
                                 data=self._data,
                                 default={"_count": 0})
 
     def __create_datum(self, doc):
-        datum = create_period_group(doc)
+        datum = {}
+        if self.period == "week":
+            datum = create_period_group(doc)
+        if self.period == "month":
+            datum = create_period_group_month(doc)
         return datum
 
 

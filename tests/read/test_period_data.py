@@ -11,7 +11,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 42
         }
 
-        period_data = PeriodData([stub_doc])
+        period_data = PeriodData([stub_doc], period="week")
 
         assert_that(len(period_data.data()), is_(1))
         assert_that(period_data.data()[0], has_entry("_count", 42))
@@ -20,6 +20,21 @@ class TestPeriodData(unittest.TestCase):
         assert_that(period_data.data()[0], has_entry("_end_at",
                                                      d_tz(2013, 5, 13)))
 
+    def test_adding_mongo_doc_to_collection_expands_month_start_at(self):
+        stub_doc = {
+            "_month_start_at": d(2013, 4, 1),
+            "_count": 5
+        }
+
+        period_data = PeriodData([stub_doc], period="month")
+
+        assert_that(len(period_data.data()), is_(1))
+        assert_that(period_data.data()[0], has_entry("_count", 5))
+        assert_that(period_data.data()[0], has_entry("_start_at",
+                                                     d_tz(2013, 4, 1)))
+        assert_that(period_data.data()[0], has_entry("_end_at",
+                                                     d_tz(2013, 5, 1)))
+
     def test_period_datum_week_start_at_should_be_monday(self):
         stub_doc = {
             "_week_start_at": d(2013, 5, 4),
@@ -27,7 +42,7 @@ class TestPeriodData(unittest.TestCase):
         }
 
         try:
-            period_data = PeriodData([stub_doc])
+            period_data = PeriodData([stub_doc], period="week")
             assert_that(False, "expected exception")
         except ValueError as e:
             assert_that(str(e), is_("Weeks MUST start on Monday but got date:"
@@ -43,7 +58,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 66
         }
 
-        period_data = PeriodData([stub_doc, another_stub_doc])
+        period_data = PeriodData([stub_doc, another_stub_doc], period="week")
 
         assert_that(len(period_data.data()), is_(2))
 
@@ -62,7 +77,7 @@ class TestPeriodData(unittest.TestCase):
             "_week_start_at": d(2013, 5, 6),
             "_count": 42
         }
-        period_data = PeriodData([stub_doc])
+        period_data = PeriodData([stub_doc], period="week")
         the_data = period_data.data()
         try:
             the_data.append({"nonsense": True})
@@ -70,7 +85,7 @@ class TestPeriodData(unittest.TestCase):
         except AttributeError as e:
             assert_that(str(e), "'tuple' object has no attribute append")
 
-    def test_filling_data_for_missing_periods(self):
+    def test_filling_data_for_missing_week_periods(self):
         stub_doc_1 = {
             "_week_start_at": d(2013, 4, 1),
             "_count": 5
@@ -79,8 +94,22 @@ class TestPeriodData(unittest.TestCase):
             "_week_start_at": d(2013, 4, 15),
             "_count": 5
         }
-        period_data = PeriodData([stub_doc_1, stub_doc_2])
+        period_data = PeriodData([stub_doc_1, stub_doc_2], period="week")
 
-        period_data.fill_missing_weeks(d(2013, 4, 1), d(2013, 4, 16))
+        period_data.fill_missing_periods(d(2013, 4, 1), d(2013, 4, 16))
 
+        assert_that(period_data.data(), has_length(3))
+
+    def test_filling_data_for_missing_month_periods(self):
+        stub_doc_1 = {
+            "_month_start_at": d(2013, 4, 1),
+            "_count": 5
+
+        }
+        stub_doc_2 = {
+            "_month_start_at": d(2013, 6, 1),
+            "_count": 6
+        }
+        period_data = PeriodData([stub_doc_1, stub_doc_2], period="month")
+        period_data.fill_missing_periods(d(2013, 4, 1), d(2013, 6, 2))
         assert_that(period_data.data(), has_length(3))
