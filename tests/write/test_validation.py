@@ -2,7 +2,7 @@ import unittest
 
 from hamcrest import *
 
-from backdrop.write.validation import validate_data_object
+from backdrop.write.validation import validate_data_object, validate_incoming_csv_data
 from tests.support.validity_matcher import is_invalid_with_message, is_valid
 
 valid_string = 'validstring'
@@ -77,3 +77,23 @@ class ValidDateObjectTestCase(unittest.TestCase):
         assert_that(
             validate_data_object(some_good_data).is_valid,
             is_(True))
+
+
+class ValidateIncomingCsvData(unittest.TestCase):
+    def test_validate_when_values_for_columns_are_missing(self):
+        incoming_data = [
+            {'a': 'x', 'b': 'y'},
+            {'a': 'q', 'b': None}
+        ]
+
+        result = validate_incoming_csv_data(incoming_data)
+        assert_that(result.is_valid, is_(False))
+
+    def test_validate_when_there_are_more_values_than_columns(self):
+        incoming_data = [
+            {'a': 'x', 'b': 'y', None: 'd'},
+            {'a': 'q', 'b': 'w'}
+        ]
+
+        result = validate_incoming_csv_data(incoming_data)
+        assert_that(result.is_valid, is_(False))

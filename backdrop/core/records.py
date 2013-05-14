@@ -34,6 +34,10 @@ def parse(data):
     return Record(data)
 
 
+def parse_all(data):
+    return [parse(datum) for datum in data]
+
+
 def _time_string_to_utc_datetime(time_string):
     time = parser.parse(time_string)
     return time.astimezone(pytz.utc)
