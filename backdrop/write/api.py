@@ -1,6 +1,8 @@
 from os import getenv
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, g
+from backdrop import statsd
+from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 
@@ -42,6 +44,7 @@ app.after_request(create_response_logger(app))
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
+    statsd.incr("write.error", bucket=g.bucket_name)
     return jsonify(status='error', message=''), e.code
 
 
@@ -58,10 +61,12 @@ def health_check():
 @app.route('/<bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
+    g.bucket_name = bucket_name
+
     def extract_bearer_token(header):
         if header is None or len(header) < 8:
             return ''
-        # Strip the leading "Bearer " from the header value
+            # Strip the leading "Bearer " from the header value
         return header[7:]
 
     expected_token = app.config['TOKENS'].get(bucket_name, None)
@@ -71,6 +76,7 @@ def post_to_bucket(bucket_name):
     if request_token != expected_token:
         app.logger.error("expected <%s> but was <%s>" %
                          (expected_token, request_token))
+        statsd.incr("write_api.bad_token", bucket=g.bucket_name)
         return jsonify(status='error', message='Forbidden'), 403
 
     if request.json is None:
@@ -98,6 +104,18 @@ def post_to_bucket(bucket_name):
     bucket.store(incoming_records)
 
     return jsonify(status='ok')
+
+
+@app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
+def get_upload(bucket_name):
+    if request.method == 'GET':
+        return render_template("upload_csv.html")
+    elif request.method == 'POST':
+        file = request.files["file"]
+        data = parse_csv(file.stream)
+        bucket = Bucket(db, bucket_name)
+        bucket.store([records.parse(datum) for datum in data])
+        return "ok"
 
 
 def prep_data(incoming_json):
