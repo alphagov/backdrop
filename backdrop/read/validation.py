@@ -117,6 +117,19 @@ class ParameterMustBeThisValidator(Validator):
                                'Supported periods include: week')
 
 
+class ParameterMustBeOneOfTheseValidator(Validator):
+    def validate(self, request_args, context):
+        param_to_check = context['param_name']
+        allowed_params = context['must_be_one_of_these']
+
+        if param_to_check in request_args:
+            if request_args[param_to_check] not in allowed_params:
+                self.add_error("'{param}' must be one of {allowed}".format(
+                    param=param_to_check,
+                    allowed=str(allowed_params)
+                ))
+
+
 class SortByValidator(Validator):
     def _unrecognised_direction(self, sort_by):
         return not re.match(r'^.+:(ascending|descending)$', sort_by)
@@ -234,8 +247,11 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         DatetimeValidator(request_args, param_name='start_at'),
         DatetimeValidator(request_args, param_name='end_at'),
         FilterByValidator(request_args),
-        ParameterMustBeThisValidator(request_args, param_name='period',
-                                     must_be_this='week'),
+        ParameterMustBeOneOfTheseValidator(
+            request_args,
+            param_name='period',
+            must_be_one_of_these=['week', 'month']
+        ),
         SortByValidator(request_args),
         GroupByValidator(request_args),
         PositiveIntegerValidator(request_args, param_name='limit'),
