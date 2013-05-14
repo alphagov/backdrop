@@ -9,6 +9,7 @@ from os.path import join
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -48,4 +49,5 @@ if __name__ == '__main__':
     database = get_database(config)
 
     for migration in get_migrations():
+        log.info("Running migration %s" % migration)
         migration.up(database)
