@@ -239,6 +239,7 @@ class MondayValidator(Validator):
                     self.add_error('%s must be a monday'
                                    % context['param_name'])
 
+
 class FirstOfMonthValidator(Validator):
     def validate(self, request_args, context):
 
