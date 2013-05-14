@@ -54,10 +54,7 @@ def parse_request_args(request_args):
     else:
         args['limit'] = None
 
-    if 'collect' in request_args:
-        args['collect'] = request_args.getlist('collect')
-    else:
-        args['collect'] = None
+    args['collect'] = request_args.getlist('collect')
     return args
 
 
@@ -73,7 +70,7 @@ class Query(_Query):
                start_at=None, end_at=None, filter_by=None, period=None,
                group_by=None, sort_by=None, limit=None, collect=None):
         return Query(start_at, end_at, filter_by, period,
-                     group_by, sort_by, limit, collect)
+                     group_by, sort_by, limit, collect or [])
 
     @classmethod
     def parse(cls, request_args):
@@ -114,7 +111,7 @@ class Query(_Query):
         cursor = repository.multi_group(
             self.group_by, period_key, self,
             sort=self.sort_by, limit=self.limit,
-            collect=self.collect or []
+            collect=self.collect
         )
 
         results = WeeklyGroupedData(cursor)
@@ -126,7 +123,7 @@ class Query(_Query):
 
     def __execute_grouped_query(self, repository):
         cursor = repository.group(self.group_by, self, self.sort_by,
-                                  self.limit, self.collect or [])
+                                  self.limit, self.collect)
 
         results = GroupedData(cursor)
         return results
