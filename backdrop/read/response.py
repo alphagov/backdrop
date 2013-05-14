@@ -140,6 +140,8 @@ class MonthlyGroupedData(object):
         datum.update({
             "values": [create_period_group_month(subgroup) for
                        subgroup in doc["_subgroup"]]})
+        del doc["_subgroup"]
+        datum.update(doc)
         self._data.append(datum)
 
     def data(self):
