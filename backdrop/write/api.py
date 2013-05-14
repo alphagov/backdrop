@@ -117,7 +117,11 @@ def get_upload(bucket_name):
         if request.content_length > 100000:
             abort(411)
 
-        incoming_data = parse_csv(request.files["file"].stream)
+        try:
+            incoming_data = parse_csv(request.files["file"].stream)
+        except UnicodeError:
+            return render_template("upload_error.html",
+                                   message="Some characters were invalid"), 400
 
         result = validate_incoming_csv_data(incoming_data)
         if result.is_valid:

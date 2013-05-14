@@ -1,17 +1,26 @@
 import json
+import os
+import shutil
 from hamcrest import assert_that, has_length, is_
+
+
+@given(u'a file named "{filename}" with fixture "{fixturename}"')
+def step(context, filename, fixturename):
+    filepath = os.path.join("tmp", filename)
+    fixturepath = os.path.join("features", "fixtures", fixturename)
+    shutil.copyfile(fixturepath, filepath)
 
 
 @given(u'a file named "{filename}"')
 def step(context, filename):
-    filepath = "tmp/%s" % filename
+    filepath = os.path.join("tmp", filename)
     with open(filepath, "w") as stream:
         stream.write(context.text)
 
 
 @given(u'a file named "{filename}" of size "{number}" bytes')
 def step(context, filename, number):
-    filepath = "tmp/%s" % filename
+    filepath = os.path.join("tmp", filename)
     with open(filepath, "w") as stream:
         stream.write("x" * int(number))
 

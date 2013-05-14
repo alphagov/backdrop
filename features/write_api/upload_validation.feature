@@ -26,3 +26,8 @@ Feature: csv upload validation
        Given a file named "data.csv" of size "100000" bytes
         when I post the file "data.csv" to "/foo/upload"
         then I should get back a status of "411"
+
+    Scenario: non UTF8 characters
+       Given  a file named "data.csv" with fixture "bad-characters.csv"
+        when  I post the file "data.csv" to "/foo/upload"
+        then  I should get back a status of "400"
