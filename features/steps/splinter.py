@@ -1,5 +1,5 @@
 import json
-from hamcrest import assert_that, has_length
+from hamcrest import assert_that, has_length, is_
 
 
 @given(u'a file named "{filename}"')
@@ -34,3 +34,9 @@ def step(context, bucket_name):
         query = json.loads(line)
         result = bucket.find(query)
         assert_that(list(result), has_length(1))
+
+
+@then(u'the platform should have "{n}" items stored in "{bucket_name}"')
+def step(context, n, bucket_name):
+    bucket = context.client.storage()[bucket_name]
+    assert_that(bucket.count(), is_(int(n)))

@@ -110,11 +110,12 @@ def get_upload(bucket_name):
     elif request.method == 'POST':
         if request.content_length > 100000:
             abort(411)
-        file = request.files["file"]
         try:
-            data = parse_csv(file.stream)
+            data = parse_csv(request.files["file"].stream)
+            data = [records.parse(datum) for datum in data]
+
             bucket = Bucket(db, bucket_name)
-            bucket.store([records.parse(datum) for datum in data])
+            bucket.store(data)
         except MoreValuesThanColumnsException:
             return "Some rows in the csv file contain more values " \
                    "than the specified number of columns", 400

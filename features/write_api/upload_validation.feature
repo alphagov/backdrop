@@ -20,6 +20,7 @@ Feature: csv upload validation
              """
         when I post the file "data.csv" to "/foo/upload"
         then I should get back a status of "400"
+         and the platform should have "0" items stored in "foo"
 
     Scenario: file too large
        Given a file named "data.csv" of size "100000" bytes
