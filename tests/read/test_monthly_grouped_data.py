@@ -55,3 +55,18 @@ class TestMonthlyGroupedData(unittest.TestCase):
         except ValueError as e:
             assert_that(str(e), is_("Expected subgroup to have "
                                     "keys '_count' and '_month_start_at'"))
+
+    def test_that_other_fields_get_added_to_response(self):
+        stub_document = {
+            "_subgroup": [
+                {
+                    "_month_start_at": d(2013, 5, 1),
+                    "_count": 1
+                }
+            ],
+            "other_stuff": "something"
+        }
+
+        data = MonthlyGroupedData([stub_document])
+
+        assert_that(data.data()[0], has_entry("other_stuff", "something"))

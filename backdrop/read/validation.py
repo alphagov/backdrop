@@ -232,11 +232,22 @@ class MidnightValidator(Validator):
 
 class MondayValidator(Validator):
     def validate(self, request_args, context):
-        if 'period' in request_args:
+        if request_args.get('period') == 'week':
             timestamp = request_args.get(context['param_name'])
             if _is_valid_date(timestamp):
                 if (parser.parse(timestamp)).weekday() != 0:
                     self.add_error('%s must be a monday'
+                                   % context['param_name'])
+
+class FirstOfMonthValidator(Validator):
+    def validate(self, request_args, context):
+
+        if request_args.get('period') == 'month':
+            timestamp = request_args.get(context['param_name'])
+            if _is_valid_date(timestamp):
+                if (parser.parse(timestamp)).day != 1:
+                    self.add_error('\'%s\' must be the first of the month for '
+                                   'period=month queries'
                                    % context['param_name'])
 
 
@@ -267,7 +278,9 @@ def validate_request_args(request_args, raw_queries_allowed=False):
             MidnightValidator(request_args, param_name='start_at'),
             MidnightValidator(request_args, param_name='end_at'),
             MondayValidator(request_args, param_name="start_at"),
-            MondayValidator(request_args, param_name="end_at")
+            MondayValidator(request_args, param_name="end_at"),
+            FirstOfMonthValidator(request_args, param_name="start_at"),
+            FirstOfMonthValidator(request_args, param_name="end_at")
         ]
 
     for validator in validators:
