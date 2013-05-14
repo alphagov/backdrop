@@ -1,12 +1,14 @@
 from os import getenv
 
 from flask import Flask, request, jsonify, render_template, abort
-from backdrop.core.parse_csv import parse_csv
-from backdrop.core.log_handler \
-    import create_request_logger, create_response_logger
-from backdrop.core.validation import bucket_is_valid
 
-from .validation import validate_incoming_data, validate_incoming_csv_data
+from ..core.parse_csv import parse_csv
+from ..core.log_handler \
+    import create_request_logger, create_response_logger
+
+from .validation import bearer_token_is_valid
+from ..core.validation import bucket_is_valid, ValidationError
+
 from ..core import database, log_handler, records, cache_control
 from ..core.bucket import Bucket
 
@@ -61,92 +63,69 @@ def health_check():
 @app.route('/<bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
-    # TODO: move this to a before filter
     if not bucket_is_valid(bucket_name):
-        return jsonify(status="error", message="Bucket name is invalid"), 400
+        return jsonify(status="error",
+                       message="Bucket name is invalid"), 400
 
-    def extract_bearer_token(header):
-        if header is None or len(header) < 8:
-            return ''
-            # Strip the leading "Bearer " from the header value
-        return header[7:]
-
-    expected_token = app.config['TOKENS'].get(bucket_name, None)
+    tokens = app.config['TOKENS']
     auth_header = request.headers.get('Authorization', None)
-    request_token = extract_bearer_token(auth_header)
 
-    if request_token != expected_token:
-        app.logger.error("expected <%s> but was <%s>" %
-                         (expected_token, request_token))
+    if not bearer_token_is_valid(tokens, auth_header, bucket_name):
         return jsonify(status='error', message='Forbidden'), 403
 
-    if request.json is None:
-        app.logger.error("Request must be JSON")
-        return jsonify(status='error', message='Request must be JSON'), 400
+    try:
+        parse_and_store(
+            load_json(request.json),
+            bucket_name)
 
-    incoming_data = prep_data(request.json)
-
-    result = validate_incoming_data(incoming_data)
-
-    # TODO: We currently don't test that incoming data gets validated
-    # feels too heavy to be in the controller anyway - pull out later?
-    if not result.is_valid:
-        app.logger.error(result.message)
-        return jsonify(status='error', message=result.message), 400
-
-    app.logger.info("request contains %d documents" % len(incoming_data))
-
-    incoming_records = records.parse_all(incoming_data)
-
-    bucket = Bucket(db, bucket_name)
-    bucket.store(incoming_records)
-
-    return jsonify(status='ok')
+        return jsonify(status='ok')
+    except ValidationError as e:
+        return jsonify(status="error", message=e.message), 400
 
 
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
 def get_upload(bucket_name):
-    # TODO: move this to a before filter
     if not bucket_is_valid(bucket_name):
         return render_template("upload_error.html",
                                message="Bucket name is invalid"), 400
 
     if request.method == 'GET':
         return render_template("upload_csv.html")
-    elif request.method == 'POST':
-        if request.content_length > 100000:
-            abort(411)
 
-        try:
-            incoming_data = parse_csv(request.files["file"].stream)
-        except UnicodeError:
-            return render_template("upload_error.html",
-                                   message="Some characters were invalid"), 400
+    if request.method != 'POST':
+        abort(403)
 
-        result = validate_incoming_csv_data(incoming_data)
-        if result.is_valid:
-            result = validate_incoming_data(incoming_data)
+    if request.content_length > 100000:
+        abort(411)
 
-        # TODO: We currently don't test that incoming data gets validated
-        # feels too heavy to be in the controller anyway - pull out later?
-        if not result.is_valid:
-            return render_template("upload_error.html",
-                                   message=result.message), 400
+    try:
+        parse_and_store(
+            parse_csv(request.files["file"].stream),
+            bucket_name)
 
-        app.logger.info("request contains %s documents" % len(incoming_data))
-
-        incoming_records = records.parse_all(incoming_data)
-
-        bucket = Bucket(db, bucket_name)
-        bucket.store(incoming_records)
-    return "ok"
+        return render_template("upload_ok.html")
+    except ValidationError as e:
+        return render_template("upload_error.html", message=e.message), 400
 
 
-def prep_data(incoming_json):
-    if isinstance(incoming_json, list):
-        return incoming_json
+def load_json(data):
+    if data is None:
+        raise ValidationError("Request must be JSON")
+
+    if isinstance(data, list):
+        return data
     else:
-        return [incoming_json]
+        return [data]
+
+
+def parse_and_store(incoming_data, bucket_name):
+    incoming_records = records.parse_all(incoming_data)
+
+    app.logger.info(
+        "request contains %s documents" % len(incoming_records))
+
+    bucket = Bucket(db, bucket_name)
+    bucket.store(incoming_records)
 
 
 def start(port):

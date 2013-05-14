@@ -1,9 +1,15 @@
+import datetime
 import unittest
 
 from hamcrest import *
+from hamcrest import assert_that, is_
 
 from backdrop.core.validation import value_is_valid_id,\
-    value_is_valid, key_is_valid, value_is_valid_datetime_string, key_is_reserved
+    value_is_valid, key_is_valid, value_is_valid_datetime_string, key_is_reserved, validate_record_data
+from tests.support.validity_matcher import is_invalid_with_message, is_valid
+
+valid_string = 'validstring'
+valid_timestamp = datetime.datetime(2012, 12, 12, 12, 12, 12)
 
 
 class ValidKeysTestCase(unittest.TestCase):
@@ -115,3 +121,71 @@ class IdValueIsValidTestCase(unittest.TestCase):
         assert_that(value_is_valid_id(7), is_(False))
         assert_that(value_is_valid_id(None), is_(False))
         assert_that(value_is_valid_id(u'7'), is_(True))
+
+
+class TestValidateRecordData(unittest.TestCase):
+    def test_objects_with_invalid_keys_are_disallowed(self):
+        validation_result = validate_record_data({
+            'foo-bar': 'bar'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message("foo-bar is not a valid key"))
+
+    def test_objects_with_invalid_values_are_disallowed(self):
+        validation_result = validate_record_data({
+            'foo': tuple()
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message("foo has an invalid value"))
+
+    def test_objects_with_invalid_timestamps_are_disallowed(self):
+        validation_result = validate_record_data({
+            '_timestamp': 'this is not a timestamp'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "_timestamp is not a valid datetime object"))
+
+    def test_objects_with_invalid_ids_are_disallowed(self):
+        validation_result = validate_record_data({
+            '_id': 'invalid id'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message("_id is not a valid id"))
+
+    def test_objects_with_unrecognised_internal_keys_are_disallowed(self):
+        validation_result = validate_record_data({
+            '_unknown': 'whatever'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "_unknown is not a recognised internal field"))
+
+    def test_known_internal_fields_are_recognised_as_valid(self):
+        validate = validate_record_data
+
+        assert_that(validate({'_timestamp': valid_timestamp}), is_valid())
+        assert_that(validate({'_id': valid_string}), is_valid())
+
+
+class ValidDateObjectTestCase(unittest.TestCase):
+    def test_validation_happens_until_error_or_finish(self):
+        #see value validation tests, we don't accept arrays
+        my_second_value_is_bad = {
+            u'aardvark': u'puppies',
+            u'Cthulu': ["R'lyeh"]
+        }
+
+        assert_that(
+            validate_record_data(my_second_value_is_bad).is_valid,
+            is_(False))
+
+    def test_validation_for_bad_time_strings(self):
+        some_bad_data = {u'_timestamp': u'hammer time'}
+        assert_that(
+            validate_record_data(some_bad_data).is_valid,
+            is_(False))
+        some_good_data = {u'_timestamp': datetime.datetime(2012, 12, 12, 12)}
+        assert_that(
+            validate_record_data(some_good_data).is_valid,
+            is_(True))
