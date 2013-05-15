@@ -136,3 +136,24 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
                     is_invalid_with_message(
                         "both 'start_at' and 'end_at' are required for "
                         "a period query"))
+
+    def test_that_grouping_by_month_requires_dates_at_start_of_month(self):
+        validation_result = validate_request_args({
+            "period": "month",
+            "start_at": "2013-01-02T00:00:00Z",
+            "end_at": "2014-01-01T00:00:00Z"
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "'start_at' must be the first of the month for "
+            "period=month queries"
+        ))
+
+    def test_that_grouping_by_month_with_dates_on_the_1st_is_allowed(self):
+        validation_result = validate_request_args({
+            "period": "month",
+            "start_at": "2013-01-01T00:00:00Z",
+            "end_at": "2014-01-01T00:00:00Z"
+        })
+
+        assert_that(validation_result, is_valid())
