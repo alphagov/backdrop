@@ -1,8 +1,9 @@
 from StringIO import StringIO
 import unittest
 from hamcrest import assert_that, only_contains, is_
+
 from backdrop.core.parse_csv import parse_csv
-from backdrop.core.validation import ValidationError
+from backdrop.core.errors import ParseError
 
 
 class ParseCsvTestCase(unittest.TestCase):
@@ -24,9 +25,9 @@ class ParseCsvTestCase(unittest.TestCase):
     def test_error_when_values_for_columns_are_missing(self):
         incoming_data = StringIO("a,b\nx,y\nq")
 
-        self.assertRaises(ValidationError, parse_csv, incoming_data)
+        self.assertRaises(ParseError, parse_csv, incoming_data)
 
     def test_error_when_there_are_more_values_than_columns(self):
         incoming_data = StringIO("a,b\nx,y,s,d\nq,w")
 
-        self.assertRaises(ValidationError, parse_csv, incoming_data)
+        self.assertRaises(ParseError, parse_csv, incoming_data)

@@ -4,8 +4,8 @@ import datetime
 from hamcrest import *
 import pytz
 
+from backdrop.core.errors import ParseError
 from backdrop.core.records import Record, parse
-from backdrop.core.validation import ValidationError
 
 
 class TestParse(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestParse(unittest.TestCase):
         assert_that(isinstance(record.data['_timestamp'], datetime.datetime))
 
     def test_validation_error_is_raised_if_cannot_parse(self):
-        self.assertRaises(ValidationError, parse, {"_timestamp": "foobar"})
+        self.assertRaises(ParseError, parse, {"_timestamp": "foobar"})
 
 
 class TestRecord(unittest.TestCase):

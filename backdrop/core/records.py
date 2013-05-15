@@ -1,7 +1,8 @@
 from dateutil import parser
 import pytz
 from backdrop.core.timeseries import WEEK
-from backdrop.core.validation import ValidationError, validate_record_data
+from backdrop.core.validation import validate_record_data
+from .errors import ParseError, ValidationError
 
 
 class Record(object):
@@ -38,7 +39,7 @@ def parse(datum):
             datum['_timestamp'] = _time_string_to_utc_datetime(
                 datum['_timestamp'])
         except ValueError:
-            raise ValidationError(
+            raise ParseError(
                 '_timestamp is not a valid timestamp, it must be ISO8601')
 
     return Record(datum)

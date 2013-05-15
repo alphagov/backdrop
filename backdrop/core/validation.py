@@ -9,7 +9,6 @@ import datetime
 import re
 from dateutil import parser
 import pytz
-from backdrop.core.errors import BackdropError
 
 RESERVED_KEYWORDS = (
     '_timestamp',
@@ -83,10 +82,6 @@ def valid():
 
 def invalid(message):
     return ValidationResult(False, message)
-
-
-class ValidationError(BackdropError):
-    pass
 
 
 def validate_record_data(data):

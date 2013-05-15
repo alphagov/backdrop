@@ -2,15 +2,15 @@ from os import getenv
 
 from flask import Flask, request, jsonify, render_template, abort
 
+from ..core.errors import ParseError, ValidationError
 from ..core.parse_csv import parse_csv
 from ..core.log_handler \
     import create_request_logger, create_response_logger
-
-from .validation import bearer_token_is_valid
-from ..core.validation import bucket_is_valid, ValidationError
-
+from ..core.validation import bucket_is_valid
 from ..core import database, log_handler, records, cache_control
 from ..core.bucket import Bucket
+
+from .validation import bearer_token_is_valid
 
 
 def setup_logging():
@@ -79,7 +79,7 @@ def post_to_bucket(bucket_name):
             bucket_name)
 
         return jsonify(status='ok')
-    except ValidationError as e:
+    except (ParseError, ValidationError) as e:
         return jsonify(status="error", message=e.message), 400
 
 
@@ -104,7 +104,7 @@ def get_upload(bucket_name):
             bucket_name)
 
         return render_template("upload_ok.html")
-    except ValidationError as e:
+    except (ParseError, ValidationError) as e:
         return render_template("upload_error.html", message=e.message), 400
 
 
