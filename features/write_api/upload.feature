@@ -16,3 +16,19 @@ Feature: csv upload
              {"name": "Pawel", "age": "27", "nationality": "Polish"}
              {"name": "Max", "age": "35", "nationality": "Italian"}
              """
+
+    Scenario: UTF8 characters
+       Given a file named "data.csv":
+             """
+             english,italian
+             city,città
+             coffee,caffè
+             """
+        when I go to "/my_bucket/upload"
+         and I enter "data.csv" into the file upload field
+         and I click "submit"
+        then the platform should have stored in "my_bucket":
+             """
+             {"english": "city", "italian": "città"}
+             {"english": "coffee", "italian": "caffè"}
+             """

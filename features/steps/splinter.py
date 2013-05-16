@@ -1,3 +1,4 @@
+from httplib import BadStatusLine
 import json
 import os
 import shutil
@@ -13,9 +14,10 @@ def step(context, filename, fixturename):
 
 @given(u'a file named "{filename}"')
 def step(context, filename):
+    content = context.text.encode('utf-8')
     filepath = os.path.join("tmp", filename)
     with open(filepath, "w") as stream:
-        stream.write(context.text)
+        stream.write(content)
 
 
 @given(u'a file named "{filename}" of size "{number}" bytes')
