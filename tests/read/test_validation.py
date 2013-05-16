@@ -261,14 +261,13 @@ class TestRequestValidation(TestCase):
             "Cannot group by internal fields, internal fields "
             "start with an underscore"))
 
-    def test_queries_with_period_values_not_set_to_week_are_disallowed(self):
+    def test_queries_with_period_values_must_be_certain_values(self):
         validation_result = validate_request_args({
             'period': 'fortnight'
         })
 
         assert_that(validation_result, is_invalid_with_message(
-            'Unrecognised grouping for period. '
-            'Supported periods include: week'))
+            "'period' must be one of ['week', 'month']"))
 
     def test_queries_without_a_colon_in_sort_by_are_disallowed(self):
         validation_result = validate_request_args({

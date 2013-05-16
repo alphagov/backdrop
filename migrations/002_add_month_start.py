@@ -14,7 +14,7 @@ def up(db):
         collection = db[name]
         query = {
             "_timestamp": {"$exists": True},
-            "_week_start_at": {"$exists": False}
+            "_month_start_at": {"$exists": False}
         }
         for document in collection.find(query):
             document['_timestamp'] = utc(document['_timestamp'])

@@ -1,11 +1,12 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, abort
+from flask import Flask, request, jsonify, render_template, g
+from backdrop import statsd
+from backdrop.core.parse_csv import parse_csv
+from backdrop.core.log_handler \
+    import create_request_logger, create_response_logger
 
 from ..core.errors import ParseError, ValidationError
-from ..core.parse_csv import parse_csv
-from ..core.log_handler \
-    import create_request_logger, create_response_logger
 from ..core.validation import bucket_is_valid
 from ..core import database, log_handler, records, cache_control
 from ..core.bucket import Bucket
@@ -48,6 +49,7 @@ app.after_request(create_response_logger(app))
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
+    statsd.incr("write.error", bucket=g.bucket_name)
     code = (e.code if hasattr(e, 'code') else None)
     return jsonify(status='error', message=''), code
 
@@ -65,6 +67,8 @@ def health_check():
 @app.route('/<bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
+    g.bucket_name = bucket_name
+
     if not bucket_is_valid(bucket_name):
         return jsonify(status="error",
                        message="Bucket name is invalid"), 400
@@ -73,6 +77,7 @@ def post_to_bucket(bucket_name):
     auth_header = request.headers.get('Authorization', None)
 
     if not bearer_token_is_valid(tokens, auth_header, bucket_name):
+        statsd.incr("write_api.bad_token", bucket=g.bucket_name)
         return jsonify(status='error', message='Forbidden'), 403
 
     try:

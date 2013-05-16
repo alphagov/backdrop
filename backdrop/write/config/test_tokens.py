@@ -6,4 +6,6 @@ TOKENS = {
     'licensing': 'licensing-bearer-token',
     'my_dinosaur_bucket': 'my_dinosaur_bucket-bearer-token',
     'reptiles': 'reptiles-bearer-token',
+    'month': 'month-bearer-token',
+    'month_no_raw_access': 'month_no_raw_access-bearer-token'
 }

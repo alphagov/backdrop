@@ -7,5 +7,6 @@ RAW_QUERIES_ALLOWED = {
     "foo": True,
     "licensing": True,
     "lizards": True,
-    "rawr": True
+    "rawr": True,
+    "month": True
 }

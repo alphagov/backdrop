@@ -3,19 +3,29 @@ Run all migrations
 """
 import imp
 import os
+import sys
 import pymongo
 from os.path import join
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 def load_config(env):
-    config_path = os.path.join(ROOT_PATH, 'backdrop', 'write', 'config',
-                               '{0}.py'.format(env))
-    return imp.load_source('config', config_path)
+    config_path = os.path.join(ROOT_PATH, 'backdrop', 'write', 'config')
+    fp = None
+    try:
+        sys.path.append(config_path)
+        fp, pathname, description = imp.find_module(
+            "backdrop/write/config/%s" % env)
+        return imp.load_module(env, fp, pathname, description)
+    finally:
+        sys.path.pop()
+        if fp:
+            fp.close()
 
 
 def get_database(config):
@@ -39,4 +49,5 @@ if __name__ == '__main__':
     database = get_database(config)
 
     for migration in get_migrations():
+        log.info("Running migration %s" % migration)
         migration.up(database)
