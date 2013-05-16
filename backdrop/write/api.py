@@ -12,6 +12,8 @@ from ..core.bucket import Bucket
 
 from .validation import bearer_token_is_valid
 
+MAX_UPLOAD_SIZE = 100000
+
 
 def setup_logging():
     log_handler.set_up_logging(app, "write",
@@ -86,17 +88,13 @@ def post_to_bucket(bucket_name):
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
 def get_upload(bucket_name):
     if not bucket_is_valid(bucket_name):
-        return render_template("upload_error.html",
-                               message="Bucket name is invalid"), 400
+        return _invalid_upload("Bucket name is invalid")
 
     if request.method == 'GET':
         return render_template("upload_csv.html")
 
     if request.method != 'POST':
         abort(403)
-
-    if request.content_length > 100000:
-        abort(411)
 
     try:
         parse_and_store(
@@ -105,7 +103,11 @@ def get_upload(bucket_name):
 
         return render_template("upload_ok.html")
     except (ParseError, ValidationError) as e:
-        return render_template("upload_error.html", message=e.message), 400
+        return _invalid_upload(e.message)
+
+
+def _invalid_upload(msg):
+    return render_template("upload_error.html", message=msg), 400
 
 
 def load_json(data):
