@@ -3,14 +3,14 @@ import logging
 from pymongo import MongoClient
 from splinter import Browser
 
-from features.support.http_test_client import HTTPTestClient
+from features.support.http_test_client import HTTPTestClient, Api
 
 
 class SplinterClient(object):
 
     def __init__(self, database_name):
         self.database_name = database_name
-        self.http_test_client = HTTPTestClient(database_name)
+        self._write_api = Api.start('write', '5001')
 
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
@@ -22,10 +22,10 @@ class SplinterClient(object):
         self.browser.quit()
 
     def spin_down(self):
-        self.http_test_client.spin_down()
+        self._write_api.stop()
 
     def get(self, url, headers=None):
-        self.browser.visit(self.http_test_client.write_url(url))
+        self.browser.visit(self._write_api.url(url))
         return SplinterResponse(self.browser)
 
 
