@@ -5,11 +5,7 @@ from .errors import ParseError
 def parse_csv(incoming_data):
     return list(
         parse_rows(
-            csv.DictReader(
-                encode_as_utf8(
-                    incoming_data
-                )
-            )
+            unicode_csv_dict_reader(incoming_data, 'utf-8')
         )
     )
 
@@ -25,9 +21,26 @@ def parse_rows(data):
         yield datum
 
 
-def encode_as_utf8(incoming_data):
-    for line in incoming_data:
+class UnicodeCsvReader(object):
+    def __init__(self, reader, encoding):
+        self._reader = reader
+        self._encoding = encoding
+
+    def next(self):
         try:
-            yield line.encode('utf-8')
+            return [self._decode(cell) for cell in self._reader.next()]
         except UnicodeError:
             raise ParseError("Non-UTF8 characters found.")
+
+    @property
+    def line_num(self):
+        return self._reader.line_num
+
+    def _decode(self, cell):
+        return unicode(cell, self._encoding)
+
+
+def unicode_csv_dict_reader(incoming_data, encoding):
+    r = csv.DictReader(incoming_data)
+    r.reader = UnicodeCsvReader(r.reader, encoding)
+    return r
