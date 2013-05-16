@@ -57,6 +57,7 @@ class HTTPTestClient(object):
         return subprocess.Popen(
             ["python", "start.py", api, self.APP_PORTS[api]],
             preexec_fn=os.setsid,
+            stderr=subprocess.STDOUT, stdout=subprocess.PIPE
         )
 
     def read_url(self, url):
