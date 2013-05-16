@@ -93,8 +93,8 @@ def get_upload(bucket_name):
     if request.method == 'GET':
         return render_template("upload_csv.html")
 
-    if request.method != 'POST':
-        abort(403)
+    if request.content_length > MAX_UPLOAD_SIZE:
+        return _invalid_upload("file too large")
 
     try:
         parse_and_store(
