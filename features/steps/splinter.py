@@ -1,12 +1,30 @@
+from httplib import BadStatusLine
 import json
-from hamcrest import assert_that, has_length
+import os
+import shutil
+from hamcrest import assert_that, has_length, is_
+
+
+@given(u'a file named "{filename}" with fixture "{fixturename}"')
+def step(context, filename, fixturename):
+    filepath = os.path.join("tmp", filename)
+    fixturepath = os.path.join("features", "fixtures", fixturename)
+    shutil.copyfile(fixturepath, filepath)
 
 
 @given(u'a file named "{filename}"')
 def step(context, filename):
-    filepath = "tmp/%s" % filename
+    content = context.text.encode('utf-8')
+    filepath = os.path.join("tmp", filename)
     with open(filepath, "w") as stream:
-        stream.write(context.text)
+        stream.write(content)
+
+
+@given(u'a file named "{filename}" of size "{number}" bytes')
+def step(context, filename, number):
+    filepath = os.path.join("tmp", filename)
+    with open(filepath, "w") as stream:
+        stream.write("x" * int(number))
 
 
 @when(u'I enter "{filename}" into the file upload field')
@@ -27,3 +45,9 @@ def step(context, bucket_name):
         query = json.loads(line)
         result = bucket.find(query)
         assert_that(list(result), has_length(1))
+
+
+@then(u'the platform should have "{n}" items stored in "{bucket_name}"')
+def step(context, n, bucket_name):
+    bucket = context.client.storage()[bucket_name]
+    assert_that(bucket.count(), is_(int(n)))

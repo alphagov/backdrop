@@ -5,6 +5,7 @@ App specific validation functions combine validators and return a
 ValidationResult object.
 """
 from collections import namedtuple
+import datetime
 import re
 from dateutil import parser
 import pytz
@@ -38,7 +39,7 @@ def value_is_valid_datetime_string(value):
 
 
 def value_is_valid(value):
-    return isinstance(value, (int, float, basestring, bool))
+    return isinstance(value, (int, float, basestring, bool, datetime.datetime))
 
 
 def key_is_valid(key):
@@ -81,3 +82,25 @@ def valid():
 
 def invalid(message):
     return ValidationResult(False, message)
+
+
+def validate_record_data(data):
+    for key, value in data.items():
+        if not key_is_valid(key):
+            return invalid('{0} is not a valid key'.format(key))
+
+        if key_is_internal(key) and not key_is_reserved(key):
+            return invalid(
+                '{0} is not a recognised internal field'.format(key))
+
+        if not value_is_valid(value):
+            return invalid('{0} has an invalid value'.format(key))
+
+        if key == '_timestamp' and not isinstance(value, datetime.datetime):
+            return invalid(
+                '_timestamp is not a valid datetime object')
+
+        if key == '_id' and not value_is_valid_id(value):
+            return invalid('_id is not a valid id')
+
+    return valid()

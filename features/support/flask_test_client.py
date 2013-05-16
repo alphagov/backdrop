@@ -13,6 +13,12 @@ class FlaskTestClient(object):
     def storage(self):
         return self._storage
 
+    def before_scenario(self):
+        pass
+
+    def after_scenario(self):
+        pass
+
     def spin_down(self):
         self._config.from_object(
             "backdrop.read.config.test"

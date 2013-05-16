@@ -6,9 +6,14 @@ from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 
-from .validation import validate_post_to_bucket
+from ..core.errors import ParseError, ValidationError
+from ..core.validation import bucket_is_valid
 from ..core import database, log_handler, records, cache_control
 from ..core.bucket import Bucket
+
+from .validation import bearer_token_is_valid
+
+MAX_UPLOAD_SIZE = 100000
 
 
 def setup_logging():
@@ -45,7 +50,8 @@ app.after_request(create_response_logger(app))
 def exception_handler(e):
     app.logger.exception(e)
     statsd.incr("write.error", bucket=g.bucket_name)
-    return jsonify(status='error', message=''), e.code
+    code = (e.code if hasattr(e, 'code') else None)
+    return jsonify(status='error', message=''), code
 
 
 @app.route('/_status', methods=['GET'])
@@ -63,66 +69,73 @@ def health_check():
 def post_to_bucket(bucket_name):
     g.bucket_name = bucket_name
 
-    def extract_bearer_token(header):
-        if header is None or len(header) < 8:
-            return ''
-            # Strip the leading "Bearer " from the header value
-        return header[7:]
+    if not bucket_is_valid(bucket_name):
+        return jsonify(status="error",
+                       message="Bucket name is invalid"), 400
 
-    expected_token = app.config['TOKENS'].get(bucket_name, None)
+    tokens = app.config['TOKENS']
     auth_header = request.headers.get('Authorization', None)
-    request_token = extract_bearer_token(auth_header)
 
-    if request_token != expected_token:
-        app.logger.error("expected <%s> but was <%s>" %
-                         (expected_token, request_token))
+    if not bearer_token_is_valid(tokens, auth_header, bucket_name):
         statsd.incr("write_api.bad_token", bucket=g.bucket_name)
         return jsonify(status='error', message='Forbidden'), 403
 
-    if request.json is None:
-        app.logger.error("Request must be JSON")
-        return jsonify(status='error', message='Request must be JSON'), 400
+    try:
+        parse_and_store(
+            load_json(request.json),
+            bucket_name)
 
-    incoming_data = prep_data(request.json)
-
-    app.logger.info("request contains %d documents" % len(incoming_data))
-
-    result = validate_post_to_bucket(incoming_data, bucket_name)
-
-    # TODO: We currently don't test that incoming data gets validated
-    # feels too heavy to be in the controller anyway - pull out later?
-    if not result.is_valid:
-        app.logger.error(result.message)
-        return jsonify(status='error', message=result.message), 400
-
-    incoming_records = []
-
-    for datum in incoming_data:
-        incoming_records.append(records.parse(datum))
-
-    bucket = Bucket(db, bucket_name)
-    bucket.store(incoming_records)
-
-    return jsonify(status='ok')
+        return jsonify(status='ok')
+    except (ParseError, ValidationError) as e:
+        return jsonify(status="error", message=e.message), 400
 
 
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
-def get_upload(bucket_name):
+def upload(bucket_name):
+    if not bucket_is_valid(bucket_name):
+        return _invalid_upload("Bucket name is invalid")
+
     if request.method == 'GET':
         return render_template("upload_csv.html")
-    elif request.method == 'POST':
-        file = request.files["file"]
-        data = parse_csv(file.stream)
-        bucket = Bucket(db, bucket_name)
-        bucket.store([records.parse(datum) for datum in data])
-        return "ok"
+
+    return _store_csv_data(bucket_name)
 
 
-def prep_data(incoming_json):
-    if isinstance(incoming_json, list):
-        return incoming_json
+def _store_csv_data(bucket_name):
+    if request.content_length > MAX_UPLOAD_SIZE:
+        return _invalid_upload("file too large")
+    try:
+        parse_and_store(
+            parse_csv(request.files["file"].stream),
+            bucket_name)
+
+        return render_template("upload_ok.html")
+    except (ParseError, ValidationError) as e:
+        return _invalid_upload(e.message)
+
+
+def _invalid_upload(msg):
+    return render_template("upload_error.html", message=msg), 400
+
+
+def load_json(data):
+    if data is None:
+        raise ValidationError("Request must be JSON")
+
+    if isinstance(data, list):
+        return data
     else:
-        return [incoming_json]
+        return [data]
+
+
+def parse_and_store(incoming_data, bucket_name):
+    incoming_records = records.parse_all(incoming_data)
+
+    app.logger.info(
+        "request contains %s documents" % len(incoming_records))
+
+    bucket = Bucket(db, bucket_name)
+    bucket.store(incoming_records)
 
 
 def start(port):

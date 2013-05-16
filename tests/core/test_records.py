@@ -2,10 +2,20 @@ import unittest
 import datetime
 
 from hamcrest import *
-import pytz
 
-from backdrop.core.records import Record
+from backdrop.core.errors import ParseError
+from backdrop.core.records import Record, parse
 from tests.support.test_helpers import d_tz
+
+
+class TestParse(unittest.TestCase):
+    def test__timestamp_is_parsed_to_datetime(self):
+        record = parse({"_timestamp": "2012-12-12T00:00:00+00:00"})
+
+        assert_that(isinstance(record.data['_timestamp'], datetime.datetime))
+
+    def test_validation_error_is_raised_if_cannot_parse(self):
+        self.assertRaises(ParseError, parse, {"_timestamp": "foobar"})
 
 
 class TestRecord(unittest.TestCase):

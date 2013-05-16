@@ -23,16 +23,31 @@ class HTTPTestClient(object):
 
     def post(self, url, **message):
         headers = dict(message.get("headers", []))
-        headers.update({"Content-type": message['content_type']})
-        response = requests.post(
-            self.write_url(url),
-            data=message['data'],
-            headers=headers
-        )
+        if "data" in message:
+            headers.update({"Content-type": message['content_type']})
+            response = requests.post(
+                self.write_url(url),
+                data=message['data'],
+                headers=headers
+            )
+        elif "files" in message:
+            response = requests.post(
+                self.write_url(url),
+                files=message['files'],
+                headers=headers,
+            )
+        else:
+            raise Exception("Incorrect message")
         return HTTPTestResponse(response)
 
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
+
+    def before_scenario(self):
+        pass
+
+    def after_scenario(self):
+        pass
 
     def spin_down(self):
         os.killpg(self.read.pid, 9)
