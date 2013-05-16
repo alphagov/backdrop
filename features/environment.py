@@ -1,5 +1,7 @@
+import logging
 import os
 import sys
+from backdrop.core.log_handler import get_log_file_handler
 from features.support.splinter_client import SplinterClient
 
 sys.path.append(
@@ -14,6 +16,16 @@ from backdrop.read import api as read_api
 from backdrop.write import api as write_api
 # pick one for test configuration, if they don't match things will fail
 from backdrop.write.config import test as config
+
+
+handler = logging.FileHandler('log/behave.log')
+handler.setFormatter(logging.Formatter(
+    "%(asctime)s [%(levelname)s - %(name)s - %(filename)s:%(lineno)d] "
+    "-> %(message)s"))
+
+
+log = logging.getLogger()
+log.addHandler(handler)
 
 
 def before_feature(context, feature):
