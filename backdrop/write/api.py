@@ -86,16 +86,19 @@ def post_to_bucket(bucket_name):
 
 
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
-def get_upload(bucket_name):
+def upload(bucket_name):
     if not bucket_is_valid(bucket_name):
         return _invalid_upload("Bucket name is invalid")
 
     if request.method == 'GET':
         return render_template("upload_csv.html")
 
+    return _store_csv_data(bucket_name)
+
+
+def _store_csv_data(bucket_name):
     if request.content_length > MAX_UPLOAD_SIZE:
         return _invalid_upload("file too large")
-
     try:
         parse_and_store(
             parse_csv(request.files["file"].stream),
