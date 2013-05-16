@@ -43,6 +43,12 @@ class HTTPTestClient(object):
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
 
+    def before_scenario(self):
+        pass
+
+    def after_scenario(self):
+        pass
+
     def spin_down(self):
         os.killpg(self.read.pid, 9)
         os.killpg(self.write.pid, 9)
