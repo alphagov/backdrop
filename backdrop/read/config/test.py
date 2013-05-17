@@ -8,5 +8,5 @@ RAW_QUERIES_ALLOWED = {
     "licensing": True,
     "lizards": True,
     "rawr": True,
-    "month": True
+    "month": True,
 }
