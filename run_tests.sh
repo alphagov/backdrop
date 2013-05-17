@@ -28,6 +28,8 @@ source "$venvdir/bin/activate"
 
 pip install -r requirements_for_tests.txt
 
+find . -name '*.pyc' -delete
+
 nosetests -v
 display_result $? 1 "Unit tests"
 
