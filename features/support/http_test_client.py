@@ -55,6 +55,15 @@ class HTTPTestResponse:
         self.headers = response.headers
 
 
+def wait_until(condition, timeout=3, interval=0.1):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if condition():
+            return
+        time.sleep(interval)
+    raise RuntimeError("timeout")
+
+
 class Api(object):
     @classmethod
     def start(cls, api, port):
@@ -72,12 +81,16 @@ class Api(object):
             preexec_fn=os.setsid,
             stderr=subprocess.STDOUT, stdout=subprocess.PIPE
         )
-        time.sleep(0.3)  # wait until process has started
+        wait_until(self._started)
+
+    def _started(self):
+        try:
+            return requests.get(self.url('/_status')).status_code == 200
+        except:
+            return False
 
     def stop(self):
         os.killpg(self._process.pid, 9)
 
     def url(self, path):
         return 'http://localhost:{0}{1}'.format(self._port, path)
-
-
