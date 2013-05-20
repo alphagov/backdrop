@@ -5,9 +5,15 @@ from .errors import ParseError
 def parse_csv(incoming_data):
     return list(
         parse_rows(
-            unicode_csv_dict_reader(incoming_data, 'utf-8')
+            ignore_comment_column(unicode_csv_dict_reader(
+                ignore_comment_lines(incoming_data), 'utf-8')
+            )
         )
     )
+
+
+def is_empty_row(row):
+    return all(not v for v in row.values())
 
 
 def parse_rows(data):
@@ -18,7 +24,21 @@ def parse_rows(data):
         if None in datum.values():
             raise ParseError(
                 'Some rows in the CSV file contain fewer values than columns')
-        yield datum
+        if not is_empty_row(datum):
+            yield datum
+
+
+def ignore_comment_lines(reader):
+    for line in reader:
+        if not line.startswith('#'):
+            yield line
+
+
+def ignore_comment_column(data):
+    for d in data:
+        if "comment" in d:
+            del d["comment"]
+        yield d
 
 
 class UnicodeCsvReader(object):
