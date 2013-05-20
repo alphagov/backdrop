@@ -20,6 +20,8 @@ def up(db):
             document['_timestamp'] = utc(document['_timestamp'])
             if '_week_start_at' in document:
                 document.pop('_week_start_at')
+            if '_updated_at' in document:
+                document.pop('_updated_at')
             record = Record(document)
 
             collection.save(record.to_mongo())
