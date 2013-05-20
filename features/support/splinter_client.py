@@ -1,9 +1,6 @@
-import logging
-
 from pymongo import MongoClient
 from splinter import Browser
 
-from features.support.http_test_client import HTTPTestClient
 from features.support.support import Api
 
 

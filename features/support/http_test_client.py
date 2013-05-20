@@ -20,13 +20,15 @@ class HTTPTestClient(object):
             response = requests.post(
                 self._write_api.url(url),
                 data=message['data'],
-                headers=headers
+                headers=headers,
+                timeout=60,
             )
         elif "files" in message:
             response = requests.post(
                 self._write_api.url(url),
                 files=message['files'],
                 headers=headers,
+                timeout=60,
             )
         else:
             raise Exception("Incorrect message")
