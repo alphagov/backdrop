@@ -60,7 +60,22 @@ class UnicodeCsvReader(object):
         return unicode(cell, self._encoding)
 
 
+class IgnoreCsvCommentsReader(object):
+    def __init__(self, reader):
+        self._reader = reader
+
+    def next(self):
+        d = self._reader.next()
+        if "comment" in d:
+            del d["comment"]
+        return d
+
+    def __iter__(self):
+        return self
+
+
 def unicode_csv_dict_reader(incoming_data, encoding):
     r = csv.DictReader(CommentedFile(incoming_data))
     r.reader = UnicodeCsvReader(r.reader, encoding)
+    r = IgnoreCsvCommentsReader(r)
     return r

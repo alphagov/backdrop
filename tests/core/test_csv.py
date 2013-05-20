@@ -81,3 +81,13 @@ class ParseCsvTestCase(unittest.TestCase):
         assert_that(data, only_contains(
             {"a": u"c", "b": u"d"}
         ))
+
+    def test_ignore_values_in_comments_column(self):
+        csv = u"a,comment,b\nc,d,e"
+        csv_stream = StringIO(csv.encode("utf-8"))
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"a": u"c", "b": u"e"}
+        ))
