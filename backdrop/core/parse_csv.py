@@ -5,7 +5,9 @@ from .errors import ParseError
 def parse_csv(incoming_data):
     return list(
         parse_rows(
-            unicode_csv_dict_reader(incoming_data, 'utf-8')
+            ignore_comment_column(unicode_csv_dict_reader(
+                ignore_comment_lines(incoming_data), 'utf-8')
+            )
         )
     )
 
@@ -26,19 +28,17 @@ def parse_rows(data):
             yield datum
 
 
-class CommentedFile:
-    def __init__(self, reader, commentstring="#"):
-        self._reader = reader
-        self._commentstring = commentstring
+def ignore_comment_lines(reader):
+    for line in reader:
+        if not line.startswith('#'):
+            yield line
 
-    def next(self):
-        line = self._reader.next()
-        while line.startswith(self._commentstring):
-            line = self._reader.next()
-        return line
 
-    def __iter__(self):
-        return self
+def ignore_comment_column(data):
+    for d in data:
+        if "comment" in d:
+            del d["comment"]
+        yield d
 
 
 class UnicodeCsvReader(object):
@@ -60,22 +60,7 @@ class UnicodeCsvReader(object):
         return unicode(cell, self._encoding)
 
 
-class IgnoreCsvCommentsReader(object):
-    def __init__(self, reader):
-        self._reader = reader
-
-    def next(self):
-        d = self._reader.next()
-        if "comment" in d:
-            del d["comment"]
-        return d
-
-    def __iter__(self):
-        return self
-
-
 def unicode_csv_dict_reader(incoming_data, encoding):
-    r = csv.DictReader(CommentedFile(incoming_data))
+    r = csv.DictReader(incoming_data)
     r.reader = UnicodeCsvReader(r.reader, encoding)
-    r = IgnoreCsvCommentsReader(r)
     return r
