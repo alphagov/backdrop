@@ -10,6 +10,10 @@ def parse_csv(incoming_data):
     )
 
 
+def is_empty_row(row):
+    return all(not v for v in row.values())
+
+
 def parse_rows(data):
     for datum in data:
         if None in datum.keys():
@@ -18,7 +22,23 @@ def parse_rows(data):
         if None in datum.values():
             raise ParseError(
                 'Some rows in the CSV file contain fewer values than columns')
-        yield datum
+        if not is_empty_row(datum):
+            yield datum
+
+
+class CommentedFile:
+    def __init__(self, reader, commentstring="#"):
+        self._reader = reader
+        self._commentstring = commentstring
+
+    def next(self):
+        line = self._reader.next()
+        while line.startswith(self._commentstring):
+            line = self._reader.next()
+        return line
+
+    def __iter__(self):
+        return self
 
 
 class UnicodeCsvReader(object):
@@ -41,6 +61,6 @@ class UnicodeCsvReader(object):
 
 
 def unicode_csv_dict_reader(incoming_data, encoding):
-    r = csv.DictReader(incoming_data)
+    r = csv.DictReader(CommentedFile(incoming_data))
     r.reader = UnicodeCsvReader(r.reader, encoding)
     return r

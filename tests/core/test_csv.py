@@ -50,3 +50,34 @@ class ParseCsvTestCase(unittest.TestCase):
         csv_stream = StringIO(csv.encode("iso-8859-1"))
 
         self.assertRaises(ParseError, parse_csv, csv_stream)
+
+    def test_ignore_when_empty_row(self):
+        csv = u"a,b\n,\nc,d"
+        csv_stream = StringIO(csv.encode("utf-8"))
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"a": u"c", "b": u"d"}
+        ))
+
+    def test_accept_when_some_values_empty(self):
+        csv = u"a,b\n,\nc,d\nc,"
+        csv_stream = StringIO(csv.encode("utf-8"))
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"a": u"c", "b": u"d"},
+            {"a": u"c", "b": u""}
+        ))
+
+    def test_ignore_comments(self):
+        csv = u"# top comment\na,b\n# any random comment\nc,d"
+        csv_stream = StringIO(csv.encode("utf-8"))
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"a": u"c", "b": u"d"}
+        ))
