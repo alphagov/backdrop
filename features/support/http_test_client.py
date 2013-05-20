@@ -1,24 +1,16 @@
-import os
-import subprocess
-import time
 from pymongo import MongoClient
 import requests
+from features.support.support import Api
 
 
 class HTTPTestClient(object):
-    APP_PORTS = {
-        'read': '5000',
-        'write': '5001',
-    }
-
     def __init__(self, database_name):
         self.database_name = database_name
-        self.read = self.run_api("read")
-        self.write = self.run_api("write")
-        time.sleep(1)  # wait until processes have started
+        self._read_api = Api.start("read", "5000")
+        self._write_api = Api.start("write", "5001")
 
     def get(self, url, headers=None):
-        response = requests.get(self.read_url(url), headers=headers)
+        response = requests.get(self._read_api.url(url), headers=headers)
         return HTTPTestResponse(response)
 
     def post(self, url, **message):
@@ -26,13 +18,13 @@ class HTTPTestClient(object):
         if "data" in message:
             headers.update({"Content-type": message['content_type']})
             response = requests.post(
-                self.write_url(url),
+                self._write_api.url(url),
                 data=message['data'],
                 headers=headers
             )
         elif "files" in message:
             response = requests.post(
-                self.write_url(url),
+                self._write_api.url(url),
                 files=message['files'],
                 headers=headers,
             )
@@ -50,21 +42,8 @@ class HTTPTestClient(object):
         pass
 
     def spin_down(self):
-        os.killpg(self.read.pid, 9)
-        os.killpg(self.write.pid, 9)
-
-    def run_api(self, api):
-        return subprocess.Popen(
-            ["python", "start.py", api, self.APP_PORTS[api]],
-            preexec_fn=os.setsid,
-            stderr=subprocess.STDOUT, stdout=subprocess.PIPE
-        )
-
-    def read_url(self, url):
-        return 'http://localhost:{0}{1}'.format(self.APP_PORTS['read'], url)
-
-    def write_url(self, url):
-        return 'http://localhost:{0}{1}'.format(self.APP_PORTS['write'], url)
+        self._read_api.stop()
+        self._write_api.stop()
 
 
 class HTTPTestResponse:
