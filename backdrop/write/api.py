@@ -102,16 +102,20 @@ def upload(bucket_name):
 
 
 def _store_csv_data(bucket_name):
-    if request.content_length > MAX_UPLOAD_SIZE:
-        return _invalid_upload("file too large")
+    file_stream = request.files["file"].stream
     try:
-        parse_and_store(
-            parse_csv(request.files["file"].stream),
-            bucket_name)
+        if request.content_length > MAX_UPLOAD_SIZE:
+            return _invalid_upload("file too large")
+        try:
+            parse_and_store(
+                parse_csv(file_stream),
+                bucket_name)
 
-        return render_template("upload_ok.html")
-    except (ParseError, ValidationError) as e:
-        return _invalid_upload(e.message)
+            return render_template("upload_ok.html")
+        except (ParseError, ValidationError) as e:
+            return _invalid_upload(e.message)
+    finally:
+        file_stream.close()
 
 
 def _invalid_upload(msg):
