@@ -1,10 +1,12 @@
+import json
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, g
+from flask import Flask, request, jsonify, render_template, g, session
 from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
+from backdrop.write.signonotron2 import Signonotron2
 
 from ..core.errors import ParseError, ValidationError
 from ..core.validation import bucket_is_valid
@@ -31,6 +33,7 @@ app = Flask(__name__)
 app.config.from_object(
     "backdrop.write.config.%s" % environment()
 )
+app.secret_key = app.config['SECRET_KEY']
 
 db = database.Database(
     app.config['MONGO_HOST'],
@@ -42,6 +45,30 @@ setup_logging()
 
 app.before_request(create_request_logger(app))
 app.after_request(create_response_logger(app))
+
+app.oauth_service = Signonotron2(
+    client_id=app.config['CLIENT_ID'],
+    client_secret=app.config['CLIENT_SECRET']
+)
+
+
+@app.route("/login")
+def oauth_login():
+    return app.oauth_service.authorize()
+
+
+@app.route("/authorized")
+def oauth_authorized():
+    access_token = app.oauth_service.exchange(request.args['code'])
+    user_details, can_see_backdrop = \
+        app.oauth_service.user_details(access_token)
+    if not can_see_backdrop:
+        return ("You are signed in to GOV.UK account '%s', "
+                "but you don't have permissions to use this application." %
+                user_details["user"]["name"], 403)
+    session.update(
+        {"user": user_details["user"]["name"]})
+    return "You are logged in as '%s'." % (session.get('user'))
 
 
 @app.errorhandler(500)
