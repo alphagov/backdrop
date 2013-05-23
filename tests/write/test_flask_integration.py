@@ -7,7 +7,7 @@ import pytz
 from mock import patch
 from backdrop.core.records import Record
 
-from tests.support.test_helpers import is_bad_request, is_ok, is_error_response
+from tests.support.test_helpers import is_bad_request, is_ok, is_error_response, has_status
 from tests.support.test_helpers import is_unauthorized
 from backdrop.write import api
 
@@ -145,6 +145,23 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
+    @patch("backdrop.write.api.statsd")
+    @patch("backdrop.write.api.bucket_is_valid")
+    def test_exception_handling(self, bucket_is_valid, statsd):
+        bucket_is_valid.side_effect = ValueError("BOOM")
+
+        response = self.app.post(
+            "/foo",
+            data={'foo': 'bar'},
+            content_type='application/json',
+            headers=[('Authorization', 'Bearer foo-bearer-token')]
+        )
+
+        assert_that(response, has_status(500))
+        assert_that(response, is_error_response())
+
+        statsd.incr.assert_called_with("write.error", bucket="foo")
+
 
 class ApiHealthCheckTestCase(unittest.TestCase):
     def setUp(self):
@@ -160,3 +177,15 @@ class ApiHealthCheckTestCase(unittest.TestCase):
 
         entity = json.loads(response.data)
         assert_that(entity["status"], is_("ok"))
+
+    @patch("backdrop.write.api.statsd")
+    @patch("backdrop.write.api.db")
+    def test_exception_handling(self, db, statsd):
+        db.alive.side_effect = ValueError("BOOM")
+
+        response = self.app.get("/_status")
+
+        assert_that(response, has_status(500))
+        assert_that(response, is_error_response())
+
+        statsd.incr.assert_called_with("write.error", bucket="/_status")

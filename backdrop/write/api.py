@@ -53,8 +53,9 @@ def exception_handler(e):
     bucket_name = getattr(g, 'bucket_name', request.path)
     statsd.incr("write.error", bucket=bucket_name)
 
-    code = getattr(e, 'code', None)
-    name = getattr(e, 'name', None)
+    code = getattr(e, 'code', 500)
+    name = getattr(e, 'name', "Internal Error")
+
     return jsonify(status='error', message=name), code
 
 
