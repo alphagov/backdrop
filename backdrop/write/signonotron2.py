@@ -1,4 +1,5 @@
-from flask import url_for, redirect, json
+from functools import wraps
+from flask import url_for, redirect, json, session
 from rauth import OAuth2Service
 
 
@@ -16,7 +17,7 @@ class Signonotron2(object):
     def __redirect_uri(self):
         return url_for("oauth_authorized", _external=True)
 
-    def json_access_token(self, something):
+    def __json_access_token(self, something):
         return json.loads(something)
 
     def authorize(self):
@@ -34,7 +35,7 @@ class Signonotron2(object):
         )
         access_token = self.signon.get_access_token(
             'POST',
-            decoder=self.json_access_token,
+            decoder=self.__json_access_token,
             data=data)
         return access_token
 
@@ -42,3 +43,12 @@ class Signonotron2(object):
         session = self.signon.get_session(access_token)
         user_details = session.get('user.json').json()
         return user_details, "signin" in user_details["user"]["permissions"]
+
+
+def protected(f):
+    @wraps(f)
+    def verify_user_logged_in(*args, **kwargs):
+        if not "user" in session:
+            return redirect(url_for('oauth_login'))
+        return f(*args, **kwargs)
+    return verify_user_logged_in

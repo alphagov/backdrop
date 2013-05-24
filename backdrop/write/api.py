@@ -1,4 +1,3 @@
-import json
 from os import getenv
 
 from flask import Flask, request, jsonify, render_template, g, session
@@ -6,7 +5,7 @@ from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
-from backdrop.write.signonotron2 import Signonotron2
+from backdrop.write.signonotron2 import Signonotron2, protected
 
 from ..core.errors import ParseError, ValidationError
 from ..core.validation import bucket_is_valid
@@ -89,6 +88,12 @@ def health_check():
     else:
         return jsonify(status='error',
                        message='cannot connect to database'), 500
+
+
+@app.route("/upload", methods=['GET'])
+@protected
+def upload_buckets():
+    return "hello"
 
 
 @app.route('/<bucket_name>', methods=['POST'])
