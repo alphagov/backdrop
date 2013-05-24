@@ -85,6 +85,10 @@ def exception_handler(e):
     code = (e.code if hasattr(e, 'code') else None)
     return jsonify(status='error', message=''), code
 
+@app.route("/", methods=['GET'])
+def index():
+    return render_template("index.html")
+
 
 @app.route('/_status', methods=['GET'])
 @cache_control.nocache
