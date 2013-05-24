@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import url_for, redirect, json, session
 from rauth import OAuth2Service
+from rauth.service import process_token_request
 
 
 class Signonotron2(object):
@@ -33,10 +34,13 @@ class Signonotron2(object):
             redirect_uri=self.__redirect_uri(),
             code=code
         )
-        access_token = self.signon.get_access_token(
-            'POST',
-            decoder=self.__json_access_token,
-            data=data)
+        response = self.signon.get_raw_access_token('POST', data=data)
+        if response.status_code in [200, 201]:
+            access_token, = process_token_request(
+                response, self.__json_access_token, 'access_token')
+        else:
+            access_token = None
+
         return access_token
 
     def user_details(self, access_token):
