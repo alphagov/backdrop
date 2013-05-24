@@ -68,17 +68,16 @@ def oauth_authorized():
     access_token = app.oauth_service.exchange(request.args['code'])
     user_details, can_see_backdrop = \
         app.oauth_service.user_details(access_token)
-    session.update(
-        {"user": user_details["user"]["name"]})
     if not can_see_backdrop:
         return redirect(url_for("not_authorized"))
-    return "You are logged in as '%s'." % (session.get('user'))
+    session.update(
+        {"user": user_details["user"]["name"]})
+    return redirect(url_for("index"))
 
 
 @app.route("/not_authorized")
 def not_authorized():
-    return render_template("signon/not_authorized.html",
-                           user=session.get("user"))
+    return render_template("signon/not_authorized.html")
 
 
 @app.errorhandler(500)

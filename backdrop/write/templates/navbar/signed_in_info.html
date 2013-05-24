@@ -1,0 +1,6 @@
+{% if session.get('user') %}
+    <ul class="nav pull-right">
+        <li class="divider-vertical"><a href="/sign_out">Sign out</a></li>
+    </ul>
+    <p class="pull-right navbar-text">Signed in as {{ session.get('user') }}</p>
+{% endif %}
