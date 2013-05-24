@@ -51,9 +51,15 @@ app.oauth_service = Signonotron2(
 )
 
 
-@app.route("/login")
+@app.route("/sign_in")
 def oauth_login():
     return app.oauth_service.authorize()
+
+
+@app.route("/sign_out")
+def logout():
+    session.clear()
+    return render_template("signon/signout.html")
 
 
 @app.route("/authorized")

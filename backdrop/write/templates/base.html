@@ -5,8 +5,16 @@
     <title>{% block title %}{% endblock %} - Performance Platform</title>
 </head>
 
-<body>
-    {% block body %}{% endblock %}
+<body style="padding-top: 60px">
+    {% include "navbar/nav.html" %}
+    <div class="container">
+        {% block body %}{% endblock %}
+    <hr>
+    <footer class="container">
+        <p>Performance Platform: Backdrop</p>
+    </footer>
+    </div>
+    {% include "includes.html" %}
 </body>
 
 </html>
