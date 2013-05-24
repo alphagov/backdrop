@@ -49,9 +49,14 @@ app.after_request(create_response_logger(app))
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
-    statsd.incr("write.error", bucket=g.bucket_name)
-    code = (e.code if hasattr(e, 'code') else None)
-    return jsonify(status='error', message=''), code
+
+    bucket_name = getattr(g, 'bucket_name', request.path)
+    statsd.incr("write.error", bucket=bucket_name)
+
+    code = getattr(e, 'code', 500)
+    name = getattr(e, 'name', "Internal Error")
+
+    return jsonify(status='error', message=name), code
 
 
 @app.route('/_status', methods=['GET'])
