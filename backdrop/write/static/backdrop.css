@@ -21,3 +21,7 @@
     line-height: 1em;
     padding-top: 35px;
 }
+
+.alert-warning {
+    color: black;
+}

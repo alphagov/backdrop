@@ -1,6 +1,7 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, g, session
+from flask import Flask, request, jsonify, render_template, g, session, \
+    redirect, url_for
 from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
@@ -67,13 +68,17 @@ def oauth_authorized():
     access_token = app.oauth_service.exchange(request.args['code'])
     user_details, can_see_backdrop = \
         app.oauth_service.user_details(access_token)
-    if not can_see_backdrop:
-        return ("You are signed in to GOV.UK account '%s', "
-                "but you don't have permissions to use this application." %
-                user_details["user"]["name"], 403)
     session.update(
         {"user": user_details["user"]["name"]})
+    if not can_see_backdrop:
+        return redirect(url_for("not_authorized"))
     return "You are logged in as '%s'." % (session.get('user'))
+
+
+@app.route("/not_authorized")
+def not_authorized():
+    return render_template("signon/not_authorized.html",
+                           user=session.get("user"))
 
 
 @app.errorhandler(500)
@@ -84,6 +89,7 @@ def exception_handler(e):
     statsd.incr("write.error", bucket=g.bucket_name)
     code = (e.code if hasattr(e, 'code') else None)
     return jsonify(status='error', message=''), code
+
 
 @app.route("/", methods=['GET'])
 def index():

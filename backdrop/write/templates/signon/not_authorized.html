@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Not authorized{% endblock %}
+
+{% block body %}
+    <div class="alert alert-warning">
+        <p>
+            You are signed in to GOV.UK account '{{ user }}',
+            but you don't have permissions to use this application.
+        </p>
+        <p>If you think you should have access to this application, contact Norm.</p>
+    </div>
+{% endblock %}
