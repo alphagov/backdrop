@@ -1,7 +1,7 @@
 from os import getenv
 
 from flask import Flask, request, jsonify, render_template, g, session, \
-    redirect, url_for
+    redirect, url_for, flash
 from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
@@ -66,12 +66,14 @@ def logout():
 @app.route("/authorized")
 def oauth_authorized():
     access_token = app.oauth_service.exchange(request.args['code'])
+
     user_details, can_see_backdrop = \
         app.oauth_service.user_details(access_token)
     if not can_see_backdrop:
         return redirect(url_for("not_authorized"))
     session.update(
         {"user": user_details["user"]["name"]})
+    flash("You were successfully signed in")
     return redirect(url_for("index"))
 
 
