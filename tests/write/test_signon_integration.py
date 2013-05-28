@@ -63,3 +63,17 @@ class TestSignonIntegration(unittest.TestCase):
         with self.app.test_request_context('/sign_out'):
             self.app.dispatch_request()
             assert_that(session.get('user'), is_(None))
+
+    @patch("backdrop.write.api.app.oauth_service")
+    def test_user_is_redirected_to_not_authorized_page_for_bad_permissions(
+            self, oauth_service):
+        oauth_service.exchange.return_value = None
+        oauth_service.user_details.return_value = \
+            {"user": {"name": "test"}}, False
+
+        with self.app.test_request_context('/authorized?code=12345'):
+            response = self.app.dispatch_request()
+            path = response.headers['Location'].split('?')[0]
+            assert_that(session.get('user'), is_(None))
+            assert_that(path, is_('/not_authorized'))
+            assert_that(response, has_status(302))
