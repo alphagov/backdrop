@@ -13,14 +13,14 @@ class TestSignonIntegration(unittest.TestCase):
         self.app = api.app
 
     def test_signing_in_redirects_me_to_signon(self):
-        response = self.client.get('/sign_in')
+        response = self.client.get('/_user/sign_in')
 
         params = url_decode(response.headers['Location'].split('?')[1])
 
         assert_that(response, has_status(302))
         assert_that(params, has_entry('response_type', 'code'))
         assert_that(params, has_entry('redirect_uri',
-                                      'http://localhost/authorized'))
+                                      'http://localhost/_user/authorized'))
         assert_that(params, has_entry('client_id',
                                       api.app.config['CLIENT_ID']))
 
@@ -35,7 +35,7 @@ class TestSignonIntegration(unittest.TestCase):
             "user": {"name": "we don't care at all"}
         }, user_is_authorized_to_see_backdrop
 
-        response = self.client.get('/authorized?code=%s' % code)
+        response = self.client.get('/_user/authorized?code=%s' % code)
 
         path = response.headers['Location'].split('?')[0]
         assert_that(response, has_status(302))
@@ -47,7 +47,7 @@ class TestSignonIntegration(unittest.TestCase):
         oauth_service.user_details.return_value = \
             {"user": {"name": "test"}}, True
 
-        with self.app.test_request_context('/authorized?code=12345'):
+        with self.app.test_request_context('/_user/authorized?code=12345'):
             self.app.dispatch_request()
             assert_that(session.get('user'), is_('test'))
 
@@ -56,11 +56,11 @@ class TestSignonIntegration(unittest.TestCase):
         oauth_service.exchange.return_value = "don't care"
         oauth_service.user_details.return_value = \
             {"user": {"name": "test"}}, True
-        with self.app.test_request_context('/authorized?code=12345'):
+        with self.app.test_request_context('/_user/authorized?code=12345'):
             self.app.dispatch_request()
             assert_that(session.get('user'), is_("test"))
 
-        with self.app.test_request_context('/sign_out'):
+        with self.app.test_request_context('/_user/sign_out'):
             self.app.dispatch_request()
             assert_that(session.get('user'), is_(None))
 
@@ -71,9 +71,9 @@ class TestSignonIntegration(unittest.TestCase):
         oauth_service.user_details.return_value = \
             {"user": {"name": "test"}}, False
 
-        with self.app.test_request_context('/authorized?code=12345'):
+        with self.app.test_request_context('/_user/authorized?code=12345'):
             response = self.app.dispatch_request()
             path = response.headers['Location'].split('?')[0]
             assert_that(session.get('user'), is_(None))
-            assert_that(path, is_('/not_authorized'))
+            assert_that(path, is_('/_user/not_authorized'))
             assert_that(response, has_status(302))

@@ -16,6 +16,7 @@ from ..core.bucket import Bucket
 from .validation import bearer_token_is_valid
 
 MAX_UPLOAD_SIZE = 100000
+NON_BUCKET_SCOPE = "/_user"
 
 
 def setup_logging():
@@ -52,19 +53,19 @@ app.oauth_service = Signonotron2(
 )
 
 
-@app.route("/sign_in")
-def oauth_login():
+@app.route(NON_BUCKET_SCOPE + "/sign_in")
+def oauth_sign_in():
     return app.oauth_service.authorize()
 
 
-@app.route("/sign_out")
-def logout():
+@app.route(NON_BUCKET_SCOPE + "/sign_out")
+def oauth_sign_out():
     session.clear()
     flash("You have been signed out of Backdrop", category="success")
     return render_template("signon/signout.html")
 
 
-@app.route("/authorized")
+@app.route(NON_BUCKET_SCOPE + "/authorized")
 def oauth_authorized():
     access_token = app.oauth_service.exchange(request.args['code'])
 
@@ -84,7 +85,7 @@ def oauth_authorized():
     return redirect(url_for("index"))
 
 
-@app.route("/not_authorized")
+@app.route(NON_BUCKET_SCOPE + "/not_authorized")
 def not_authorized():
     return render_template("signon/not_authorized.html")
 
@@ -119,7 +120,7 @@ def health_check():
                        message='cannot connect to database'), 500
 
 
-@app.route("/upload", methods=['GET'])
+@app.route(NON_BUCKET_SCOPE + "/protected", methods=['GET'])
 @protected
 def upload_buckets():
     return "hello"
