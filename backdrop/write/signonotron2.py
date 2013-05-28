@@ -44,6 +44,9 @@ class Signonotron2(object):
         return access_token
 
     def user_details(self, access_token):
+        if access_token is None:
+            return None, None
+
         session = self.signon.get_session(access_token)
         user_details = session.get('user.json').json()
         return user_details, "signin" in user_details["user"]["permissions"]

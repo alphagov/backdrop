@@ -22,6 +22,6 @@
     padding-top: 35px;
 }
 
-.alert-warning {
+.alert-info, .alert-message, .alert-warning {
     color: black;
 }

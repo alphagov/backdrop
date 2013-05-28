@@ -60,6 +60,7 @@ def oauth_login():
 @app.route("/sign_out")
 def logout():
     session.clear()
+    flash("You have been signed out of Backdrop", category="success")
     return render_template("signon/signout.html")
 
 
@@ -69,11 +70,17 @@ def oauth_authorized():
 
     user_details, can_see_backdrop = \
         app.oauth_service.user_details(access_token)
-    if not can_see_backdrop:
+    if can_see_backdrop is None:
+        flash("Could not authenticate with single sign on.",
+              category="error")
+        return redirect(url_for("not_authorized"))
+    if can_see_backdrop is False:
+        flash("You are signed in to your GOV.UK account, "
+              "but you don't have permissions to use this application.")
         return redirect(url_for("not_authorized"))
     session.update(
         {"user": user_details["user"]["name"]})
-    flash("You were successfully signed in")
+    flash("You were successfully signed in", category="success")
     return redirect(url_for("index"))
 
 
