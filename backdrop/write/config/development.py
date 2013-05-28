@@ -2,6 +2,7 @@ DATABASE_NAME = "backdrop"
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 LOG_LEVEL = "DEBUG"
+SINGLE_SIGN_ON = True
 SECRET_KEY = "something unique and secret"
 CLIENT_ID = \
     "cf5776c78bfc6def628e0893e4fa27c78f845a124e9ec56bae6de51095e548b3"

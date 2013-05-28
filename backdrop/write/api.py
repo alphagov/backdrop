@@ -1,12 +1,12 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, g, session, \
-    redirect, url_for, flash
+from flask import Flask, request, jsonify, render_template, g
 from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
-from backdrop.write.signonotron2 import Signonotron2, protected
+from backdrop.write import sign_on
+from backdrop.write.sign_on import use_single_sign_on
 
 from ..core.errors import ParseError, ValidationError
 from ..core.validation import bucket_is_valid
@@ -16,7 +16,6 @@ from ..core.bucket import Bucket
 from .validation import bearer_token_is_valid
 
 MAX_UPLOAD_SIZE = 100000
-NON_BUCKET_SCOPE = "/_user"
 
 
 def setup_logging():
@@ -34,7 +33,6 @@ app = Flask(__name__)
 app.config.from_object(
     "backdrop.write.config.%s" % environment()
 )
-app.secret_key = app.config['SECRET_KEY']
 
 db = database.Database(
     app.config['MONGO_HOST'],
@@ -47,47 +45,9 @@ setup_logging()
 app.before_request(create_request_logger(app))
 app.after_request(create_response_logger(app))
 
-app.oauth_service = Signonotron2(
-    client_id=app.config['CLIENT_ID'],
-    client_secret=app.config['CLIENT_SECRET']
-)
-
-
-@app.route(NON_BUCKET_SCOPE + "/sign_in")
-def oauth_sign_in():
-    return app.oauth_service.authorize()
-
-
-@app.route(NON_BUCKET_SCOPE + "/sign_out")
-def oauth_sign_out():
-    session.clear()
-    flash("You have been signed out of Backdrop", category="success")
-    return render_template("signon/signout.html")
-
-
-@app.route(NON_BUCKET_SCOPE + "/authorized")
-def oauth_authorized():
-    access_token = app.oauth_service.exchange(request.args.get('code'))
-
-    user_details, can_see_backdrop = \
-        app.oauth_service.user_details(access_token)
-    if can_see_backdrop is None:
-        flash("Could not authenticate with single sign on.",
-              category="error")
-        return redirect(url_for("not_authorized"))
-    if can_see_backdrop is False:
-        flash("You are signed in to your GOV.UK account, "
-              "but you don't have permissions to use this application.")
-        return redirect(url_for("not_authorized"))
-    session.update(
-        {"user": user_details["user"]["name"]})
-    flash("You were successfully signed in", category="success")
-    return redirect(url_for("index"))
-
-
-@app.route(NON_BUCKET_SCOPE + "/not_authorized")
-def not_authorized():
-    return render_template("signon/not_authorized.html")
+if use_single_sign_on(app):
+    app.secret_key = app.config['SECRET_KEY']
+    sign_on.setup(app)
 
 
 @app.errorhandler(500)
@@ -107,7 +67,10 @@ def exception_handler(e):
 
 @app.route("/", methods=['GET'])
 def index():
-    return render_template("index.html")
+    if use_single_sign_on(app):
+        return render_template("index.html")
+    else:
+        return "Backdrop is running."
 
 
 @app.route('/_status', methods=['GET'])
@@ -118,12 +81,6 @@ def health_check():
     else:
         return jsonify(status='error',
                        message='cannot connect to database'), 500
-
-
-@app.route(NON_BUCKET_SCOPE + "/protected", methods=['GET'])
-@protected
-def upload_buckets():
-    return "hello"
 
 
 @app.route('/<bucket_name>', methods=['POST'])
