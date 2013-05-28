@@ -67,7 +67,7 @@ def oauth_sign_out():
 
 @app.route(NON_BUCKET_SCOPE + "/authorized")
 def oauth_authorized():
-    access_token = app.oauth_service.exchange(request.args['code'])
+    access_token = app.oauth_service.exchange(request.args.get('code'))
 
     user_details, can_see_backdrop = \
         app.oauth_service.user_details(access_token)
