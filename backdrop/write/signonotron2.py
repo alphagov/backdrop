@@ -7,14 +7,14 @@ log = getLogger(__name__)
 
 
 class Signonotron2(object):
-    def __init__(self, client_id, client_secret):
+    def __init__(self, client_id, client_secret, base_url):
         self.signon = OAuth2Service(
             client_id=client_id,
             client_secret=client_secret,
             name="backdrop",
-            authorize_url="http://signon.dev.gov.uk/oauth/authorize",
-            access_token_url="http://signon.dev.gov.uk/oauth/token",
-            base_url="http://signon.dev.gov.uk"
+            authorize_url="%s/oauth/authorize" % base_url,
+            access_token_url="%s/oauth/token" % base_url,
+            base_url=base_url
         )
 
     def __redirect_uri(self):

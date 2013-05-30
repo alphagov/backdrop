@@ -17,7 +17,7 @@ class Signonotron2TestCase(unittest.TestCase):
         self.ctx.pop()
 
     def test_authorize_returns_a_redirect_to_signon_service(self):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         oauth_service.signon.get_authorize_url.return_value = ""
 
@@ -26,7 +26,7 @@ class Signonotron2TestCase(unittest.TestCase):
         assert_that(response, has_status(302))
 
     def test_exchange_returns_none_when_code_is_none(self):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         response = Response()
         response.status_code = 401
@@ -35,7 +35,7 @@ class Signonotron2TestCase(unittest.TestCase):
         assert_that(oauth_service.exchange(None), is_(None))
 
     def test_exchange_when_code_is_rejected(self):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         response = Response()
         response.status_code = 401
@@ -45,7 +45,7 @@ class Signonotron2TestCase(unittest.TestCase):
 
     @patch("rauth.service.process_token_request")
     def test_exchange_when_code_is_accepted(self, process_token_request):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         response = Response()
         response.status_code = 200
@@ -57,14 +57,14 @@ class Signonotron2TestCase(unittest.TestCase):
             is_("access toucan"))
 
     def test_returns_no_user_details_if_access_token_is_none(self):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
 
         user_details = oauth_service.user_details(None)
 
         assert_that(user_details, is_((None, None)))
 
     def test_user_details_if_access_token_is_rejected(self):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         session_object = Mock()
         response = Response()
@@ -78,7 +78,7 @@ class Signonotron2TestCase(unittest.TestCase):
         assert_that(user_details, is_((None, None)))
 
     def test_user_details_if_access_token_is_accepted(self):
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         session_object = Mock()
         response = Response()

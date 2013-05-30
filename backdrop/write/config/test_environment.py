@@ -9,3 +9,6 @@ TOKENS = {
     'month': 'month-bearer-token',
     'month_no_raw_access': 'month_no_raw_access-bearer-token'
 }
+OAUTH_CLIENT_ID = "it's not important here"
+OAUTH_CLIENT_SECRET = "it's not important here"
+OAUTH_BASE_URL = "http://signon.dev.gov.uk"

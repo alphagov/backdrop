@@ -7,8 +7,9 @@ USER_SCOPE = "/_user"
 
 def setup(app):
     app.oauth_service = Signonotron2(
-        client_id=app.config['CLIENT_ID'],
-        client_secret=app.config['CLIENT_SECRET']
+        client_id=app.config['OAUTH_CLIENT_ID'],
+        client_secret=app.config['OAUTH_CLIENT_SECRET'],
+        base_url=app.config['OAUTH_BASE_URL']
     )
 
     @app.route(USER_SCOPE)

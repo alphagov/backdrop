@@ -22,7 +22,7 @@ class TestSignonIntegration(unittest.TestCase):
         assert_that(params, has_entry('redirect_uri',
                                       'http://localhost/_user/authorized'))
         assert_that(params, has_entry('client_id',
-                                      api.app.config['CLIENT_ID']))
+                                      api.app.config['OAUTH_CLIENT_ID']))
 
     @patch("backdrop.write.api.app.oauth_service")
     def test_authorized_handler_redirects_you_to_index_page(
