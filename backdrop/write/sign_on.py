@@ -1,7 +1,7 @@
 from flask import flash, session, render_template, redirect, url_for, request
 from backdrop.write.signonotron2 import protected, Signonotron2
 
-NON_BUCKET_SCOPE = "/_user"
+USER_SCOPE = "/_user"
 
 
 def setup(app):
@@ -10,17 +10,21 @@ def setup(app):
         client_secret=app.config['CLIENT_SECRET']
     )
 
-    @app.route(NON_BUCKET_SCOPE + "/sign_in")
+    @app.route(USER_SCOPE)
+    def user_route():
+        return redirect(url_for("index"))
+
+    @app.route(USER_SCOPE + "/sign_in")
     def oauth_sign_in():
         return app.oauth_service.authorize()
 
-    @app.route(NON_BUCKET_SCOPE + "/sign_out")
+    @app.route(USER_SCOPE + "/sign_out")
     def oauth_sign_out():
         session.clear()
         flash("You have been signed out of Backdrop", category="success")
         return render_template("signon/signout.html")
 
-    @app.route(NON_BUCKET_SCOPE + "/authorized")
+    @app.route(USER_SCOPE + "/authorized")
     def oauth_authorized():
         access_token = app.oauth_service.exchange(request.args.get('code'))
 
@@ -39,11 +43,11 @@ def setup(app):
         flash("You were successfully signed in", category="success")
         return redirect(url_for("index"))
 
-    @app.route(NON_BUCKET_SCOPE + "/not_authorized")
+    @app.route(USER_SCOPE + "/not_authorized")
     def not_authorized():
         return render_template("signon/not_authorized.html")
 
-    @app.route(NON_BUCKET_SCOPE + "/protected", methods=['GET'])
+    @app.route(USER_SCOPE + "/protected", methods=['GET'])
     @protected
     def upload_buckets():
         return "hello"

@@ -77,3 +77,7 @@ class TestSignonIntegration(unittest.TestCase):
             assert_that(session.get('user'), is_(None))
             assert_that(path, is_('/_user/not_authorized'))
             assert_that(response, has_status(302))
+
+    def test_user_top_level_redirects_to_index_for_now(self):
+        response = self.client.get('/_user')
+        assert_that(response, has_status(302))
