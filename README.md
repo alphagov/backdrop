@@ -1,6 +1,7 @@
 # Backdrop
 
 ##What is it?
+
 Backdrop is a datastore built with python and mongo db. It is made up of two separately deployable APIs for reading and writing data over http. The plan is to be able to gather data from a variety of sources and then aggregate and compare this data in useful ways.
 
 - Data is grouped into buckets.
@@ -19,4 +20,24 @@ This assumes you are using the GDS dev environment and so have python and mongo 
 1. Navigate to the ```performance-platform``` directory and run ```./run_tests.sh```. This will
 create a new virtualenv, install all dependencies and run the tests.
 2. ```source venv/bin/activate``` to enable the virtualenv.
+
+##Testing single sign on integration on dev
+
+- Clone the signonotron2 project https://github.com/alphagov/signonotron2
+- Use the rake tasks (`bundle exec rake -T` to list them) in order to create:
+    - A new application **copy the generated client id and secret into `backdrop/write/config/development.py`**
+    - Users with and without permissions to sign in to backdrop
+- Start backdrop_write and signon
+- Visit `www.dev.gov.uk:3039/_user/sign_in`
+
+##Oauth Flow
+
+This is the oauth flow we are using to authenticate users with Signonotron2
+
+1. **GET** `/_user/sign_in` redirects user to signonotron2 asking them to give backdrop permission to see their data
+2. User signs in allowing backdrop to see their data
+3. **GET** (redirected from signonotron) `/_user/authorized?code=blahblahblah` 
+    - **POST** (to signonotron) `/oauth/token` exchanges authorization code for access token so backdrop can query users data
+    - **GET** (to signonotron) `/user.json` uses access token to get user data and see if they have permissions to sign in to backdrop
+4. User is now signed in
 

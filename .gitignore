@@ -12,3 +12,4 @@ coverage.xml
 nosetests.xml
 pep8.out
 tmp/*
+.DS_store

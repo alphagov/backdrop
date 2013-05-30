@@ -6,3 +6,4 @@ pymongo==2.5
 python-dateutil==2.1
 pytz==2013b
 statsd==2.0.1
+rauth==0.5.4

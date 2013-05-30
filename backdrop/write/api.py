@@ -5,6 +5,8 @@ from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
+from backdrop.write import sign_on
+from backdrop.write.sign_on import use_single_sign_on
 
 from ..core.errors import ParseError, ValidationError
 from ..core.validation import bucket_is_valid
@@ -43,6 +45,10 @@ setup_logging()
 app.before_request(create_request_logger(app))
 app.after_request(create_response_logger(app))
 
+if use_single_sign_on(app):
+    app.secret_key = app.config['SECRET_KEY']
+    sign_on.setup(app)
+
 
 @app.errorhandler(500)
 @app.errorhandler(405)
@@ -57,6 +63,14 @@ def exception_handler(e):
     name = getattr(e, 'name', "Internal Error")
 
     return jsonify(status='error', message=name), code
+
+
+@app.route("/", methods=['GET'])
+def index():
+    if use_single_sign_on(app):
+        return render_template("index.html")
+    else:
+        return "Backdrop is running."
 
 
 @app.route('/_status', methods=['GET'])
@@ -92,7 +106,7 @@ def post_to_bucket(bucket_name):
 
         return jsonify(status='ok')
     except (ParseError, ValidationError) as e:
-        return jsonify(status="error", message=e.message), 400
+        return jsonify(status="error", message=str(e)), 400
 
 
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])

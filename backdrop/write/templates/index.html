@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="row well">
+        <div class="span12 background-image">
+            <h1 class="masthead">Performance<br/> Platform</h1>
+            <p>Welcome to Backdrop the data collection API for the Performance Platform.</p>
+            <a class="btn btn-primary btn-large btn-block" href={{ url_for("oauth_sign_in") }}>Sign in</a>
+        </div>
+    </div>
+{% endblock %}

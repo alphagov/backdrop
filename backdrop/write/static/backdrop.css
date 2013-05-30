@@ -1,0 +1,23 @@
+.background-image {
+    height: 500px;
+    background: url("/static/images/performance_graphs.svg") no-repeat;
+    background-position-x: 90%;
+    background-position-y: -36%;
+}
+
+.background-image p {
+    width: 400px;
+    font-size: 1.5em;
+    line-height: 1.2em;
+}
+
+.background-image .btn {
+    margin-top: 2em;
+    width: 400px;
+}
+
+.masthead {
+    font-size: 5em;
+    line-height: 1em;
+    padding-top: 35px;
+}
