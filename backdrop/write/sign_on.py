@@ -1,4 +1,5 @@
-from flask import flash, session, render_template, redirect, url_for, request, abort
+from flask import flash, session, render_template, redirect, url_for, \
+    request, abort
 from backdrop.write.signonotron2 import protected, Signonotron2
 
 USER_SCOPE = "/_user"

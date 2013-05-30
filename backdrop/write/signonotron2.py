@@ -5,6 +5,7 @@ from rauth import OAuth2Service, service
 
 log = getLogger(__name__)
 
+
 class Signonotron2(object):
     def __init__(self, client_id, client_secret):
         self.signon = OAuth2Service(
@@ -43,8 +44,7 @@ class Signonotron2(object):
                 access_token = service.process_token_request(
                     response, self.__json_access_token, 'access_token')[0]
             except KeyError as e:
-                log.warn('Could not parse token from response :'
-                                + str(e))
+                log.warn('Could not parse token from response :' + str(e))
 
         return access_token
 
