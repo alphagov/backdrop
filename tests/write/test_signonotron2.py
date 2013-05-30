@@ -96,7 +96,7 @@ class Signonotron2TestCase(unittest.TestCase):
     def test_returns_none_and_logs_error_if_cannot_parse_token(self):
         mock_logger = Mock()
         signonotron2.log = mock_logger
-        oauth_service = Signonotron2(None, None)
+        oauth_service = Signonotron2(None, None, None)
         oauth_service.signon = Mock()
         response = Response()
         response._content = '{"foo":"bar"}'
