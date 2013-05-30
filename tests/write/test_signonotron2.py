@@ -1,9 +1,9 @@
 import json
 import unittest
-from hamcrest import assert_that, is_
+from hamcrest import *
 from mock import patch, Mock
 from requests import Response
-from backdrop.write import api
+from backdrop.write import api, signonotron2
 from backdrop.write.signonotron2 import Signonotron2
 from tests.support.test_helpers import has_status
 
@@ -92,3 +92,18 @@ class Signonotron2TestCase(unittest.TestCase):
         user_details = oauth_service.user_details("token is accepted")
 
         assert_that(user_details, is_((user_details_json, True)))
+
+    def test_returns_none_and_logs_error_if_cannot_parse_token(self):
+        mock_logger = Mock()
+        signonotron2.log = mock_logger
+        oauth_service = Signonotron2(None, None)
+        oauth_service.signon = Mock()
+        response = Response()
+        response._content = '{"foo":"bar"}'
+        response.status_code = 200
+        oauth_service.signon.get_raw_access_token.return_value = response
+
+        access_token = oauth_service.exchange("top secret code")
+        assert_that(access_token, is_(None))
+        assert_that(mock_logger.warn.call_args[0][0],
+                    starts_with('Could not parse token from response'))

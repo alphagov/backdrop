@@ -1,6 +1,6 @@
-import logging
+from logging import getLogger
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 def bearer_token_is_valid(tokens, auth_header, bucket_name):
