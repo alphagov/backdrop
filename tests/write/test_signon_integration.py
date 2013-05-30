@@ -81,3 +81,7 @@ class TestSignonIntegration(unittest.TestCase):
     def test_user_top_level_redirects_to_index_for_now(self):
         response = self.client.get('/_user')
         assert_that(response, has_status(302))
+
+    def test_returning_a_400_when_auth_code_is_not_present(self):
+        response = self.client.get('/_user/authorized')
+        assert_that(response, has_status(400))

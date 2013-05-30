@@ -1,4 +1,4 @@
-from flask import flash, session, render_template, redirect, url_for, request
+from flask import flash, session, render_template, redirect, url_for, request, abort
 from backdrop.write.signonotron2 import protected, Signonotron2
 
 USER_SCOPE = "/_user"
@@ -26,7 +26,10 @@ def setup(app):
 
     @app.route(USER_SCOPE + "/authorized")
     def oauth_authorized():
-        access_token = app.oauth_service.exchange(request.args.get('code'))
+        auth_code = request.args.get('code')
+        if not auth_code:
+            abort(400)
+        access_token = app.oauth_service.exchange(auth_code)
 
         user_details, can_see_backdrop = \
             app.oauth_service.user_details(access_token)
