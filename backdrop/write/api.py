@@ -106,7 +106,7 @@ def post_to_bucket(bucket_name):
 
         return jsonify(status='ok')
     except (ParseError, ValidationError) as e:
-        return jsonify(status="error", message=e.message), 400
+        return jsonify(status="error", message=str(e)), 400
 
 
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
