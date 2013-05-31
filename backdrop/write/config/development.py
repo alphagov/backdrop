@@ -4,4 +4,8 @@ MONGO_PORT = 27017
 LOG_LEVEL = "DEBUG"
 SINGLE_SIGN_ON = True
 SECRET_KEY = "something unique and secret"
-from development_environment import *
+
+try:
+    from development_environment import *
+except ImportError:
+    from development_environment_sample import *

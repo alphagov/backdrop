@@ -1,3 +1,5 @@
+# Copy this file to development_environment.py
+# and replace OAuth credentials your dev credentials
 TOKENS = {
     '_foo_bucket': '_foo_bucket-bearer-token',
     'bucket': 'bucket-bearer-token',
