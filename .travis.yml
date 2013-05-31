@@ -4,8 +4,6 @@ python:
   - "2.7"
 # Need mongodb for testing
 services: mongodb
-# Run in the test environment
-env: GOVUK_ENV=test
 # command to install dependencies
 install: "pip install -r requirements_for_tests.txt --use-mirrors"
 # command to run tests

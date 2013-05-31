@@ -1,8 +1,11 @@
 TOKENS = {
     '_bucket': '_bucket-bearer-token',
     '_status': '_status-bearer-token',  # not expected to be here
+    'bucket': 'bucket-bearer-token',
     'data_with_times': 'data_with_times-bearer-token',
     'flavour_events': 'flavour_events-bearer-token',
+    'foo': 'foo-bearer-token',
+    'foo_bucket': 'foo_bucket-bearer-token',
     'licensing': 'licensing-bearer-token',
     'my_dinosaur_bucket': 'my_dinosaur_bucket-bearer-token',
     'reptiles': 'reptiles-bearer-token',
