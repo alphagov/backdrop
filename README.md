@@ -20,7 +20,8 @@ This assumes you are using the GDS dev environment and so have python and mongo 
 1. Navigate to the ```performance-platform``` directory and run ```./run_tests.sh```. This will
 create a new virtualenv, install all dependencies and run the tests.
 2. ```source venv/bin/activate``` to enable the virtualenv.
-3. Copy `backdrop/write/config/development_environment.py.sample` to `development_environment.py` and edit as needed.
+3. Copy `backdrop/write/config/development_environment_sample.py` to `development_environment.py`
+(if you want to) and edit as needed.
 
 ##Testing single sign on integration on dev
 
