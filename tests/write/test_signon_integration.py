@@ -39,7 +39,7 @@ class TestSignonIntegration(unittest.TestCase):
 
         path = response.headers['Location'].split('?')[0]
         assert_that(response, has_status(302))
-        assert_that(path, is_('http://localhost/'))
+        assert_that(path, is_('http://localhost/_user'))
 
     @patch("backdrop.write.api.app.oauth_service")
     def test_user_is_stored_in_session_when_authorized(self, oauth_service):
@@ -77,10 +77,6 @@ class TestSignonIntegration(unittest.TestCase):
             assert_that(session.get('user'), is_(None))
             assert_that(path, is_('/_user/not_authorized'))
             assert_that(response, has_status(302))
-
-    def test_user_top_level_redirects_to_index_for_now(self):
-        response = self.client.get('/_user')
-        assert_that(response, has_status(302))
 
     def test_returning_a_400_when_auth_code_is_not_present(self):
         response = self.client.get('/_user/authorized')

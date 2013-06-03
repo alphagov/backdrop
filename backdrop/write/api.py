@@ -27,12 +27,14 @@ def environment():
     return getenv("GOVUK_ENV", "development")
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/_user/static")
 
 # Configuration
 app.config.from_object(
     "backdrop.write.config.%s" % environment()
 )
+
+app.config['USER_SCOPE'] = "/_user"
 
 db = database.Database(
     app.config['MONGO_HOST'],
@@ -67,10 +69,7 @@ def exception_handler(e):
 
 @app.route("/", methods=['GET'])
 def index():
-    if use_single_sign_on(app):
-        return render_template("index.html")
-    else:
-        return "Backdrop is running."
+    return "write.backdrop root path."
 
 
 @app.route('/_status', methods=['GET'])

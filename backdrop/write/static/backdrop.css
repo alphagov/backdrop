@@ -1,6 +1,6 @@
 .background-image {
     height: 500px;
-    background: url("/static/images/performance_graphs.svg") no-repeat;
+    background: url("images/performance_graphs.svg") no-repeat;
     background-position-x: 90%;
     background-position-y: -36%;
 }

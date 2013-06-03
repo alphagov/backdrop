@@ -2,10 +2,10 @@ from flask import flash, session, render_template, redirect, url_for, \
     request, abort
 from backdrop.write.signonotron2 import protected, Signonotron2
 
-USER_SCOPE = "/_user"
-
 
 def setup(app):
+    USER_SCOPE = app.config['USER_SCOPE']
+
     app.oauth_service = Signonotron2(
         client_id=app.config['OAUTH_CLIENT_ID'],
         client_secret=app.config['OAUTH_CLIENT_SECRET'],
@@ -14,7 +14,10 @@ def setup(app):
 
     @app.route(USER_SCOPE)
     def user_route():
-        return redirect(url_for("index"))
+        if use_single_sign_on(app):
+            return render_template("index.html")
+        else:
+            return "Backdrop is running."
 
     @app.route(USER_SCOPE + "/sign_in")
     def oauth_sign_in():
@@ -46,7 +49,7 @@ def setup(app):
         session.update(
             {"user": user_details["user"]["name"]})
         flash("You were successfully signed in", category="success")
-        return redirect(url_for("index"))
+        return redirect(url_for("user_route"))
 
     @app.route(USER_SCOPE + "/not_authorized")
     def not_authorized():
