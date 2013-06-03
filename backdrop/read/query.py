@@ -14,47 +14,36 @@ def parse_time_string(time_string):
     return time.astimezone(pytz.utc)
 
 
+def if_present(func, value):
+    """Apply the given function to the value and return if it exists"""
+    if value is not None:
+        return func(value)
+
+
 def parse_request_args(request_args):
-    args = {}
+    args = dict()
 
-    if 'start_at' in request_args:
-        args['start_at'] = parse_time_string(request_args['start_at'])
-    else:
-        args['start_at'] = None
+    args['start_at'] = if_present(parse_time_string,
+                                  request_args.get('start_at'))
 
-    if 'end_at' in request_args:
-        args['end_at'] = parse_time_string(request_args['end_at'])
-    else:
-        args['end_at'] = None
+    args['end_at'] = if_present(parse_time_string,
+                                request_args.get('end_at'))
 
-    if 'filter_by' in request_args:
-        args['filter_by'] = [
-            f.split(':', 1) for f in request_args.getlist('filter_by')
-        ]
-    else:
-        args['filter_by'] = None
+    args['filter_by'] = [
+        f.split(':', 1) for f in request_args.getlist('filter_by')
+    ]
 
-    if 'period' in request_args:
-        args['period'] = request_args['period']
-    else:
-        args['period'] = None
+    args['period'] = request_args.get('period')
 
-    if 'group_by' in request_args:
-        args['group_by'] = request_args['group_by']
-    else:
-        args['group_by'] = None
+    args['group_by'] = request_args.get('group_by')
 
-    if 'sort_by' in request_args:
-        args['sort_by'] = request_args['sort_by'].split(':', 1)
-    else:
-        args['sort_by'] = None
+    args['sort_by'] = if_present(lambda sort_by: sort_by.split(':', 1),
+                                 request_args.get('sort_by'))
 
-    if 'limit' in request_args:
-        args['limit'] = int(request_args['limit'])
-    else:
-        args['limit'] = None
+    args['limit'] = if_present(int, request_args.get('limit'))
 
     args['collect'] = request_args.getlist('collect')
+
     return args
 
 
@@ -69,7 +58,7 @@ class Query(_Query):
     def create(cls,
                start_at=None, end_at=None, filter_by=None, period=None,
                group_by=None, sort_by=None, limit=None, collect=None):
-        return Query(start_at, end_at, filter_by, period,
+        return Query(start_at, end_at, filter_by or [], period,
                      group_by, sort_by, limit, collect or [])
 
     @classmethod
