@@ -1,12 +1,13 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, g
+from flask import Flask, request, jsonify, render_template, g, session
 from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.write import sign_on
 from backdrop.write.sign_on import use_single_sign_on
+from backdrop.write.signonotron2 import protected
 
 from ..core.errors import ParseError, ValidationError
 from ..core.validation import bucket_is_valid
@@ -110,6 +111,7 @@ def post_to_bucket(bucket_name):
 
 
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
+@protected
 def upload(bucket_name):
     if not bucket_is_valid(bucket_name):
         return _invalid_upload("Bucket name is invalid")

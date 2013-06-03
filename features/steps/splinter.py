@@ -38,6 +38,11 @@ def step(context, element_text):
     context.client.browser.find_by_value(element_text).first.click()
 
 
+@then(u'I should see the text "{message}"')
+def step(context, message):
+    assert context.client.browser.is_text_present(message)
+
+
 @then(u'the platform should have stored in "{bucket_name}"')
 def step(context, bucket_name):
     bucket = context.client.storage()[bucket_name]

@@ -15,6 +15,11 @@ def step(context, fixture_name):
         context.data_to_post = fixture.read()
 
 
+@given(u'I am logged in')
+def step(context):
+    context.client.get("/_user/sign_in/test/my_username")
+
+
 @when('I post the data to "{bucket_name}"')
 def step(context, bucket_name):
     context.bucket = bucket_name.replace('/', '')

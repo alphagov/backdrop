@@ -85,3 +85,11 @@ class TestSignonIntegration(unittest.TestCase):
     def test_returning_a_400_when_auth_code_is_not_present(self):
         response = self.client.get('/_user/authorized')
         assert_that(response, has_status(400))
+
+    def test_upload_page_redirects_non_authenticated_user_to_sign_in(self):
+        with self.client.session_transaction() as session:
+            if "user" in session:
+                del session["user"]
+
+        response = self.client.get('/test/upload')
+        assert_that(response, has_status(302))

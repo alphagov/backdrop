@@ -8,6 +8,7 @@ Feature: csv upload
              Pawel,27,Polish
              Max,35,Italian
              """
+         and I am logged in
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
          and I click "submit"
@@ -24,6 +25,7 @@ Feature: csv upload
              city,città
              coffee,caffè
              """
+         and I am logged in
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
          and I click "submit"

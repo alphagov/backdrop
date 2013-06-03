@@ -56,6 +56,16 @@ def setup(app):
     def upload_buckets():
         return "hello"
 
+    if allow_test_signin(app):
+        @app.route(USER_SCOPE + "/sign_in/test/<user>", methods=['GET'])
+        def test_signin(user):
+            session.update({"user": user})
+            return "logged in as " + user, 200
+
+
+def allow_test_signin(app):
+    return bool(app.config.get("ALLOW_TEST_SIGNIN"))
+
 
 def use_single_sign_on(app):
     return bool(app.config.get("SINGLE_SIGN_ON"))
