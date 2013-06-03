@@ -6,8 +6,6 @@ from ..core.validation import value_is_valid_datetime_string, valid,\
     invalid, key_is_valid
 import re
 
-MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
-
 
 class Validator(object):
     def __init__(self, request_args, **context):
