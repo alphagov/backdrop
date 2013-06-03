@@ -1,17 +1,12 @@
 from collections import namedtuple
 
-from dateutil import parser
 import pytz
+from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.read.response import *
 
 
 def utc(dt):
     return dt.replace(tzinfo=pytz.UTC)
-
-
-def parse_time_string(time_string):
-    time = parser.parse(time_string)
-    return time.astimezone(pytz.utc)
 
 
 def if_present(func, value):
@@ -23,10 +18,10 @@ def if_present(func, value):
 def parse_request_args(request_args):
     args = dict()
 
-    args['start_at'] = if_present(parse_time_string,
+    args['start_at'] = if_present(parse_time_as_utc,
                                   request_args.get('start_at'))
 
-    args['end_at'] = if_present(parse_time_string,
+    args['end_at'] = if_present(parse_time_as_utc,
                                 request_args.get('end_at'))
 
     args['filter_by'] = [

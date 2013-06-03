@@ -1,6 +1,5 @@
-from dateutil import parser
-import pytz
 from backdrop.core.timeseries import WEEK, MONTH
+from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.validation import validate_record_data
 from .errors import ParseError, ValidationError
 
@@ -36,7 +35,7 @@ class Record(object):
 def parse(datum):
     if '_timestamp' in datum:
         try:
-            datum['_timestamp'] = _time_string_to_utc_datetime(
+            datum['_timestamp'] = parse_time_as_utc(
                 datum['_timestamp'])
         except ValueError:
             raise ParseError(
@@ -47,8 +46,3 @@ def parse(datum):
 
 def parse_all(data):
     return [parse(datum) for datum in data]
-
-
-def _time_string_to_utc_datetime(time_string):
-    time = parser.parse(time_string)
-    return time.astimezone(pytz.utc)
