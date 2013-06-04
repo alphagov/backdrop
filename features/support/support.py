@@ -13,6 +13,17 @@ def wait_until(condition, timeout=3, interval=0.1):
     raise RuntimeError("timeout")
 
 
+class BaseClient(object):
+    def before_scenario(self):
+        pass
+
+    def after_scenario(self):
+        pass
+
+    def spin_down(self):
+        pass
+
+
 class Api(object):
     @classmethod
     def start_api(cls, app_name, port):

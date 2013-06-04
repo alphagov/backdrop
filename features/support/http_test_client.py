@@ -1,9 +1,9 @@
 from pymongo import MongoClient
 import requests
-from features.support.support import Api
+from features.support.support import Api, BaseClient
 
 
-class HTTPTestClient(object):
+class HTTPTestClient(BaseClient):
     def __init__(self, database_name):
         self.database_name = database_name
         self._read_api = Api("read", "5000")
@@ -37,12 +37,6 @@ class HTTPTestClient(object):
 
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
-
-    def before_scenario(self):
-        pass
-
-    def after_scenario(self):
-        pass
 
     def spin_down(self):
         self._read_api.stop()

@@ -1,10 +1,10 @@
 from pymongo import MongoClient
 from splinter import Browser
 
-from features.support.support import Api
+from features.support.support import Api, BaseClient
 
 
-class SplinterClient(object):
+class SplinterClient(BaseClient):
 
     def __init__(self, database_name):
         self.database_name = database_name
