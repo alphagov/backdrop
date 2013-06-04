@@ -42,7 +42,8 @@ def setup(app):
             flash("You are signed in to your GOV.UK account, "
                   "but you don't have permissions to use this application.")
             return redirect(url_for("not_authorized"))
-        _create_session_user(user_details["user"]["name"], user_details["user"]["email"])
+        _create_session_user(user_details["user"]["name"],
+                             user_details["user"]["email"])
         flash("You were successfully signed in", category="success")
         return redirect(url_for("index"))
 
@@ -58,7 +59,8 @@ def setup(app):
     if allow_test_signin(app):
         @app.route(USER_SCOPE + "/sign_in/test", methods=['GET'])
         def test_signin():
-            _create_session_user(request.args.get('user'), request.args.get('email'))
+            _create_session_user(request.args.get('user'),
+                                 request.args.get('email'))
             return "logged in as %s" % session.get('user'), 200
 
     def _create_session_user(name, email):
