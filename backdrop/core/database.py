@@ -3,7 +3,7 @@ from bson import Code
 import pymongo
 from pymongo.errors import AutoReconnect
 from backdrop import statsd
-from backdrop.core import backdrop_time as backdrop_time
+from backdrop.core import timeutils
 
 
 class Database(object):
@@ -120,7 +120,7 @@ class Repository(object):
             collect or [])
 
     def save(self, obj):
-        obj['_updated_at'] = backdrop_time.now()
+        obj['_updated_at'] = timeutils.now()
         self._mongo.save(obj)
 
     def multi_group(self, key1, key2, query,

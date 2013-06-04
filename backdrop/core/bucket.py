@@ -1,10 +1,3 @@
-import pytz
-
-
-def utc(dt):
-    return dt.replace(tzinfo=pytz.UTC)
-
-
 class Bucket(object):
     def __init__(self, db, bucket_name):
         self.bucket_name = bucket_name
