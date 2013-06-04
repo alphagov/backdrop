@@ -119,8 +119,8 @@ def upload(bucket_name):
     if not bucket_is_valid(bucket_name):
         return _invalid_upload("Bucket name is invalid")
 
-    if not app.permissions.is_user_allowed_to_bucket(
-            session.get("user").get("email"), bucket_name):
+    current_user_email = session.get("user").get("email")
+    if not app.permissions.allowed(current_user_email, bucket_name):
         return abort(404)
 
     if request.method == 'GET':
