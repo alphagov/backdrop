@@ -15,14 +15,15 @@ def wait_until(condition, timeout=3, interval=0.1):
 
 class Api(object):
     @classmethod
-    def start(cls, app_name, port):
+    def start_api(cls, app_name, port):
         _api = Api(app_name, port)
-        _api._start()
+        _api.start()
         return _api
 
     def __init__(self, name, port):
         self._name = name
         self._port = port
+        self._process = None
 
     def _run(self):
         return subprocess.Popen(
@@ -31,7 +32,7 @@ class Api(object):
             stderr=subprocess.STDOUT, stdout=subprocess.PIPE
         )
 
-    def _start(self):
+    def start(self):
         if self._running():
             raise RuntimeError(
                 "An api is already available on port %s "
@@ -40,9 +41,6 @@ class Api(object):
         self._process = self._run()
         wait_until(self._running)
 
-        print "started app %s on port %s with pid %s" % (self._name, self._port, self._process.pid)
-
-
     def _running(self):
         try:
             return requests.get(self.url('/_status')).status_code == 200
@@ -50,10 +48,9 @@ class Api(object):
             return False
 
     def stop(self):
-        print "stopping app %s on port %s with pid %s" % (self._name, self._port, self._process.pid)
-
-        os.killpg(self._process.pid, 9)
-        self._process.communicate()
+        if self._process:
+            os.killpg(self._process.pid, 9)
+            self._process.communicate()
 
     def url(self, path):
         return 'http://localhost:{0}{1}'.format(self._port, path)

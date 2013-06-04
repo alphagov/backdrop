@@ -6,8 +6,9 @@ from features.support.support import Api
 class HTTPTestClient(object):
     def __init__(self, database_name):
         self.database_name = database_name
-        self._read_api = Api.start("read", "5000")
-        self._write_api = Api.start("write", "5001")
+        self._read_api = Api("read", "5000")
+        self._write_api = Api("write", "5001")
+        self._start()
 
     def get(self, url, headers=None):
         response = requests.get(self._read_api.url(url), headers=headers)
@@ -46,6 +47,14 @@ class HTTPTestClient(object):
     def spin_down(self):
         self._read_api.stop()
         self._write_api.stop()
+
+    def _start(self):
+        try:
+            self._read_api.start()
+            self._write_api.start()
+        except:
+            self.spin_down()
+            raise
 
 
 class HTTPTestResponse:
