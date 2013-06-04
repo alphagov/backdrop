@@ -17,7 +17,12 @@ def step(context, fixture_name):
 
 @given(u'I am logged in')
 def step(context):
-    testuser = ("testuser", "test@example.com")
+    context.execute_steps(u'given I am logged in as "testuser"')
+
+
+@given(u'I am logged in as "{name}"')
+def step(context, name):
+    testuser = (name, "test@example.com")
     context.client.get("/_user/sign_in/test?user=%s&email=%s" % testuser)
 
 

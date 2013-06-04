@@ -2,5 +2,5 @@
     <ul class="nav pull-right">
         <li class="divider-vertical"><a href="{{ url_for("oauth_sign_out") }}">Sign out</a></li>
     </ul>
-    <p class="pull-right navbar-text">Signed in as {{ session.get('user') }}</p>
+    <p class="pull-right navbar-text">Signed in as {{ session.get('user').get('name') }}</p>
 {% endif %}
