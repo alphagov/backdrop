@@ -6,6 +6,7 @@ from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.write import sign_on
+from backdrop.write.permissions import Permissions
 from backdrop.write.sign_on import use_single_sign_on
 from backdrop.write.signonotron2 import protected
 
@@ -45,6 +46,8 @@ setup_logging()
 
 app.before_request(create_request_logger(app))
 app.after_request(create_response_logger(app))
+
+app.permissions = Permissions(app.config["PERMISSIONS"])
 
 if use_single_sign_on(app):
     app.secret_key = app.config['SECRET_KEY']
@@ -110,18 +113,14 @@ def post_to_bucket(bucket_name):
         return jsonify(status="error", message=str(e)), 400
 
 
-def user_assigned_to_bucket(user, bucket_name):
-    permissions = app.config.get("PERMISSIONS")
-    return user["email"] in permissions[bucket_name]
-
-
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
 @protected
 def upload(bucket_name):
     if not bucket_is_valid(bucket_name):
         return _invalid_upload("Bucket name is invalid")
 
-    if not user_assigned_to_bucket(session.get("user"), bucket_name):
+    if not app.permissions.is_user_allowed_to_bucket(
+            session.get("user").get("email"), bucket_name):
         return abort(404)
 
     if request.method == 'GET':

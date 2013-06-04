@@ -4,6 +4,7 @@ from hamcrest import *
 from mock import patch
 from werkzeug.urls import url_decode
 from backdrop.write import api
+from backdrop.write.permissions import Permissions
 from tests.support.test_helpers import has_status
 
 
@@ -124,6 +125,6 @@ class TestSignonIntegration(unittest.TestCase):
                 del session["user"]
 
     def given_bucket_permissions(self, bucket, users):
-        self.app.config.update(PERMISSIONS={
+        self.app.permissions = Permissions({
             bucket: users
         })
