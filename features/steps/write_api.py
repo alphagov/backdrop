@@ -17,7 +17,7 @@ def step(context, fixture_name):
 
 @given(u'I am logged in')
 def step(context):
-    context.client.get("/_user/sign_in/test/my_username")
+    context.client.get("/_user/sign_in/test?user=testuser&email=test@example.com")
 
 
 @when('I post the data to "{bucket_name}"')

@@ -6,3 +6,4 @@ TOKENS = {
     'licensing': 'licensing-bearer-token',
     'licensing_journey': 'licensing_journey-bearer-token'
 }
+PERMISSIONS = {}

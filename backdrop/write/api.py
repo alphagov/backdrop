@@ -1,6 +1,6 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, g, session
+from flask import Flask, request, jsonify, render_template, g, session, abort
 from backdrop import statsd
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
@@ -110,11 +110,19 @@ def post_to_bucket(bucket_name):
         return jsonify(status="error", message=str(e)), 400
 
 
+def user_assigned_to_bucket(user, bucket_name):
+    permissions = app.config.get("PERMISSIONS")
+    return user["email"] in permissions[bucket_name]
+
+
 @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
 @protected
 def upload(bucket_name):
     if not bucket_is_valid(bucket_name):
         return _invalid_upload("Bucket name is invalid")
+
+    if not user_assigned_to_bucket(session.get("user"), bucket_name):
+        return abort(404)
 
     if request.method == 'GET':
         return render_template("upload_csv.html")
