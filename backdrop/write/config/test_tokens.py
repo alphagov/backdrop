@@ -9,3 +9,7 @@ TOKENS = {
     'month': 'month-bearer-token',
     'month_no_raw_access': 'month_no_raw_access-bearer-token'
 }
+PERMISSIONS = {
+    'my_bucket': ['test@example.com'],
+    'foo': ['test@example.com']
+}

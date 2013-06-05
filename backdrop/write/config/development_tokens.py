@@ -12,3 +12,4 @@ TOKENS = {
     'pay_foreign_marriage_certificates_journey': 'pay_foreign_marriage_certificates_journey-bearer-token',
     'deposit_foreign_marriage_journey': 'deposit_foreign_marriage_journey-bearer-token',
 }
+PERMISSIONS = {}
