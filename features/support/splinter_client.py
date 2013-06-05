@@ -1,14 +1,14 @@
 from pymongo import MongoClient
 from splinter import Browser
 
-from features.support.support import Api
+from features.support.support import Api, BaseClient
 
 
-class SplinterClient(object):
+class SplinterClient(BaseClient):
 
     def __init__(self, database_name):
         self.database_name = database_name
-        self._write_api = Api.start('write', '5001')
+        self._write_api = Api.start_api('write', '5001')
 
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
