@@ -7,7 +7,7 @@ import pytz
 from mock import patch
 from backdrop.core.records import Record
 
-from tests.support.test_helpers import is_bad_request, is_ok, is_error_response, has_status
+from tests.support.test_helpers import is_bad_request, is_ok, is_error_response, has_status, is_not_found
 from tests.support.test_helpers import is_unauthorized
 from backdrop.write import api
 
@@ -89,7 +89,7 @@ class PostDataTestCase(unittest.TestCase):
             headers=[('Authorization', 'Bearer _foo_bucket-bearer-token')],
         )
 
-        assert_that( response, is_bad_request() )
+        assert_that( response, is_not_found() )
         assert_that( response, is_error_response())
 
     @patch("backdrop.core.bucket.Bucket.store")

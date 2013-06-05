@@ -9,12 +9,12 @@ Feature: the performance platform write api
         Given I have the data in "dinosaur.json"
          when I post the data to "/_status"
          # Bah, this should be a 405
-         then I should get back a status of "400"
+         then I should get back a status of "404"
 
     Scenario: posting to a reserved bucket name
         Given I have the data in "dinosaur.json"
          when I post the data to "/_bucket"
-         then I should get back a status of "400"
+         then I should get back a status of "404"
 
     Scenario: posting one object to a bucket
         Given I have the data in "dinosaur.json"

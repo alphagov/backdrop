@@ -1,6 +1,6 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, abort
 from backdrop import statsd
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
@@ -88,8 +88,7 @@ def post_to_bucket(bucket_name):
     g.bucket_name = bucket_name
 
     if not bucket_is_valid(bucket_name):
-        return jsonify(status="error",
-                       message="Bucket name is invalid"), 400
+        return abort(404)
 
     tokens = app.config['TOKENS']
     auth_header = request.headers.get('Authorization', None)

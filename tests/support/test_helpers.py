@@ -28,6 +28,10 @@ def is_unauthorized():
     return has_status(403)
 
 
+def is_not_found():
+    return has_status(404)
+
+
 def is_ok():
     return has_status(200)
 

@@ -97,7 +97,7 @@ def setup(app, db):
     @protected
     def upload(bucket_name):
         if not bucket_is_valid(bucket_name):
-            return _invalid_upload("Bucket name is invalid")
+            return abort(404)
 
         current_user_email = session.get("user").get("email")
         if not app.permissions.allowed(current_user_email, bucket_name):
