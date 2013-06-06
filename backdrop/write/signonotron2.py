@@ -1,13 +1,14 @@
-from functools import wraps
 from logging import getLogger
-from flask import url_for, redirect, json, session
+from flask import redirect, json
+from admin_ui_helper import url_for
 from rauth import OAuth2Service, service
 
 log = getLogger(__name__)
 
 
 class Signonotron2(object):
-    def __init__(self, client_id, client_secret, base_url):
+    def __init__(self, client_id, client_secret, base_url,
+                 backdrop_admin_ui_host):
         self.signon = OAuth2Service(
             client_id=client_id,
             client_secret=client_secret,
@@ -16,9 +17,10 @@ class Signonotron2(object):
             access_token_url="%s/oauth/token" % base_url,
             base_url=base_url
         )
+        self.backdrop_admin_ui_host = backdrop_admin_ui_host
 
     def __redirect_uri(self):
-        return url_for("oauth_authorized", _external=True)
+        return url_for(self.backdrop_admin_ui_host, "oauth_authorized")
 
     def __json_access_token(self, something):
         return json.loads(something)
@@ -61,12 +63,3 @@ class Signonotron2(object):
         else:
             user_details = None, None
         return user_details
-
-
-def protected(f):
-    @wraps(f)
-    def verify_user_logged_in(*args, **kwargs):
-        if not "user" in session:
-            return redirect(url_for('oauth_sign_in'))
-        return f(*args, **kwargs)
-    return verify_user_logged_in

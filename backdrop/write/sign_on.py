@@ -1,16 +1,29 @@
-from flask import flash, session, render_template, redirect, url_for, \
+from functools import wraps
+from flask import flash, session, render_template, redirect, \
     request, abort
-from backdrop.write.signonotron2 import protected, Signonotron2
+from admin_ui_helper import url_for
+from backdrop.write.signonotron2 import Signonotron2
 
 
 def setup(app):
     USER_SCOPE = app.config['USER_SCOPE']
+    ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
 
     app.oauth_service = Signonotron2(
         client_id=app.config['OAUTH_CLIENT_ID'],
         client_secret=app.config['OAUTH_CLIENT_SECRET'],
-        base_url=app.config['OAUTH_BASE_URL']
+        base_url=app.config['OAUTH_BASE_URL'],
+        backdrop_admin_ui_host=ADMIN_UI_HOST
     )
+
+    def protected(f):
+        @wraps(f)
+        def verify_user_logged_in(*args, **kwargs):
+            if not "user" in session:
+                return redirect(
+                    url_for(ADMIN_UI_HOST, 'oauth_sign_in'))
+            return f(*args, **kwargs)
+        return verify_user_logged_in
 
     @app.route(USER_SCOPE)
     def user_route():
@@ -41,15 +54,15 @@ def setup(app):
         if can_see_backdrop is None:
             flash("Could not authenticate with single sign on.",
                   category="error")
-            return redirect(url_for("not_authorized"))
+            return redirect(url_for(ADMIN_UI_HOST, "not_authorized"))
         if can_see_backdrop is False:
             flash("You are signed in to your GOV.UK account, "
                   "but you don't have permissions to use this application.")
-            return redirect(url_for("not_authorized"))
+            return redirect(url_for(ADMIN_UI_HOST, "not_authorized"))
         session.update(
             {"user": user_details["user"]["name"]})
         flash("You were successfully signed in", category="success")
-        return redirect(url_for("user_route"))
+        return redirect(url_for(ADMIN_UI_HOST, "user_route"))
 
     @app.route(USER_SCOPE + "/not_authorized")
     def not_authorized():
