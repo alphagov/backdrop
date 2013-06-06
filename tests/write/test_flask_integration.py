@@ -146,13 +146,13 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.write.api.bucket_is_valid")
-    def test_exception_handling(self, bucket_is_valid, statsd):
-        bucket_is_valid.side_effect = ValueError("BOOM")
+    @patch("backdrop.write.api.parse_and_store")
+    def test_exception_handling(self, parse_and_store, statsd):
+        parse_and_store.side_effect = RuntimeError("BOOM")
 
         response = self.app.post(
             "/foo",
-            data={'foo': 'bar'},
+            data="{}",
             content_type='application/json',
             headers=[('Authorization', 'Bearer foo-bearer-token')]
         )
