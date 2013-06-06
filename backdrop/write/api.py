@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, g, abort
 from backdrop import statsd
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
+from backdrop.write.flaskext import BucketConverter
 from backdrop.write.permissions import Permissions
 from backdrop.write.admin_ui import use_single_sign_on
 from backdrop.write import admin_ui, parse_and_store
@@ -47,6 +48,8 @@ app.after_request(create_response_logger(app))
 
 app.permissions = Permissions(app.config["PERMISSIONS"])
 
+app.url_map.converters["bucket"] = BucketConverter
+
 if use_single_sign_on(app):
     app.secret_key = app.config['SECRET_KEY']
     admin_ui.setup(app, db)
@@ -82,13 +85,10 @@ def health_check():
                        message='cannot connect to database'), 500
 
 
-@app.route('/<bucket_name>', methods=['POST'])
+@app.route('/<bucket:bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
     g.bucket_name = bucket_name
-
-    if not bucket_is_valid(bucket_name):
-        return abort(404)
 
     tokens = app.config['TOKENS']
     auth_header = request.headers.get('Authorization', None)

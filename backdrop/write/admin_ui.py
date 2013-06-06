@@ -93,12 +93,9 @@ def setup(app, db):
                 "email": email
             }})
 
-    @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
+    @app.route('/<bucket:bucket_name>/upload', methods=['GET', 'POST'])
     @protected
     def upload(bucket_name):
-        if not bucket_is_valid(bucket_name):
-            return abort(404)
-
         current_user_email = session.get("user").get("email")
         if not app.permissions.allowed(current_user_email, bucket_name):
             return abort(404)

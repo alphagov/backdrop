@@ -189,3 +189,12 @@ class ApiHealthCheckTestCase(unittest.TestCase):
         assert_that(response, is_error_response())
 
         statsd.incr.assert_called_with("write.error", bucket="/_status")
+
+
+class UploadPageTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = api.app.test_client()
+
+    def test_invalid_bucket_name_returns_400(self):
+        response = self.app.get("/$invalid_bucket/upload")
+        assert_that(response, is_not_found())
