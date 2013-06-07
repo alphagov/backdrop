@@ -13,33 +13,55 @@ def wait_until(condition, timeout=3, interval=0.1):
     raise RuntimeError("timeout")
 
 
+class BaseClient(object):
+    def before_scenario(self):
+        pass
+
+    def after_scenario(self):
+        pass
+
+    def spin_down(self):
+        pass
+
+
 class Api(object):
     @classmethod
-    def start(cls, api, port):
-        api = Api(api, port)
-        api._start()
-        return api
+    def start_api(cls, app_name, port):
+        _api = Api(app_name, port)
+        _api.start()
+        return _api
 
-    def __init__(self, api, port):
-        self._api = api
+    def __init__(self, name, port):
+        self._name = name
         self._port = port
+        self._process = None
 
-    def _start(self):
-        self._process = subprocess.Popen(
-            ["python", "start.py", self._api, self._port],
+    def _run(self):
+        return subprocess.Popen(
+            ["python", "start.py", self._name, self._port],
             preexec_fn=os.setsid,
             stderr=subprocess.STDOUT, stdout=subprocess.PIPE
         )
-        wait_until(self._started)
 
-    def _started(self):
+    def start(self):
+        if self._running():
+            raise RuntimeError(
+                "An api is already available on port %s "
+                "BEFORE starting the process!" % self._port)
+
+        self._process = self._run()
+        wait_until(self._running)
+
+    def _running(self):
         try:
             return requests.get(self.url('/_status')).status_code == 200
         except:
             return False
 
     def stop(self):
-        os.killpg(self._process.pid, 9)
+        if self._process:
+            os.killpg(self._process.pid, 9)
+            self._process.communicate()
 
     def url(self, path):
         return 'http://localhost:{0}{1}'.format(self._port, path)

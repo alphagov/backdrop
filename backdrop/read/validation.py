@@ -2,11 +2,9 @@ from datetime import time
 from dateutil import parser
 import pytz
 import api
-from ..core.validation import value_is_valid_datetime_string, valid,\
+from ..core.validation import value_is_valid_datetime_string, valid, \
     invalid, key_is_valid
 import re
-
-MONGO_FIELD_REGEX = re.compile(r'^[A-Za-z-_]+$')
 
 
 class Validator(object):
@@ -96,17 +94,17 @@ class FilterByValidator(Validator):
             validate_field_value=self.validate_field_value)
 
     def validate_field_value(self, value, request_args, context):
-            if value.find(':') < 0:
-                self.add_error(
-                    'filter_by must be a field name and value separated by '
-                    'a colon (:) eg. authority:Westminster')
-            if not key_is_valid(value.split(':', 1)[0]):
-                self.add_error(
-                    'Cannot filter by an invalid field name'
-                )
-            if value.startswith('$'):
-                self.add_error(
-                    'filter_by must not start with a $')
+        if value.find(':') < 0:
+            self.add_error(
+                'filter_by must be a field name and value separated by '
+                'a colon (:) eg. authority:Westminster')
+        if not key_is_valid(value.split(':', 1)[0]):
+            self.add_error(
+                'Cannot filter by an invalid field name'
+            )
+        if value.startswith('$'):
+            self.add_error(
+                'filter_by must not start with a $')
 
 
 class ParameterMustBeThisValidator(Validator):
@@ -171,7 +169,6 @@ class ParamDependencyValidator(Validator):
 
 
 class CollectValidator(Validator):
-
     def validate(self, request_args, context):
         MultiValueValidator(
             request_args,

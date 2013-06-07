@@ -35,8 +35,7 @@ def before_feature(context, feature):
 def before_scenario(context, _):
     context.client.before_scenario()
     storage = context.client.storage()
-    name = storage.name
-    storage.connection.drop_database(name)
+    storage.connection.drop_database(storage.name)
 
 
 def after_scenario(context, _):

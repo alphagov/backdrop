@@ -1,4 +1,7 @@
-class FlaskTestClient(object):
+from features.support.support import BaseClient
+
+
+class FlaskTestClient(BaseClient):
     def __init__(self, flask_app):
         self._client = flask_app.app.test_client()
         self._storage = flask_app.db.connection
@@ -13,17 +16,8 @@ class FlaskTestClient(object):
     def storage(self):
         return self._storage
 
-    def before_scenario(self):
-        pass
-
-    def after_scenario(self):
-        pass
-
     def spin_down(self):
-        self._config.from_object(
-            "backdrop.read.config.test"
-        )
-        pass
+        self._config.from_object("backdrop.read.config.test")
 
     def set_config_parameter(self, name, value):
         self._config[name] = value
