@@ -1,8 +1,11 @@
 TOKENS = {
     '_bucket': '_bucket-bearer-token',
     '_status': '_status-bearer-token',  # not expected to be here
+    'bucket': 'bucket-bearer-token',
     'data_with_times': 'data_with_times-bearer-token',
     'flavour_events': 'flavour_events-bearer-token',
+    'foo': 'foo-bearer-token',
+    'foo_bucket': 'foo_bucket-bearer-token',
     'licensing': 'licensing-bearer-token',
     'my_dinosaur_bucket': 'my_dinosaur_bucket-bearer-token',
     'reptiles': 'reptiles-bearer-token',
@@ -13,3 +16,6 @@ PERMISSIONS = {
     'my_bucket': ['test@example.com'],
     'foo': ['test@example.com']
 }
+OAUTH_CLIENT_ID = "it's not important here"
+OAUTH_CLIENT_SECRET = "it's not important here"
+OAUTH_BASE_URL = "http://signon.dev.gov.uk"
