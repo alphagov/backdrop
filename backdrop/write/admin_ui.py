@@ -2,12 +2,17 @@ from functools import wraps
 from flask import flash, session, render_template, redirect, \
     request, abort
 from admin_ui_helper import url_for
+from backdrop.core.errors import ParseError, ValidationError
+from backdrop.core.parse_csv import parse_csv
+from backdrop.core.validation import bucket_is_valid
+from backdrop.write import parse_and_store
 from backdrop.write.signonotron2 import Signonotron2
 
 
-def setup(app):
+def setup(app, db):
     USER_SCOPE = app.config['USER_SCOPE']
     ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
+    MAX_UPLOAD_SIZE = 100000
 
     app.oauth_service = Signonotron2(
         client_id=app.config['OAUTH_CLIENT_ID'],
@@ -86,6 +91,42 @@ def setup(app):
                 "name": name,
                 "email": email
             }})
+
+    @app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
+    @protected
+    def upload(bucket_name):
+        if not bucket_is_valid(bucket_name):
+            return _invalid_upload("Bucket name is invalid")
+
+        current_user_email = session.get("user").get("email")
+        if not app.permissions.allowed(current_user_email, bucket_name):
+            return abort(404)
+
+        if request.method == 'GET':
+            return render_template("upload_csv.html")
+
+        return _store_csv_data(bucket_name)
+
+    def _store_csv_data(bucket_name):
+        file_stream = request.files["file"].stream
+        try:
+            if request.content_length > MAX_UPLOAD_SIZE:
+                return _invalid_upload("file too large")
+            try:
+                parse_and_store(
+                    db,
+                    parse_csv(file_stream),
+                    bucket_name,
+                    app.logger)
+
+                return render_template("upload_ok.html")
+            except (ParseError, ValidationError) as e:
+                return _invalid_upload(e.message)
+        finally:
+            file_stream.close()
+
+    def _invalid_upload(msg):
+        return render_template("upload_error.html", message=msg), 400
 
 
 def allow_test_signin(app):

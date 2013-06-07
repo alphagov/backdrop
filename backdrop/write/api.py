@@ -1,14 +1,12 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, render_template, g, session, abort
+from flask import Flask, request, jsonify, g
 from backdrop import statsd
-from backdrop.core.parse_csv import parse_csv
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
-from backdrop.write import sign_on
 from backdrop.write.permissions import Permissions
-from backdrop.write.sign_on import use_single_sign_on
-from backdrop.write.signonotron2 import protected
+from backdrop.write.admin_ui import use_single_sign_on
+from backdrop.write import admin_ui, parse_and_store
 
 from ..core.errors import ParseError, ValidationError
 from ..core.validation import bucket_is_valid
@@ -16,8 +14,6 @@ from ..core import database, log_handler, records, cache_control
 from ..core.bucket import Bucket
 
 from .validation import bearer_token_is_valid
-
-MAX_UPLOAD_SIZE = 100000
 
 
 def setup_logging():
@@ -53,7 +49,7 @@ app.permissions = Permissions(app.config["PERMISSIONS"])
 
 if use_single_sign_on(app):
     app.secret_key = app.config['SECRET_KEY']
-    sign_on.setup(app)
+    admin_ui.setup(app, db)
 
 
 @app.errorhandler(500)
@@ -104,49 +100,14 @@ def post_to_bucket(bucket_name):
 
     try:
         parse_and_store(
+            db,
             load_json(request.json),
-            bucket_name)
+            bucket_name,
+            app.logger)
 
         return jsonify(status='ok')
     except (ParseError, ValidationError) as e:
         return jsonify(status="error", message=str(e)), 400
-
-
-@app.route('/<bucket_name>/upload', methods=['GET', 'POST'])
-@protected
-def upload(bucket_name):
-    if not bucket_is_valid(bucket_name):
-        return _invalid_upload("Bucket name is invalid")
-
-    current_user_email = session.get("user").get("email")
-    if not app.permissions.allowed(current_user_email, bucket_name):
-        return abort(404)
-
-    if request.method == 'GET':
-        return render_template("upload_csv.html")
-
-    return _store_csv_data(bucket_name)
-
-
-def _store_csv_data(bucket_name):
-    file_stream = request.files["file"].stream
-    try:
-        if request.content_length > MAX_UPLOAD_SIZE:
-            return _invalid_upload("file too large")
-        try:
-            parse_and_store(
-                parse_csv(file_stream),
-                bucket_name)
-
-            return render_template("upload_ok.html")
-        except (ParseError, ValidationError) as e:
-            return _invalid_upload(e.message)
-    finally:
-        file_stream.close()
-
-
-def _invalid_upload(msg):
-    return render_template("upload_error.html", message=msg), 400
 
 
 def load_json(data):
@@ -157,16 +118,6 @@ def load_json(data):
         return data
     else:
         return [data]
-
-
-def parse_and_store(incoming_data, bucket_name):
-    incoming_records = records.parse_all(incoming_data)
-
-    app.logger.info(
-        "request contains %s documents" % len(incoming_records))
-
-    bucket = Bucket(db, bucket_name)
-    bucket.store(incoming_records)
 
 
 def start(port):
