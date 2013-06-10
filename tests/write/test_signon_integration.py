@@ -100,7 +100,7 @@ class TestSignonIntegration(unittest.TestCase):
         assert_that(response, has_status(404))
 
     def test_upload_page_is_available_to_user_with_permission(self):
-        self.given_bucket_permissions("test", [ "bob@example.com" ])
+        self.given_bucket_permissions("bob@example.com", [ "test" ])
         self.given_user_is_signed_in_as(email="bob@example.com")
 
         response = self.client.get('/test/upload')
