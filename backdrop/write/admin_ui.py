@@ -45,7 +45,8 @@ def setup(app, db):
     def oauth_sign_out():
         session.clear()
         flash("You have been signed out of Backdrop", category="success")
-        return render_template("signon/signout.html")
+        return render_template("signon/signout.html",
+                               oauth_base_url=app.config['OAUTH_BASE_URL'])
 
     @app.route(USER_SCOPE + "/authorized")
     def oauth_authorized():
