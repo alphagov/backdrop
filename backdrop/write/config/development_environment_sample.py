@@ -6,7 +6,9 @@ TOKENS = {
     'foo': 'foo-bearer-token',
     'foo_bucket': 'foo_bucket-bearer-token',
     'licensing': 'licensing-bearer-token',
-    'licensing_journey': 'licensing_journey-bearer-token'
+    'licensing_journey': 'licensing_journey-bearer-token',
+    'govuk_realtime': 'govuk-realtime-bearer-token',
+    'licensing-realtime': 'licensing-realtime-bearer-token'
 }
 PERMISSIONS = {}
 OAUTH_CLIENT_ID = \
