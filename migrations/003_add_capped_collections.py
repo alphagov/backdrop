@@ -8,14 +8,8 @@ log = logging.getLogger(__name__)
 
 def up(db):
     capped_collections = [
-        "fco-realtime-pay-legalisation-post",
-        "fco-realtime-pay-legalisation-drop-off",
-        "fco-realtime-pay-register-birth-abroad",
-        "fco-realtime-pay-register-death-abroad",
-        "fco-realtime-pay-foreign-marriage-certificates",
-        "fco-realtime-deposit-foreign-marriage",
-        "govuk-realtime",
-        "licensing-realtime"
+        "govuk_realtime",
+        "licensing_realtime"
     ]
 
     for collection_name in capped_collections:

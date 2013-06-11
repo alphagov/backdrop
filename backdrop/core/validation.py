@@ -14,7 +14,7 @@ RESERVED_KEYWORDS = (
     '_timestamp',
     '_id'
 )
-VALID_KEY = re.compile('^[a-z_][a-z0-9_-]+$')
+VALID_KEY = re.compile('^[a-z_][a-z0-9_]+$')
 
 
 def _is_real_date(value):
