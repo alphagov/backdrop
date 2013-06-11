@@ -110,6 +110,8 @@ def setup(app, db):
 
     def _store_csv_data(bucket_name):
         file_stream = request.files["file"].stream
+        if not request.files["file"].filename:
+            return _invalid_upload("file is required")
         try:
             if request.content_length > MAX_UPLOAD_SIZE:
                 return _invalid_upload("file too large")

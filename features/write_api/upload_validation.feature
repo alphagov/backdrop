@@ -46,3 +46,10 @@ Feature: csv upload validation
          and I click "submit"
         then I should see the text "There was an error with your upload"
          and the platform should have "0" items stored in "foo"
+
+    Scenario: no file is provided
+       Given I am logged in
+        when I go to "/foo/upload"
+         and I click "submit"
+        then I should see the text "There was an error with your upload"
+         and the platform should have "0" items stored in "foo"
