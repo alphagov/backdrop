@@ -1,0 +1,8 @@
+# anything in comments column is ignored by the performance platform,,,,
+start_at,end_at,key,value,comment
+2013-01-01,2013-01-07,cheese and marmite sandwich,287,you either love it or hate it
+2013-01-01,2013-01-07,chocolate cake,425,lots of sugar
+,,,,
+2013-01-01,2013-01-07,stilton cheese,753,
+# you can add comments anywhere in a file, if you start them with a '#'
+2013-01-08,2013-01-08,spaghetti sandwich,12,some people like spaghetti on their toasts

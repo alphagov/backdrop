@@ -4,9 +4,18 @@
 
 {% block body %}
     <h1>Upload CSV data to the Performance Platform</h1>
-
+    <p>You can upload data to Performance Platform from your CSV files. For
+        each row in a CSV file a document will be added to your bucket. You need
+        to make sure they match our expected format (see example below). </p>
+    <p>Download example CSV file: <a href="{{ url_for('static', filename='example.csv') }}">example.csv</a></p>
     <form action="upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file"/>
-        <input type="submit" value="submit" />
+        <div class="form-panel">
+            <label for="file">CSV file to upload</label>
+            <input type="file" name="file"/>
+        </div>
+        <div>
+            <input class="btn btn-primary btn-large" type="submit" value="submit" />
+        </div>
     </form>
+
 {% endblock %}
