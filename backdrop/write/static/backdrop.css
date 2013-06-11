@@ -21,3 +21,16 @@
     line-height: 1em;
     padding-top: 35px;
 }
+
+form label {
+    font-size: 1.2rem;
+}
+
+form div {
+    padding: 1em;
+}
+
+.form-panel {
+    background-color: #d5e8f3;
+    width: 50%;
+}
