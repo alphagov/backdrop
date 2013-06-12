@@ -2,7 +2,7 @@ import unittest
 from hamcrest import assert_that, is_
 from nose.tools import raises
 import werkzeug
-from backdrop.write.flaskext import BucketConverter
+from backdrop.core.flaskutils import BucketConverter
 
 
 class BucketConverterTestCase(unittest.TestCase):
