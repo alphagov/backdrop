@@ -7,8 +7,8 @@ TOKENS = {
     'foo_bucket': 'foo_bucket-bearer-token',
     'licensing': 'licensing-bearer-token',
     'licensing_journey': 'licensing_journey-bearer-token',
-    'licensing_live_data': 'licensing_live_data_bearer_token',
-    'licence_finder_live_data': 'licence_finder_live_data_bearer_token'
+    'licensing__monitoring': 'licensing_monitoring_bearer_token',
+    'licence_finder_monitoring': 'licence_finder_monitoring_bearer_token'
 }
 PERMISSIONS = {}
 OAUTH_CLIENT_ID = \
