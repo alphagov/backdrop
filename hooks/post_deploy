@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-BACKDROP_APP=$(echo $GOVUK_APP_NAME | cut -d . -f 1)
-
-cp Procfile-$BACKDROP_APP Procfile
+if [ -n "$GOVUK_APP_NAME" ]; then
+	BACKDROP_APP=$(echo $GOVUK_APP_NAME | cut -d . -f 1)
+	cp Procfile-$BACKDROP_APP Procfile
+fi
