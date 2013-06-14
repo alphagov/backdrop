@@ -16,7 +16,7 @@ def up(db):
         "fco_deposit_foreign_marriage_realtime",
         "govuk_realtime",
         "licensing_realtime",
-   ]
+    ]
 
     for collection_name in capped_collections:
         db.create_collection(name=collection_name, capped=True, size=5040)
