@@ -9,6 +9,8 @@ TOKENS = {
     'licensing_journey': 'licensing_journey-bearer-token',
     'licensing__monitoring': 'licensing_monitoring_bearer_token',
     'licence_finder_monitoring': 'licence_finder_monitoring_bearer_token'
+    'govuk_realtime': 'govuk_realtime-bearer-token',
+    'licensing_realtime': 'licensing_realtime-bearer-token',
 }
 PERMISSIONS = {}
 OAUTH_CLIENT_ID = \
