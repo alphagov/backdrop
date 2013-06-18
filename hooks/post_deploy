@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
-BACKDROP_APP=$(echo $GOVUK_APP_NAME | cut -d . -f 1)
+function is_govuk_infrastructure {
+  [ -n "$GOVUK_APP_NAME" ]  
+}
 
-cp Procfile-$BACKDROP_APP Procfile
+if is_govuk_infrastructure; then
+	BACKDROP_APP=$(echo $GOVUK_APP_NAME | cut -d . -f 1)
+	cp Procfile-$BACKDROP_APP Procfile
+fi
