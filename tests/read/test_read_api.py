@@ -75,3 +75,22 @@ class ReadApiTestCase(unittest.TestCase):
         )
         mock_query.assert_called_with(
             Query.create(sort_by=["value", "descending"]))
+
+    def test_cors_preflight_requests_have_empty_body(self):
+        response = self.app.open('/bucket', method='OPTIONS')
+        assert_that(response.status_code, is_(200))
+        assert_that(response.data, is_(""))
+
+    def test_cors_preflight_are_allowed_from_all_origins(self):
+        response = self.app.open('/bucket', method='OPTIONS')
+        assert_that(response.headers['Access-Control-Allow-Origin'], is_('*'))
+
+    def test_cors_preflight_result_cache(self):
+        response = self.app.open('/bucket', method='OPTIONS')
+        assert_that(response.headers['Access-Control-Max-Age'],
+                    is_('86400'))
+
+    def test_cors_requests_can_cache_control(self):
+        response = self.app.open('/bucket', method='OPTIONS')
+        assert_that(response.headers['Access-Control-Allow-Headers'],
+                    is_('cache-control'))
