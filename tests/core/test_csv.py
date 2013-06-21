@@ -5,7 +5,7 @@ import unittest
 import cStringIO
 from hamcrest import assert_that, only_contains, is_
 
-from backdrop.core.parse_csv import parse_csv
+from backdrop.core.parse_csv import parse_csv, lines
 from backdrop.core.errors import ParseError
 
 
@@ -112,6 +112,43 @@ class ParseCsvTestCase(unittest.TestCase):
         assert_that(data, only_contains(
             {"prop1": "value 1", "prop2": "value 2"}
         ))
+
+    def test_preserve_newlines_in_quoted_values(self):
+        csv = u"prop1,prop2\nvalue,\"value\nwith newline\""
+
+        print csv
+
+        csv_stream = _string_io(csv, "utf-8")
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"prop1": "value", "prop2": "value\nwith newline"}
+        ))
+
+
+class LinesGeneratorTest(unittest.TestCase):
+    def test_handles_CR_LF_and_CRLF(self):
+        text = "1\n2\r3\r\n4"
+
+        lines_list = list(lines(_string_io(text)))
+
+        assert_that(lines_list, is_(["1\n", "2\r", "3\r\n", "4"]))
+
+    def test_handles_emptylines(self):
+        text = "q\n\rw\r\r\ne"
+
+        lines_list = list(lines(_string_io(text)))
+
+        assert_that(lines_list, is_(["q\n", "\r", "w\r", "\r\n", "e"]))
+
+    def test_ignores_trailing_empty_line(self):
+        text = "asd\n"
+
+        lines_list = list(lines(_string_io(text)))
+
+        assert_that(lines_list, is_(["asd\n"]))
+
 
 def _string_io(content, encoding=None):
     if encoding is not None:

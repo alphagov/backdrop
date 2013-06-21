@@ -1,5 +1,4 @@
 import csv
-import re
 from .errors import ParseError
 
 
@@ -14,7 +13,9 @@ def parse_csv(incoming_data):
 
 
 def lines(stream):
-    return re.split("\r\n|\r|\n", stream.read())
+    for candidate_line in stream:
+        for line in candidate_line.splitlines(True):
+            yield line
 
 
 def is_empty_row(row):
