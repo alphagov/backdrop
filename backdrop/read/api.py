@@ -69,27 +69,34 @@ def health_check():
                        message='cannot connect to database'), 500
 
 
-@app.route('/<bucket_name>', methods=['GET'])
+@app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
-    result = validate_request_args(request.args,
-                                   raw_queries_allowed(bucket_name))
+    if request.method == 'OPTIONS':
+        # OPTIONS requests are made by XHR as part of the CORS spec
+        # if the client uses custom headers
+        response = app.make_default_options_response()
+        response.headers['Access-Control-Max-Age'] = '86400'
+        response.headers['Access-Control-Allow-Headers'] = 'cache-control'
+    else:
+        result = validate_request_args(request.args,
+                                       raw_queries_allowed(bucket_name))
 
-    if not result.is_valid:
-        app.logger.error(result.message)
-        return jsonify(status='error', message=result.message), 400
+        if not result.is_valid:
+            app.logger.error(result.message)
+            return jsonify(status='error', message=result.message), 400
 
-    bucket = Bucket(db, bucket_name)
-    result_data = bucket.query(Query.parse(request.args)).data()
+        bucket = Bucket(db, bucket_name)
+        result_data = bucket.query(Query.parse(request.args)).data()
 
-    # Taken from flask.helpers.jsonify to add JSONEncoder
-    # NB. this can be removed once fix #471 works it's way into a release
-    # https://github.com/mitsuhiko/flask/pull/471
-    json_data = json.dumps({"data": result_data}, cls=JsonEncoder,
-                           indent=None if request.is_xhr else 2)
+        # Taken from flask.helpers.jsonify to add JSONEncoder
+        # NB. this can be removed once fix #471 works it's way into a release
+        # https://github.com/mitsuhiko/flask/pull/471
+        json_data = json.dumps({"data": result_data}, cls=JsonEncoder,
+                               indent=None if request.is_xhr else 2)
 
-    response = app.response_class(json_data, mimetype='application/json')
+        response = app.response_class(json_data, mimetype='application/json')
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
