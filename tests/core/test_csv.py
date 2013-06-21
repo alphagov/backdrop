@@ -91,3 +91,23 @@ class ParseCsvTestCase(unittest.TestCase):
         assert_that(data, only_contains(
             {"a": u"c", "b": u"e"}
         ))
+
+    def test_accept_csv_with_CR_as_line_separator(self):
+        csv = u"prop1,prop2\rvalue 1,value 2"
+        csv_stream = StringIO(csv.encode("utf-8"))
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"prop1": "value 1", "prop2": "value 2"}
+        ))
+
+    def test_accept_csv_with_CRLF_as_line_separator(self):
+        csv = u"prop1,prop2\r\nvalue 1,value 2"
+        csv_stream = StringIO(csv.encode("utf-8"))
+
+        data = parse_csv(csv_stream)
+
+        assert_that(data, only_contains(
+            {"prop1": "value 1", "prop2": "value 2"}
+        ))
