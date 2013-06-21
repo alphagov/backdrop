@@ -116,8 +116,6 @@ class ParseCsvTestCase(unittest.TestCase):
     def test_preserve_newlines_in_quoted_values(self):
         csv = u"prop1,prop2\nvalue,\"value\nwith newline\""
 
-        print csv
-
         csv_stream = _string_io(csv, "utf-8")
 
         data = parse_csv(csv_stream)
