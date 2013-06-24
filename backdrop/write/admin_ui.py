@@ -5,7 +5,6 @@ from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.parse_csv import parse_csv
-from backdrop.core.records import add_id
 from backdrop.write.signonotron2 import Signonotron2
 
 
@@ -116,10 +115,7 @@ def setup(app, db):
                 data = parse_csv(file_stream)
 
                 auto_id = app.config.get("BUCKET_AUTO_ID", {}).get(bucket_name)
-                if auto_id:
-                    data = [add_id(d, keys=auto_id) for d in data]
-
-                bucket = Bucket(db, bucket_name)
+                bucket = Bucket(db, bucket_name, auto_id=auto_id)
                 bucket.parse_and_store(data)
 
                 return render_template("upload_ok.html")

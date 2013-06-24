@@ -1,21 +1,35 @@
+from base64 import b64encode
 import unittest
 from hamcrest import *
 from mock import Mock, call
+from nose.tools import raises
 from backdrop.core import bucket
+from backdrop.core.bucket import Bucket
+from backdrop.core.errors import ValidationError
 from backdrop.core.records import Record
 from backdrop.read.query import Query
 from tests.support.test_helpers import d, d_tz
 
 
+def mock_database(mock_repository):
+    mock_database = Mock()
+    mock_database.get_repository.return_value = mock_repository
+    return mock_database
+
+
+def mock_repository():
+    mock_repository = Mock()
+    mock_repository.find.return_value = []
+    mock_repository.group.return_value = []
+    return mock_repository
+
+
 class TestBucket(unittest.TestCase):
+
     def setUp(self):
-        mock_database = Mock()
-        mock_repository = Mock()
-        mock_database.get_repository.return_value = mock_repository
-        self.bucket = bucket.Bucket(mock_database, 'test_bucket')
-        self.mock_repository = mock_repository
-        self.mock_repository.find.return_value = []
-        self.mock_repository.group.return_value = []
+        self.mock_repository = mock_repository()
+        self.mock_database = mock_database(self.mock_repository)
+        self.bucket = bucket.Bucket(self.mock_database, 'test_bucket')
 
     def test_that_a_single_object_gets_stored(self):
         obj = Record({"name": "Gummo"})
@@ -569,3 +583,53 @@ class TestBucket(unittest.TestCase):
             assert_that(str(e), is_(
                 "Weeks MUST start on Monday but got date: 2013-04-09 00:00:00"
             ))
+
+
+class TestBucketAutoIdGeneration(unittest.TestCase):
+    def setUp(self):
+        self.mock_repository = mock_repository()
+        self.mock_database = mock_database(self.mock_repository)
+
+    def test_auto_id_generation(self):
+        objects = [{
+            "postcode": "WC2B 6SE",
+            "number": "125",
+            "name": "Aviation House"
+        }]
+
+        auto_id = ("postcode", "number")
+        bucket = Bucket(self.mock_database, "bucket", auto_id=auto_id)
+
+        bucket.parse_and_store(objects)
+
+        self.mock_repository.save.assert_called_once_with({
+            "_id": b64encode("WC2B 6SE.125"),
+            "postcode": "WC2B 6SE",
+            "number": "125",
+            "name": "Aviation House"
+        })
+
+    def test_no_id_generated_if_auto_id_is_none(self):
+        object = {
+            "postcode": "WC2B 6SE",
+            "number": "125",
+            "name": "Aviation House"
+        }
+
+        bucket = Bucket(self.mock_database, "bucket", auto_id=None)
+
+        bucket.parse_and_store([object])
+
+        self.mock_repository.save.assert_called_once_with(object)
+
+    @raises(ValidationError)
+    def test_validation_error_if_auto_id_property_is_missing(self):
+        objects = [{
+            "postcode": "WC2B 6SE",
+            "name": "Aviation House"
+        }]
+
+        auto_id = ("postcode", "number")
+        bucket = Bucket(self.mock_database, "bucket", auto_id=auto_id)
+
+        bucket.parse_and_store(objects)
