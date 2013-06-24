@@ -1,3 +1,4 @@
+from base64 import b64encode
 from backdrop.core.timeseries import WEEK, MONTH
 from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.validation import validate_record_data
@@ -59,5 +60,5 @@ def add_id(datum):
     if not has_all_required_keys(datum):
         return datum
 
-    id = ".".join([datum[key] for key in id_keys])
+    id = b64encode(".".join([datum[key] for key in id_keys]))
     return dict(datum.items() + [("_id", id)])

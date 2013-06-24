@@ -1,3 +1,4 @@
+from base64 import b64encode
 import unittest
 import datetime
 
@@ -148,7 +149,8 @@ class TestAddId(unittest.TestCase):
 
         assert_that(modified_record, has_entries(record))
         assert_that(modified_record,
-                    has_entry("_id", "record-key.2013-01-01.2013-01-07"))
+                    has_entry("_id",
+                              b64encode("record-key.2013-01-01.2013-01-07")))
 
     def test_does_not_change_record_already_with_id(self):
         record = {
