@@ -598,7 +598,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
         }]
 
         auto_id = ("postcode", "number")
-        bucket = Bucket(self.mock_database, "bucket", auto_id=auto_id)
+        bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
 
         bucket.parse_and_store(objects)
 
@@ -616,7 +616,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }
 
-        bucket = Bucket(self.mock_database, "bucket", auto_id=None)
+        bucket = Bucket(self.mock_database, "bucket", generate_id_from=None)
 
         bucket.parse_and_store([object])
 
@@ -630,6 +630,6 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
         }]
 
         auto_id = ("postcode", "number")
-        bucket = Bucket(self.mock_database, "bucket", auto_id=auto_id)
+        bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
 
         bucket.parse_and_store(objects)

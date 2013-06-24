@@ -8,7 +8,7 @@ LOG_LEVEL = "DEBUG"
 CLIENT_ID = "it's not important here"
 CLIENT_SECRET = "it's not important here"
 ALLOW_TEST_SIGNIN = True
-BUCKET_AUTO_ID = {
+BUCKET_AUTO_ID_KEYS = {
     "bucket_with_auto_id": ("key", "start_at", "end_at")
 }
 

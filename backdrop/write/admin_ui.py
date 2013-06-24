@@ -114,8 +114,8 @@ def setup(app, db):
             try:
                 data = parse_csv(file_stream)
 
-                auto_id = app.config.get("BUCKET_AUTO_ID", {}).get(bucket_name)
-                bucket = Bucket(db, bucket_name, auto_id=auto_id)
+                auto_id_keys = _auto_id_keys_for(bucket_name)
+                bucket = Bucket(db, bucket_name, generate_id_from=auto_id_keys)
                 bucket.parse_and_store(data)
 
                 return render_template("upload_ok.html")
@@ -123,6 +123,9 @@ def setup(app, db):
                 return _invalid_upload(e.message)
         finally:
             file_stream.close()
+
+    def _auto_id_keys_for(bucket_name):
+        return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)
 
     def _invalid_upload(msg):
         return render_template("upload_error.html", message=msg), 400
