@@ -2,10 +2,10 @@ from functools import wraps
 from flask import flash, session, render_template, redirect, \
     request, abort
 from admin_ui_helper import url_for
+from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.parse_csv import parse_csv
 from backdrop.core.records import add_id
-from backdrop.write import parse_and_store
 from backdrop.write.signonotron2 import Signonotron2
 
 
@@ -119,11 +119,8 @@ def setup(app, db):
                 if auto_id:
                     data = [add_id(d, keys=auto_id) for d in data]
 
-                parse_and_store(
-                    db,
-                    data,
-                    bucket_name,
-                    app.logger)
+                bucket = Bucket(db, bucket_name)
+                bucket.parse_and_store(data)
 
                 return render_template("upload_ok.html")
             except (ParseError, ValidationError) as e:

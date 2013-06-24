@@ -7,7 +7,8 @@ import pytz
 from mock import patch
 from backdrop.core.records import Record
 
-from tests.support.test_helpers import is_bad_request, is_ok, is_error_response, has_status, is_not_found
+from tests.support.test_helpers import is_bad_request, is_ok, \
+    is_error_response, has_status, is_not_found
 from tests.support.test_helpers import is_unauthorized
 from backdrop.write import api
 
@@ -146,7 +147,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.write.api.parse_and_store")
+    @patch("backdrop.core.bucket.Bucket.parse_and_store")
     def test_exception_handling(self, parse_and_store, statsd):
         parse_and_store.side_effect = RuntimeError("BOOM")
 
