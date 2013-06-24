@@ -4,7 +4,7 @@ import datetime
 from hamcrest import *
 
 from backdrop.core.errors import ParseError
-from backdrop.core.records import Record, parse
+from backdrop.core.records import Record, parse, add_id
 from tests.support.test_helpers import d_tz
 
 
@@ -133,3 +133,42 @@ class TestRecord(unittest.TestCase):
         assert_that(record.to_mongo(), has_key('name'))
         assert_that(record.to_mongo(), has_key('_timestamp'))
         assert_that(record.to_mongo(), has_key('_week_start_at'))
+
+
+class TestAddId(unittest.TestCase):
+    def test_adds_id_to_record(self):
+        record = {
+            "start_at": "2013-01-01",
+            "end_at": "2013-01-07",
+            "key": "record-key",
+            "other_property": 123
+        }
+
+        modified_record = add_id(record)
+
+        assert_that(modified_record, has_entries(record))
+        assert_that(modified_record,
+                    has_entry("_id", "record-key.2013-01-01.2013-01-07"))
+
+    def test_does_not_change_record_already_with_id(self):
+        record = {
+            "_id": 1,
+            "start_at": "2013-01-01",
+            "end_at": "2013-01-07",
+            "key": "record-key",
+            "other_property": 123
+        }
+
+        modified_record = add_id(record)
+
+        assert_that(modified_record, equal_to(record))
+
+    def test_does_not_change_record_without_required_properties(self):
+        record = {
+            "name": "Guido",
+            "preferred_language": "python"
+        }
+
+        modified_record = add_id(record)
+
+        assert_that(modified_record, equal_to(record))

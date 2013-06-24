@@ -4,7 +4,7 @@ from flask import flash, session, render_template, redirect, \
 from admin_ui_helper import url_for
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.parse_csv import parse_csv
-from backdrop.core.validation import bucket_is_valid
+from backdrop.core.records import add_id
 from backdrop.write import parse_and_store
 from backdrop.write.signonotron2 import Signonotron2
 
@@ -113,9 +113,11 @@ def setup(app, db):
             if request.content_length > MAX_UPLOAD_SIZE:
                 return _invalid_upload("file too large")
             try:
+                data = parse_csv(file_stream)
+                data = [add_id(d) for d in data]
                 parse_and_store(
                     db,
-                    parse_csv(file_stream),
+                    data,
                     bucket_name,
                     app.logger)
 
