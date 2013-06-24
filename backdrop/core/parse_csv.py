@@ -6,10 +6,16 @@ def parse_csv(incoming_data):
     return list(
         parse_rows(
             ignore_comment_column(unicode_csv_dict_reader(
-                ignore_comment_lines(incoming_data), 'utf-8')
+                ignore_comment_lines(lines(incoming_data)), 'utf-8')
             )
         )
     )
+
+
+def lines(stream):
+    for candidate_line in stream:
+        for line in candidate_line.splitlines(True):
+            yield line
 
 
 def is_empty_row(row):
