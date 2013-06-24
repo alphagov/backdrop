@@ -5,9 +5,14 @@ python:
 # Need mongodb for testing
 services: mongodb
 # command to install dependencies
-install: "pip install -r requirements_for_tests.txt --use-mirrors"
+install: "pip install -q -r requirements_for_tests.txt --use-mirrors"
 # command to run tests
-script: nosetests && behave && ./pep-it.sh
+script:
+  - nosetests --with-coverage --cover-inclusive
+  - behave
+  - ./pep-it.sh
+after_script:
+  - coveralls
 branches:
   except:
     - master
