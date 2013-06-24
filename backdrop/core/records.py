@@ -49,16 +49,6 @@ def parse_all(data):
     return [parse(datum) for datum in data]
 
 
-def add_id(datum):
-    id_keys = ("key", "start_at", "end_at")
-
-    def has_all_required_keys(datum):
-        return set(id_keys).issubset(set(datum.keys()))
-
-    if "_id" in datum:
-        return datum
-    if not has_all_required_keys(datum):
-        return datum
-
-    id = b64encode(".".join([datum[key] for key in id_keys]))
+def add_id(datum, keys):
+    id = b64encode(".".join([datum[key] for key in keys]))
     return dict(datum.items() + [("_id", id)])

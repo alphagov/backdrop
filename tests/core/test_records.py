@@ -137,7 +137,7 @@ class TestRecord(unittest.TestCase):
 
 
 class TestAddId(unittest.TestCase):
-    def test_adds_id_to_record(self):
+    def test_adds_id_as_base64_encoded_concatenation_of_properties(self):
         record = {
             "start_at": "2013-01-01",
             "end_at": "2013-01-07",
@@ -145,32 +145,9 @@ class TestAddId(unittest.TestCase):
             "other_property": 123
         }
 
-        modified_record = add_id(record)
+        modified_record = add_id(record, keys=["key", "start_at", "end_at"])
 
         assert_that(modified_record, has_entries(record))
         assert_that(modified_record,
                     has_entry("_id",
                               b64encode("record-key.2013-01-01.2013-01-07")))
-
-    def test_does_not_change_record_already_with_id(self):
-        record = {
-            "_id": 1,
-            "start_at": "2013-01-01",
-            "end_at": "2013-01-07",
-            "key": "record-key",
-            "other_property": 123
-        }
-
-        modified_record = add_id(record)
-
-        assert_that(modified_record, equal_to(record))
-
-    def test_does_not_change_record_without_required_properties(self):
-        record = {
-            "name": "Guido",
-            "preferred_language": "python"
-        }
-
-        modified_record = add_id(record)
-
-        assert_that(modified_record, equal_to(record))

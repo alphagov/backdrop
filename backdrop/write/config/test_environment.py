@@ -13,7 +13,7 @@ TOKENS = {
     'month_no_raw_access': 'month_no_raw_access-bearer-token'
 }
 PERMISSIONS = {
-    'test@example.com': ['my_bucket', 'foo'],
+    'test@example.com': ['my_bucket', 'bucket_with_auto_id', 'foo'],
     'some.other@example.com': ['foo']
 }
 OAUTH_CLIENT_ID = "it's not important here"

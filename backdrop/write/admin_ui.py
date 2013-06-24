@@ -114,7 +114,11 @@ def setup(app, db):
                 return _invalid_upload("file too large")
             try:
                 data = parse_csv(file_stream)
-                data = [add_id(d) for d in data]
+
+                auto_id = app.config.get("BUCKET_AUTO_ID", {}).get(bucket_name)
+                if auto_id:
+                    data = [add_id(d, keys=auto_id) for d in data]
+
                 parse_and_store(
                     db,
                     data,

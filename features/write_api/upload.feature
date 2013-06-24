@@ -52,13 +52,13 @@ Feature: csv upload
              2013-01-01,2013-01-07,def,425
              """
          and I am logged in
-        when I go to "/my_bucket/upload"
+        when I go to "/bucket_with_auto_id/upload"
          and I enter "data.csv" into the file upload field
          and I click "submit"
-         and I go to "/my_bucket/upload"
+         and I go to "/bucket_with_auto_id/upload"
          and I enter "data2.csv" into the file upload field
          and I click "submit"
-        then the platform should have stored in "my_bucket":
+        then the platform should have stored in "bucket_with_auto_id":
              """
              {"start_at": "2013-01-01", "end_at": "2013-01-07", "key": "abc", "value": "287"}
              {"start_at": "2013-01-01", "end_at": "2013-01-07", "key": "def", "value": "425"}
