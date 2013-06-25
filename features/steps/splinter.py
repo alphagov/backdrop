@@ -1,8 +1,7 @@
-from httplib import BadStatusLine
 import json
 import os
 import shutil
-from hamcrest import assert_that, has_length, is_
+from hamcrest import *
 
 
 @given(u'a file named "{filename}" with fixture "{fixturename}"')
@@ -45,11 +44,12 @@ def step(context, message):
 
 @then(u'the platform should have stored in "{bucket_name}"')
 def step(context, bucket_name):
+    documents = [json.loads(line) for line in context.text.split("\n")]
+    matchers = [has_entries(doc) for doc in documents]
+
     bucket = context.client.storage()[bucket_name]
-    for line in context.text.split("\n"):
-        query = json.loads(line)
-        result = bucket.find(query)
-        assert_that(list(result), has_length(1))
+    result = list(bucket.find())
+    assert_that(result, contains_inanyorder(*matchers))
 
 
 @then(u'the platform should have "{n}" items stored in "{bucket_name}"')

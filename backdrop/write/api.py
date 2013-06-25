@@ -2,12 +2,13 @@ from os import getenv
 
 from flask import Flask, request, jsonify, g
 from backdrop import statsd
+from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.core.flaskutils import BucketConverter
 from backdrop.write.permissions import Permissions
 from backdrop.write.admin_ui import use_single_sign_on
-from backdrop.write import admin_ui, parse_and_store
+from backdrop.write import admin_ui
 
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
@@ -96,11 +97,10 @@ def post_to_bucket(bucket_name):
         return jsonify(status='error', message='Forbidden'), 403
 
     try:
-        parse_and_store(
-            db,
-            load_json(request.json),
-            bucket_name,
-            app.logger)
+        data = load_json(request.json)
+
+        bucket = Bucket(db, bucket_name)
+        bucket.parse_and_store(data)
 
         return jsonify(status='ok')
     except (ParseError, ValidationError) as e:
