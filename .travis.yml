@@ -15,5 +15,4 @@ after_script:
   - coveralls
 branches:
   except:
-    - master
     - release

@@ -1,5 +1,7 @@
 # Backdrop
 
+[![Build Status](https://travis-ci.org/alphagov/backdrop.png?branch=master)](https://travis-ci.org/alphagov/backdrop?branch=master)
+
 ##What is it?
 
 Backdrop is a datastore built with python and mongo db. It is made up of two separately deployable APIs for reading and writing data over http. The plan is to be able to gather data from a variety of sources and then aggregate and compare this data in useful ways.
