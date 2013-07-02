@@ -3,7 +3,7 @@ from hamcrest import assert_that, is_
 from mock import Mock, patch
 from pymongo.errors import AutoReconnect
 from backdrop.core import database
-from backdrop.core.database import Repository, InvalidSortError, MongoDriver
+from backdrop.core.database import Repository, InvalidSortError, MongoDriver, apply_collection_method
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
@@ -70,6 +70,56 @@ class NestedMergeTestCase(unittest.TestCase):
             {'a': 1},
             {'a': 2}
         ]))
+
+    def test_nested_merge_collected_values(self):
+        stub_dictionaries = [
+            {'a': 1, 'b': [2], 'c': 3},
+            {'a': 1, 'b': [1], 'c': 3},
+            {'a': 2, 'b': [1], 'c': 3}
+        ]
+        output = database.nested_merge(['a'], [('b', 'set')], stub_dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b:set': [1, 2], 'b': [1, 2]},
+            {'a': 2, 'b:set': [1], 'b': [1]}
+        ]))
+
+    def test_nested_merge_collect_sum(self):
+        stub_dictionaries = [
+            {'a': 1, 'b': [2]},
+            {'a': 1, 'b': [1]},
+            {'a': 2, 'b': [1]}
+        ]
+        output = database.nested_merge(['a'], [('b', 'sum')], stub_dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b:sum': 3},
+            {'a': 2, 'b:sum': 1}
+        ]))
+
+
+class TestApplyCollectionMethod(unittest.TestCase):
+    def test_sum(self):
+        data = [2, 5, 8]
+        response = apply_collection_method(data, "sum")
+        assert_that(response, is_(15))
+
+    def test_count(self):
+        data = ['Sheep', 'Elephant', 'Wolf', 'Dog']
+        response = apply_collection_method(data, "count")
+        assert_that(response, is_(4))
+
+    def test_set(self):
+        data = ['Badger', 'Badger', 'Badger', 'Snake']
+        response = apply_collection_method(data, "set")
+        assert_that(response, is_(['Badger', 'Snake']))
+
+    def test_mean(self):
+        data = [13, 19, 15, 2]
+        response = apply_collection_method(data, "mean")
+        assert_that(response, is_(12.25))
+
+    def test_unknown_collection_method_raises_error(self):
+        self.assertRaises(ValueError,
+                          apply_collection_method, ['foo'], "unknown")
 
 
 class TestRepository(unittest.TestCase):

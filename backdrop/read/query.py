@@ -37,7 +37,12 @@ def parse_request_args(request_args):
 
     args['limit'] = if_present(int, request_args.get('limit'))
 
-    args['collect'] = request_args.getlist('collect')
+    args['collect'] = []
+    for collect_arg in request_args.getlist('collect'):
+        if ':' in collect_arg:
+            args['collect'].append(tuple(collect_arg.split(':')))
+        else:
+            args['collect'].append((collect_arg, 'set'))
 
     return args
 

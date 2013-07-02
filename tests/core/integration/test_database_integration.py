@@ -295,32 +295,33 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
     def test_grouping_with_collect(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("person", Query.create(), None, None, ["place"])
+        results = self.repo.group("person", Query.create(), None, None, [("place", "set")])
 
         assert_that(results, has_item(has_entries({
             "person": "John",
-            "place": has_items("Kettering", "Kennington")
+            "place:set": has_items("Kettering", "Kennington")
         })))
 
     def test_another_grouping_with_collect(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("place", Query.create(), None, None, ["person"])
+        results = self.repo.group("place", Query.create(), None, None, [("person", "set")])
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": has_items("Jack", "John")
+            "person:set": has_items("Jack", "John")
         })))
 
     def test_grouping_with_collect_two_fields(self):
         self.setUpPeopleLocationData()
 
-        results = self.repo.group("place", Query.create(), None, None, ["person", "hair"])
+        results = self.repo.group("place", Query.create(), None, None,
+                                  [("person", "set"), ("hair", "set")])
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["Jack", "John"],
-            "hair": ["blond", "dark", "red"]
+            "person:set": ["Jack", "John"],
+            "hair:set": ["blond", "dark", "red"]
         })))
 
     def test_grouping_on_non_existent_keys(self):
@@ -426,12 +427,12 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "place",
             "_week_start_at",
             Query.create(),
-            collect=["person"]
+            collect=[("person", "set")]
         )
 
         assert_that(results, has_item(has_entries({
             "place": "Kettering",
-            "person": ["Jack", "John"]
+            "person:set": ["Jack", "John"]
         })))
 
 

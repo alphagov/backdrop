@@ -106,6 +106,13 @@ def step(context, nth, key, value):
     assert_that(the_data[i][key], has_item(json.loads(value)))
 
 
+@then('the "{nth}" result should have "{key}" with json "{expected_json}"')
+def impl(context, nth, key, expected_json):
+    the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i][key], is_(json.loads(expected_json)))
+
+
 @then('the "{header}" header should be "{value}"')
 def step(context, header, value):
     assert_that(context.response.headers.get(header), is_(value))

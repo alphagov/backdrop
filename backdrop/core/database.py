@@ -144,7 +144,8 @@ class Repository(object):
         return query
 
     def _group(self, keys, query, sort=None, limit=None, collect=None):
-        results = self._mongo.group(keys, query, collect)
+        collect_fields = unique_collect_fields(collect)
+        results = self._mongo.group(keys, query, list(collect_fields))
 
         results = nested_merge(keys, collect, results)
 
@@ -174,7 +175,7 @@ class InvalidSortError(ValueError):
 
 def extract_collected_values(collect, result):
     collected = {}
-    for collect_field in collect:
+    for collect_field in unique_collect_fields(collect):
         collected[collect_field] = result.pop(collect_field)
     return collected, result
 
@@ -182,14 +183,39 @@ def extract_collected_values(collect, result):
 def insert_collected_values(collected, group):
     for collect_field in collected.keys():
         if collect_field not in group:
-            group[collect_field] = set()
-        group[collect_field].update(collected[collect_field])
+            group[collect_field] = []
+        group[collect_field] += collected[collect_field]
 
 
-def convert_collected_values_to_list(collect, groups):
+def apply_collection_methods(collect, groups):
     for group in groups:
-        for collected_field in collect:
-            group[collected_field] = sorted(list(group[collected_field]))
+        for collect_field, collect_method in collect:
+            collect_key = '{0}:{1}'.format(collect_field, collect_method)
+            group[collect_key] = apply_collection_method(
+                group[collect_field], collect_method)
+        for collect_field in unique_collect_fields(collect):
+            del group[collect_field]
+            # This is to provide backwards compatibility with earlier interface
+            if (collect_field, 'set') in collect:
+                group[collect_field] = group['{0}:set'.format(collect_field)]
+
+
+def apply_collection_method(collected_data, collect_method):
+    if "sum" == collect_method:
+        return sum(collected_data)
+    elif "count" == collect_method:
+        return len(collected_data)
+    elif "set" == collect_method:
+        return sorted(list(set(collected_data)))
+    elif "mean" == collect_method:
+        return sum(collected_data) / float(len(collected_data))
+    else:
+        raise ValueError("Unknown collection method")
+
+
+def unique_collect_fields(collect):
+    """Return the unique set of field names to collect."""
+    return set([collect_field for collect_field, _ in collect])
 
 
 def nested_merge(keys, collect, results):
@@ -201,7 +227,7 @@ def nested_merge(keys, collect, results):
 
         insert_collected_values(collected, group)
 
-    convert_collected_values_to_list(collect, groups)
+    apply_collection_methods(collect, groups)
     return groups
 
 
