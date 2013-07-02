@@ -214,7 +214,7 @@ def _merge(groups, keys, result):
     group = _find_group(group for group in groups if group[key] == value)
     if not group:
         if is_leaf:
-            group = _new_leaf_node(key, value, result)
+            group = _new_leaf_node(key, value, result.get('_count'))
         else:
             group = _new_branch_node(key, value)
         groups.append(group)
@@ -241,10 +241,14 @@ def _new_branch_node(key, value):
     }
 
 
-def _new_leaf_node(key, value, result):
+def _new_leaf_node(key, value, count=None):
     """Create a new node that has no further sub-groups"""
-    result[key] = value
-    return result
+    r = {
+        key: value,
+    }
+    if count is not None:
+        r['_count'] = count
+    return r
 
 
 def _merge_and_sort_subgroup(group, keys, result):
