@@ -82,7 +82,7 @@ class TestMongoDriver(unittest.TestCase):
     def test_group(self):
         self._setup_musical_instruments()
 
-        results = self.mongo_driver.group(keys=["type"], query={}, collect=[])
+        results = self.mongo_driver.group(keys=["type"], query={}, collect_fields=[])
 
         assert_that(results, contains_inanyorder(
             has_entries({"_count": is_(2), "type": "wind"}),
@@ -94,7 +94,7 @@ class TestMongoDriver(unittest.TestCase):
 
         results = self.mongo_driver.group(keys=["type"],
                                           query={"range": "high"},
-                                          collect=[])
+                                          collect_fields=[])
 
         assert_that(results, contains_inanyorder(
             has_entries({"_count": is_(1), "type": "wind"}),
@@ -104,7 +104,7 @@ class TestMongoDriver(unittest.TestCase):
     def test_group_and_collect_additional_properties(self):
         self._setup_musical_instruments()
 
-        results = self.mongo_driver.group(keys=["type"], query={}, collect=["range"])
+        results = self.mongo_driver.group(keys=["type"], query={}, collect_fields=["range"])
 
         assert_that(results, contains(
             has_entries(
@@ -137,7 +137,7 @@ class TestMongoDriver(unittest.TestCase):
     def test_group_without_keys(self):
         self._setup_people()
 
-        results = self.mongo_driver.group(keys=[], query={}, collect=[])
+        results = self.mongo_driver.group(keys=[], query={}, collect_fields=[])
 
         assert_that(results, contains(
             has_entries({"_count": is_(4)}),
@@ -148,7 +148,7 @@ class TestMongoDriver(unittest.TestCase):
         self._setup_people()
         self.mongo_collection.save({"name": "Yoko"})
 
-        results = self.mongo_driver.group(keys=["plays"], query={}, collect=[])
+        results = self.mongo_driver.group(keys=["plays"], query={}, collect_fields=[])
 
         assert_that(results, contains(
             has_entries({"_count": is_(2), "plays": "guitar"}),

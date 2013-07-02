@@ -49,31 +49,32 @@ class MongoDriver(object):
                 query[key] = {"$ne": None}
         return query
 
-    def group(self, keys, query, collect):
+    def group(self, keys, query, collect_fields):
         return self._collection.group(
             key=keys,
             condition=self._ignore_docs_without_grouping_keys(keys, query),
-            initial=self._build_accumulator_initial_state(collect),
-            reduce=self._build_reducer_function(collect)
+            initial=self._build_accumulator_initial_state(collect_fields),
+            reduce=self._build_reducer_function(collect_fields)
         )
 
-    def _build_collector_code(self, collect):
+    def _build_collector_code(self, collect_fields):
         template = "if (current.{c} !== undefined) " \
                    "{{ previous.{c}.push(current.{c}); }}"
-        code = [template.format(c=collect_me) for collect_me in collect]
+        code = [template.format(c=collect_field)
+                for collect_field in collect_fields]
         return "\n".join(code)
 
-    def _build_accumulator_initial_state(self, collect):
+    def _build_accumulator_initial_state(self, collect_fields):
         initial = {'_count': 0}
-        for collect_me in collect:
-            initial.update({collect_me: []})
+        for collect_field in collect_fields:
+            initial.update({collect_field: []})
         return initial
 
-    def _build_reducer_function(self, collect):
+    def _build_reducer_function(self, collect_fields):
         reducer_skeleton = "function (current, previous)" + \
                            "{{ previous._count++; {collectors} }}"
         reducer_code = reducer_skeleton.format(
-            collectors=self._build_collector_code(collect)
+            collectors=self._build_collector_code(collect_fields)
         )
         reducer = Code(reducer_code)
         return reducer
