@@ -45,3 +45,22 @@ This is the oauth flow we are using to authenticate users with Signonotron2
     - **GET** (to signonotron) `/user.json` uses access token to get user data and see if they have permissions to sign in to backdrop
 4. User is now signed in
 
+## Requesting data
+
+Requests return a JSON object containing a `data` array.
+
+`GET /bucket_name` will return an array of data. Each element is an object.
+
+`GET /bucket_name?collect=score&group_by=name` will return an array. In this
+case, each element of the array is an object containing a `name` value, a
+`score` array with the scores for that name and a `_count` value with the
+number of scores.
+
+`GET /bucket_name?filter_by=name:Foo` returns all elements with `name` equal to "Foo".
+
+Other parameters:
+
+- `start_at` (YYYY-MM-DDTHH:MM:SS+HH:MM) and `end_at` (YYYY-MM-DDTHH:MM:SS+HH:MM)
+- `period` ("week", "month")
+- `sort_by` (field)
+- `limit` (number)
