@@ -466,8 +466,7 @@ class TestRepositoryIntegration_MultiGroupWithMissingFields(
             "bar": "2"
         })
 
-        result = self.repo.multi_group("_week_start_at", "bar", Query.create(),
-                                       collect=["foo"])
+        result = self.repo.multi_group("_week_start_at", "bar", Query.create())
 
         assert_that(result, has_item(has_entry("_count", 1)))
         assert_that(result, has_item(has_entry("_group_count", 1)))
@@ -488,8 +487,7 @@ class TestRepositoryIntegration_MultiGroupWithMissingFields(
         })
 
         result = self.repo.multi_group("_week_start_at", "bar",
-                                       Query.create(filter_by= [["bar", "2"]]),
-                                       collect=["foo"])
+                                       Query.create(filter_by= [["bar", "2"]]))
 
         assert_that(result, has_item(has_entry("_count", 1)))
         assert_that(result, has_item(has_entry("_group_count", 1)))
