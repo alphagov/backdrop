@@ -32,7 +32,7 @@ find . -name '*.pyc' -delete
 nosetests -v
 display_result $? 1 "Unit tests"
 
-behave --stop
+behave --stop --tags=-wip
 display_result $? 2 "Feature tests"
 
 "$basedir/pep-it.sh"
