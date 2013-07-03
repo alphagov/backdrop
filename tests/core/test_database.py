@@ -3,7 +3,7 @@ from hamcrest import assert_that, is_
 from mock import Mock, patch
 from pymongo.errors import AutoReconnect
 from backdrop.core import database
-from backdrop.core.database import Repository, InvalidSortError, MongoDriver, apply_collection_method
+from backdrop.core.database import Repository, InvalidSortError, InvalidOperationError, MongoDriver, apply_collection_method
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
@@ -132,6 +132,14 @@ class TestApplyCollectionMethod(unittest.TestCase):
     def test_unknown_collection_method_raises_error(self):
         self.assertRaises(ValueError,
                           apply_collection_method, ['foo'], "unknown")
+
+    def test_bad_data_for_sum_raises_error(self):
+        self.assertRaises(InvalidOperationError,
+                          apply_collection_method, ['sum', 'this'], "sum")
+
+    def test_bad_data_for_mean_raises_error(self):
+        self.assertRaises(InvalidOperationError,
+                          apply_collection_method, ['average', 'this'], "mean")
 
 
 class TestRepository(unittest.TestCase):

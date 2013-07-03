@@ -116,3 +116,9 @@ def impl(context, nth, key, expected_json):
 @then('the "{header}" header should be "{value}"')
 def step(context, header, value):
     assert_that(context.response.headers.get(header), is_(value))
+
+
+@then(u'the error message should be "{expected_message}"')
+def impl(context, expected_message):
+    error_message = json.loads(context.response.data)['message']
+    assert_that(error_message, is_(expected_message))

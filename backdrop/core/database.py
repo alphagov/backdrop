@@ -207,13 +207,19 @@ def apply_collection_methods(collect, groups):
 
 def apply_collection_method(collected_data, collect_method):
     if "sum" == collect_method:
-        return sum(collected_data)
+        try:
+            return sum(collected_data)
+        except TypeError:
+            raise InvalidOperationError("Unable to sum that data")
     elif "count" == collect_method:
         return len(collected_data)
     elif "set" == collect_method:
         return sorted(list(set(collected_data)))
     elif "mean" == collect_method:
-        return sum(collected_data) / float(len(collected_data))
+        try:
+            return sum(collected_data) / float(len(collected_data))
+        except TypeError:
+            raise InvalidOperationError("Unable to find the mean of that data")
     elif "default" == collect_method:
         return sorted(list(set(collected_data)))
     else:
@@ -292,3 +298,7 @@ def _merge_and_sort_subgroup(group, keys, result):
 def _add_branch_node_counts(group):
     group['_count'] = sum(doc.get('_count', 0) for doc in group['_subgroup'])
     group['_group_count'] = len(group['_subgroup'])
+
+
+class InvalidOperationError(TypeError):
+    pass
