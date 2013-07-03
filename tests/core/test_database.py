@@ -71,7 +71,19 @@ class NestedMergeTestCase(unittest.TestCase):
             {'a': 2}
         ]))
 
-    def test_nested_merge_collected_values(self):
+    def test_nested_merge_collect_default(self):
+        stub_dictionaries = [
+            {'a': 1, 'b': [2], 'c': 3},
+            {'a': 1, 'b': [1], 'c': 3},
+            {'a': 2, 'b': [1], 'c': 3}
+        ]
+        output = database.nested_merge(['a'], [('b', 'default')], stub_dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b:set': [1, 2], 'b': [1, 2]},
+            {'a': 2, 'b:set': [1], 'b': [1]}
+        ]))
+
+    def test_nested_merge_collect_set(self):
         stub_dictionaries = [
             {'a': 1, 'b': [2], 'c': 3},
             {'a': 1, 'b': [1], 'c': 3},
@@ -79,8 +91,8 @@ class NestedMergeTestCase(unittest.TestCase):
         ]
         output = database.nested_merge(['a'], [('b', 'set')], stub_dictionaries)
         assert_that(output, is_([
-            {'a': 1, 'b:set': [1, 2], 'b': [1, 2]},
-            {'a': 2, 'b:set': [1], 'b': [1]}
+            {'a': 1, 'b:set': [1, 2]},
+            {'a': 2, 'b:set': [1]}
         ]))
 
     def test_nested_merge_collect_sum(self):

@@ -190,13 +190,18 @@ def insert_collected_values(collected, group):
 def apply_collection_methods(collect, groups):
     for group in groups:
         for collect_field, collect_method in collect:
-            collect_key = '{0}:{1}'.format(collect_field, collect_method)
-            group[collect_key] = apply_collection_method(
-                group[collect_field], collect_method)
+            if collect_method == 'default':
+                collect_keys = [collect_field, '{0}:set'.format(collect_field)]
+            else:
+                collect_keys = ['{0}:{1}'.format(collect_field,
+                                                 collect_method)]
+            for collect_key in collect_keys:
+                group[collect_key] = apply_collection_method(
+                    group[collect_field], collect_method)
         for collect_field in unique_collect_fields(collect):
             del group[collect_field]
             # This is to provide backwards compatibility with earlier interface
-            if (collect_field, 'set') in collect:
+            if (collect_field, 'default') in collect:
                 group[collect_field] = group['{0}:set'.format(collect_field)]
 
 
@@ -209,6 +214,8 @@ def apply_collection_method(collected_data, collect_method):
         return sorted(list(set(collected_data)))
     elif "mean" == collect_method:
         return sum(collected_data) / float(len(collected_data))
+    elif "default" == collect_method:
+        return sorted(list(set(collected_data)))
     else:
         raise ValueError("Unknown collection method")
 

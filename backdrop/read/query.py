@@ -42,7 +42,7 @@ def parse_request_args(request_args):
         if ':' in collect_arg:
             args['collect'].append(tuple(collect_arg.split(':')))
         else:
-            args['collect'].append((collect_arg, 'set'))
+            args['collect'].append((collect_arg, 'default'))
 
     return args
 

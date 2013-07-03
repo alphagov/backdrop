@@ -110,7 +110,7 @@ class Test_parse_request_args(unittest.TestCase):
 
         args = parse_request_args(request_args)
 
-        assert_that(args['collect'], is_([("some_key", "set")]))
+        assert_that(args['collect'], is_([("some_key", "default")]))
 
     def test_two_collects_are_parsed_with_default_methods(self):
         request_args = MultiDict([
@@ -120,8 +120,8 @@ class Test_parse_request_args(unittest.TestCase):
 
         args = parse_request_args(request_args)
 
-        assert_that(args['collect'], is_([("some_key", "set"),
-                                          ("some_other_key", "set")]))
+        assert_that(args['collect'], is_([("some_key", "default"),
+                                          ("some_other_key", "default")]))
 
     def test_one_collect_is_parsed_with_custom_method(self):
         request_args = MultiDict([
