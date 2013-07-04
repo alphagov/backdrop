@@ -9,7 +9,7 @@ install: "pip install -q -r requirements_for_tests.txt --use-mirrors"
 # command to run tests
 script:
   - nosetests --with-coverage --cover-inclusive
-  - behave
+  - behave --stop --tags=-wip
   - ./pep-it.sh
 after_script:
   - coveralls
