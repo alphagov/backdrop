@@ -49,31 +49,32 @@ class MongoDriver(object):
                 query[key] = {"$ne": None}
         return query
 
-    def group(self, keys, query, collect):
+    def group(self, keys, query, collect_fields):
         return self._collection.group(
             key=keys,
             condition=self._ignore_docs_without_grouping_keys(keys, query),
-            initial=self._build_accumulator_initial_state(collect),
-            reduce=self._build_reducer_function(collect)
+            initial=self._build_accumulator_initial_state(collect_fields),
+            reduce=self._build_reducer_function(collect_fields)
         )
 
-    def _build_collector_code(self, collect):
+    def _build_collector_code(self, collect_fields):
         template = "if (current.{c} !== undefined) " \
                    "{{ previous.{c}.push(current.{c}); }}"
-        code = [template.format(c=collect_me) for collect_me in collect]
+        code = [template.format(c=collect_field)
+                for collect_field in collect_fields]
         return "\n".join(code)
 
-    def _build_accumulator_initial_state(self, collect):
+    def _build_accumulator_initial_state(self, collect_fields):
         initial = {'_count': 0}
-        for collect_me in collect:
-            initial.update({collect_me: []})
+        for collect_field in collect_fields:
+            initial.update({collect_field: []})
         return initial
 
-    def _build_reducer_function(self, collect):
+    def _build_reducer_function(self, collect_fields):
         reducer_skeleton = "function (current, previous)" + \
                            "{{ previous._count++; {collectors} }}"
         reducer_code = reducer_skeleton.format(
-            collectors=self._build_collector_code(collect)
+            collectors=self._build_collector_code(collect_fields)
         )
         reducer = Code(reducer_code)
         return reducer
@@ -143,7 +144,8 @@ class Repository(object):
         return query
 
     def _group(self, keys, query, sort=None, limit=None, collect=None):
-        results = self._mongo.group(keys, query, collect)
+        collect_fields = unique_collect_fields(collect)
+        results = self._mongo.group(keys, query, list(collect_fields))
 
         results = nested_merge(keys, collect, results)
 
@@ -173,7 +175,7 @@ class InvalidSortError(ValueError):
 
 def extract_collected_values(collect, result):
     collected = {}
-    for collect_field in collect:
+    for collect_field in unique_collect_fields(collect):
         collected[collect_field] = result.pop(collect_field)
     return collected, result
 
@@ -181,14 +183,52 @@ def extract_collected_values(collect, result):
 def insert_collected_values(collected, group):
     for collect_field in collected.keys():
         if collect_field not in group:
-            group[collect_field] = set()
-        group[collect_field].update(collected[collect_field])
+            group[collect_field] = []
+        group[collect_field] += collected[collect_field]
 
 
-def convert_collected_values_to_list(collect, groups):
+def apply_collection_methods(collect, groups):
     for group in groups:
-        for collected_field in collect:
-            group[collected_field] = sorted(list(group[collected_field]))
+        for collect_field, collect_method in collect:
+            if collect_method == 'default':
+                collect_keys = [collect_field, '{0}:set'.format(collect_field)]
+            else:
+                collect_keys = ['{0}:{1}'.format(collect_field,
+                                                 collect_method)]
+            for collect_key in collect_keys:
+                group[collect_key] = apply_collection_method(
+                    group[collect_field], collect_method)
+        for collect_field in unique_collect_fields(collect):
+            del group[collect_field]
+            # This is to provide backwards compatibility with earlier interface
+            if (collect_field, 'default') in collect:
+                group[collect_field] = group['{0}:set'.format(collect_field)]
+
+
+def apply_collection_method(collected_data, collect_method):
+    if "sum" == collect_method:
+        try:
+            return sum(collected_data)
+        except TypeError:
+            raise InvalidOperationError("Unable to sum that data")
+    elif "count" == collect_method:
+        return len(collected_data)
+    elif "set" == collect_method:
+        return sorted(list(set(collected_data)))
+    elif "mean" == collect_method:
+        try:
+            return sum(collected_data) / float(len(collected_data))
+        except TypeError:
+            raise InvalidOperationError("Unable to find the mean of that data")
+    elif "default" == collect_method:
+        return sorted(list(set(collected_data)))
+    else:
+        raise ValueError("Unknown collection method")
+
+
+def unique_collect_fields(collect):
+    """Return the unique set of field names to collect."""
+    return set([collect_field for collect_field, _ in collect])
 
 
 def nested_merge(keys, collect, results):
@@ -200,7 +240,7 @@ def nested_merge(keys, collect, results):
 
         insert_collected_values(collected, group)
 
-    convert_collected_values_to_list(collect, groups)
+    apply_collection_methods(collect, groups)
     return groups
 
 
@@ -213,7 +253,7 @@ def _merge(groups, keys, result):
     group = _find_group(group for group in groups if group[key] == value)
     if not group:
         if is_leaf:
-            group = _new_leaf_node(key, value, result)
+            group = _new_leaf_node(key, value, result.get('_count'))
         else:
             group = _new_branch_node(key, value)
         groups.append(group)
@@ -240,10 +280,14 @@ def _new_branch_node(key, value):
     }
 
 
-def _new_leaf_node(key, value, result):
+def _new_leaf_node(key, value, count=None):
     """Create a new node that has no further sub-groups"""
-    result[key] = value
-    return result
+    r = {
+        key: value,
+    }
+    if count is not None:
+        r['_count'] = count
+    return r
 
 
 def _merge_and_sort_subgroup(group, keys, result):
@@ -254,3 +298,7 @@ def _merge_and_sort_subgroup(group, keys, result):
 def _add_branch_node_counts(group):
     group['_count'] = sum(doc.get('_count', 0) for doc in group['_subgroup'])
     group['_group_count'] = len(group['_subgroup'])
+
+
+class InvalidOperationError(TypeError):
+    pass

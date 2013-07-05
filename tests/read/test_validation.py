@@ -306,6 +306,27 @@ class TestRequestValidation(TestCase):
         assert_that(validation_result, is_invalid_with_message(
             "start_at is not a valid datetime"))
 
+    def test_that_collect_queries_with_valid_methods_are_allowed(self):
+        valid_collection_methods = ["sum", "count", "set", "mean"]
+
+        for method in valid_collection_methods:
+            validation_result = validate_request_args({
+                'group_by': 'foo',
+                'collect': 'field:{0}'.format(method),
+            })
+
+            assert_that(validation_result, is_valid())
+
+    def test_that_collect_queries_with_invalid_method_are_disallowed(self):
+        validation_result = validate_request_args({
+            'group_by': 'foo',
+            'collect': 'field:infinity',
+        })
+
+        assert_that(validation_result, is_invalid_with_message((
+            "Unknown collection method"
+        )))
+
 
 class TestValidationHelpers(TestCase):
     def test_timestamp_is_valid_method(self):

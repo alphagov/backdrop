@@ -3,7 +3,7 @@ from hamcrest import assert_that, is_
 from mock import Mock, patch
 from pymongo.errors import AutoReconnect
 from backdrop.core import database
-from backdrop.core.database import Repository, InvalidSortError, MongoDriver
+from backdrop.core.database import Repository, InvalidSortError, InvalidOperationError, MongoDriver, apply_collection_method
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
@@ -51,8 +51,8 @@ class NestedMergeTestCase(unittest.TestCase):
             "_count": 0,
             "_group_count": 2,
             "_subgroup": [
-                {"b": 1, "c": 3},
-                {"b": 2, "c": 3},
+                {"b": 1},
+                {"b": 2},
             ],
         }))
         assert_that(output[1], is_({
@@ -60,16 +60,86 @@ class NestedMergeTestCase(unittest.TestCase):
             "_count": 0,
             "_group_count": 1,
             "_subgroup": [
-                {"b": 1, "c": 3}
+                {"b": 1}
             ],
         }))
 
     def test_nested_merge_squashes_duplicates(self):
         output = database.nested_merge(['a'], [], self.dictionaries)
         assert_that(output, is_([
-            {'a': 1, 'b': 2, 'c': 3},
-            {'a': 2, 'b': 1, 'c': 3}
+            {'a': 1},
+            {'a': 2}
         ]))
+
+    def test_nested_merge_collect_default(self):
+        stub_dictionaries = [
+            {'a': 1, 'b': [2], 'c': 3},
+            {'a': 1, 'b': [1], 'c': 3},
+            {'a': 2, 'b': [1], 'c': 3}
+        ]
+        output = database.nested_merge(['a'], [('b', 'default')], stub_dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b:set': [1, 2], 'b': [1, 2]},
+            {'a': 2, 'b:set': [1], 'b': [1]}
+        ]))
+
+    def test_nested_merge_collect_set(self):
+        stub_dictionaries = [
+            {'a': 1, 'b': [2], 'c': 3},
+            {'a': 1, 'b': [1], 'c': 3},
+            {'a': 2, 'b': [1], 'c': 3}
+        ]
+        output = database.nested_merge(['a'], [('b', 'set')], stub_dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b:set': [1, 2]},
+            {'a': 2, 'b:set': [1]}
+        ]))
+
+    def test_nested_merge_collect_sum(self):
+        stub_dictionaries = [
+            {'a': 1, 'b': [2]},
+            {'a': 1, 'b': [1]},
+            {'a': 2, 'b': [1]}
+        ]
+        output = database.nested_merge(['a'], [('b', 'sum')], stub_dictionaries)
+        assert_that(output, is_([
+            {'a': 1, 'b:sum': 3},
+            {'a': 2, 'b:sum': 1}
+        ]))
+
+
+class TestApplyCollectionMethod(unittest.TestCase):
+    def test_sum(self):
+        data = [2, 5, 8]
+        response = apply_collection_method(data, "sum")
+        assert_that(response, is_(15))
+
+    def test_count(self):
+        data = ['Sheep', 'Elephant', 'Wolf', 'Dog']
+        response = apply_collection_method(data, "count")
+        assert_that(response, is_(4))
+
+    def test_set(self):
+        data = ['Badger', 'Badger', 'Badger', 'Snake']
+        response = apply_collection_method(data, "set")
+        assert_that(response, is_(['Badger', 'Snake']))
+
+    def test_mean(self):
+        data = [13, 19, 15, 2]
+        response = apply_collection_method(data, "mean")
+        assert_that(response, is_(12.25))
+
+    def test_unknown_collection_method_raises_error(self):
+        self.assertRaises(ValueError,
+                          apply_collection_method, ['foo'], "unknown")
+
+    def test_bad_data_for_sum_raises_error(self):
+        self.assertRaises(InvalidOperationError,
+                          apply_collection_method, ['sum', 'this'], "sum")
+
+    def test_bad_data_for_mean_raises_error(self):
+        self.assertRaises(InvalidOperationError,
+                          apply_collection_method, ['average', 'this'], "mean")
 
 
 class TestRepository(unittest.TestCase):

@@ -38,6 +38,7 @@ Feature: csv upload
     # If the uploaded CSV does not have an _id column,
     # overwrite records with the same combination of:
     #    start_at, end_at and key
+    @wip
     Scenario: Overwrite data with matching properties
        Given a file named "data.csv":
              """

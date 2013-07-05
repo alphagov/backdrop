@@ -57,6 +57,7 @@ Feature: grouping queries for read api
          then I should get back a status of "200"
            and the JSON should have "1" results
            and the "1st" result should have "values" with item "{"_start_at": "2013-03-11T00:00:00+00:00", "_end_at": "2013-03-18T00:00:00+00:00", "_count": 2.0}"
+           and the "1st" result should have "values" with item "{"_start_at": "2013-03-18T00:00:00+00:00", "_end_at": "2013-03-25T00:00:00+00:00", "_count": 1.0}"
 
 
     Scenario: grouping data by time period (week) and a name that doesn't exist

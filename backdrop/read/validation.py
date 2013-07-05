@@ -176,6 +176,11 @@ class CollectValidator(Validator):
             validate_field_value=self.validate_field_value)
 
     def validate_field_value(self, value, request_args, _):
+        if ":" in value:
+            value, operator = value.split(":")
+            if operator not in ["sum", "count", "set", "mean"]:
+                self.add_error("Unknown collection method")
+
         if not key_is_valid(value):
             self.add_error('Cannot collect an invalid field name')
         if value.startswith('_'):

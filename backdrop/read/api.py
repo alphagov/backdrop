@@ -12,6 +12,7 @@ from backdrop.read.query import Query
 from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
 from ..core.bucket import Bucket
+from ..core.database import InvalidOperationError
 
 
 def setup_logging():
@@ -69,6 +70,11 @@ def health_check():
                        message='cannot connect to database'), 500
 
 
+def log_error_and_respond(message, status_code):
+    app.logger.error(message)
+    return jsonify(status='error', message=message), status_code
+
+
 @app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
@@ -84,11 +90,14 @@ def query(bucket_name):
                                        raw_queries_allowed(bucket_name))
 
         if not result.is_valid:
-            app.logger.error(result.message)
-            return jsonify(status='error', message=result.message), 400
+            return log_error_and_respond(result.message, 400)
 
         bucket = Bucket(db, bucket_name)
-        result_data = bucket.query(Query.parse(request.args)).data()
+
+        try:
+            result_data = bucket.query(Query.parse(request.args)).data()
+        except InvalidOperationError:
+            return log_error_and_respond('invalid collect for that data', 400)
 
         # Taken from flask.helpers.jsonify to add JSONEncoder
         # NB. this can be removed once fix #471 works it's way into a release
