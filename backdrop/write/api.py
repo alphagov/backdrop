@@ -1,6 +1,6 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, redirect, url_for
 from backdrop import statsd
 from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
@@ -71,7 +71,7 @@ def exception_handler(e):
 
 @app.route("/", methods=['GET'])
 def index():
-    return "write.backdrop root path."
+    return redirect(url_for('user_route'))
 
 
 @app.route('/_status', methods=['GET'])
