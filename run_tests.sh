@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 function display_result {
   RESULT=$1
   EXIT_STATUS=$2
