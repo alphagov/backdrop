@@ -33,11 +33,18 @@ pip install -r requirements_for_tests.txt
 rm -f coverage.xml .coverage nosetests.xml
 find . -name '*.pyc' -delete
 
+# run unit tests
 nosetests -v --with-xunit --with-coverage --cover-package=backdrop --cover-inclusive
 display_result $? 1 "Unit tests"
 
+# create coverage report
+python -m coverage.__main__ xml --include=backdrop*
+
+# run feature tests
 behave --stop --tags=-wip
 display_result $? 2 "Feature tests"
 
+# run style checks
 ./pep-it.sh | tee pep8.out
 display_result $? 3 "Code style check"
+
