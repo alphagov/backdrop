@@ -25,3 +25,19 @@ class PermissionsTestCase(unittest.TestCase):
         })
 
         assert_that(permissions.allowed("userone", "mybucket"), is_(True))
+
+    def test_returns_list_of_buckets_for_known_user(self):
+        permissions = Permissions({
+            "userone": ["moj", "fco"],
+            "usertwo": ["dvla", "etc"]
+        })
+
+        assert_that(permissions.get_buckets_for_user("userone"),
+                    is_(["moj", "fco"]))
+
+    def test_returns_empty_list_for_unknown_user(self):
+        permissions = Permissions({
+            "otheruser": ["foo"]
+        })
+
+        assert_that(permissions.get_buckets_for_user("userone"), is_([]))
