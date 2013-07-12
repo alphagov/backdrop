@@ -11,7 +11,7 @@ Feature: csv upload validation
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then I should see the text "There was an error with your upload"
          and the platform should have "0" items stored in "foo"
 
@@ -25,7 +25,7 @@ Feature: csv upload validation
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then I should see the text "There was an error with your upload"
          and the platform should have "0" items stored in "foo"
 
@@ -34,7 +34,7 @@ Feature: csv upload validation
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then I should see the text "There was an error with your upload"
          and the platform should have "0" items stored in "foo"
 
@@ -43,13 +43,13 @@ Feature: csv upload validation
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then I should see the text "There was an error with your upload"
          and the platform should have "0" items stored in "foo"
 
     Scenario: no file is provided
        Given I am logged in
         when I go to "/foo/upload"
-         and I click "submit"
+         and I click "Upload"
         then I should see the text "There was an error with your upload"
          and the platform should have "0" items stored in "foo"

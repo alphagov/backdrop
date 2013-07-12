@@ -107,7 +107,7 @@ def setup(app, db):
             return abort(404)
 
         if request.method == 'GET':
-            return render_template("upload_csv.html")
+            return render_template("upload_csv.html", bucket_name=bucket_name)
 
         return _store_csv_data(bucket_name)
 
