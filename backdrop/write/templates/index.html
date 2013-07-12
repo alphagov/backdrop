@@ -3,9 +3,31 @@
 {% block body %}
     <div class="row well">
         <div class="span12 background-image">
-            <h1 class="masthead">Performance<br/> Platform</h1>
-            <p>Welcome to Backdrop the data collection API for the Performance Platform.</p>
-            <a class="btn btn-primary btn-large btn-block" href={{ url_for("oauth_sign_in") }}>Sign in</a>
+            <h1 class="masthead">Performance Platform</h1>
+            <p>Welcome to Backdrop, the data collection API for the Performance Platform.</p>
+            {% if session.get('user') %}
+                <h2>Available buckets</h2>
+                {% if buckets_available %}
+                    <p>
+                        If you can't see the bucket you want to upload data to in this list,
+                        <a href="mailto:performance-platform@digital.cabinet-office.gov.uk">contact the Performance Platform team</a>.
+                    </p>
+                    <ul id="bucket-list">
+                        {% for bucket in buckets_available %}
+                        <li>
+                            <h3>{{ bucket }}</h3>
+                            <p><a href="{{ url_for('upload', bucket_name=bucket) }}">
+                                Upload a CSV to the {{ bucket }} bucket
+                            </a></p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>You don't have permission to upload to any buckets yet.</p>
+                {% endif %}
+            {% else %}
+                <a class="btn btn-primary btn-large btn-block" href={{ url_for("oauth_sign_in") }}>Sign in</a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
