@@ -4,6 +4,7 @@ from os import getenv
 from bson import ObjectId
 
 from flask import Flask, jsonify, request
+from flask_featureflags import FeatureFlag
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.read.response import SimpleData, PeriodData, WeeklyGroupedData
@@ -20,6 +21,8 @@ def setup_logging():
 
 
 app = Flask(__name__)
+
+feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
