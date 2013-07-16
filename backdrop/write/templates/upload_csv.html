@@ -4,6 +4,7 @@
 
 {% block body %}
     <h1>Upload CSV data to the Performance Platform</h1>
+    <h2>Bucket: {{ bucket_name }}</h2>
     <p>You can upload data to Performance Platform from your CSV files. For
         each row in a CSV file a document will be added to your bucket. You need
         to make sure they match our expected format (see example below). </p>
@@ -14,7 +15,7 @@
             <input type="file" name="file"/>
         </div>
         <div>
-            <input class="btn btn-primary btn-large" type="submit" value="submit" />
+            <input class="btn btn-primary btn-large" type="submit" value="Upload" />
         </div>
     </form>
 

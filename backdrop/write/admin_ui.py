@@ -32,7 +32,9 @@ def setup(app, db):
     @app.route(USER_SCOPE)
     def user_route():
         if use_single_sign_on(app):
-            return render_template("index.html")
+            buckets_available = app.permissions.buckets_in_session(session)
+            return render_template("index.html",
+                                   buckets_available=buckets_available)
         else:
             return "Backdrop is running."
 
@@ -100,7 +102,7 @@ def setup(app, db):
             return abort(404)
 
         if request.method == 'GET':
-            return render_template("upload_csv.html")
+            return render_template("upload_csv.html", bucket_name=bucket_name)
 
         return _store_csv_data(bucket_name)
 

@@ -1,13 +1,13 @@
 .background-image {
-    height: 500px;
+    min-height: 500px;
     background: url("images/performance_graphs.svg") no-repeat;
-    background-position-x: 90%;
-    background-position-y: -36%;
+    background-position: 90% 0;
+    background-size: contain;
 }
 
 .background-image p {
     width: 400px;
-    font-size: 1.5em;
+    font-size: 1.2em;
     line-height: 1.2em;
 }
 
@@ -19,7 +19,7 @@
 .masthead {
     font-size: 5em;
     line-height: 1em;
-    padding-top: 35px;
+    max-width: 400px;
 }
 
 form label {
@@ -33,4 +33,9 @@ form div {
 .form-panel {
     background-color: #d5e8f3;
     width: 50%;
+}
+
+#bucket-list {
+    list-style-type: none;
+    margin-left: 0;
 }

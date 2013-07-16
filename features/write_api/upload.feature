@@ -11,7 +11,7 @@ Feature: csv upload
          and I am logged in
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then the platform should have stored in "my_bucket":
              """
              {"name": "Pawel", "age": "27", "nationality": "Polish"}
@@ -28,7 +28,7 @@ Feature: csv upload
          and I am logged in
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then the platform should have stored in "my_bucket":
              """
              {"english": "city", "italian": "città"}
@@ -55,10 +55,10 @@ Feature: csv upload
          and I am logged in
         when I go to "/bucket_with_auto_id/upload"
          and I enter "data.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
          and I go to "/bucket_with_auto_id/upload"
          and I enter "data2.csv" into the file upload field
-         and I click "submit"
+         and I click "Upload"
         then the platform should have stored in "bucket_with_auto_id":
              """
              {"start_at": "2013-01-01", "end_at": "2013-01-07", "key": "abc", "value": "287"}
