@@ -32,12 +32,7 @@ def setup(app, db):
     @app.route(USER_SCOPE)
     def user_route():
         if use_single_sign_on(app):
-            if session.get("user"):
-                current_user = session.get("user").get("email")
-                buckets_available = \
-                    app.permissions.get_buckets_for_user(current_user)
-            else:
-                buckets_available = []
+            buckets_available = app.permissions.buckets_in_session(session)
             return render_template("index.html",
                                    buckets_available=buckets_available)
         else:
