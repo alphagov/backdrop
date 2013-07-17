@@ -11,8 +11,8 @@
     <p>Download example CSV file: <a href="{{ url_for('static', filename='example.csv') }}">example.csv</a></p>
     <form action="upload" method="post" enctype="multipart/form-data">
         <div class="form-panel">
-            <label for="file">CSV file to upload</label>
-            <input type="file" name="file"/>
+            <label for="csv-file">CSV file to upload</label>
+            <input id="csv-file" type="file" name="file"/>
         </div>
         <div>
             <input class="btn btn-primary btn-large" type="submit" value="Upload" />
