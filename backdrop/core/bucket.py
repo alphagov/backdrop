@@ -13,7 +13,7 @@ class Bucket(object):
         self.auto_id_keys = generate_id_from
 
     def parse_and_store(self, data):
-        log.info("request contains %s documents" % len(data))
+        log.info("received %s documents" % len(data))
 
         if self.auto_id_keys:
             data = [self._add_id(d) for d in data]
