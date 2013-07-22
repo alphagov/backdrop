@@ -27,12 +27,25 @@ form label {
 }
 
 form div {
-    padding: 1em;
+    padding: 16px;
 }
 
 .form-panel {
     background-color: #d5e8f3;
-    width: 50%;
+    width: 60%;
+}
+
+.warning-panel {
+    margin-top: 16px;
+    width: 60%;
+    background: rgb(223, 233, 235) url("images/warning.png") no-repeat 98% 1em;
+    font-size: 1.15em;
+    line-height: 1.5em;
+}
+
+.list {
+    margin-left: 20px;
+    list-style-type: disc;
 }
 
 #bucket-list {
