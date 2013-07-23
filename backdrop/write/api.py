@@ -1,6 +1,7 @@
 from os import getenv
 
 from flask import Flask, request, jsonify, g, redirect, url_for
+from flask_featureflags import FeatureFlag
 from backdrop import statsd
 from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
@@ -26,6 +27,8 @@ def environment():
 
 
 app = Flask(__name__, static_url_path="/_user/static")
+
+feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
