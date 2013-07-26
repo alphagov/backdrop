@@ -2,7 +2,6 @@
 
 from cStringIO import StringIO
 import unittest
-import cStringIO
 from hamcrest import assert_that, only_contains, is_
 
 from backdrop.core.parse_csv import parse_csv, lines
@@ -151,4 +150,4 @@ class LinesGeneratorTest(unittest.TestCase):
 def _string_io(content, encoding=None):
     if encoding is not None:
         content = content.encode(encoding)
-    return cStringIO.StringIO(content)
+    return StringIO(content)

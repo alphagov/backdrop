@@ -5,6 +5,7 @@ from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.parse_csv import parse_csv
+from backdrop.core.parse_excel import parse_excel
 from backdrop.write.signonotron2 import Signonotron2
 
 
@@ -104,9 +105,14 @@ def setup(app, db):
         if request.method == 'GET':
             return render_template("upload_csv.html", bucket_name=bucket_name)
 
-        return _store_csv_data(bucket_name)
+        filters = app.config["BUCKET_UPLOAD_FILTERS"].get(
+            bucket_name, ["parse_csv"])
 
-    def _store_csv_data(bucket_name):
+        filters = [globals()[name] for name in filters]
+
+        return _store_data(bucket_name, filters[0])
+
+    def _store_data(bucket_name, parse_data):
         file_stream = request.files["file"].stream
         if not request.files["file"].filename:
             return _invalid_upload("file is required")
@@ -114,7 +120,7 @@ def setup(app, db):
             if request.content_length > MAX_UPLOAD_SIZE:
                 return _invalid_upload("file too large")
             try:
-                data = parse_csv(file_stream)
+                data = parse_data(file_stream)
 
                 auto_id_keys = _auto_id_keys_for(bucket_name)
                 bucket = Bucket(db, bucket_name, generate_id_from=auto_id_keys)

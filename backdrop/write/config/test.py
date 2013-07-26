@@ -11,6 +11,9 @@ ALLOW_TEST_SIGNIN = True
 BUCKET_AUTO_ID_KEYS = {
     "bucket_with_auto_id": ("key", "start_at", "end_at")
 }
+BUCKET_UPLOAD_FILTERS = {
+    "my_xlsx_bucket": ["parse_excel"]
+}
 
 
 from test_environment import *
