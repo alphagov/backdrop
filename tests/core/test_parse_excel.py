@@ -4,6 +4,7 @@ from hamcrest import assert_that, only_contains
 
 from backdrop.core.parse_excel import parse_excel
 
+
 class ParseExcelTestCase(unittest.TestCase):
     def test_parse_an_xlsx_file(self):
         file_stream = open(_fixture_path("data.xlsx"))
