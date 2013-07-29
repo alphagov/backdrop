@@ -21,7 +21,10 @@ class ParseExcelTestCase(unittest.TestCase):
         assert_that(self._parse_excel("dates.xlsx"),
                     only_contains(
                         {"date": d_tz(2013, 12, 3, 13, 30)},
-                        {"date": d_tz(2013, 12, 4)}
-                    )
-                    )
+                        {"date": d_tz(2013, 12, 4)}))
 
+    def test_parse_xls_file(self):
+        assert_that(self._parse_excel("xlsfile.xls"),
+                    only_contains(
+                        {"date": d_tz(2013, 12, 3, 13, 30), "name": "test1", "number": 12},
+                        {"date": d_tz(2013, 12, 4), "name": "test2", "number": 34}))
