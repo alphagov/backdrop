@@ -8,8 +8,8 @@ BACKDROP_ADMIN_UI_HOST = "http://backdrop-admin.dev.gov.uk"
 BUCKET_AUTO_ID_KEYS = {
     "lpa_volumes": ("key", "start_at", "end_at")
 }
-BUCKET_UPLOAD_FILTERS = {
-    "my_xlsx_bucket": ["parse_excel"]
+BUCKET_UPLOAD_FORMAT = {
+    "my_xlsx_bucket": "excel",
 }
 
 try:
