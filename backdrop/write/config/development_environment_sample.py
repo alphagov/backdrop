@@ -25,7 +25,7 @@ TOKENS = {
     'deposit_foreign_marriage_realtime': 'deposit_foreign_marriage_realtime-bearer-token',
 }
 PERMISSIONS = {
-    'rob.young@digital.cabinet-office.gov.uk': ['xls_test', 'my_xlsx_bucket']
+    'user@host': ['bucket_one', 'bucket_two']
 }
 OAUTH_CLIENT_ID = \
     "1759c91cdc926eebe5d5c9fce53a58170ad17ba30a22b4b451c377a339a98844"
