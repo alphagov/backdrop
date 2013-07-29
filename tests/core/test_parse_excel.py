@@ -17,7 +17,6 @@ class ParseExcelTestCase(unittest.TestCase):
                         {"name": "Pawel", "age": 27, "nationality": "Polish"},
                         {"name": "Max", "age": 35, "nationality": "Italian"}))
 
-
     def test_parse_xlsx_dates(self):
         assert_that(self._parse_excel("dates.xlsx"),
                     only_contains(
