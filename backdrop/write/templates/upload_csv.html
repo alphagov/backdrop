@@ -1,32 +1,4 @@
-{% extends "base.html" %}
+{% extends "upload_file.html" %}
 
-{% block title %}Upload CSV{% endblock %}
-
-{% block body %}
-    <h1>Upload CSV data to the Performance Platform</h1>
-    <h2>Bucket: {{ bucket_name }}</h2>
-    <p>You can upload data to Performance Platform from your CSV files. For
-        each row in a CSV file a document will be added to your bucket. You need
-        to make sure they match our expected format (see example below). </p>
-    <p>Download example CSV file: <a href="{{ url_for('static', filename='example.csv') }}">example.csv</a></p>
-    <form action="upload" method="post" enctype="multipart/form-data">
-        <div class="form-panel">
-            <label for="csv-file">CSV file to upload</label>
-            <input id="csv-file" type="file" name="file"/>
-        </div>
-
-        <div class="warning-panel">
-            <strong>Make sure that the data you are providing:</strong>
-            <ul class="list">
-                <li>contains no personal data of any kind</li>
-                <li>has been signed off by your Senior Information Risk Officer</li>
-                <li>does not exceed IL0 confidentiality</li>
-            </ul>
-        </div>
-
-        <div>
-            <input class="btn btn-primary btn-large" type="submit" value="Upload" />
-        </div>
-    </form>
-
-{% endblock %}
+{% set upload_format = "CSV" %}
+{% set example_filename = "example.csv" %}

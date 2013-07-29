@@ -102,15 +102,16 @@ def setup(app, db):
         if not app.permissions.allowed(current_user_email, bucket_name):
             return abort(404)
 
+        upload_format = app.config["BUCKET_UPLOAD_FORMAT"].get(
+            bucket_name, "csv")
+
         if request.method == 'GET':
-            return render_template("upload_csv.html", bucket_name=bucket_name)
+            return render_template("upload_%s.html" % upload_format,
+                                   bucket_name=bucket_name)
 
-        filters = app.config["BUCKET_UPLOAD_FILTERS"].get(
-            bucket_name, ["parse_csv"])
+        parse_data = globals()["parse_%s" % upload_format]
 
-        filters = [globals()[name] for name in filters]
-
-        return _store_data(bucket_name, filters[0])
+        return _store_data(bucket_name, parse_data)
 
     def _store_data(bucket_name, parse_data):
         file_stream = request.files["file"].stream
