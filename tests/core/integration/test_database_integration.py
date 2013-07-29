@@ -117,6 +117,43 @@ class TestMongoDriver(unittest.TestCase):
                  "range": ["high", "high", "low"]})
         ))
 
+    def test_group_and_collect_with_hyphen_in_field_name(self):
+        self.mongo_collection.save({"type": "foo", "this-name": "bar"})
+        self.mongo_collection.save({"type": "foo", "this-name": "bar"})
+        self.mongo_collection.save({"type": "bar", "this-name": "bar"})
+        self.mongo_collection.save({"type": "bar", "this-name": "foo"})
+
+        results = self.mongo_driver.group(keys=["type"], query={}, collect_fields=["this-name"])
+
+        assert_that(results, contains(
+            has_entries(
+                {"_count": is_(2),
+                 "type": "foo",
+                 "this-name": ["bar", "bar"]}),
+            has_entries(
+                {"_count": is_(2),
+                 "type": "bar",
+                 "this-name": ["bar", "foo"]})
+        ))
+
+    def test_group_and_collect_with_injection_attempt(self):
+        self.mongo_collection.save({"type": "foo", "this-name": "bar"})
+        self.mongo_collection.save({"type": "foo", "this-name": "bar"})
+        self.mongo_collection.save({"type": "bar", "this-name": "bar"})
+        self.mongo_collection.save({"type": "bar", "this-name": "foo"})
+
+        for collect_field in ["name']-foo", "name\\']-foo"]:
+            results = self.mongo_driver.group(keys=["type"], query={}, collect_fields=[collect_field])
+
+            assert_that(results, contains(
+                has_entries(
+                    {"_count": is_(2),
+                     "type": "foo"}),
+                has_entries(
+                    {"_count": is_(2),
+                     "type": "bar"})
+            ))
+
     def test_group_and_collect_with_false_value(self):
         self.mongo_collection.save({"foo": "one", "bar": False})
         self.mongo_collection.save({"foo": "two", "bar": True})
