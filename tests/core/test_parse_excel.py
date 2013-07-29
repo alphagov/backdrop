@@ -1,5 +1,6 @@
 import unittest
 from hamcrest import assert_that, only_contains
+from backdrop.core.errors import ParseError
 
 from backdrop.core.parse_excel import parse_excel
 from tests.support.test_helpers import fixture_path, d_tz
@@ -28,3 +29,6 @@ class ParseExcelTestCase(unittest.TestCase):
                     only_contains(
                         {"date": d_tz(2013, 12, 3, 13, 30), "name": "test1", "number": 12},
                         {"date": d_tz(2013, 12, 4), "name": "test2", "number": 34}))
+
+    def test_parse_xlsx_with_error(self):
+        self.assertRaises(ParseError, self._parse_excel, "error.xlsx")

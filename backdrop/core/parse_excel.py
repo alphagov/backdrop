@@ -1,5 +1,6 @@
 import xlrd
 import datetime
+from backdrop.core.errors import ParseError
 from backdrop.core.timeutils import utc
 
 
@@ -24,4 +25,6 @@ def _extract_values(row, book):
 def _extract_cell_value(cell, book):
     if cell.ctype == 3:
         return utc(datetime.datetime(*xlrd.xldate_as_tuple(cell.value, book.datemode)))
+    elif cell.ctype == 5:
+        raise ParseError("Error encountered in cell")
     return cell.value
