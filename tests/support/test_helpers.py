@@ -1,6 +1,7 @@
 import json
 import datetime
 from hamcrest.core.base_matcher import BaseMatcher
+import os
 import pytz
 
 
@@ -67,3 +68,7 @@ def d_tz(year, month, day, hour=0, minute=0, seconds=0):
 def d(year, month, day, hour=0, minute=0, second=0):
     return datetime.datetime(year=year, month=month, day=day,
                              hour=hour, minute=minute, second=second)
+
+
+def fixture_path(name):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'features', 'fixtures', name))

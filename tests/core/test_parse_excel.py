@@ -1,20 +1,27 @@
-import os
 import unittest
 from hamcrest import assert_that, only_contains
 
 from backdrop.core.parse_excel import parse_excel
+from tests.support.test_helpers import fixture_path, d_tz
 
 
 class ParseExcelTestCase(unittest.TestCase):
-    def test_parse_an_xlsx_file(self):
-        file_stream = open(_fixture_path("data.xlsx"))
-        data = parse_excel(file_stream)
+    def _parse_excel(self, file_name):
+        file_stream = open(fixture_path(file_name))
+        return parse_excel(file_stream)
 
-        assert_that(data,
+    def test_parse_an_xlsx_file(self):
+        assert_that(self._parse_excel("data.xlsx"),
                     only_contains(
                         {"name": "Pawel", "age": 27, "nationality": "Polish"},
                         {"name": "Max", "age": 35, "nationality": "Italian"}))
 
 
-def _fixture_path(name):
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'features', 'fixtures', name))
+    def test_parse_xlsx_dates(self):
+        assert_that(self._parse_excel("dates.xlsx"),
+                    only_contains(
+                        {"date": d_tz(2013, 12, 3, 13, 30)},
+                        {"date": d_tz(2013, 12, 4)}
+                    )
+                    )
+
