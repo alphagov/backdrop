@@ -24,7 +24,9 @@ TOKENS = {
     'deposit_foreign_marriage_journey': 'deposit_foreign_marriage_journey-bearer-token',
     'deposit_foreign_marriage_realtime': 'deposit_foreign_marriage_realtime-bearer-token',
 }
-PERMISSIONS = {}
+PERMISSIONS = {
+    'user@host': ['bucket_one', 'bucket_two']
+}
 OAUTH_CLIENT_ID = \
     "1759c91cdc926eebe5d5c9fce53a58170ad17ba30a22b4b451c377a339a98844"
 OAUTH_CLIENT_SECRET = \
