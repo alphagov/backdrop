@@ -4,12 +4,10 @@ from ..errors import ParseError
 
 
 def parse_csv(incoming_data):
-    return list(
-        ignore_empty_rows(
-            ignore_comment_column(
-                unicode_csv_reader(
-                    ignore_comment_lines(lines(incoming_data)), "utf-8"
-                )
+    return ignore_empty_rows(
+        ignore_comment_column(
+            unicode_csv_reader(
+                ignore_comment_lines(lines(incoming_data)), "utf-8"
             )
         )
     )

@@ -33,4 +33,5 @@ class ParseExcelTestCase(unittest.TestCase):
         ))
 
     def test_parse_xlsx_with_error(self):
-        self.assertRaises(ParseError, self._parse_excel, "error.xlsx")
+        with self.assertRaises(ParseError):
+            list(self._parse_excel("error.xlsx"))

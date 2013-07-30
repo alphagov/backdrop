@@ -5,10 +5,6 @@ from backdrop.core.timeutils import utc
 
 
 def parse_excel(incoming_data):
-    return list(_parse_excel_sheet(incoming_data))
-
-
-def _parse_excel_sheet(incoming_data):
     book = xlrd.open_workbook(file_contents=incoming_data.read())
     sheet = book.sheet_by_index(0)
 
