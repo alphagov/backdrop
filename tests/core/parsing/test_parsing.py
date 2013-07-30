@@ -1,7 +1,7 @@
 import unittest
 from hamcrest import only_contains, assert_that
 from backdrop.core.errors import ParseError
-from backdrop.core.parsing import make_records
+from backdrop.core.parsing.utils import make_records
 
 
 class TestMakeRecords(unittest.TestCase):

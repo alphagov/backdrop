@@ -1,24 +1,35 @@
-from backdrop.core.errors import ParseError
+from .utils import make_records
+from .parse_csv import parse_csv
+from .parse_excel import parse_excel
 
 
-def make_records(rows):
-    """Return an iterator of records given an iterator of rows
+def create_parser(upload_format, upload_filters):
+    format_parser = load_format_parser(upload_format)
+    upload_filters = map(load_filter, upload_filters)
 
-    Given an iterator of rows consisting of a iterator of lists of values
-    produces an iterator of records using the first row as the keys for
-    all subsequent rows.
-    """
-    rows = iter(rows)
-    keys = next(rows)
+    def parser(file_stream):
+        data = format_parser(file_stream)
+        for upload_filter in upload_filters:
+            data = upload_filter(data)
 
-    for row in rows:
-        key_count = len(keys)
-        row_count = len(row)
-        if key_count < row_count:
-            raise ParseError(
-                'Some rows in the CSV file contain more values than columns')
-        if key_count > row_count:
-            raise ParseError(
-                'Some rows in the CSV file contain fewer values than columns')
+        return list(make_records(data))
 
-        yield dict(zip(keys, row))
+    return parser
+
+
+def load_format_parser(upload_format):
+    return {
+        "csv": parse_csv,
+        "excel": parse_excel,
+    }[upload_format]
+
+
+def load_filter(filter_name):
+    module_name, func_name = filter_name.rsplit(".", 1)
+
+    module = __import__(
+        module_name,
+        fromlist=filter_name.rsplit(".", 1)[0])
+
+    return getattr(module, func_name)
+
