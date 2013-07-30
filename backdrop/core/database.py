@@ -58,11 +58,14 @@ class MongoDriver(object):
         )
 
     def _build_collector_code(self, collect_fields):
-        template = "if (current.{c} !== undefined) " \
-                   "{{ previous.{c}.push(current.{c}); }}"
-        code = [template.format(c=collect_field)
+        template = "if (current['{c}'] !== undefined) " \
+                   "{{ previous['{c}'].push(current['{c}']); }}"
+        code = [template.format(c=self._clean_collect_field(collect_field))
                 for collect_field in collect_fields]
         return "\n".join(code)
+
+    def _clean_collect_field(self, collect_field):
+        return collect_field.replace('\\', '\\\\').replace("'", "\\'")
 
     def _build_accumulator_initial_state(self, collect_fields):
         initial = {'_count': 0}
