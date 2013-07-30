@@ -27,4 +27,3 @@ class ParseTimeAsUTCTestCase(unittest.TestCase):
     def test_datetime_with_no_timezone_is_given_utc(self):
         assert_that(parse_time_as_utc(d(2012, 12, 12, 12)),
                     equal_to(d_tz(2012, 12, 12, 12)))
-
