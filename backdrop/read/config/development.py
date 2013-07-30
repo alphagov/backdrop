@@ -31,4 +31,8 @@ RAW_QUERIES_ALLOWED = {
   "pay_register_death_abroad_journey": True,
   "pay_register_death_abroad_monitoring": True,
   "pay_register_death_abroad_realtime": True,
+  # HMRC preview
+  "hmrc_preview": True,
+  # LPA / Lasting Power of Attorney
+  "lpa_journey": True,
 }
