@@ -1,5 +1,7 @@
 @use_splinter_client
 Feature: EVL Upload
+
+    @wip
     Scenario: Upload call center volumes
        Given a file named "CEG Data.xlsx" with fixture "contrib/CEG Transaction Tracker.xlsx"
          and I am logged in

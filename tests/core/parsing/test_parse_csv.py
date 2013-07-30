@@ -2,9 +2,9 @@
 
 from cStringIO import StringIO
 import unittest
-from hamcrest import assert_that, only_contains, is_
+from hamcrest import assert_that, only_contains, is_, contains
 
-from backdrop.core.parse_csv import parse_csv, lines
+from backdrop.core.parsing.parse_csv import parse_csv, lines
 from backdrop.core.errors import ParseError
 
 
@@ -14,8 +14,11 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data,
-                    only_contains({"a": "x", "b": "y"}, {"a": "q", "b": "w"}))
+        assert_that(data, contains(
+            ["a", "b"],
+            ["x", "y"],
+            ["q", "w"],
+        ))
 
     def test_parse_empty_csv(self):
         csv_stream = _string_io("")
@@ -30,19 +33,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
-            {"a": u"à", "b": u"ù"}
+        assert_that(data, contains(
+            ["a", "b"],
+            [u"à", u"ù"],
         ))
-
-    def test_error_when_values_for_columns_are_missing(self):
-        incoming_data = _string_io("a,b\nx,y\nq")
-
-        self.assertRaises(ParseError, parse_csv, incoming_data)
-
-    def test_error_when_there_are_more_values_than_columns(self):
-        incoming_data = _string_io("a,b\nx,y,s,d\nq,w")
-
-        self.assertRaises(ParseError, parse_csv, incoming_data)
 
     def test_error_when_input_is_not_utf8(self):
         csv = u"a,b\nà,ù"
@@ -58,7 +52,8 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"a": u"c", "b": u"d"}
+            ["a", "b"],
+            ["c", "d"],
         ))
 
     def test_accept_when_some_values_empty(self):
@@ -68,8 +63,9 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"a": u"c", "b": u"d"},
-            {"a": u"c", "b": u""}
+            ["a", "b"],
+            ["c", "d"],
+            ["c", ""],
         ))
 
     def test_ignore_comments(self):
@@ -79,7 +75,8 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"a": u"c", "b": u"d"}
+            ["a", "b"],
+            ["c", "d"],
         ))
 
     def test_ignore_values_in_comments_column(self):
@@ -89,7 +86,8 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"a": u"c", "b": u"e"}
+            ["a", "b"],
+            ["c", "e"],
         ))
 
     def test_accept_csv_with_CR_as_line_separator(self):
@@ -99,7 +97,8 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"prop1": "value 1", "prop2": "value 2"}
+            ["prop1", "prop2"],
+            ["value 1", "value 2"],
         ))
 
     def test_accept_csv_with_CRLF_as_line_separator(self):
@@ -109,8 +108,9 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"prop1": "value 1", "prop2": "value 2"}
-        ))
+            ["prop1", "prop2"],
+            ["value 1", "value 2"],
+            ))
 
     def test_preserve_newlines_in_quoted_values(self):
         csv = u"prop1,prop2\nvalue,\"value\nwith newline\""
@@ -120,7 +120,8 @@ class ParseCsvTestCase(unittest.TestCase):
         data = parse_csv(csv_stream)
 
         assert_that(data, only_contains(
-            {"prop1": "value", "prop2": "value\nwith newline"}
+            ["prop1", "prop2"],
+            ["value", "value\nwith newline"],
         ))
 
 

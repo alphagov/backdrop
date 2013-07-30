@@ -1,11 +1,13 @@
 from functools import wraps
 from flask import flash, session, render_template, redirect, \
     request, abort
+import logging
 from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
-from backdrop.core.parse_csv import parse_csv
-from backdrop.core.parse_excel import parse_excel
+from backdrop.core.parsing import make_records
+from backdrop.core.parsing.parse_csv import parse_csv
+from backdrop.core.parsing.parse_excel import parse_excel
 from backdrop.write.signonotron2 import Signonotron2
 
 
@@ -134,9 +136,12 @@ def setup(app, db):
                 return _invalid_upload("file too large")
             try:
                 data = parse_data(file_stream)
+                logging.warning(data)
 
                 for data_filter in data_filters:
                     data = data_filter(data)
+
+                data = list(make_records(data))
 
                 auto_id_keys = _auto_id_keys_for(bucket_name)
                 bucket = Bucket(db, bucket_name, generate_id_from=auto_id_keys)

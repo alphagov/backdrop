@@ -11,7 +11,9 @@ BUCKET_AUTO_ID_KEYS = {
 BUCKET_UPLOAD_FORMAT = {
     "my_xlsx_bucket": "excel",
 }
+BUCKET_UPLOAD_FILTERS = {
 
+}
 try:
     from development_environment import *
 except ImportError:
