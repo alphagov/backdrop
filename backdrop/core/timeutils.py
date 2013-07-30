@@ -8,8 +8,19 @@ def now():
 
 
 def parse_time_as_utc(time_string):
-    time = parser.parse(time_string)
-    return time.astimezone(pytz.utc)
+    if isinstance(time_string, datetime.datetime):
+        time = time_string
+    else:
+        time = parser.parse(time_string)
+
+    return as_utc(time)
+
+
+def as_utc(dt):
+    if dt.tzinfo is None:
+        return utc(dt)
+    else:
+        return dt.astimezone(pytz.utc)
 
 
 def utc(dt):

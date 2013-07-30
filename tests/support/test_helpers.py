@@ -60,9 +60,9 @@ def is_error_response():
     return IsErrorResponse()
 
 
-def d_tz(year, month, day, hour=0, minute=0, seconds=0):
+def d_tz(year, month, day, hour=0, minute=0, seconds=0, tzinfo=None):
     return datetime.datetime(year, month, day, hour, minute, seconds,
-                             tzinfo=pytz.UTC)
+                             tzinfo=tzinfo or pytz.UTC)
 
 
 def d(year, month, day, hour=0, minute=0, second=0):
