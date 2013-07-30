@@ -12,6 +12,8 @@ RAW_QUERIES_ALLOWED = {
   "licensing_realtime": True,
   "lpa_volumes": True,
   "lpa_monitoring": True,
+  # electronic vehicle licensing
+  "electronic_vehicle_licensing_monitoring": True,
   # fco
   "deposit_foreign_marriage_journey": True,
   "deposit_foreign_marriage_monitoring": True,
