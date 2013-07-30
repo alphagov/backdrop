@@ -32,4 +32,3 @@ def load_filter(filter_name):
         fromlist=filter_name.rsplit(".", 1)[0])
 
     return getattr(module, func_name)
-

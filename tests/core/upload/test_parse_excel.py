@@ -2,7 +2,7 @@ import unittest
 from hamcrest import assert_that, only_contains, contains
 from backdrop.core.errors import ParseError
 
-from backdrop.core.parsing.parse_excel import parse_excel
+from backdrop.core.upload.parse_excel import parse_excel
 from tests.support.test_helpers import fixture_path, d_tz
 
 

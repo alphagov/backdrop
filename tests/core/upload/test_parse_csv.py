@@ -4,7 +4,7 @@ from cStringIO import StringIO
 import unittest
 from hamcrest import assert_that, only_contains, is_, contains
 
-from backdrop.core.parsing.parse_csv import parse_csv, lines
+from backdrop.core.upload.parse_csv import parse_csv, lines
 from backdrop.core.errors import ParseError
 
 

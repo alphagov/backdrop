@@ -4,7 +4,7 @@ from flask import flash, session, render_template, redirect, \
 from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
-from backdrop.core.parsing import create_parser
+from backdrop.core.upload import create_parser
 from backdrop.write.signonotron2 import Signonotron2
 
 
