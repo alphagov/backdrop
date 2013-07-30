@@ -45,26 +45,24 @@ def step(context, message):
     assert context.client.browser.is_text_present(message)
 
 
-@then(u'the platform should have stored in "{bucket_name}"')
+@then(u'the "{bucket_name}" bucket should contain in any order')
 def step(context, bucket_name):
-    documents = [json.loads(line) for line in context.text.split("\n")]
-    matchers = [has_entries(doc) for doc in documents]
-
-    bucket = context.client.storage()[bucket_name]
-    records = list(bucket.find())
-
-    assert_that(records, contains_inanyorder(*matchers))
+    bucket_contains(context, bucket_name, contains_inanyorder)
 
 
-@then(u'the "{bucket_name}" bucket should contain')
+@then(u'the "{bucket_name}" bucket should have items')
 def step(context, bucket_name):
+    bucket_contains(context, bucket_name, has_items)
+
+
+def bucket_contains(context, bucket_name, sequence_matcher):
     documents = [json.loads(line) for line in context.text.split("\n")]
     matchers = [has_entries(doc) for doc in documents]
 
     bucket = context.client.storage()[bucket_name]
     records = [datetimes_to_strings(record) for record in bucket.find()]
 
-    assert_that(records, has_items(*matchers))
+    assert_that(records, sequence_matcher(*matchers))
 
 
 def datetimes_to_strings(record):
