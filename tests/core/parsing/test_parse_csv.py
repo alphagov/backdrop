@@ -110,7 +110,7 @@ class ParseCsvTestCase(unittest.TestCase):
         assert_that(data, only_contains(
             ["prop1", "prop2"],
             ["value 1", "value 2"],
-            ))
+        ))
 
     def test_preserve_newlines_in_quoted_values(self):
         csv = u"prop1,prop2\nvalue,\"value\nwith newline\""

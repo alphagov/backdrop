@@ -42,13 +42,13 @@ def ignore_comment_column(rows):
 
     if "comment" in keys:
         index = keys.index("comment")
-        keys = keys[:index] + keys[index+1:]
+        keys = keys[:index] + keys[index + 1:]
 
     yield keys
 
     for row in rows:
         if index is not None:
-            yield row[:index] + row[index+1:]
+            yield row[:index] + row[index + 1:]
         else:
             yield row
 

@@ -123,7 +123,9 @@ def setup(app, db):
     def _load_filter(filter_name):
         module_name, func_name = filter_name.rsplit(".", 1)
 
-        module = __import__(module_name, fromlist=filter_name.rsplit(".", 1)[0])
+        module = __import__(
+            module_name,
+            fromlist=filter_name.rsplit(".", 1)[0])
 
         return getattr(module, func_name)
 
