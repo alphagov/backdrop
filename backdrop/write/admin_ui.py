@@ -111,9 +111,21 @@ def setup(app, db):
 
         parse_data = globals()["parse_%s" % upload_format]
 
-        return _store_data(bucket_name, parse_data)
+        data_filters = [
+            _load_filter(filter_name) for filter_name in
+            app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name, [])
+        ]
 
-    def _store_data(bucket_name, parse_data):
+        return _store_data(bucket_name, parse_data, data_filters)
+
+    def _load_filter(filter_name):
+        module_name, func_name = filter_name.rsplit(".", 1)
+
+        module = __import__(module_name, fromlist=filter_name.rsplit(".", 1)[0])
+
+        return getattr(module, func_name)
+
+    def _store_data(bucket_name, parse_data, data_filters):
         file_stream = request.files["file"].stream
         if not request.files["file"].filename:
             return _invalid_upload("file is required")
@@ -122,6 +134,9 @@ def setup(app, db):
                 return _invalid_upload("file too large")
             try:
                 data = parse_data(file_stream)
+
+                for data_filter in data_filters:
+                    data = data_filter(data)
 
                 auto_id_keys = _auto_id_keys_for(bucket_name)
                 bucket = Bucket(db, bucket_name, generate_id_from=auto_id_keys)

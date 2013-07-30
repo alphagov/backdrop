@@ -12,7 +12,13 @@ BUCKET_AUTO_ID_KEYS = {
     "bucket_with_auto_id": ("key", "start_at", "end_at")
 }
 BUCKET_UPLOAD_FORMAT = {
-    "my_xlsx_bucket": "excel"
+    "my_xlsx_bucket": "excel",
+    "evl_ceg_data": "excel",
+}
+BUCKET_UPLOAD_FILTERS = {
+    "evl_ceg_data": [
+        "backdrop.contrib.evl_upload.ceg_volumes"
+    ]
 }
 
 
