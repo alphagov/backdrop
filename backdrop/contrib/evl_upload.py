@@ -1,6 +1,5 @@
 from datetime import datetime
 import itertools
-from tests.support.test_helpers import d_tz
 
 
 def ceg_volumes(rows):
@@ -17,12 +16,11 @@ def ceg_volumes(rows):
             date = ceg_date(rows, column)
             if not isinstance(date, datetime):
                 return
-            if date >= d_tz(2012, 4, 1):
-                yield [
-                    date, "month", rows[5][column], rows[6][column],
-                    rows[9][column], rows[11][column], rows[12][column],
-                    rows[13][column], rows[15][column], rows[17][column]
-                ]
+            yield [
+                date, "month", rows[5][column], rows[6][column],
+                rows[9][column], rows[11][column], rows[12][column],
+                rows[13][column], rows[15][column], rows[17][column]
+            ]
 
     def ceg_date(rows, column):
         try:
@@ -34,9 +32,3 @@ def ceg_volumes(rows):
 
     for row in ceg_rows(rows):
         yield row
-
-
-
-
-
-
