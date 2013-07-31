@@ -43,8 +43,9 @@ class ParseCsvTestCase(unittest.TestCase):
 
         csv_stream = _string_io(csv, "iso-8859-1")
 
-        with self.assertRaises(ParseError):
-            list(parse_csv(csv_stream))
+        self.assertRaises(ParseError,
+                          lambda csv_stream: list(parse_csv(csv_stream)),
+                          csv_stream)
 
     def test_ignore_when_empty_row(self):
         csv = u"a,b\n,\nc,d"
