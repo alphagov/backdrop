@@ -3,6 +3,12 @@ import itertools
 
 
 def ceg_volumes(rows):
+    """Electronic Vehicle Licensing (EVL) Customer Enquiries Group (CEG)
+
+    Call center volume data
+
+    https://docs.google.com/a/digital.cabinet-office.gov.uk/file/d/1CQZJBThI-UVM5OJqUG-ZxieanLkJaySgdCFmVMjkjs9Mh9Ufqfao-oYuLcyA/edit?usp=sharing
+    """
     def ceg_keys(rows):
         return [
             "_timestamp", "timeSpan", "relicensing_web", "relicensing_ivr",
