@@ -7,7 +7,7 @@ def ceg_volumes(rows):
 
     Call center volume data
 
-    https://docs.google.com/a/digital.cabinet-office.gov.uk/file/d/1CQZJBThI-UVM5OJqUG-ZxieanLkJaySgdCFmVMjkjs9Mh9Ufqfao-oYuLcyA/edit?usp=sharing
+    http://goo.gl/52VcMe
     """
     def ceg_keys(rows):
         return [
