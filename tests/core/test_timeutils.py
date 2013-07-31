@@ -15,8 +15,7 @@ class ParseTimeAsUTCTestCase(unittest.TestCase):
                     equal_to(d_tz(2012, 12, 12, 11, 12, 12)))
 
     def test_invalid_time_string_raises_value_error(self):
-        with self.assertRaises(ValueError):
-            parse_time_as_utc("not a date")
+        self.assertRaises(ValueError, parse_time_as_utc, "not a date")
 
     def test_datetime_is_converted_to_utc(self):
         us_eastern_time = d_tz(2012, 12, 12, 12,

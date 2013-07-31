@@ -28,8 +28,9 @@ class TestMakeRecords(unittest.TestCase):
             ["screen", 567, 8],
         ]
 
-        with self.assertRaises(ParseError):
-            list(make_records(rows))
+        self.assertRaises(ParseError,
+                          lambda rows: list(make_records(rows)),
+                          rows)
 
     def test_fail_if_a_row_contains_fewer_values_than_the_first_row(self):
         rows = [
@@ -38,8 +39,9 @@ class TestMakeRecords(unittest.TestCase):
             ["screen"],
         ]
 
-        with self.assertRaises(ParseError):
-            list(make_records(rows))
+        self.assertRaises(ParseError,
+                          lambda rows: list(make_records(rows)),
+                          rows)
 
     def test_works_if_given_an_iterator(self):
         def rows():
