@@ -12,6 +12,7 @@ def ceg_volumes(rows):
         ]
 
     def ceg_rows(rows):
+        rows = list(rows)
         for column in itertools.count(3):
             date = ceg_date(rows, column)
             if not isinstance(date, datetime):
