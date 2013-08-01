@@ -14,3 +14,16 @@ Feature: EVL Upload
              {"_timestamp": "2012-04-01T00:00:00+00:00", "timeSpan":"month", "relicensing_web": 1551564, "relicensing_ivr": 251634, "relicensing_agent": 7159, "sorn_web": 207689, "sorn_ivr": 48313, "sorn_agent": 2141, "agent_automated_dupes": 7489, "calls_answered_by_advisor": 32214}
              {"_timestamp": "2013-02-01T00:00:00+00:00", "timeSpan":"month", "relicensing_web": 1861016, "relicensing_ivr": 300243, "relicensing_agent": 9225, "sorn_web": 208062, "sorn_ivr": 41724, "sorn_agent": 3434, "agent_automated_dupes": 6833, "calls_answered_by_advisor": 30437}
              """
+
+    @wip
+    Scenario: Upload services volumetrics
+       Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
+         and I am logged in
+        when I go to "/evl_services_volumetrics/upload"
+         and I enter "EVL Volumetrics.xlsx" into the file upload field
+         and I click "Upload"
+        then the platform should have "1" items stored in "evl_services_volumetrics"
+         and the "evl_services_volumetrics" bucket should have items:
+             """
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "timeSpan":"day", "successful_tax_disc": 151065, "successful_sorn": 16718}
+             """
