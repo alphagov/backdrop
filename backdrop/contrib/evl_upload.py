@@ -9,6 +9,15 @@ def ceg_volumes(rows):
 
     http://goo.gl/52VcMe
     """
+    RELICENSING_WEB_INDEX = 5
+    RELICENSING_IVR_INDEX = 6
+    RELICENSING_AGENT_INDEX = 9
+    SORN_WEB_INDEX = 11
+    SORN_IVR_INDEX = 12
+    SORN_AGENT_INDEX = 13
+    AGENT_AUTOMATED_DUPES_INDEX = 15
+    CALLS_ANSWERED_BY_ADVISOR_INDEX = 17
+
     def ceg_keys(rows):
         return [
             "_timestamp", "timeSpan", "relicensing_web", "relicensing_ivr",
@@ -23,9 +32,15 @@ def ceg_volumes(rows):
             if not isinstance(date, datetime):
                 return
             yield [
-                date, "month", rows[5][column], rows[6][column],
-                rows[9][column], rows[11][column], rows[12][column],
-                rows[13][column], rows[15][column], rows[17][column]
+                date, "month",
+                rows[RELICENSING_WEB_INDEX][column],
+                rows[RELICENSING_IVR_INDEX][column],
+                rows[RELICENSING_AGENT_INDEX][column],
+                rows[SORN_WEB_INDEX][column],
+                rows[SORN_IVR_INDEX][column],
+                rows[SORN_AGENT_INDEX][column],
+                rows[AGENT_AUTOMATED_DUPES_INDEX][column],
+                rows[CALLS_ANSWERED_BY_ADVISOR_INDEX][column],
             ]
 
     def ceg_date(rows, column):
