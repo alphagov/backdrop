@@ -133,10 +133,12 @@ def setup(app, db):
             file_stream.close()
 
     def _upload_format_for(bucket_name):
-        return app.config["BUCKET_UPLOAD_FORMAT"].get(bucket_name, "csv")
+        return app.config.get("BUCKET_UPLOAD_FORMAT", {})\
+                         .get(bucket_name, "csv")
 
     def _upload_filters_for(bucket_name):
-        return app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name, [])
+        return app.config.get("BUCKET_UPLOAD_FILTERS", {})\
+                         .get(bucket_name, [])
 
     def _auto_id_keys_for(bucket_name):
         return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)
