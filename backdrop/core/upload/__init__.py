@@ -1,4 +1,4 @@
-from .utils import make_records
+from .utils import make_dicts
 from .parse_csv import parse_csv
 from .parse_excel import parse_excel
 
@@ -12,7 +12,7 @@ def create_parser(upload_format, upload_filters):
         for upload_filter in upload_filters:
             data = upload_filter(data)
 
-        return list(make_records(data))
+        return list(make_dicts(data))
 
     return parser
 

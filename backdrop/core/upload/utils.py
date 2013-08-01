@@ -1,11 +1,11 @@
 from backdrop.core.errors import ParseError
 
 
-def make_records(rows):
-    """Return an iterator of records given an iterator of rows
+def make_dicts(rows):
+    """Return an iterator of dictionaries given an iterator of rows
 
     Given an iterator of rows consisting of a iterator of lists of values
-    produces an iterator of records using the first row as the keys for
+    produces an iterator of dictionaries using the first row as the keys for
     all subsequent rows.
     """
     rows = iter(rows)

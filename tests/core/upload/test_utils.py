@@ -1,7 +1,7 @@
 import unittest
 from hamcrest import only_contains, assert_that
 from backdrop.core.errors import ParseError
-from backdrop.core.upload.utils import make_records
+from backdrop.core.upload.utils import make_dicts
 
 
 class TestMakeRecords(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestMakeRecords(unittest.TestCase):
             ["mug", 12],
         ]
 
-        records = make_records(rows)
+        records = make_dicts(rows)
 
         assert_that(records, only_contains(
             {"name": "bottle", "size": 123},
@@ -29,7 +29,7 @@ class TestMakeRecords(unittest.TestCase):
         ]
 
         self.assertRaises(ParseError,
-                          lambda rows: list(make_records(rows)),
+                          lambda rows: list(make_dicts(rows)),
                           rows)
 
     def test_fail_if_a_row_contains_fewer_values_than_the_first_row(self):
@@ -40,7 +40,7 @@ class TestMakeRecords(unittest.TestCase):
         ]
 
         self.assertRaises(ParseError,
-                          lambda rows: list(make_records(rows)),
+                          lambda rows: list(make_dicts(rows)),
                           rows)
 
     def test_works_if_given_an_iterator(self):
@@ -49,7 +49,7 @@ class TestMakeRecords(unittest.TestCase):
             yield ("bottle", 123)
             yield ("screen", 567)
 
-        records = list(make_records(rows()))
+        records = list(make_dicts(rows()))
 
         assert_that(records, only_contains(
             {"name": "bottle", "size": 123},
