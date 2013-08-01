@@ -1,7 +1,10 @@
 import json
 import os
 import shutil
+import datetime
 from hamcrest import *
+
+from backdrop.core.timeutils import utc
 
 
 @given(u'a file named "{filename}" with fixture "{fixturename}"')
@@ -42,14 +45,32 @@ def step(context, message):
     assert context.client.browser.is_text_present(message)
 
 
-@then(u'the platform should have stored in "{bucket_name}"')
+@then(u'the "{bucket_name}" bucket should contain in any order')
 def step(context, bucket_name):
+    bucket_contains(context, bucket_name, contains_inanyorder)
+
+
+@then(u'the "{bucket_name}" bucket should have items')
+def step(context, bucket_name):
+    bucket_contains(context, bucket_name, has_items)
+
+
+def bucket_contains(context, bucket_name, sequence_matcher):
     documents = [json.loads(line) for line in context.text.split("\n")]
     matchers = [has_entries(doc) for doc in documents]
 
     bucket = context.client.storage()[bucket_name]
-    result = list(bucket.find())
-    assert_that(result, contains_inanyorder(*matchers))
+    records = [datetimes_to_strings(record) for record in bucket.find()]
+
+    assert_that(records, sequence_matcher(*matchers))
+
+
+def datetimes_to_strings(record):
+    for key, value in record.items():
+        if isinstance(value, datetime.datetime):
+            record[key] = utc(value).isoformat()
+
+    return record
 
 
 @then(u'the platform should have "{n}" items stored in "{bucket_name}"')

@@ -12,7 +12,7 @@ Feature: csv upload
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
          and I click "Upload"
-        then the platform should have stored in "my_bucket":
+        then the "my_bucket" bucket should contain in any order:
              """
              {"name": "Pawel", "age": "27", "nationality": "Polish"}
              {"name": "Max", "age": "35", "nationality": "Italian"}
@@ -29,7 +29,7 @@ Feature: csv upload
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
          and I click "Upload"
-        then the platform should have stored in "my_bucket":
+        then the "my_bucket" bucket should contain in any order:
              """
              {"english": "city", "italian": "città"}
              {"english": "coffee", "italian": "caffè"}
@@ -59,7 +59,7 @@ Feature: csv upload
          and I go to "/bucket_with_auto_id/upload"
          and I enter "data2.csv" into the file upload field
          and I click "Upload"
-        then the platform should have stored in "bucket_with_auto_id":
+        then the "bucket_with_auto_id" bucket should contain in any order:
              """
              {"start_at": "2013-01-01", "end_at": "2013-01-07", "key": "abc", "value": "287"}
              {"start_at": "2013-01-01", "end_at": "2013-01-07", "key": "def", "value": "425"}

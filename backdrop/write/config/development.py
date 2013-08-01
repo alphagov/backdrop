@@ -11,7 +11,11 @@ BUCKET_AUTO_ID_KEYS = {
 BUCKET_UPLOAD_FORMAT = {
     "my_xlsx_bucket": "excel",
 }
-
+BUCKET_UPLOAD_FILTERS = {
+    "evl_ceg_data": [
+        "backdrop.contrib.evl_upload.ceg_volumes"
+    ]
+}
 try:
     from development_environment import *
 except ImportError:

@@ -4,8 +4,7 @@ from flask import flash, session, render_template, redirect, \
 from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
-from backdrop.core.parse_csv import parse_csv
-from backdrop.core.parse_excel import parse_excel
+from backdrop.core.upload import create_parser
 from backdrop.write.signonotron2 import Signonotron2
 
 
@@ -102,18 +101,18 @@ def setup(app, db):
         if not app.permissions.allowed(current_user_email, bucket_name):
             return abort(404)
 
-        upload_format = app.config["BUCKET_UPLOAD_FORMAT"].get(
-            bucket_name, "csv")
+        upload_format = _upload_format_for(bucket_name)
+        upload_filters = _upload_filters_for(bucket_name)
 
         if request.method == 'GET':
             return render_template("upload_%s.html" % upload_format,
                                    bucket_name=bucket_name)
 
-        parse_data = globals()["parse_%s" % upload_format]
+        parser = create_parser(upload_format, upload_filters)
 
-        return _store_data(bucket_name, parse_data)
+        return _store_data(bucket_name, parser)
 
-    def _store_data(bucket_name, parse_data):
+    def _store_data(bucket_name, parser):
         file_stream = request.files["file"].stream
         if not request.files["file"].filename:
             return _invalid_upload("file is required")
@@ -121,7 +120,7 @@ def setup(app, db):
             if request.content_length > MAX_UPLOAD_SIZE:
                 return _invalid_upload("file too large")
             try:
-                data = parse_data(file_stream)
+                data = parser(file_stream)
 
                 auto_id_keys = _auto_id_keys_for(bucket_name)
                 bucket = Bucket(db, bucket_name, generate_id_from=auto_id_keys)
@@ -132,6 +131,12 @@ def setup(app, db):
                 return _invalid_upload(e.message)
         finally:
             file_stream.close()
+
+    def _upload_format_for(bucket_name):
+        return app.config["BUCKET_UPLOAD_FORMAT"].get(bucket_name, "csv")
+
+    def _upload_filters_for(bucket_name):
+        return app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name, [])
 
     def _auto_id_keys_for(bucket_name):
         return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)

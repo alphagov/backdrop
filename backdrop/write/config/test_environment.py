@@ -13,7 +13,10 @@ TOKENS = {
     'month_no_raw_access': 'month_no_raw_access-bearer-token'
 }
 PERMISSIONS = {
-    'test@example.com': ['my_bucket', 'bucket_with_auto_id', 'foo', 'my_xlsx_bucket'],
+    'test@example.com': [
+        'my_bucket', 'bucket_with_auto_id', 'foo',
+        'my_xlsx_bucket', 'evl_ceg_data'
+    ],
     'some.other@example.com': ['foo']
 }
 OAUTH_CLIENT_ID = "it's not important here"

@@ -8,14 +8,8 @@ def parse_excel(incoming_data):
     book = xlrd.open_workbook(file_contents=incoming_data.read())
     sheet = book.sheet_by_index(0)
 
-    keys = _extract_values(sheet.row(0), book)
-    data = []
-    for i in range(1, sheet.nrows):
-        row = zip(keys, _extract_values(sheet.row(i), book))
-
-        data.append(dict(row))
-
-    return data
+    for i in range(sheet.nrows):
+        yield _extract_values(sheet.row(i), book)
 
 
 def _extract_values(row, book):
