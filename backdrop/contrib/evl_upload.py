@@ -56,6 +56,7 @@ def ceg_volumes(rows):
 
 
 def service_volumetrics(rows):
+    rows = list(rows)
     yield ["_timestamp", "timeSpan", "successful_tax_disc", "successful_sorn"]
 
     timestamp = rows[2][1]

@@ -15,7 +15,6 @@ Feature: EVL Upload
              {"_timestamp": "2013-02-01T00:00:00+00:00", "timeSpan":"month", "relicensing_web": 1861016, "relicensing_ivr": 300243, "relicensing_agent": 9225, "sorn_web": 208062, "sorn_ivr": 41724, "sorn_agent": 3434, "agent_automated_dupes": 6833, "calls_answered_by_advisor": 30437}
              """
 
-    @wip
     Scenario: Upload services volumetrics
        Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
          and I am logged in

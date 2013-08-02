@@ -15,7 +15,7 @@ TOKENS = {
 PERMISSIONS = {
     'test@example.com': [
         'my_bucket', 'bucket_with_auto_id', 'foo',
-        'my_xlsx_bucket', 'evl_ceg_data'
+        'my_xlsx_bucket', 'evl_ceg_data', 'evl_services_volumetrics'
     ],
     'some.other@example.com': ['foo']
 }
