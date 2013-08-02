@@ -2,7 +2,7 @@ from datetime import datetime
 import itertools
 
 
-def ceg_volumes(sheets):
+def ceg_volumes(rows):
     """Electronic Vehicle Licensing (EVL) Customer Enquiries Group (CEG)
 
     Call center volume data
@@ -24,8 +24,8 @@ def ceg_volumes(sheets):
             "agent_automated_dupes", "calls_answered_by_advisor"
         ]
 
-    def ceg_rows(sheets):
-        rows = list(list(sheets)[0])
+    def ceg_rows(rows):
+        rows = list(rows)
         for column in itertools.count(3):
             date = ceg_date(rows, column)
             if not isinstance(date, datetime):
@@ -50,12 +50,12 @@ def ceg_volumes(sheets):
 
     yield ceg_keys
 
-    for row in ceg_rows(sheets):
+    for row in ceg_rows(rows):
         yield row
 
 
-def service_volumetrics(sheets):
-    rows = list(list(sheets)[0])
+def service_volumetrics(rows):
+    rows = list(rows)
     yield ["_timestamp", "timeSpan", "successful_tax_disc", "successful_sorn"]
 
     timestamp = rows[2][1]

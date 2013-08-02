@@ -18,9 +18,11 @@ BUCKET_UPLOAD_FORMAT = {
 }
 BUCKET_UPLOAD_FILTERS = {
     "evl_ceg_data": [
+        "backdrop.core.upload.filters.first_sheet_filter",
         "backdrop.contrib.evl_upload.ceg_volumes"
     ],
     "evl_services_volumetrics": [
+        "backdrop.core.upload.filters.first_sheet_filter",
         "backdrop.contrib.evl_upload.service_volumetrics"
     ]
 }
