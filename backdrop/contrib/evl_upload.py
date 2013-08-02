@@ -63,3 +63,6 @@ def service_volumetrics(rows):
     sornApplications = rows[25][2]
 
     yield [timestamp, "day", taxDiskApplications, sornApplications]
+
+def service_failures(sheets):
+    yield []

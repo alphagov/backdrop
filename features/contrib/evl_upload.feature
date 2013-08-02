@@ -37,5 +37,7 @@ Feature: EVL Upload
         then the platform should have "134" items stored in "evl_services_failures"
          and the "evl_services_failures" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "timeSpan":"day", "f"}
+             {"_timestamp": "2013-08-01T00:00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "_count": 89, "description": "Abandoned"}
+             {"_timestamp": "2013-08-01T00:00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "_count": 50, "description": "LPB Response Code was PSP Session Timeout"}
+             {"_timestamp": "2013-08-01T00:00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "_count": 354, "description": "User Cancelled Transaction"}
              """
