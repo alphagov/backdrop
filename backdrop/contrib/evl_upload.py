@@ -64,5 +64,25 @@ def service_volumetrics(rows):
 
     yield [timestamp, "day", taxDiskApplications, sornApplications]
 
+
 def service_failures(sheets):
-    yield []
+    rows = list(list(sheets)[1])
+    timestamp = rows[1][1]
+
+    yield ["_timestamp", "_id", "type", "reason", "count", "description"]
+
+    def failure(service_type, reason_code, num_failures, description, timestamp):
+        return [timestamp, "%s.%s.%s" % (timestamp.date().isoformat(), service_type, reason_code),
+                service_type, reason_code, num_failures, description]
+
+    for row in rows[6:]:
+        description = row[0]
+        if len(description) == 0:
+            return
+
+        reason_code = int(row[1])
+        tax_disc_failures = int(row[2] or 0)
+        sorn_failures = int(row[4] or 0)
+
+        yield failure("tax-disc", reason_code, tax_disc_failures, description, timestamp)
+        yield failure("sorn", reason_code, sorn_failures, description, timestamp)

@@ -27,17 +27,16 @@ Feature: EVL Upload
              {"_timestamp": "2013-08-01T00:00:00+00:00", "timeSpan":"day", "successful_tax_disc": 151065, "successful_sorn": 16718}
              """
 
-    @wip
     Scenario: Upload service failures
         Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
          and I am logged in
         when I go to "/evl_services_failures/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
          and I click "Upload"
-        then the platform should have "134" items stored in "evl_services_failures"
+        then the platform should have "136" items stored in "evl_services_failures"
          and the "evl_services_failures" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "_count": 89, "description": "Abandoned"}
-             {"_timestamp": "2013-08-01T00:00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "_count": 50, "description": "LPB Response Code was PSP Session Timeout"}
-             {"_timestamp": "2013-08-01T00:00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "_count": 354, "description": "User Cancelled Transaction"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "count": 89, "description": "Abandoned"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "count": 50, "description": "LPB Response Code was PSP Session Timeout"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 354, "description": "User Cancelled Transaction"}
              """
