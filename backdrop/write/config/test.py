@@ -15,7 +15,7 @@ BUCKET_UPLOAD_FORMAT = {
     "my_xlsx_bucket": "excel",
     "evl_ceg_data": "excel",
     "evl_services_volumetrics": "excel",
-    "evl_services_failures": "excel"
+    "evl_services_failures": "excel",
 }
 BUCKET_UPLOAD_FILTERS = {
     "evl_ceg_data": [
