@@ -29,7 +29,11 @@ BUCKET_UPLOAD_FILTERS = {
     ],
     "evl_services_failures": [
         "backdrop.contrib.evl_upload.service_failures"
-    ]
+    ],
+    "evl_channel_volumetrics": [
+        "backdrop.core.upload.filters.first_sheet_filter",
+        "backdrop.contrib.evl_upload.channel_volumetrics"
+    ],
 }
 
 

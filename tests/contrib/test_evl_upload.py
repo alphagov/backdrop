@@ -1,6 +1,7 @@
+from datetime import timedelta
 import unittest
 from hamcrest import assert_that, is_
-from backdrop.contrib.evl_upload import service_volumetrics, service_failures
+from backdrop.contrib.evl_upload import service_volumetrics, service_failures, channel_volumetrics
 from tests.support.test_helpers import d_tz
 
 
@@ -70,3 +71,22 @@ class EVLServiceVolumetrics(unittest.TestCase):
             [timestamp, "2013-07-30.tax-disc.1", "tax-disc", 1, 20, "No sorn failure"],
             [timestamp, "2013-07-30.sorn.1",     "sorn",     1, 0,  "No sorn failure"],
         ]))
+
+    def test_converts_channel_volumetrics_raw_data_to_normalised_data(self):
+        monday = d_tz(2013, 7, 29)
+        tuesday = monday + timedelta(days=1)
+        wednesday = monday + timedelta(days=2)
+        volumetrics_raw_data = \
+            self.ignore_rows(1) + \
+            [["Channel", monday, tuesday, wednesday, "", "", "", ""]] + \
+            [["Agent successful", 10, 20, '']] + \
+            [["IVR successful", 30, 40, '']] + \
+            [["WEB successful", 40, 50, '']] + \
+            [["Total successful all channels", 40, 50, 0]] + \
+            self.ignore_rows(17)
+
+        data = list(channel_volumetrics(volumetrics_raw_data))
+
+        assert_that(data, is_([["_timestamp", "successful_agent", "successful_ivr", "successful_web"],
+                               [monday, 10, 30, 40],
+                               [tuesday, 20, 40, 50]]))

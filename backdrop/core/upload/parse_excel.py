@@ -15,6 +15,7 @@ def _extract_rows(sheet, book):
     for i in range(sheet.nrows):
             yield _extract_values(sheet.row(i), book)
 
+
 def _extract_values(row, book):
     return [_extract_cell_value(cell, book) for cell in row]
 

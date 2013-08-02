@@ -19,10 +19,10 @@ def ceg_volumes(rows):
     CALLS_ANSWERED_BY_ADVISOR_INDEX = 17
 
     ceg_keys = [
-            "_timestamp", "timeSpan", "relicensing_web", "relicensing_ivr",
-            "relicensing_agent", "sorn_web", "sorn_ivr", "sorn_agent",
-            "agent_automated_dupes", "calls_answered_by_advisor"
-        ]
+        "_timestamp", "timeSpan", "relicensing_web", "relicensing_ivr",
+        "relicensing_agent", "sorn_web", "sorn_ivr", "sorn_agent",
+        "agent_automated_dupes", "calls_answered_by_advisor"
+    ]
 
     def ceg_rows(rows):
         rows = list(rows)
@@ -71,9 +71,9 @@ def service_failures(sheets):
 
     yield ["_timestamp", "_id", "type", "reason", "count", "description"]
 
-    def failure(service_type, reason_code, num_failures, description, timestamp):
-        return [timestamp, "%s.%s.%s" % (timestamp.date().isoformat(), service_type, reason_code),
-                service_type, reason_code, num_failures, description]
+    def failure(service_type, reason, failures, description, timestamp):
+        id = "%s.%s.%s" % (timestamp.date().isoformat(), service_type, reason)
+        return [timestamp, id, service_type, reason, failures, description]
 
     for row in rows[6:]:
         description = row[0]
@@ -84,5 +84,26 @@ def service_failures(sheets):
         tax_disc_failures = int(row[2] or 0)
         sorn_failures = int(row[4] or 0)
 
-        yield failure("tax-disc", reason_code, tax_disc_failures, description, timestamp)
-        yield failure("sorn", reason_code, sorn_failures, description, timestamp)
+        yield failure("tax-disc", reason_code, tax_disc_failures, description,
+                      timestamp)
+        yield failure("sorn", reason_code, sorn_failures, description,
+                      timestamp)
+
+
+def channel_volumetrics(rows):
+    rows = list(rows)
+    yield ["_timestamp", "successful_agent", "successful_ivr",
+           "successful_web"]
+
+    for column in range(1, 8):
+        all = rows[5][column]
+
+        if all == 0:
+            return
+
+        date = rows[1][column]
+        agent = rows[2][column]
+        ivr = rows[3][column]
+        web = rows[4][column]
+
+        yield [date, agent, ivr, web]

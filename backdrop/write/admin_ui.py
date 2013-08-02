@@ -137,7 +137,8 @@ def setup(app, db):
         return app.config["BUCKET_UPLOAD_FORMAT"].get(bucket_name, "csv")
 
     def _upload_filters_for(bucket_name):
-        return app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name, [first_sheet_filter])
+        return app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name,
+                                                       [first_sheet_filter])
 
     def _auto_id_keys_for(bucket_name):
         return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)

@@ -155,5 +155,6 @@ def _string_io(content, encoding=None):
         content = content.encode(encoding)
     return StringIO(content)
 
+
 def _traverse(content):
     return map(lambda rows: list(rows), content)
