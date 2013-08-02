@@ -144,6 +144,7 @@ def setup(app, db):
         return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)
 
     def _invalid_upload(msg):
+        app.logger.error("Upload error: %s" % msg)
         return render_template("upload_error.html", message=msg), 400
 
 

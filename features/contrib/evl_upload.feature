@@ -41,7 +41,6 @@ Feature: EVL Upload
              {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 354, "description": "User Cancelled Transaction"}
              """
 
-    @wip
     Scenario: Upload channel volumetrics
         Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Channel Volumetrics Sample.xls"
          and I am logged in

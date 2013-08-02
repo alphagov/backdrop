@@ -13,6 +13,7 @@ BUCKET_UPLOAD_FORMAT = {
     "evl_ceg_data": "excel",
     "evl_services_volumetrics": "excel",
     "evl_services_failures": "excel",
+    "evl_channel_volumetrics": "excel",
 }
 BUCKET_UPLOAD_FILTERS = {
     "evl_ceg_data": [
@@ -25,7 +26,11 @@ BUCKET_UPLOAD_FILTERS = {
     ],
     "evl_services_failures": [
         "backdrop.contrib.evl_upload.service_failures"
-    ]
+    ],
+    "evl_channel_volumetrics": [
+        "backdrop.core.upload.filters.first_sheet_filter",
+        "backdrop.contrib.evl_upload.channel_volumetrics"
+    ],
 }
 
 try:
