@@ -16,7 +16,7 @@ PERMISSIONS = {
     'test@example.com': [
         'my_bucket', 'bucket_with_auto_id', 'foo',
         'my_xlsx_bucket', 'evl_ceg_data', 'evl_services_volumetrics',
-        'evl_services_failures'
+        'evl_services_failures', 'evl_channel_volumetrics'
     ],
     'some.other@example.com': ['foo']
 }

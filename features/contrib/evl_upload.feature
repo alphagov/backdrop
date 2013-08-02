@@ -40,3 +40,17 @@ Feature: EVL Upload
              {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "count": 50, "description": "LPB Response Code was PSP Session Timeout"}
              {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 354, "description": "User Cancelled Transaction"}
              """
+
+    @wip
+    Scenario: Upload channel volumetrics
+        Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Channel Volumetrics Sample.xls"
+         and I am logged in
+        when I go to "/evl_channel_volumetrics/upload"
+         and I enter "EVL Volumetrics.xlsx" into the file upload field
+         and I click "Upload"
+        then the platform should have "2" items stored in "evl_channel_volumetrics"
+         and the "evl_channel_volumetrics" bucket should have items:
+             """
+             {"_timestamp": "2013-07-29T00:00:00+00:00", "successful_agent": 1039, "successful_ivr": 19985, "successful_web": 102182}
+             {"_timestamp": "2013-07-30T00:00:00+00:00", "successful_agent": 1047, "successful_ivr": 18315, "successful_web": 100800}
+             """
