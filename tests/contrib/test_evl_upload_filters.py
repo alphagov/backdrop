@@ -1,7 +1,7 @@
 from datetime import timedelta
 import unittest
 from hamcrest import assert_that, is_
-from backdrop.contrib.evl_upload import service_volumetrics, service_failures, channel_volumetrics
+from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics
 from tests.support.test_helpers import d_tz
 
 
