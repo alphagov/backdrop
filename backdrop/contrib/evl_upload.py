@@ -56,4 +56,10 @@ def ceg_volumes(rows):
 
 
 def service_volumetrics(rows):
-    yield []
+    yield ["_timestamp", "timeSpan", "successful_tax_disc", "successful_sorn"]
+
+    timestamp = rows[2][1]
+    taxDiskApplications = rows[24][2]
+    sornApplications = rows[25][2]
+
+    yield [timestamp, "day", taxDiskApplications, sornApplications]
