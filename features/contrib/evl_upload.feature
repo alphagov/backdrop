@@ -26,3 +26,16 @@ Feature: EVL Upload
              """
              {"_timestamp": "2013-08-01T00:00:00+00:00", "timeSpan":"day", "successful_tax_disc": 151065, "successful_sorn": 16718}
              """
+
+    @wip
+    Scenario: Upload service failures
+        Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
+         and I am logged in
+        when I go to "/evl_services_failures/upload"
+         and I enter "EVL Volumetrics.xlsx" into the file upload field
+         and I click "Upload"
+        then the platform should have "134" items stored in "evl_services_failures"
+         and the "evl_services_failures" bucket should have items:
+             """
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "timeSpan":"day", "f"}
+             """
