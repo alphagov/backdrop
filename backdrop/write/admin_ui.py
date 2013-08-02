@@ -5,6 +5,7 @@ from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.upload import create_parser
+from backdrop.core.upload.filters import first_sheet_filter
 from backdrop.write.signonotron2 import Signonotron2
 
 
@@ -136,7 +137,7 @@ def setup(app, db):
         return app.config["BUCKET_UPLOAD_FORMAT"].get(bucket_name, "csv")
 
     def _upload_filters_for(bucket_name):
-        return app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name, [])
+        return app.config["BUCKET_UPLOAD_FILTERS"].get(bucket_name, [first_sheet_filter])
 
     def _auto_id_keys_for(bucket_name):
         return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)

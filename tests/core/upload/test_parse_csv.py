@@ -14,18 +14,18 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, contains(
+        assert_that(data, contains(contains(
             ["a", "b"],
             ["x", "y"],
             ["q", "w"],
-        ))
+        )))
 
     def test_parse_empty_csv(self):
         csv_stream = _string_io("")
 
-        data = list(parse_csv(csv_stream))
+        data = _traverse(parse_csv(csv_stream))
 
-        assert_that(data, is_([]))
+        assert_that(data, is_([[]]))
 
     def test_parse_utf8_data(self):
         csv = u"a,b\nà,ù"
@@ -33,10 +33,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, contains(
+        assert_that(data, contains(contains(
             ["a", "b"],
             [u"à", u"ù"],
-        ))
+        )))
 
     def test_error_when_input_is_not_utf8(self):
         csv = u"a,b\nà,ù"
@@ -44,7 +44,7 @@ class ParseCsvTestCase(unittest.TestCase):
         csv_stream = _string_io(csv, "iso-8859-1")
 
         self.assertRaises(ParseError,
-                          lambda csv_stream: list(parse_csv(csv_stream)),
+                          lambda csv_stream: _traverse(parse_csv(csv_stream)),
                           csv_stream)
 
     def test_ignore_when_empty_row(self):
@@ -53,10 +53,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["a", "b"],
             ["c", "d"],
-        ))
+        )))
 
     def test_accept_when_some_values_empty(self):
         csv = u"a,b\n,\nc,d\nc,"
@@ -64,11 +64,11 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["a", "b"],
             ["c", "d"],
             ["c", ""],
-        ))
+        )))
 
     def test_ignore_comments(self):
         csv = u"# top comment\na,b\n# any random comment\nc,d"
@@ -76,10 +76,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["a", "b"],
             ["c", "d"],
-        ))
+        )))
 
     def test_ignore_values_in_comments_column(self):
         csv = u"a,comment,b\nc,d,e"
@@ -87,10 +87,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["a", "b"],
             ["c", "e"],
-        ))
+        )))
 
     def test_accept_csv_with_CR_as_line_separator(self):
         csv = u"prop1,prop2\rvalue 1,value 2"
@@ -98,10 +98,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["prop1", "prop2"],
             ["value 1", "value 2"],
-        ))
+        )))
 
     def test_accept_csv_with_CRLF_as_line_separator(self):
         csv = u"prop1,prop2\r\nvalue 1,value 2"
@@ -109,10 +109,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["prop1", "prop2"],
             ["value 1", "value 2"],
-        ))
+        )))
 
     def test_preserve_newlines_in_quoted_values(self):
         csv = u"prop1,prop2\nvalue,\"value\nwith newline\""
@@ -121,10 +121,10 @@ class ParseCsvTestCase(unittest.TestCase):
 
         data = parse_csv(csv_stream)
 
-        assert_that(data, only_contains(
+        assert_that(data, only_contains(only_contains(
             ["prop1", "prop2"],
             ["value", "value\nwith newline"],
-        ))
+        )))
 
 
 class LinesGeneratorTest(unittest.TestCase):
@@ -154,3 +154,6 @@ def _string_io(content, encoding=None):
     if encoding is not None:
         content = content.encode(encoding)
     return StringIO(content)
+
+def _traverse(content):
+    return map(lambda rows: list(rows), content)

@@ -6,11 +6,14 @@ from backdrop.core.timeutils import utc
 
 def parse_excel(incoming_data):
     book = xlrd.open_workbook(file_contents=incoming_data.read())
-    sheet = book.sheet_by_index(0)
 
+    for sheet in book.sheets():
+        yield _extract_rows(sheet, book)
+
+
+def _extract_rows(sheet, book):
     for i in range(sheet.nrows):
-        yield _extract_values(sheet.row(i), book)
-
+            yield _extract_values(sheet.row(i), book)
 
 def _extract_values(row, book):
     return [_extract_cell_value(cell, book) for cell in row]
