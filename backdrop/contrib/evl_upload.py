@@ -19,7 +19,7 @@ def ceg_volumes(rows):
     CALLS_ANSWERED_BY_ADVISOR_INDEX = 17
 
     ceg_keys = [
-        "_timestamp", "timeSpan", "relicensing_web", "relicensing_ivr",
+        "_timestamp", "_id", "timeSpan", "relicensing_web", "relicensing_ivr",
         "relicensing_agent", "sorn_web", "sorn_ivr", "sorn_agent",
         "agent_automated_dupes", "calls_answered_by_advisor"
     ]
@@ -31,7 +31,7 @@ def ceg_volumes(rows):
             if not isinstance(date, datetime):
                 return
             yield [
-                date, "month",
+                date, date.date().isoformat(), "month",
                 rows[RELICENSING_WEB_INDEX][column],
                 rows[RELICENSING_IVR_INDEX][column],
                 rows[RELICENSING_AGENT_INDEX][column],
@@ -56,13 +56,15 @@ def ceg_volumes(rows):
 
 def service_volumetrics(rows):
     rows = list(rows)
-    yield ["_timestamp", "timeSpan", "successful_tax_disc", "successful_sorn"]
+    yield ["_timestamp", "_id", "timeSpan", "successful_tax_disc",
+           "successful_sorn"]
 
     timestamp = rows[2][1]
     taxDiskApplications = rows[24][2]
     sornApplications = rows[25][2]
 
-    yield [timestamp, "day", taxDiskApplications, sornApplications]
+    yield [timestamp, timestamp.date().isoformat(), "day", taxDiskApplications,
+           sornApplications]
 
 
 def service_failures(sheets):
@@ -92,7 +94,7 @@ def service_failures(sheets):
 
 def channel_volumetrics(rows):
     rows = list(rows)
-    yield ["_timestamp", "successful_agent", "successful_ivr",
+    yield ["_timestamp", "_id", "successful_agent", "successful_ivr",
            "successful_web"]
 
     for column in range(1, 8):
@@ -106,4 +108,4 @@ def channel_volumetrics(rows):
         ivr = rows[3][column]
         web = rows[4][column]
 
-        yield [date, agent, ivr, web]
+        yield [date, date.date().isoformat(), agent, ivr, web]

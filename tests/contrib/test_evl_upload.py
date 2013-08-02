@@ -22,8 +22,8 @@ class EVLServiceVolumetrics(unittest.TestCase):
 
         data = list(service_volumetrics(evl_volumetrics_raw_data))
 
-        assert_that(data, is_([["_timestamp", "timeSpan", "successful_tax_disc", "successful_sorn"],
-                               [timestamp, "day", 52, 13]]))
+        assert_that(data, is_([["_timestamp", "_id", "timeSpan", "successful_tax_disc", "successful_sorn"],
+                               [timestamp, "2013-07-30", "day", 52, 13]]))
 
     def test_converts_service_failures_data_to_normalised_data(self):
         timestamp = d_tz(2013, 7, 30)
@@ -87,6 +87,6 @@ class EVLServiceVolumetrics(unittest.TestCase):
 
         data = list(channel_volumetrics(volumetrics_raw_data))
 
-        assert_that(data, is_([["_timestamp", "successful_agent", "successful_ivr", "successful_web"],
-                               [monday, 10, 30, 40],
-                               [tuesday, 20, 40, 50]]))
+        assert_that(data, is_([["_timestamp", "_id", "successful_agent", "successful_ivr", "successful_web"],
+                               [monday, "2013-07-29", 10, 30, 40],
+                               [tuesday, "2013-07-30", 20, 40, 50]]))
