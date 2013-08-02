@@ -53,3 +53,7 @@ def ceg_volumes(rows):
 
     for row in ceg_rows(rows):
         yield row
+
+
+def service_volumetrics(rows):
+    yield []
