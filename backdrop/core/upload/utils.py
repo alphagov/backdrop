@@ -6,6 +6,7 @@ from backdrop.core.errors import ParseError
 def remove_blanks(rows):
     return filter(lambda r: not all(len(v) == 0 for v in r), rows)
 
+
 def make_dicts(rows):
     """Return an iterator of dictionaries given an iterator of rows
 

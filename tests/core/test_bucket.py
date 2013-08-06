@@ -579,5 +579,3 @@ class TestBucket(unittest.TestCase):
             assert_that(str(e), is_(
                 "Weeks MUST start on Monday but got date: 2013-04-09 00:00:00"
             ))
-
-

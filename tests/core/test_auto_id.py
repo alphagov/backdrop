@@ -78,14 +78,12 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "foo": "bar"
         }]
 
-
         auto_id = ["_timestamp", "foo"]
 
         bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
         bucket.parse_and_store(objects)
 
-
-        saved_object =  self.mock_repository.save.call_args[0][0]
+        saved_object = self.mock_repository.save.call_args[0][0]
 
         assert_that(b64decode(saved_object['_id']),
                     is_("2013-08-01T00:00:00+00:00.bar"))
