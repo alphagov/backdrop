@@ -55,3 +55,18 @@ class TestMakeRecords(unittest.TestCase):
             {"name": "bottle", "size": 123},
             {"name": "screen", "size": 567},
         ))
+
+    def test_ignores_empty_rows(self):
+        rows = [
+            ["name", "size"],
+            ["val1", 123],
+            ["", ""],
+            ["val2", 456]
+        ]
+
+        records = list(make_dicts(rows))
+
+        assert_that(records, only_contains(
+            {"name": "val1", "size": 123},
+            {"name": "val2", "size": 456},
+        ))

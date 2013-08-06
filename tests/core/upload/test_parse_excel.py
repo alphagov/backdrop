@@ -21,15 +21,15 @@ class ParseExcelTestCase(unittest.TestCase):
     def test_parse_xlsx_dates(self):
         assert_that(self._parse_excel("dates.xlsx"), contains(contains(
             ["date"],
-            [d_tz(2013, 12, 3, 13, 30)],
-            [d_tz(2013, 12, 4)],
+            ["2013-12-03T13:30:00+00:00"],
+            ["2013-12-04T00:00:00+00:00"],
         )))
 
     def test_parse_xls_file(self):
         assert_that(self._parse_excel("xlsfile.xls"), contains(contains(
             ["date", "name", "number"],
-            [d_tz(2013, 12, 3, 13, 30), "test1", 12],
-            [d_tz(2013, 12, 4), "test2", 34],
+            ["2013-12-03T13:30:00+00:00", "test1", 12],
+            ["2013-12-04T00:00:00+00:00", "test2", 34],
         )))
 
     def test_parse_xlsx_with_error(self):

@@ -1,5 +1,6 @@
 from datetime import datetime
 import itertools
+from backdrop.core.timeutils import parse_time_as_utc
 
 
 def ceg_volumes(rows):
@@ -31,7 +32,7 @@ def ceg_volumes(rows):
             if not isinstance(date, datetime):
                 return
             yield [
-                date, date.date().isoformat(), "month",
+                date.isoformat(), date.date().isoformat(), "month",
                 rows[RELICENSING_WEB_INDEX][column],
                 rows[RELICENSING_IVR_INDEX][column],
                 rows[RELICENSING_AGENT_INDEX][column],
@@ -44,7 +45,7 @@ def ceg_volumes(rows):
 
     def ceg_date(rows, column):
         try:
-            return rows[3][column]
+            return parse_time_as_utc(rows[3][column])
         except IndexError:
             return None
 
@@ -63,8 +64,8 @@ def service_volumetrics(rows):
     taxDiskApplications = rows[24][2]
     sornApplications = rows[25][2]
 
-    yield [timestamp, timestamp.date().isoformat(), "day", taxDiskApplications,
-           sornApplications]
+    yield [timestamp, parse_time_as_utc(timestamp).date().isoformat(), "day",
+           taxDiskApplications, sornApplications]
 
 
 def service_failures(sheets):
@@ -74,7 +75,8 @@ def service_failures(sheets):
     yield ["_timestamp", "_id", "type", "reason", "count", "description"]
 
     def failure(service_type, reason, failures, description, timestamp):
-        id = "%s.%s.%s" % (timestamp.date().isoformat(), service_type, reason)
+        date = parse_time_as_utc(timestamp).date()
+        id = "%s.%s.%s" % (date.isoformat(), service_type, reason)
         return [timestamp, id, service_type, reason, failures, description]
 
     for row in rows[6:]:
@@ -108,4 +110,5 @@ def channel_volumetrics(rows):
         ivr = rows[3][column]
         web = rows[4][column]
 
-        yield [date, date.date().isoformat(), agent, ivr, web]
+        yield [date, parse_time_as_utc(date).date().isoformat(), agent, ivr,
+               web]
