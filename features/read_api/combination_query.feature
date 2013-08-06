@@ -39,4 +39,3 @@ Feature: more complex combination of parameters that are used by clients
           and the "2nd" result should have "_count" equaling the integer "12"
           and the "2nd" result should have "licenceName" with item ""Fake Licence 5""
 
-

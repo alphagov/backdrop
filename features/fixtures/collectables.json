@@ -1,0 +1,14 @@
+[
+    {
+        "_week_start_at": "2013-07-05T00:00:00+00:00",
+        "pickup": "mushroom"
+    },
+    {
+        "_week_start_at": "2013-07-05T00:00:00+00:00",
+        "pickup": "ring"
+    },
+    {
+        "_week_start_at": "2013-07-12T00:00:00+00:00",
+        "pickup": "1-up"
+    }
+]
