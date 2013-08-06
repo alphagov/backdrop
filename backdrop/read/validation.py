@@ -162,7 +162,8 @@ class GroupByValidator(Validator):
 class ParamDependencyValidator(Validator):
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
-            if all(param not in request_args for param in context['depends_on']):
+            if all(param not in request_args
+                   for param in context['depends_on']):
                 self.add_error(
                     '%s can be use only with either %s'
                     % (context['param_name'], context['depends_on']))

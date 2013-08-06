@@ -72,10 +72,10 @@ class TestValidators(unittest.TestCase):
             "group_by": "test"
         }
 
-        assert_that(ParamDependencyValidator(request_args=query,
+        validator = ParamDependencyValidator(request_args=query,
                                              param_name="collect",
-                                             depends_on=["group_by"]).invalid(),
-                    is_(False))
+                                             depends_on=["group_by"])
+        assert_that(validator.invalid(), is_(False))
 
     def test_param_dependency_validator_invalidates_correctly(self):
         query = {
@@ -83,10 +83,10 @@ class TestValidators(unittest.TestCase):
             "group_by": "test"
         }
 
-        assert_that(ParamDependencyValidator(request_args=query,
+        validator = ParamDependencyValidator(request_args=query,
                                              param_name="collect",
-                                             depends_on=["wibble"]).invalid(),
-                    is_(True))
+                                             depends_on=["wibble"])
+        assert_that(validator.invalid(), is_(True))
 
     def test_that_a_parameter_can_have_multiple_dependencies(self):
         query = {
@@ -94,8 +94,7 @@ class TestValidators(unittest.TestCase):
             "period": "week"
         }
 
-        assert_that(ParamDependencyValidator(request_args=query,
+        validator = ParamDependencyValidator(request_args=query,
                                              param_name="collect",
-                                             depends_on=["group_by","period"])
-                                            .invalid(),
-                    is_(False))
+                                             depends_on=["group_by", "period"])
+        assert_that(validator.invalid(), is_(False))
