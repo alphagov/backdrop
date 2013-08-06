@@ -14,11 +14,26 @@ BUCKET_AUTO_ID_KEYS = {
 BUCKET_UPLOAD_FORMAT = {
     "my_xlsx_bucket": "excel",
     "evl_ceg_data": "excel",
+    "evl_services_volumetrics": "excel",
+    "evl_services_failures": "excel",
+    "evl_channel_volumetrics": "excel",
 }
 BUCKET_UPLOAD_FILTERS = {
     "evl_ceg_data": [
-        "backdrop.contrib.evl_upload.ceg_volumes"
-    ]
+        "backdrop.core.upload.filters.first_sheet_filter",
+        "backdrop.contrib.evl_upload_filters.ceg_volumes"
+    ],
+    "evl_services_volumetrics": [
+        "backdrop.core.upload.filters.first_sheet_filter",
+        "backdrop.contrib.evl_upload_filters.service_volumetrics"
+    ],
+    "evl_services_failures": [
+        "backdrop.contrib.evl_upload_filters.service_failures"
+    ],
+    "evl_channel_volumetrics": [
+        "backdrop.core.upload.filters.first_sheet_filter",
+        "backdrop.contrib.evl_upload_filters.channel_volumetrics"
+    ],
 }
 
 

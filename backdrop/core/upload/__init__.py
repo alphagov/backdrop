@@ -25,6 +25,8 @@ def load_format_parser(upload_format):
 
 
 def load_filter(filter_name):
+    if callable(filter_name):
+        return filter_name
     module_name, func_name = filter_name.rsplit(".", 1)
 
     module = __import__(
