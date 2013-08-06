@@ -150,7 +150,7 @@ class TestBucket(unittest.TestCase):
 
         self.mock_repository.group.assert_called_once_with(
             "_week_start_at", query, sort=['_week_start_at', 'ascending'],
-            limit=None)
+            limit=None, collect=[])
 
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
@@ -174,7 +174,7 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(query).data()
         self.mock_repository.group.assert_called_once_with(
             "_month_start_at", query, sort=['_month_start_at', 'ascending'],
-            limit=None)
+            limit=None, collect=[])
 
     def test_week_query_with_limit(self):
         self.mock_repository.group.return_value = []
@@ -184,7 +184,7 @@ class TestBucket(unittest.TestCase):
 
         self.mock_repository.group.assert_called_once_with(
             "_week_start_at", query, sort=['_week_start_at', 'ascending'],
-            limit=1)
+            limit=1, collect=[])
 
     def test_month_query_with_limit(self):
         self.mock_repository.group.return_value = []
@@ -194,7 +194,7 @@ class TestBucket(unittest.TestCase):
 
         self.mock_repository.group.assert_called_once_with(
             "_month_start_at", query, sort=['_month_start_at', 'ascending'],
-            limit=1)
+            limit=1, collect=[])
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
         self.mock_repository.group.return_value = [
