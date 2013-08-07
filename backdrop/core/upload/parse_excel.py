@@ -1,3 +1,4 @@
+import logging
 import xlrd
 import datetime
 from backdrop.core.errors import ParseError
@@ -23,7 +24,7 @@ def _extract_values(row, book):
 def _extract_cell_value(cell, book):
     if cell.ctype == xlrd.XL_CELL_DATE:
         time_tuple = xlrd.xldate_as_tuple(cell.value, book.datemode)
-        return utc(datetime.datetime(*time_tuple))
+        return utc(datetime.datetime(*time_tuple)).isoformat()
     elif cell.ctype == xlrd.XL_CELL_ERROR:
         raise ParseError("Error encountered in cell")
     return cell.value

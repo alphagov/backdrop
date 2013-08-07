@@ -1,4 +1,10 @@
+from itertools import ifilter
+import logging
 from backdrop.core.errors import ParseError
+
+
+def remove_blanks(rows):
+    return filter(lambda r: not all(len(v) == 0 for v in r), rows)
 
 
 def make_dicts(rows):
@@ -11,7 +17,7 @@ def make_dicts(rows):
     rows = iter(rows)
     keys = next(rows)
 
-    for row in rows:
+    for row in remove_blanks(rows):
         key_count = len(keys)
         row_count = len(row)
         if key_count < row_count:
