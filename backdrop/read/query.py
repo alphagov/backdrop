@@ -135,7 +135,7 @@ class Query(_Query):
         sort = [period_key, "ascending"]
         cursor = repository.group(
             period_key, self,
-            sort=sort, limit=self.limit
+            sort=sort, limit=self.limit, collect=self.collect
         )
 
         results = PeriodData(cursor, period=self.period)

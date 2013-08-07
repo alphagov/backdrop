@@ -162,9 +162,10 @@ class GroupByValidator(Validator):
 class ParamDependencyValidator(Validator):
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
-            if context['depends_on'] not in request_args:
+            if all(param not in request_args
+                   for param in context['depends_on']):
                 self.add_error(
-                    '%s can be use only with %s'
+                    '%s can be use only with either %s'
                     % (context['param_name'], context['depends_on']))
 
 
@@ -270,7 +271,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         GroupByValidator(request_args),
         PositiveIntegerValidator(request_args, param_name='limit'),
         ParamDependencyValidator(request_args, param_name='collect',
-                                 depends_on='group_by'),
+                                 depends_on=['group_by', 'period']),
         CollectValidator(request_args),
     ]
 

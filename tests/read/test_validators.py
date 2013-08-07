@@ -1,6 +1,6 @@
 import unittest
 from hamcrest import *
-from backdrop.read.validation import ParameterMustBeOneOfTheseValidator, MondayValidator, FirstOfMonthValidator
+from backdrop.read.validation import ParameterMustBeOneOfTheseValidator, MondayValidator, FirstOfMonthValidator, ParamDependencyValidator
 
 #TODO: looked around and couldn't see any other validator tests
 
@@ -65,3 +65,36 @@ class TestValidators(unittest.TestCase):
 
         assert_that(i_should_be_invalid.invalid(), is_(True))
         assert_that(i_should_be_valid.invalid(), is_(False))
+
+    def test_param_dependency_validator(self):
+        query = {
+            "collect": "foo",
+            "group_by": "test"
+        }
+
+        validator = ParamDependencyValidator(request_args=query,
+                                             param_name="collect",
+                                             depends_on=["group_by"])
+        assert_that(validator.invalid(), is_(False))
+
+    def test_param_dependency_validator_invalidates_correctly(self):
+        query = {
+            "collect": "foo",
+            "group_by": "test"
+        }
+
+        validator = ParamDependencyValidator(request_args=query,
+                                             param_name="collect",
+                                             depends_on=["wibble"])
+        assert_that(validator.invalid(), is_(True))
+
+    def test_that_a_parameter_can_have_multiple_dependencies(self):
+        query = {
+            "collect": "foo",
+            "period": "week"
+        }
+
+        validator = ParamDependencyValidator(request_args=query,
+                                             param_name="collect",
+                                             depends_on=["group_by", "period"])
+        assert_that(validator.invalid(), is_(False))

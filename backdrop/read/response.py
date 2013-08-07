@@ -79,7 +79,11 @@ class PeriodData(object):
             datum = create_period_group(doc)
         if self.period == "month":
             datum = create_period_group_month(doc)
-        return datum
+
+        for key in ["_week_start_at", "_month_start_at"]:
+            doc.pop(key, None)
+
+        return dict(datum.items() + doc.items())
 
 
 class GroupedData(object):
