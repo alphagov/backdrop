@@ -7,6 +7,7 @@ from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.upload import create_parser
 from backdrop.core.upload.filters import first_sheet_filter
 from backdrop.write.signonotron2 import Signonotron2
+from ..core import cache_control
 
 
 def setup(app, db):
@@ -31,7 +32,12 @@ def setup(app, db):
         return verify_user_logged_in
 
     @app.route(USER_SCOPE)
+    @cache_control.set("private, must-revalidate")
     def user_route():
+        """
+        This representation is private to the logged-in user
+        (with their own buckets)
+        """
         if use_single_sign_on(app):
             buckets_available = app.permissions.buckets_in_session(session)
             return render_template("index.html",
@@ -40,10 +46,16 @@ def setup(app, db):
             return "Backdrop is running."
 
     @app.route(USER_SCOPE + "/sign_in")
+    @cache_control.nocache
     def oauth_sign_in():
+        """
+        This returns a redirect to the OAuth provider, so we shouldn't
+        allow this response to be cached.
+        """
         return app.oauth_service.authorize()
 
     @app.route(USER_SCOPE + "/sign_out")
+    @cache_control.set("private, must-revalidate")
     def oauth_sign_out():
         session.clear()
         flash("You have been signed out of Backdrop", category="success")
@@ -51,7 +63,12 @@ def setup(app, db):
                                oauth_base_url=app.config['OAUTH_BASE_URL'])
 
     @app.route(USER_SCOPE + "/authorized")
+    @cache_control.nocache
     def oauth_authorized():
+        """
+        The result of this is a redirect, which shouldn't be cached in
+        case their permissions get changed, etc.
+        """
         auth_code = request.args.get('code')
         if not auth_code:
             abort(400)
@@ -73,6 +90,7 @@ def setup(app, db):
         return redirect(url_for(ADMIN_UI_HOST, "user_route"))
 
     @app.route(USER_SCOPE + "/not_authorized")
+    @cache_control.nocache
     def not_authorized():
         return render_template("signon/not_authorized.html")
 
@@ -97,6 +115,7 @@ def setup(app, db):
 
     @app.route('/<bucket:bucket_name>/upload', methods=['GET', 'POST'])
     @protected
+    @cache_control.set("private, must-revalidate")
     def upload(bucket_name):
         current_user_email = session.get("user").get("email")
         if not app.permissions.allowed(current_user_email, bucket_name):
