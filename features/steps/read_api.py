@@ -46,6 +46,12 @@ def step(context, expected_status):
     assert_that(context.response.status_code, is_(int(expected_status)))
 
 
+@then('I should get a "{header}" header of "{value}"')
+def step(context, header, value):
+    print(context.response.headers)
+    assert_that(context.response.headers.get(header), is_(value))
+
+
 @then('I should get back a message: "{expected_message}"')
 def step(context, expected_message):
     assert_that(
