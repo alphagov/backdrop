@@ -31,4 +31,4 @@ class SplinterResponse:
     def __init__(self, browser):
         self.status_code = browser.status_code
         self.data = None
-        self.headers = None
+        self.headers = dict(browser.response.getheaders())
