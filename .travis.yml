@@ -17,3 +17,5 @@ after_script:
 branches:
   except:
     - release
+notifications:
+  email: false
