@@ -36,8 +36,11 @@ DATE=$(date +'%Y%m%d-%H%M%S')
 DUMPDIR="dump-$DATE"
 FILENAME="backdrop-$DATE.tar.gz"
 
+# collections to ignore
+BLACKLIST='system.indexes\|govuk_asset_requests'
+
 # ssh to mongo-1 and mongodump
-ssh $SOURCE_HOST "mongodump -d backdrop -o ${DUMPDIR}"
+ssh $SOURCE_HOST "mongo backdrop --eval 'db.getCollectionNames().join(\"\\n\")' --quiet | grep -v '\\(${BLACKLIST}\\)' | xargs -L 1 mongodump -d backdrop -o ${DUMPDIR} -c"
 
 # ssh and tar dump folder
 ssh $SOURCE_HOST "tar czvf ${FILENAME} ${DUMPDIR}"
