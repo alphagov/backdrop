@@ -22,6 +22,11 @@ def setup(app, db):
         backdrop_admin_ui_host=ADMIN_UI_HOST
     )
 
+    @app.after_request
+    def prevent_clickjacking(response):
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        return response
+
     def protected(f):
         @wraps(f)
         def verify_user_logged_in(*args, **kwargs):

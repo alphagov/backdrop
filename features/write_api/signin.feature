@@ -11,3 +11,4 @@ Feature: Sign in
        Given I am logged in as "Alex"
         when I go to "/_user"
         then I should see the text "Upload a CSV to the my_bucket bucket"
+          and I should get a "x-frame-options" header of "SAMEORIGIN"
