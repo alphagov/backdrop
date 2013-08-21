@@ -38,8 +38,8 @@ def before_scenario(context, _):
     storage.connection.drop_database(storage.name)
 
 
-def after_scenario(context, _):
-    context.client.after_scenario()
+def after_scenario(context, scenario):
+    context.client.after_scenario(scenario)
 
 
 def after_feature(context, _):
