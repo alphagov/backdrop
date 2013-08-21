@@ -118,17 +118,16 @@ def customer_satisfaction(rows):
     rows = list(rows)
     yield ["_timestamp", "_id", "satisfaction_tax_disc", "satisfaction_sorn"]
 
-    def deamericanised_date(string):
+    def date_or_none(string):
         try:
-            date = parse_time_as_utc(string)
-            return as_utc(datetime(date.year, date.day, date.month))
+            return parse_time_as_utc(string)
         except ValueError:
             return None
 
     for row_number in itertools.count(4):
         row = rows[row_number]
-        bad_date, tax_disc_satisfaction, sorn_satisfaction = row
-        date = deamericanised_date(bad_date)
+        date_string, tax_disc_satisfaction, sorn_satisfaction = row
+        date = date_or_none(date_string)
 
         if date is None:
             return
