@@ -54,7 +54,6 @@ Feature: EVL Upload
              {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 1047, "successful_ivr": 18315, "successful_web": 100800}
              """
 
-    @wip
     Scenario: Upload customer satisfaction
         Given a file named "EVL Satisfaction.xlsx" with fixture "contrib/EVL Customer Satisfaction.xlsx"
          and I am logged in
