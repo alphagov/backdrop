@@ -13,7 +13,7 @@ from ..core import cache_control
 def setup(app, db):
     USER_SCOPE = app.config['USER_SCOPE']
     ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
-    MAX_UPLOAD_SIZE = 100000
+    MAX_UPLOAD_SIZE = 1000000
 
     app.oauth_service = Signonotron2(
         client_id=app.config['OAUTH_CLIENT_ID'],
