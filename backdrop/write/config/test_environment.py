@@ -17,7 +17,7 @@ PERMISSIONS = {
         'my_bucket', 'bucket_with_auto_id', 'foo',
         'my_xlsx_bucket', 'evl_ceg_data', 'evl_services_volumetrics',
         'evl_services_failures', 'evl_channel_volumetrics',
-        'bucket_with_timestamp_auto_id'
+        'evl_customer_satisfaction', 'bucket_with_timestamp_auto_id'
     ],
     'some.other@example.com': ['foo']
 }
