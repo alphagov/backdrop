@@ -61,7 +61,7 @@ Feature: EVL Upload
         when I go to "/evl_customer_satisfaction/upload"
          and I enter "EVL Satisfaction.xlsx" into the file upload field
          and I click "Upload"
-        then the platform should have "112" items stored in "evl_customer_satisfaction"
+        then the platform should have "113" items stored in "evl_customer_satisfaction"
          and the "evl_customer_satisfaction" bucket should have items:
              """
              {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "satisfaction_tax_disc": 0.425385001089928, "satisfaction_sorn": 0.762844168796153}

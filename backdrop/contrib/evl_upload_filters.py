@@ -112,3 +112,23 @@ def channel_volumetrics(rows):
 
         yield [date, parse_time_as_utc(date).date().isoformat(), agent, ivr,
                web]
+
+def date_or_none(string):
+    try:
+        return parse_time_as_utc(string)
+    except ValueError:
+        return None
+
+def customer_satisfaction(rows):
+    rows = list(rows)
+    yield ["_timestamp", "_id", "satisfaction_tax_disc", "satisfaction_sorn"]
+
+    for row_number in itertools.count(4):
+        row = rows[row_number]
+        date, tax_disc_satisfaction, sorn_satisfaction = row
+        parsed_date = date_or_none(date)
+
+        if parsed_date is None:
+            return
+        else:
+            yield [date, parse_time_as_utc(date).date().isoformat(), tax_disc_satisfaction, sorn_satisfaction]
