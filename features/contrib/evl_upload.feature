@@ -53,3 +53,17 @@ Feature: EVL Upload
              {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 1039, "successful_ivr": 19985, "successful_web": 102182}
              {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 1047, "successful_ivr": 18315, "successful_web": 100800}
              """
+
+    @wip
+    Scenario: Upload customer satisfaction
+        Given a file named "EVL Satisfaction.xlsx" with fixture "contrib/EVL Customer Satisfaction.xlsx"
+         and I am logged in
+        when I go to "/evl_customer_satisfaction/upload"
+         and I enter "EVL Satisfaction.xlsx" into the file upload field
+         and I click "Upload"
+        then the platform should have "112" items stored in "evl_customer_satisfaction"
+         and the "evl_customer_satisfaction" bucket should have items:
+             """
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "satisfaction_tax_disc": 0.425385001089928, "satisfaction_sorn": 0.762844168796153}
+             {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "satisfaction_tax_disc": 0.372564254686694, "satisfaction_sorn": 0.473557589451075}
+             """
