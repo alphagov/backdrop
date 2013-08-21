@@ -63,6 +63,6 @@ Feature: EVL Upload
         then the platform should have "113" items stored in "evl_customer_satisfaction"
          and the "evl_customer_satisfaction" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "satisfaction_tax_disc": 0.425385001089928, "satisfaction_sorn": 0.762844168796153}
-             {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "satisfaction_tax_disc": 0.372564254686694, "satisfaction_sorn": 0.473557589451075}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "satisfaction_tax_disc": 1.2487024060928635, "satisfaction_sorn": 1.4370298628996634}
+             {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "satisfaction_tax_disc": 1.1662755514934828, "satisfaction_sorn": 1.3581011781786714}
              """

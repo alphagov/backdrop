@@ -92,16 +92,14 @@ class EVLServiceVolumetrics(unittest.TestCase):
                                [tuesday, "2013-07-30", 20, 40, 50]]))
 
     def test_converts_customer_satisfaction_raw_data_to_normalised_data(self):
-        # These dates are purposefully what we receive. We are aware this
-        # looks wrong
-        bad_may = d_tz(2013, 1, 5)
-        bad_june = d_tz(2013, 1, 6)
-        bad_july = d_tz(2013, 1, 7)
+        may = d_tz(2013, 5, 1)
+        june = d_tz(2013, 6, 1)
+        july = d_tz(2013, 7, 1)
         raw_data = \
             self.ignore_rows(4) + \
-            [[bad_may, 0.1, 0.2],
-             [bad_june, 0.3, 0.4],
-             [bad_july, 0.5, 0.6],
+            [[may, 0.1, 0.2],
+             [june, 0.3, 0.4],
+             [july, 0.5, 0.6],
              ["Total Result", 1, 2]]
 
         data = list(customer_satisfaction(raw_data))
