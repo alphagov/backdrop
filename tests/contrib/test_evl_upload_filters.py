@@ -1,7 +1,7 @@
 from datetime import timedelta
 import unittest
 from hamcrest import assert_that, is_
-from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics
+from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics, customer_satisfaction
 from tests.support.test_helpers import d_tz
 
 
@@ -90,3 +90,21 @@ class EVLServiceVolumetrics(unittest.TestCase):
         assert_that(data, is_([["_timestamp", "_id", "successful_agent", "successful_ivr", "successful_web"],
                                [monday, "2013-07-29", 10, 30, 40],
                                [tuesday, "2013-07-30", 20, 40, 50]]))
+
+    def test_converts_customer_satisfaction_raw_data_to_normalised_data(self):
+        may = d_tz(2013, 5, 1)
+        june = d_tz(2013, 6, 1)
+        july = d_tz(2013, 7, 1)
+        raw_data = \
+            self.ignore_rows(4) + \
+            [[may, 0.1, 0.2],
+             [june, 0.3, 0.4],
+             [july, 0.5, 0.6],
+             ["Total Result", 1, 2]]
+
+        data = list(customer_satisfaction(raw_data))
+
+        assert_that(data, is_([["_timestamp", "_id", "satisfaction_tax_disc", "satisfaction_sorn"],
+                               [may, "2013-05-01", 0.1, 0.2],
+                               [june, "2013-06-01", 0.3, 0.4],
+                               [july, "2013-07-01", 0.5, 0.6]]))
