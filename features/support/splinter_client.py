@@ -41,7 +41,8 @@ class SplinterClient(BaseClient):
         try:
             success = self.browser.driver.save_screenshot(filename)
             if not success:
-                logger.warn("Unable to save screenshot %s: IO error" % filename)
+                logger.warn(
+                    "Unable to save screenshot %s: IO error" % filename)
         except Exception as e:
             logger.warn("Unable to save screenshot %s: Exception" % filename)
             logger.warn(e)
