@@ -17,7 +17,7 @@ class BaseClient(object):
     def before_scenario(self):
         pass
 
-    def after_scenario(self):
+    def after_scenario(self, scenario):
         pass
 
     def spin_down(self):
