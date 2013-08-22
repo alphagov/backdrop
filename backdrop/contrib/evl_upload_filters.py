@@ -1,6 +1,6 @@
 from datetime import datetime
 import itertools
-from backdrop.core.timeutils import parse_time_as_utc
+from backdrop.core.timeutils import parse_time_as_utc, as_utc
 
 
 def ceg_volumes(rows):
@@ -112,3 +112,25 @@ def channel_volumetrics(rows):
 
         yield [date, parse_time_as_utc(date).date().isoformat(), agent, ivr,
                web]
+
+
+def customer_satisfaction(rows):
+    rows = list(rows)
+    yield ["_timestamp", "_id", "satisfaction_tax_disc", "satisfaction_sorn"]
+
+    def date_or_none(string):
+        try:
+            return parse_time_as_utc(string)
+        except ValueError:
+            return None
+
+    for row_number in itertools.count(4):
+        row = rows[row_number]
+        date_string, tax_disc_satisfaction, sorn_satisfaction = row
+        date = date_or_none(date_string)
+
+        if date is None:
+            return
+        else:
+            yield [date.isoformat(), date.date().isoformat(),
+                   tax_disc_satisfaction, sorn_satisfaction]

@@ -30,7 +30,7 @@ Feature: csv upload validation
          and the platform should have "0" items stored in "foo"
 
     Scenario: file too large
-       Given a file named "data.csv" of size "100000" bytes
+       Given a file named "data.csv" of size "1000000" bytes
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
