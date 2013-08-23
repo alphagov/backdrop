@@ -1,6 +1,6 @@
 @use_splinter_client
 Feature: EVL Upload
-
+    @wip
     Scenario: Upload call center volumes
        Given a file named "CEG Data.xlsx" with fixture "contrib/CEG Transaction Tracker.xlsx"
          and I am logged in
@@ -24,7 +24,7 @@ Feature: EVL Upload
         then the platform should have "1" items stored in "evl_services_volumetrics"
          and the "evl_services_volumetrics" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "timeSpan":"day", "successful_tax_disc": 151065, "successful_sorn": 16718}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "timeSpan":"day", "successful_tax_disc": 100.0, "successful_sorn": 200.0}
              """
 
     Scenario: Upload service failures
@@ -36,9 +36,9 @@ Feature: EVL Upload
         then the platform should have "136" items stored in "evl_services_failures"
          and the "evl_services_failures" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "count": 89, "description": "Abandoned"}
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "count": 50, "description": "LPB Response Code was PSP Session Timeout"}
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 354, "description": "User Cancelled Transaction"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "count": 1, "description": "Abandoned"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "count": 67, "description": "LPB Response Code was PSP Session Timeout"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 8, "description": "User Cancelled Transaction"}
              """
 
     Scenario: Upload channel volumetrics
@@ -50,8 +50,8 @@ Feature: EVL Upload
         then the platform should have "2" items stored in "evl_channel_volumetrics"
          and the "evl_channel_volumetrics" bucket should have items:
              """
-             {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 1039, "successful_ivr": 19985, "successful_web": 102182}
-             {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 1047, "successful_ivr": 18315, "successful_web": 100800}
+             {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 100.0, "successful_ivr": 101.0, "successful_web": 102.0}
+             {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 101.0, "successful_ivr": 102.0, "successful_web": 103.0}
              """
 
     Scenario: Upload customer satisfaction
