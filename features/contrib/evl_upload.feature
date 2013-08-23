@@ -1,6 +1,7 @@
 @use_splinter_client
 Feature: EVL Upload
 
+    @wip
     Scenario: Upload call center volumes
        Given a file named "CEG Data.xlsx" with fixture "contrib/CEG Transaction Tracker.xlsx"
          and I am logged in
@@ -10,9 +11,7 @@ Feature: EVL Upload
         then the platform should have "71" items stored in "evl_ceg_data"
          and the "evl_ceg_data" bucket should have items:
              """
-             {"_timestamp": "2008-09-01T00:00:00+00:00", "_id": "2008-09-01", "timeSpan":"month", "relicensing_web": 1039833, "relicensing_ivr": 249488, "relicensing_agent": 7935, "sorn_web": 161110, "sorn_ivr": 49889, "sorn_agent": 1345, "agent_automated_dupes": 13723, "calls_answered_by_advisor": 63575}
-             {"_timestamp": "2012-04-01T00:00:00+00:00", "_id": "2012-04-01", "timeSpan":"month", "relicensing_web": 1551564, "relicensing_ivr": 251634, "relicensing_agent": 7159, "sorn_web": 207689, "sorn_ivr": 48313, "sorn_agent": 2141, "agent_automated_dupes": 7489, "calls_answered_by_advisor": 32214}
-             {"_timestamp": "2013-02-01T00:00:00+00:00", "_id": "2013-02-01", "timeSpan":"month", "relicensing_web": 1861016, "relicensing_ivr": 300243, "relicensing_agent": 9225, "sorn_web": 208062, "sorn_ivr": 41724, "sorn_agent": 3434, "agent_automated_dupes": 6833, "calls_answered_by_advisor": 30437}
+             {"_timestamp": "2008-09-01T00:00:00+00:00", "_id": "2008-09-01", "timeSpan":"month", "relicensing_web": 100, "relicensing_ivr": 200, "relicensing_agent": 700, "sorn_web": 1100, "sorn_ivr": 1200, "sorn_agent": 1300, "agent_automated_dupes": 1400, "calls_answered_by_advisor": 1500}
              """
 
     Scenario: Upload services volumetrics
@@ -24,7 +23,7 @@ Feature: EVL Upload
         then the platform should have "1" items stored in "evl_services_volumetrics"
          and the "evl_services_volumetrics" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "timeSpan":"day", "successful_tax_disc": 151065, "successful_sorn": 16718}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "timeSpan":"day", "successful_tax_disc": 100.0, "successful_sorn": 200.0}
              """
 
     Scenario: Upload service failures
@@ -36,9 +35,9 @@ Feature: EVL Upload
         then the platform should have "136" items stored in "evl_services_failures"
          and the "evl_services_failures" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "count": 89, "description": "Abandoned"}
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "count": 50, "description": "LPB Response Code was PSP Session Timeout"}
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 354, "description": "User Cancelled Transaction"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.0", "type": "tax-disc", "reason": 0, "count": 1, "description": "Abandoned"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.tax-disc.66", "type": "tax-disc", "reason": 66, "count": 67, "description": "LPB Response Code was PSP Session Timeout"}
+             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01.sorn.5", "type": "sorn", "reason": 5, "count": 8, "description": "User Cancelled Transaction"}
              """
 
     Scenario: Upload channel volumetrics
@@ -50,8 +49,8 @@ Feature: EVL Upload
         then the platform should have "2" items stored in "evl_channel_volumetrics"
          and the "evl_channel_volumetrics" bucket should have items:
              """
-             {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 1039, "successful_ivr": 19985, "successful_web": 102182}
-             {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 1047, "successful_ivr": 18315, "successful_web": 100800}
+             {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 100.0, "successful_ivr": 101.0, "successful_web": 102.0}
+             {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 101.0, "successful_ivr": 102.0, "successful_web": 103.0}
              """
 
     Scenario: Upload customer satisfaction
