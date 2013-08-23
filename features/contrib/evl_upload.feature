@@ -87,6 +87,6 @@ Feature: EVL Upload
         then the platform should have "336" items stored in "evl_volumetrics"
          and the "evl_volumetrics" bucket should have items:
              """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "service": 1.2487024060928635, "channel": 1.4370298628996634}
-             {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "service": 1.1662755514934828, "channel": 1.3581011781786714}
+             {"_timestamp": "2012-08-01T00:00:00+00:00", "_id": "2013-08-01", "channel": "manual", "service": "tax-disc", "transaction": "V-V890 Another transaction", "volume" : 123456},
+             {"_timestamp": "2013-05-01T00:00:00+00:00", "_id": "2007-07-01", "channel": "assisted-digital", "service": "sorn", "transaction": "V-V11 Some transaction", "volume": 987654}
              """
