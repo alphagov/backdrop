@@ -3,31 +3,36 @@ from hamcrest import *
 
 
 def extract_transaction_rows(sheet):
+    HEADER_INDEX = 3
     TRANSACTION_INDEXES = {
-        "header": 3,
-        "V-V10 Licence Application Post Office": 4,
-        "V-V11 Licence Renewal Reminder Post Office": 5,
-        "V-V11 Some transaction": 7,
-        "V-V10 Licence Application EVL": 10,
-        "V-V11 Fleets": 11,
-        "V-V11 Licence Renewal Reminder EVL": 12,
-        "V-V85 and V85/1 HGV Licence Application EVL": 13,
-        "V-V11 SORN EVL": 15,
-        "V-V85/1 HGV SORN Declaration EVL": 16,
-        "V-V890 SORN Declaration EVL": 17,
-        "V-V890 SORN Declaration Fleets": 18,
-        "V-V890 Another transaction": 21,
-        "V-V11 Licence Renewal Reminder Local Office": 22,
-        "V-V85 and V85/1 HGV Licence Application": 23,
-        "V-V11 SORN Local Office": 25,
-        "V-V85/1 HGV SORN Declaration": 26,
-        "V-V890 SORN Declaration": 27,
-        "V-V890 SORN Declaration Key from Image": 28,
-        "V-V890 SORN Declaration Refunds Input": 29,
-        "V-V890 SORN Declaration Vehicles Input": 30,
-        "V-V890 SORN Declaration Vehicles Triage": 31
+           4: ["Assisted Digital", "Relicensing"],
+           5: ["Assisted Digital", "Relicensing"],
+           7: ["Assisted Digital", "SORN"],
+           10: ["Fully Digital", "Relicensing"],
+           11: ["Fully Digital", "Relicensing"],
+           12: ["Fully Digital", "Relicensing"],
+           13: ["Fully Digital", "Relicensing"],
+           15: ["Fully Digital", "SORN"],
+           16: ["Fully Digital", "SORN"],
+           17: ["Fully Digital", "SORN"],
+           18: ["Fully Digital", "SORN"],
+           21: ["Manual", "Relicensing"],
+           22: ["Manual", "Relicensing"],
+           23: ["Manual", "Relicensing"],
+           25: ["Manual", "SORN"],
+           26: ["Manual", "SORN"],
+           27: ["Manual", "SORN"],
+           28: ["Manual", "SORN"],
+           29: ["Manual", "SORN"],
+           30: ["Manual", "SORN"],
+           31: ["Manual", "SORN"],
     }
-    return map(lambda i: sheet[i], TRANSACTION_INDEXES.values())
+
+    def transaction_row(index):
+        channel_service = TRANSACTION_INDEXES[index]
+        return channel_service + sheet[index][2:4]
+
+    return sheet[HEADER_INDEX], map(transaction_row, TRANSACTION_INDEXES.keys())
 
 
 class TestEVLVolumetrics(unittest.TestCase):
@@ -72,28 +77,29 @@ class TestEVLVolumetrics(unittest.TestCase):
         ]
 
 
-        assert_that(extract_transaction_rows(sheet), is_not(has_item(["Ignore"])))
-        assert_that(extract_transaction_rows(sheet), has_items(
-           ["Channel Descriptions", "", "Transaction", "Apr 2012"],
+        header, rows = extract_transaction_rows(sheet)
+        assert_that(header, is_(["Channel Descriptions", "", "Transaction", "Apr 2012"]))
+        assert_that(rows, is_not(has_item(["Ignore"])))
+        assert_that(rows, has_items(
            ["Assisted Digital", "Relicensing", "V-V10 Licence Application Post Office", 1000],
-           ["", "", "V-V11 Licence Renewal Reminder Post Office", 1001],
-           ["", "SORN", "V-V11 Some transaction", 1003],
+           ["Assisted Digital", "Relicensing", "V-V11 Licence Renewal Reminder Post Office", 1001],
+           ["Assisted Digital", "SORN", "V-V11 Some transaction", 1003],
            ["Fully Digital", "Relicensing", "V-V10 Licence Application EVL", 1006],
-           ["", "", "V-V11 Fleets", 1007],
-           ["", "", "V-V11 Licence Renewal Reminder EVL", 1008],
-           ["", "", "V-V85 and V85/1 HGV Licence Application EVL", 1009],
-           ["", "SORN", "V-V11 SORN EVL", 1011],
-           ["", "", "V-V85/1 HGV SORN Declaration EVL", 1012],
-           ["", "", "V-V890 SORN Declaration EVL", 1013],
-           ["", "", "V-V890 SORN Declaration Fleets", 1014],
+           ["Fully Digital", "Relicensing", "V-V11 Fleets", 1007],
+           ["Fully Digital", "Relicensing", "V-V11 Licence Renewal Reminder EVL", 1008],
+           ["Fully Digital", "Relicensing", "V-V85 and V85/1 HGV Licence Application EVL", 1009],
+           ["Fully Digital", "SORN", "V-V11 SORN EVL", 1011],
+           ["Fully Digital", "SORN", "V-V85/1 HGV SORN Declaration EVL", 1012],
+           ["Fully Digital", "SORN", "V-V890 SORN Declaration EVL", 1013],
+           ["Fully Digital", "SORN", "V-V890 SORN Declaration Fleets", 1014],
            ["Manual", "Relicensing", "V-V890 Another transaction", 1017],
-           ["", "", "V-V11 Licence Renewal Reminder Local Office", 1018],
-           ["", "", "V-V85 and V85/1 HGV Licence Application", 1019],
-           ["", "SORN", "V-V11 SORN Local Office", 1021],
-           ["", "", "V-V85/1 HGV SORN Declaration", 1022],
-           ["", "", "V-V890 SORN Declaration", 1023],
-           ["", "", "V-V890 SORN Declaration Key from Image", 1024],
-           ["", "", "V-V890 SORN Declaration Refunds Input", 1025],
-           ["", "", "V-V890 SORN Declaration Vehicles Input", 1026],
-           ["", "", "V-V890 SORN Declaration Vehicles Triage", 1027]
+           ["Manual", "Relicensing", "V-V11 Licence Renewal Reminder Local Office", 1018],
+           ["Manual", "Relicensing", "V-V85 and V85/1 HGV Licence Application", 1019],
+           ["Manual", "SORN", "V-V11 SORN Local Office", 1021],
+           ["Manual", "SORN", "V-V85/1 HGV SORN Declaration", 1022],
+           ["Manual", "SORN", "V-V890 SORN Declaration", 1023],
+           ["Manual", "SORN", "V-V890 SORN Declaration Key from Image", 1024],
+           ["Manual", "SORN", "V-V890 SORN Declaration Refunds Input", 1025],
+           ["Manual", "SORN", "V-V890 SORN Declaration Vehicles Input", 1026],
+           ["Manual", "SORN", "V-V890 SORN Declaration Vehicles Triage", 1027]
         ))
