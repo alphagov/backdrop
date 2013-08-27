@@ -137,4 +137,14 @@ def customer_satisfaction(rows):
 
 
 def volumetrics(sheets):
-    pass
+    rows = list(list(sheets)[2])
+
+    yield ["_timestamp", "service", "channel", "transaction", "volume"]
+
+    first_date = as_utc(datetime.strptime(rows[3][3], "%b %Y"))
+    service = "tax-disc"
+    channel = "assisted-digital"
+    transaction = rows[4][2]
+    volume = rows[4][3]
+
+    yield [first_date.isoformat(), service, channel, transaction, volume]
