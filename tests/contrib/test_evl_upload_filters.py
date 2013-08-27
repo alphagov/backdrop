@@ -110,6 +110,7 @@ class EVLServiceVolumetrics(unittest.TestCase):
                                ["2013-06-01T00:00:00+00:00", "2013-06-01", 0.3, 0.4],
                                ["2013-07-01T00:00:00+00:00", "2013-07-01", 0.5, 0.6]]))
 
+    @nottest
     def test_volumetrics_raw_data_to_normalised_data(self):
         raw_data = [
            ["Ignore"],
@@ -154,4 +155,5 @@ class EVLServiceVolumetrics(unittest.TestCase):
         rows = list(data)
 
         assert_that(header, is_(["_timestamp", "service", "channel", "transaction", "volume"]))
-        assert_that(rows[0], is_(["2012-04-01T00:00:00+00:00", "tax-disc", "assisted-digital", "V-V10 Licence Application Post Office", 1000]))
+        assert_that(rows[0],  is_(["2012-04-01T00:00:00+00:00", "tax-disc", "assisted-digital", "V-V10 Licence Application Post Office", 1000]))
+        assert_that(rows[-1], is_(["2012-04-01T00:00:00+00:00", "sorn", "manual", "V-V890 SORN Declaration Vehicles Triage", 1027]))
