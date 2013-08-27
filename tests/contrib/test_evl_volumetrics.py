@@ -1,5 +1,8 @@
+from pprint import pprint
 import unittest
 from hamcrest import *
+from datetime import datetime
+from backdrop.core.timeutils import as_utc
 
 
 def extract_transaction_rows(sheet):
@@ -33,6 +36,30 @@ def extract_transaction_rows(sheet):
         return channel_service + sheet[index][2:4]
 
     return sheet[HEADER_INDEX], map(transaction_row, TRANSACTION_INDEXES.keys())
+
+
+def create_transaction_data(header, row):
+    CHANNEL_INDEX = 0
+    SERVICE_INDEX = 1
+    TRANSACTION_NAME_INDEX = 2
+    DATES_START_INDEX = 3
+    SERVICES = {
+        "Relicensing": "tax-disc",
+        "SORN": "sorn"
+    }
+
+    volumes = zip(header, row)[DATES_START_INDEX:]
+
+    def transaction_data(date_volume):
+        date, volume = date_volume
+        date = as_utc(datetime.strptime(date, "%b %Y"))
+        service = SERVICES[row[SERVICE_INDEX]]
+        channel = row[CHANNEL_INDEX].lower().replace(" ", "-")
+        transaction = row[TRANSACTION_NAME_INDEX]
+
+        return [date.isoformat(), service, channel, transaction, volume]
+
+    return map(transaction_data, volumes)
 
 
 class TestEVLVolumetrics(unittest.TestCase):
@@ -102,4 +129,25 @@ class TestEVLVolumetrics(unittest.TestCase):
            ["Manual", "SORN", "V-V890 SORN Declaration Refunds Input", 1025],
            ["Manual", "SORN", "V-V890 SORN Declaration Vehicles Input", 1026],
            ["Manual", "SORN", "V-V890 SORN Declaration Vehicles Triage", 1027]
+        ))
+
+    def test_extracting_header_removes_summary(self):
+        pass
+
+    def test_creating_transaction_data_from_row_and_header(self):
+        header = ["Channel Descriptions", "", "Transaction", "Apr 2012", "Mar 2013", "May 2013"]
+        row = ["Manual", "Relicensing", "V-V890 Another transaction", 1, 2, 3]
+
+        assert_that(create_transaction_data(header, row), has_items(
+            ["2012-04-01T00:00:00+00:00", "tax-disc", "manual", "V-V890 Another transaction", 1],
+            ["2013-03-01T00:00:00+00:00", "tax-disc", "manual", "V-V890 Another transaction", 2],
+            ["2013-05-01T00:00:00+00:00", "tax-disc", "manual", "V-V890 Another transaction", 3],
+        ))
+
+    def test_creating_transaction_data_from_row_and_header_maps_channel_and_services(self):
+        header = ["Channel Descriptions", "", "Transaction", "Apr 2012"]
+        row = ["Fully Digital", "SORN", "V-V11 SORN EVL", 10]
+
+        assert_that(create_transaction_data(header, row), has_items(
+            ["2012-04-01T00:00:00+00:00", "sorn", "fully-digital", "V-V11 SORN EVL", 10],
         ))
