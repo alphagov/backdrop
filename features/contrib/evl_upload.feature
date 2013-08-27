@@ -48,8 +48,8 @@ Feature: EVL Upload
         then the platform should have "2" items stored in "evl_channel_volumetrics"
          and the "evl_channel_volumetrics" bucket should have items:
              """
-             {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 100.0, "successful_ivr": 101.0, "successful_web": 102.0}
-             {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 101.0, "successful_ivr": 102.0, "successful_web": 103.0}
+             {"_timestamp": "2013-07-29T00:00:00+00:00", "_id": "2013-07-29", "successful_agent": 100.0, "successful_ivr": 101.0, "successful_web": 102.0, "total_agent": 200.0, "total_ivr": 201.0, "total_web": 202.0}
+             {"_timestamp": "2013-07-30T00:00:00+00:00", "_id": "2013-07-30", "successful_agent": 101.0, "successful_ivr": 102.0, "successful_web": 103.0, "total_agent": 201.0, "total_ivr": 202.0, "total_web": 203.0}
              """
 
     Scenario: Upload customer satisfaction

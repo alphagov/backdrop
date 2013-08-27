@@ -96,8 +96,9 @@ def service_failures(sheets):
 
 def channel_volumetrics(rows):
     rows = list(rows)
-    yield ["_timestamp", "_id", "successful_agent", "successful_ivr",
-           "successful_web"]
+    yield ["_timestamp", "_id",
+           "successful_agent", "successful_ivr", "successful_web",
+           "total_agent", "total_ivr", "total_web"]
 
     for column in range(1, 8):
         all = rows[5][column]
@@ -106,12 +107,18 @@ def channel_volumetrics(rows):
             return
 
         date = rows[1][column]
-        agent = rows[2][column]
-        ivr = rows[3][column]
-        web = rows[4][column]
 
-        yield [date, parse_time_as_utc(date).date().isoformat(), agent, ivr,
-               web]
+        agent_successful = rows[2][column]
+        ivr_successful = rows[3][column]
+        web_successful = rows[4][column]
+
+        agent_total = rows[6][column]
+        ivr_total = rows[7][column]
+        web_total = rows[8][column]
+
+        yield [date, parse_time_as_utc(date).date().isoformat(),
+               agent_successful, ivr_successful, web_successful,
+               agent_total, ivr_total, web_total]
 
 
 def customer_satisfaction(rows):
