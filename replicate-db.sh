@@ -40,7 +40,7 @@ FILENAME="backdrop-$DATE.tar.gz"
 BLACKLIST='system.indexes\|govuk_asset_requests'
 
 # ssh to mongo-1 and mongodump
-ssh $SOURCE_HOST "mongo backdrop --eval 'db.getCollectionNames().join(\"\\n\")' --quiet | grep -v '\\(${BLACKLIST}\\)' | xargs -L 1 mongodump -d backdrop -o ${DUMPDIR} -c"
+ssh $SOURCE_HOST "mongo backdrop --eval 'rs.slaveOk(); db.getCollectionNames().join(\"\\n\")' --quiet | grep -v '\\(${BLACKLIST}\\)' | xargs -L 1 mongodump -d backdrop -o ${DUMPDIR} -c"
 
 # ssh and tar dump folder
 ssh $SOURCE_HOST "tar czvf ${FILENAME} ${DUMPDIR}"
@@ -55,10 +55,13 @@ ssh $SOURCE_HOST "rm -Rf ${FILENAME} ${DUMPDIR}"
 tar xzvf $FILENAME
 
 if [ -z "$2" ]; then
-	VAGRANT_CWD=../development vagrant ssh -c "cd /var/govuk/backdrop && mongorestore ${DUMPDIR}"
+	pushd ../puppet/development
+	vagrant ssh -c "cd /var/govuk/backdrop && mongorestore ${DUMPDIR}"
+	popd
 else
 	mongorestore -h $DESTINATION_HOST $DUMPDIR
 fi
 
 # cleanup locally
 rm -Rf $DUMPDIR
+rm -f $FILENAME
