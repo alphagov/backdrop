@@ -83,13 +83,17 @@ class EVLServiceVolumetrics(unittest.TestCase):
             [["IVR successful", 30, 40, '']] + \
             [["WEB successful", 40, 50, '']] + \
             [["Total successful all channels", 40, 50, 0]] + \
+            [["Agent total", 60, 30, '']] + \
+            [["IVR total", 20, 40, '']] + \
+            [["Web total", 70, 10, '']] + \
+            [["Total all channels", 150, 80, 0]] + \
             self.ignore_rows(17)
 
         data = list(channel_volumetrics(volumetrics_raw_data))
 
-        assert_that(data, is_([["_timestamp", "_id", "successful_agent", "successful_ivr", "successful_web"],
-                               [monday, "2013-07-29", 10, 30, 40],
-                               [tuesday, "2013-07-30", 20, 40, 50]]))
+        assert_that(data, is_([["_timestamp", "_id", "successful_agent", "successful_ivr", "successful_web", "total_agent", "total_ivr", "total_web"],
+                               [monday, "2013-07-29", 10, 30, 40, 60, 20, 70],
+                               [tuesday, "2013-07-30", 20, 40, 50, 30, 40, 10]]))
 
     def test_converts_customer_satisfaction_raw_data_to_normalised_data(self):
         may = d_tz(2013, 5, 1)
