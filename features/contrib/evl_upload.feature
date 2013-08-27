@@ -78,16 +78,10 @@ Feature: EVL Upload
              {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "satisfaction_tax_disc": 1.1662755514934828, "satisfaction_sorn": 1.3581011781786714}
              """
 
-    @wip
-    Scenario: Upload evl volumetrics 
+    Scenario: Upload evl volumetrics
         Given a file named "evl-volumetrics.xls" with fixture "contrib/evl-volumetrics.xls"
          and I am logged in
         when I go to "/evl_volumetrics/upload"
          and I enter "evl-volumetrics.xls" into the file upload field
          and I click "Upload"
         then the platform should have "336" items stored in "evl_volumetrics"
-         and the "evl_volumetrics" bucket should have items:
-             """
-             {"_timestamp": "2012-08-01T00:00:00+00:00", "_id": "2013-08-01", "channel": "manual", "service": "tax-disc", "transaction": "V-V890 Another transaction", "volume" : 123456},
-             {"_timestamp": "2013-05-01T00:00:00+00:00", "_id": "2007-07-01", "channel": "assisted-digital", "service": "sorn", "transaction": "V-V11 Some transaction", "volume": 987654}
-             """

@@ -1,5 +1,6 @@
 from datetime import datetime
 import itertools
+from backdrop.contrib.evl_volumetrics import remove_summary_columns, extract_transaction_rows, create_transaction_data
 from backdrop.core.timeutils import parse_time_as_utc, as_utc
 
 
@@ -137,14 +138,12 @@ def customer_satisfaction(rows):
 
 
 def volumetrics(sheets):
-    rows = list(list(sheets)[2])
+    sheet = list(list(sheets)[2])
 
     yield ["_timestamp", "service", "channel", "transaction", "volume"]
 
-    first_date = as_utc(datetime.strptime(rows[3][3], "%b %Y"))
-    service = "tax-disc"
-    channel = "assisted-digital"
-    transaction = rows[4][2]
-    volume = rows[4][3]
+    header, rows = extract_transaction_rows(remove_summary_columns(sheet))
 
-    yield [first_date.isoformat(), service, channel, transaction, volume]
+    for row in rows:
+        for data in create_transaction_data(header, row):
+            yield data

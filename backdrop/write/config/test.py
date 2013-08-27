@@ -10,7 +10,8 @@ CLIENT_SECRET = "it's not important here"
 ALLOW_TEST_SIGNIN = True
 BUCKET_AUTO_ID_KEYS = {
     "bucket_with_auto_id": ["key", "start_at", "end_at"],
-    "bucket_with_timestamp_auto_id": ["_timestamp", "key"]
+    "bucket_with_timestamp_auto_id": ["_timestamp", "key"],
+    "evl_volumetrics": ["_timestamp", "service", "transaction"],
 }
 BUCKET_UPLOAD_FORMAT = {
     "bucket_with_timestamp_auto_id": "excel",
