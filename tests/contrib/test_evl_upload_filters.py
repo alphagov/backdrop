@@ -1,7 +1,8 @@
 from datetime import timedelta
 import unittest
 from hamcrest import assert_that, is_
-from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics, customer_satisfaction
+from nose.tools import nottest
+from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics, customer_satisfaction, volumetrics
 from tests.support.test_helpers import d_tz
 
 
@@ -108,3 +109,48 @@ class EVLServiceVolumetrics(unittest.TestCase):
                                ["2013-05-01T00:00:00+00:00", "2013-05-01", 0.1, 0.2],
                                ["2013-06-01T00:00:00+00:00", "2013-06-01", 0.3, 0.4],
                                ["2013-07-01T00:00:00+00:00", "2013-07-01", 0.5, 0.6]]))
+
+    @nottest
+    def test_volumetrics_raw_data_to_normalised_data(self):
+        raw_data = [
+           ["Ignore"],
+           ["Ignore"],
+           ["Ignore"],
+           ["Channel Descriptions", "", "Transaction", "Apr 2012"],
+           ["Assisted Digital", "Relicensing", "V-V10 Licence Application Post Office", 1000],
+           ["", "", "V-V11 Licence Renewal Reminder Post Office", 1001],
+           ["Ignore"],
+           ["", "SORN", "V-V11 Some transaction", 1003],
+           ["Ignore"],
+           ["Ignore"],
+           ["Fully Digital", "Relicensing", "V-V10 Licence Application EVL", 1006],
+           ["", "", "V-V11 Fleets", 1007],
+           ["", "", "V-V11 Licence Renewal Reminder EVL", 1008],
+           ["", "", "V-V85 and V85/1 HGV Licence Application EVL", 1009],
+           ["Ignore"],
+           ["", "SORN", "V-V11 SORN EVL", 1011],
+           ["", "", "V-V85/1 HGV SORN Declaration EVL", 1012],
+           ["", "", "V-V890 SORN Declaration EVL", 1013],
+           ["", "", "V-V890 SORN Declaration Fleets", 1014],
+           ["Ignore"],
+           ["Ignore"],
+           ["Manual", "Relicensing", "V-V890 Another transaction", 1017],
+           ["", "", "V-V11 Licence Renewal Reminder Local Office", 1018],
+           ["", "", "V-V85 and V85/1 HGV Licence Application", 1019],
+           ["Ignore"],
+           ["", "SORN", "V-V11 SORN Local Office", 1021],
+           ["", "", "V-V85/1 HGV SORN Declaration", 1022],
+           ["", "", "V-V890 SORN Declaration", 1023],
+           ["", "", "V-V890 SORN Declaration Key from Image", 1024],
+           ["", "", "V-V890 SORN Declaration Refunds Input", 1025],
+           ["", "", "V-V890 SORN Declaration Vehicles Input", 1026],
+           ["", "", "V-V890 SORN Declaration Vehicles Triage", 1027],
+           ["Ignore"],
+           ["Ignore"],
+           ["Ignore"]
+        ]
+
+        data = list(volumetrics(raw_data))
+
+        assert_that(data, is_([["_timestamp", "service", "channel", "transaction", "volume"],
+                               ["2012-04-01T00:00:00+00:00", "tax-disc", "V-V10 Licence Application Post Office", 1000]]))

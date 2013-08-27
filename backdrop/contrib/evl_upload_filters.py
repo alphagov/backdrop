@@ -134,3 +134,7 @@ def customer_satisfaction(rows):
         else:
             yield [date.isoformat(), date.date().isoformat(),
                    tax_disc_satisfaction, sorn_satisfaction]
+
+
+def volumetrics(sheets):
+    pass
