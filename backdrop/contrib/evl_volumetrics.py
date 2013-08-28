@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 from backdrop.core.timeutils import as_utc
 
+
 def extract_column_header(sheet):
     HEADER_INDEX = 3
     return sheet[HEADER_INDEX]
@@ -9,34 +10,35 @@ def extract_column_header(sheet):
 
 def extract_transaction_rows(sheet):
     TRANSACTION_INDEXES = {
-           4: ["Assisted Digital", "Relicensing"],
-           5: ["Assisted Digital", "Relicensing"],
-           7: ["Assisted Digital", "SORN"],
-           10: ["Fully Digital", "Relicensing"],
-           11: ["Fully Digital", "Relicensing"],
-           12: ["Fully Digital", "Relicensing"],
-           13: ["Fully Digital", "Relicensing"],
-           15: ["Fully Digital", "SORN"],
-           16: ["Fully Digital", "SORN"],
-           17: ["Fully Digital", "SORN"],
-           18: ["Fully Digital", "SORN"],
-           21: ["Manual", "Relicensing"],
-           22: ["Manual", "Relicensing"],
-           23: ["Manual", "Relicensing"],
-           25: ["Manual", "SORN"],
-           26: ["Manual", "SORN"],
-           27: ["Manual", "SORN"],
-           28: ["Manual", "SORN"],
-           29: ["Manual", "SORN"],
-           30: ["Manual", "SORN"],
-           31: ["Manual", "SORN"],
+        4: ["Assisted Digital", "Relicensing"],
+        5: ["Assisted Digital", "Relicensing"],
+        7: ["Assisted Digital", "SORN"],
+        10: ["Fully Digital", "Relicensing"],
+        11: ["Fully Digital", "Relicensing"],
+        12: ["Fully Digital", "Relicensing"],
+        13: ["Fully Digital", "Relicensing"],
+        15: ["Fully Digital", "SORN"],
+        16: ["Fully Digital", "SORN"],
+        17: ["Fully Digital", "SORN"],
+        18: ["Fully Digital", "SORN"],
+        21: ["Manual", "Relicensing"],
+        22: ["Manual", "Relicensing"],
+        23: ["Manual", "Relicensing"],
+        25: ["Manual", "SORN"],
+        26: ["Manual", "SORN"],
+        27: ["Manual", "SORN"],
+        28: ["Manual", "SORN"],
+        29: ["Manual", "SORN"],
+        30: ["Manual", "SORN"],
+        31: ["Manual", "SORN"],
     }
 
     def transaction_row(index):
         channel_service = TRANSACTION_INDEXES[index]
         return channel_service + sheet[index][2:]
 
-    return extract_column_header(sheet), map(transaction_row, TRANSACTION_INDEXES.keys())
+    return extract_column_header(sheet), map(transaction_row,
+                                             TRANSACTION_INDEXES.keys())
 
 
 def create_transaction_data(header, row):
@@ -76,10 +78,10 @@ def remove_summary_columns(sheet):
         else:
             return mem
 
-    date_indexes = reduce(add_date_index, range(DATES_START_INDEX,len(header)), [])
+    date_indexes = reduce(add_date_index,
+                          range(DATES_START_INDEX, len(header)), [])
 
     def remove_columns_from_row(row):
         return row[:DATES_START_INDEX] + [row[i] for i in date_indexes]
-
 
     return map(remove_columns_from_row, sheet)

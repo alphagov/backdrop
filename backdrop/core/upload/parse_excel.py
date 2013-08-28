@@ -4,18 +4,20 @@ import datetime
 from backdrop.core.errors import ParseError
 from backdrop.core.timeutils import utc
 
+
 class ExcelError(object):
     def __init__(self, description):
         self.description = description
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and \
-               self.description == other.description
+        return isinstance(other, self.__class__) \
+            and self.description == other.description
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
 EXCEL_ERROR = ExcelError("error in cell")
+
 
 def parse_excel(incoming_data):
     book = xlrd.open_workbook(file_contents=incoming_data.read())

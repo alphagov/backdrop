@@ -1,6 +1,7 @@
 from datetime import datetime
 import itertools
-from backdrop.contrib.evl_volumetrics import remove_summary_columns, extract_transaction_rows, create_transaction_data
+from backdrop.contrib.evl_volumetrics import remove_summary_columns, \
+    extract_transaction_rows, create_transaction_data
 from backdrop.core.timeutils import parse_time_as_utc, as_utc
 
 
