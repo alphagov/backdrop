@@ -10,7 +10,8 @@ CLIENT_SECRET = "it's not important here"
 ALLOW_TEST_SIGNIN = True
 BUCKET_AUTO_ID_KEYS = {
     "bucket_with_auto_id": ["key", "start_at", "end_at"],
-    "bucket_with_timestamp_auto_id": ["_timestamp", "key"]
+    "bucket_with_timestamp_auto_id": ["_timestamp", "key"],
+    "evl_volumetrics": ["_timestamp", "service", "transaction"],
 }
 BUCKET_UPLOAD_FORMAT = {
     "bucket_with_timestamp_auto_id": "excel",
@@ -20,6 +21,7 @@ BUCKET_UPLOAD_FORMAT = {
     "evl_services_failures": "excel",
     "evl_channel_volumetrics": "excel",
     "evl_customer_satisfaction": "excel",
+    "evl_volumetrics": "excel",
 }
 BUCKET_UPLOAD_FILTERS = {
     "evl_ceg_data": [
@@ -40,6 +42,9 @@ BUCKET_UPLOAD_FILTERS = {
     "evl_customer_satisfaction": [
         "backdrop.core.upload.filters.first_sheet_filter",
         "backdrop.contrib.evl_upload_filters.customer_satisfaction"
+    ],
+    "evl_volumetrics": [
+       "backdrop.contrib.evl_upload_filters.volumetrics"
     ],
 }
 

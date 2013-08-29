@@ -1,7 +1,8 @@
 from datetime import timedelta
 import unittest
 from hamcrest import assert_that, is_
-from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics, customer_satisfaction
+from nose.tools import nottest
+from backdrop.contrib.evl_upload_filters import service_volumetrics, service_failures, channel_volumetrics, customer_satisfaction, volumetrics
 from tests.support.test_helpers import d_tz
 
 
@@ -112,3 +113,50 @@ class EVLServiceVolumetrics(unittest.TestCase):
                                ["2013-05-01T00:00:00+00:00", "2013-05-01", 0.1, 0.2],
                                ["2013-06-01T00:00:00+00:00", "2013-06-01", 0.3, 0.4],
                                ["2013-07-01T00:00:00+00:00", "2013-07-01", 0.5, 0.6]]))
+
+    def test_volumetrics_raw_data_to_normalised_data(self):
+        raw_data = [
+            ["_", "_", "_", "_", "_", "_"],
+            ["_", "_", "_", "_", "_", "_"],
+            ["_", "_", "_", "_", "_", "_"],
+            ["Channel Descriptions", "", "Transaction", "Apr 2012", "2012/13 Total", "Mar 2013"],
+            ["Assisted Digital", "Relicensing", "V-V10 Licence Application Post Office", 1000, 2000, 3000],
+            ["", "", "V-V11 Licence Renewal Reminder Post Office", 1001, 2001, 3001],
+            ["_", "_", "_", "_", "_", "_"],
+            ["", "SORN", "V-V11 Some transaction", 1003, 2003, 3003],
+            ["_", "_", "_", "_", "_", "_"],
+            ["_", "_", "_", "_", "_", "_"],
+            ["Fully Digital", "Relicensing", "V-V10 Licence Application EVL", 1006, 2006, 3006],
+            ["", "", "V-V11 Fleets", 1007, 2007, 3007],
+            ["", "", "V-V11 Licence Renewal Reminder EVL", 1008, 2008, 3008],
+            ["", "", "V-V85 and V85/1 HGV Licence Application EVL", 1009, 2008, 3008],
+            ["_", "_", "_", "_", "_", "_"],
+            ["", "SORN", "V-V11 SORN EVL", 1011, 2011, 3011],
+            ["", "", "V-V85/1 HGV SORN Declaration EVL", 1012, 2012, 3012],
+            ["", "", "V-V890 SORN Declaration EVL", 1013, 2013, 3013],
+            ["", "", "V-V890 SORN Declaration Fleets", 1014, 2014, 3014],
+            ["_", "_", "_", "_", "_", "_"],
+            ["_", "_", "_", "_", "_", "_"],
+            ["Manual", "Relicensing", "V-V890 Another transaction", 1017, 2017, 3017],
+            ["", "", "V-V11 Licence Renewal Reminder Local Office", 1018, 2018, 3018],
+            ["", "", "V-V85 and V85/1 HGV Licence Application", 1019, 2019, 3019],
+            ["_", "_", "_", "_", "_", "_"],
+            ["", "SORN", "V-V11 SORN Local Office", 1021, 2021, 3021],
+            ["", "", "V-V85/1 HGV SORN Declaration", 1022, 2022, 3022],
+            ["", "", "V-V890 SORN Declaration", 1023, 2023, 3023],
+            ["", "", "V-V890 SORN Declaration Key from Image", 1024, 2024, 3024],
+            ["", "", "V-V890 SORN Declaration Refunds Input", 1025, 2025, 3025],
+            ["", "", "V-V890 SORN Declaration Vehicles Input", 1026, 2026, 3026],
+            ["", "", "V-V890 SORN Declaration Vehicles Triage", 1027, 2027, 3027],
+            ["_", "_", "_", "_", "_", "_"],
+            ["_", "_", "_", "_", "_", "_"],
+            ["_", "_", "_", "_", "_", "_"],
+        ]
+
+        data = volumetrics([[], [], raw_data])
+        header = next(data)
+        rows = list(data)
+
+        assert_that(header, is_(["_timestamp", "service", "channel", "transaction", "volume"]))
+        assert_that(rows[0],  is_(["2012-04-01T00:00:00+00:00", "tax-disc", "assisted-digital", "V-V10 Licence Application Post Office", 1000]))
+        assert_that(rows[-1], is_(["2013-03-01T00:00:00+00:00", "sorn", "manual", "V-V890 SORN Declaration Vehicles Triage", 3027]))

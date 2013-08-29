@@ -1,5 +1,7 @@
 from datetime import datetime
 import itertools
+from backdrop.contrib.evl_volumetrics import remove_summary_columns, \
+    extract_transaction_rows, create_transaction_data
 from backdrop.core.timeutils import parse_time_as_utc, as_utc
 
 
@@ -141,3 +143,15 @@ def customer_satisfaction(rows):
         else:
             yield [date.isoformat(), date.date().isoformat(),
                    tax_disc_satisfaction, sorn_satisfaction]
+
+
+def volumetrics(sheets):
+    sheet = list(list(sheets)[2])
+
+    yield ["_timestamp", "service", "channel", "transaction", "volume"]
+
+    header, rows = extract_transaction_rows(remove_summary_columns(sheet))
+
+    for row in rows:
+        for data in create_transaction_data(header, row):
+            yield data
