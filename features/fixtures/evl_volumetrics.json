@@ -1,0 +1,112 @@
+[
+  {
+    "transaction": "V-V85 and V85/1 HGV Licence Application",
+    "service": "tax-disc",
+    "volume": 9861.0,
+    "_updated_at": "2013-08-29T10:40:02.460000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVY4NSBhbmQgVjg1LzEgSEdWIExpY2VuY2UgQXBwbGljYXRpb24=",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "manual",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V85 and V85/1 HGV Licence Application EVL",
+    "service": "tax-disc",
+    "volume": 4572.0,
+    "_updated_at": "2013-08-29T10:40:02.289000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVY4NSBhbmQgVjg1LzEgSEdWIExpY2VuY2UgQXBwbGljYXRpb24gRVZM",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "fully-digital",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V890 Another transaction",
+    "service": "tax-disc",
+    "volume": 1017.0,
+    "_updated_at": "2013-08-29T09:18:31.877000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVY4OTAgQW5vdGhlciB0cmFuc2FjdGlvbg==",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "manual",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V10 Licence Application EVL",
+    "service": "tax-disc",
+    "volume": 121592.0,
+    "_updated_at": "2013-08-29T10:40:02.180000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMCBMaWNlbmNlIEFwcGxpY2F0aW9uIEVWTA==",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "fully-digital",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V10 Licence Application Local Office",
+    "service": "tax-disc",
+    "volume": 68658.0,
+    "_updated_at": "2013-08-29T10:40:02.407000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMCBMaWNlbmNlIEFwcGxpY2F0aW9uIExvY2FsIE9mZmljZQ==",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "manual",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V10 Licence Application Post Office",
+    "service": "tax-disc",
+    "volume": 595827.0,
+    "_updated_at": "2013-08-29T10:40:02.001000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMCBMaWNlbmNlIEFwcGxpY2F0aW9uIFBvc3QgT2ZmaWNl",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "assisted-digital",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V11 Fleets",
+    "service": "tax-disc",
+    "volume": 92497.0,
+    "_updated_at": "2013-08-29T10:40:02.238000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMSBGbGVldHM=",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "fully-digital",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V11 Licence Renewal Reminder EVL",
+    "service": "tax-disc",
+    "volume": 1500286.0,
+    "_updated_at": "2013-08-29T10:40:02.267000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMSBMaWNlbmNlIFJlbmV3YWwgUmVtaW5kZXIgRVZM",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "fully-digital",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V11 Licence Renewal Reminder Local Office",
+    "service": "tax-disc",
+    "volume": 13059.0,
+    "_updated_at": "2013-08-29T10:40:02.429000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMSBMaWNlbmNlIFJlbmV3YWwgUmVtaW5kZXIgTG9jYWwgT2ZmaWNl",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "manual",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  },
+  {
+    "transaction": "V-V11 Licence Renewal Reminder Post Office",
+    "service": "tax-disc",
+    "volume": 1266699.0,
+    "_updated_at": "2013-08-29T10:40:02.075000",
+    "_month_start_at": "2012-04-01T00:00:00",
+    "_id": "MjAxMi0wNC0wMVQwMDowMDowMCswMDowMC50YXgtZGlzYy5WLVYxMSBMaWNlbmNlIFJlbmV3YWwgUmVtaW5kZXIgUG9zdCBPZmZpY2U=",
+    "_week_start_at": "2012-03-26T00:00:00",
+    "channel": "assisted-digital",
+    "_timestamp": "2012-04-01T00:00:00+00:00"
+  }
+]

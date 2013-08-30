@@ -15,6 +15,7 @@ RAW_QUERIES_ALLOWED = {
   # electronic vehicle licensing
   "electronic_vehicle_licensing_monitoring": True,
   "evl_customer_satisfaction": True,
+  "evl_volumetrics": True,
   # fco
   "deposit_foreign_marriage_journey": True,
   "deposit_foreign_marriage_monitoring": True,
