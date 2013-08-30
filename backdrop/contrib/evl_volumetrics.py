@@ -55,6 +55,8 @@ def create_transaction_data(header, row):
 
     def transaction_data(date_volume):
         date, volume = date_volume
+        if volume == "" or volume == "-":
+            volume = 0
         date = as_utc(datetime.strptime(date, "%b %Y"))
         service = SERVICES[row[SERVICE_INDEX]]
         channel = row[CHANNEL_INDEX].lower().replace(" ", "-")

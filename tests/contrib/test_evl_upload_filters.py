@@ -146,8 +146,8 @@ class EVLServiceVolumetrics(unittest.TestCase):
             ["", "", "V-V890 SORN Declaration", 1023, 2023, 3023],
             ["", "", "V-V890 SORN Declaration Key from Image", 1024, 2024, 3024],
             ["", "", "V-V890 SORN Declaration Refunds Input", 1025, 2025, 3025],
-            ["", "", "V-V890 SORN Declaration Vehicles Input", 1026, 2026, 3026],
-            ["", "", "V-V890 SORN Declaration Vehicles Triage", 1027, 2027, 3027],
+            ["", "", "V-V890 SORN Declaration Vehicles Input", "-", 2026, 3026],
+            ["", "", "V-V890 SORN Declaration Vehicles Triage", "", 2027, 3027],
             ["_", "_", "_", "_", "_", "_"],
             ["_", "_", "_", "_", "_", "_"],
             ["_", "_", "_", "_", "_", "_"],
@@ -160,3 +160,5 @@ class EVLServiceVolumetrics(unittest.TestCase):
         assert_that(header, is_(["_timestamp", "service", "channel", "transaction", "volume"]))
         assert_that(rows[0],  is_(["2012-04-01T00:00:00+00:00", "tax-disc", "assisted-digital", "V-V10 Licence Application Post Office", 1000]))
         assert_that(rows[-1], is_(["2013-03-01T00:00:00+00:00", "sorn", "manual", "V-V890 SORN Declaration Vehicles Triage", 3027]))
+        assert_that(rows[-2], is_(["2012-04-01T00:00:00+00:00", "sorn", "manual", "V-V890 SORN Declaration Vehicles Triage", 0]))
+        assert_that(rows[-4], is_(["2012-04-01T00:00:00+00:00", "sorn", "manual", "V-V890 SORN Declaration Vehicles Input", 0]))
