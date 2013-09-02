@@ -14,7 +14,11 @@ def nested_merge(keys, collect, data):
 
 
 def group_by(data, keys):
-    """Recursively group an array of results by a list of keys"""
+    """Recursively group an array of results by a list of keys
+
+    data: a list of dictionaries as returned by MongoDriver.group
+    keys: a list of keys to group by
+    """
     key = keys[0]
     getter = itemgetter(key)
     data = sorted(data, key=getter)
@@ -33,6 +37,11 @@ def group_by(data, keys):
 
 
 def remove_key_from_all(groups, key):
+    """Remove a key from each group in a list of groups
+
+    groups: a list of groups (dictionaries)
+    key: the key to remove
+    """
     return [remove_key(group, key) for group in groups]
 
 
@@ -41,14 +50,16 @@ def remove_key(doc, key):
     return doc
 
 
-def apply_counts(data):
+def apply_counts(groups):
+    """Add the _count and _group_count fields to a list of groups"""
     return [
         apply_counts_to_group(group)
-        for group in data
+        for group in groups
     ]
 
 
 def apply_counts_to_group(group):
+    """Add the _count and _group_count fields to a group"""
     if '_subgroup' in group:
         subgroups = apply_counts(group['_subgroup'])
         group['_subgroup'] = subgroups
@@ -57,10 +68,16 @@ def apply_counts_to_group(group):
     return group
 
 
-def apply_collect(data, collect):
+def apply_collect(groups, collect):
+    """Apply collected values to a list of groups
+
+    groups: a list of groups (dictionaries)
+    collect: a list of collect fields, each being a tuple of field name and
+             collection method
+    """
     return [
         apply_collect_to_group(group, collect)
-        for group in data
+        for group in groups
     ]
 
 
