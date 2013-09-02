@@ -1,7 +1,6 @@
 import unittest
 from hamcrest import *
-from backdrop.core.timeseries import timeseries, MONTH
-from backdrop.read.response import create_period_group_month, MonthlyGroupedData
+from backdrop.read.response import MonthlyGroupedData
 from tests.support.test_helpers import d
 
 
@@ -70,3 +69,19 @@ class TestMonthlyGroupedData(unittest.TestCase):
         data = MonthlyGroupedData([stub_document])
 
         assert_that(data.data()[0], has_entry("other_stuff", "something"))
+
+    def test_that_collected_values_are_preserved(self):
+        stub_document = {
+            "_subgroup": [
+                {
+                    "_month_start_at": d(2013, 5, 1),
+                    "_count": 1,
+                    "foo:sum": 123
+                }
+            ]
+        }
+
+        data = MonthlyGroupedData([stub_document])
+
+        assert_that(data.data()[0]["values"][0],
+                    has_entry("foo:sum", 123))

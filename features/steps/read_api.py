@@ -109,6 +109,13 @@ def step(context, nth, key, value):
     assert_that(the_data[i][key], has_item(json.loads(value)))
 
 
+@then('the "{nth}" result should have "{key}" with item with entries "{value}"')
+def step(context, nth, key, value):
+    the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i][key], has_item(has_entries(json.loads(value))))
+
+
 @then('the "{nth}" result should have "{key}" with json "{expected_json}"')
 def impl(context, nth, key, expected_json):
     the_data = json.loads(context.response.data)['data']

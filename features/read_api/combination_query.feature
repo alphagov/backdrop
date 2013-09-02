@@ -11,8 +11,8 @@ Feature: more complex combination of parameters that are used by clients
          then I should get back a status of "200"
           and the JSON should have "3" results
           and the "1st" result should have "licenceUrlSlug" equaling "fake-licence-3"
-          and the "1st" result should have "values" with item "{"_start_at":"2013-01-28T00:00:00+00:00","_end_at":"2013-02-04T00:00:00+00:00","_count":2}"
-          and the "1st" result should have "values" with item "{"_start_at":"2013-02-04T00:00:00+00:00","_end_at":"2013-02-11T00:00:00+00:00","_count":5}"
+          and the "1st" result should have "values" with item with entries "{"_start_at":"2013-01-28T00:00:00+00:00","_end_at":"2013-02-04T00:00:00+00:00","_count":2}"
+          and the "1st" result should have "values" with item with entries "{"_start_at":"2013-02-04T00:00:00+00:00","_end_at":"2013-02-11T00:00:00+00:00","_count":5}"
 
     Scenario: for an authority get weekly data between two points in time
          when I go to "/licensing?filter_by=authorityUrlSlug:testport&start_at=2013-02-04T00:00:00%2B00:00&end_at=2013-03-29T00:00:00%2B00:00&period=week"

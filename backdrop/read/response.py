@@ -11,10 +11,9 @@ def create_period_group(doc):
     if doc["_week_start_at"].weekday() is not 0:
         raise ValueError("Weeks MUST start on Monday but "
                          "got date: %s" % doc["_week_start_at"])
-    datum = {}
-    datum["_start_at"] = doc["_week_start_at"].replace(tzinfo=pytz.utc)
+    datum = doc.copy()
+    datum["_start_at"] = datum.pop("_week_start_at").replace(tzinfo=pytz.utc)
     datum["_end_at"] = datum["_start_at"] + datetime.timedelta(days=7)
-    datum["_count"] = doc["_count"]
     return datum
 
 
@@ -25,11 +24,10 @@ def create_period_group_month(doc):
     if doc["_month_start_at"].day != 1:
         raise ValueError("Months MUST start on the 1st but "
                          "got date: %s" % doc["_month_start_at"])
-    datum = {}
-    datum["_start_at"] = doc["_month_start_at"].replace(tzinfo=pytz.utc)
-    datum["_end_at"] = (doc["_month_start_at"]
+    datum = doc.copy()
+    datum["_start_at"] = datum.pop("_month_start_at").replace(tzinfo=pytz.utc)
+    datum["_end_at"] = (datum["_start_at"]
                         + relativedelta(months=1)).replace(tzinfo=pytz.UTC)
-    datum["_count"] = doc["_count"]
     return datum
 
 
