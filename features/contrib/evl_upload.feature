@@ -85,3 +85,9 @@ Feature: EVL Upload
          and I enter "evl-volumetrics.xls" into the file upload field
          and I click "Upload"
         then the platform should have "336" items stored in "evl_volumetrics"
+         and the "evl_volumetrics" bucket should have items:
+             """
+             {"_timestamp": "2012-04-01T00:00:00+00:00", "transaction": "V-V890 SORN Declaration Refunds Input", "service": "sorn", "volume": 1025.0}
+             {"_timestamp": "2012-05-01T00:00:00+00:00", "transaction": "V-V890 SORN Declaration Vehicles Input", "service": "sorn", "volume": 0.0}
+             {"_timestamp": "2012-06-01T00:00:00+00:00", "transaction": "V-V890 SORN Declaration Vehicles Triage", "service": "sorn", "volume": 0.0}
+             """
