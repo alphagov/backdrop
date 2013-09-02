@@ -146,7 +146,7 @@ class TestApplyCollectToGroup(object):
                         'name': 'Joanne', 'age:set': [34, 56], 'age': [34, 56]}))
 
     def test_double_level_collect_sum(self):
-        group = {'name': 'Joanne', '_subgroup':[
+        group = {'name': 'Joanne', '_subgroup': [
             {'place': 'Kettering', 'age': [34, 56]},
             {'place': 'Keswick', 'age': [87, 2]},
         ]}
@@ -163,7 +163,7 @@ class TestApplyCollectToGroup(object):
                                          )))
 
     def test_double_level_collect_default(self):
-        group = {'name': 'Joanne', '_subgroup':[
+        group = {'name': 'Joanne', '_subgroup': [
             {'place': 'Kettering', 'age': [34, 56]},
             {'place': 'Keswick', 'age': [87, 2]},
         ]}
@@ -197,7 +197,7 @@ class TestCollectAllValues(object):
 
     def test_double_level_collect(self):
         group = {
-            'age': [5], # This will be discarded as there are sub groups.
+            'age': [5],  # This will be discarded as there are sub groups.
             '_subgroup': [
                 {'age': [1, 2]},
                 {'age': [3, 4]},
