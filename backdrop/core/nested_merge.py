@@ -65,6 +65,7 @@ def apply_collect(data, collect):
 
 
 def apply_collect_to_group(group, collect):
+    group = group.copy()
     # calculate collected values
     for key, method in collect:
         group[collect_key(key, method)] = collect_value(group, key, method)
@@ -126,9 +127,6 @@ def reduce_collected_values(values, method):
 def remove_collected_key(group, key):
     if key in group:
         del group[key]
-    elif '_subgroup' in group:
-        curry = lambda subgroup: remove_collected_key(subgroup, key)
-        group['_subgroup'] = map(curry, group['_subgroup'])
     return group
 
 

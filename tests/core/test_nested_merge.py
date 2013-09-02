@@ -1,6 +1,6 @@
 import unittest
-from hamcrest import assert_that, is_, contains, has_entries
-from backdrop.core.nested_merge import reduce_collected_values, InvalidOperationError, nested_merge, group_by
+from hamcrest import assert_that, is_, contains, has_entries, has_entry
+from backdrop.core.nested_merge import reduce_collected_values, InvalidOperationError, nested_merge, group_by, apply_collect_to_group, collect_all_values
 from backdrop.core.timeseries import WEEK, MONTH
 
 
@@ -132,15 +132,78 @@ class TestGroupBy(object):
 
 # TODO
 class TestApplyCollectToGroup(object):
-    pass
+    def test_single_level_collect_sum(self):
+        group = {'name': 'Joanne', 'age': [34, 56]}
+
+        assert_that(apply_collect_to_group(group, [('age', 'sum')]),
+                    has_entry('age:sum', 90))
+
+    def test_single_level_collect_default(self):
+        group = {'name': 'Joanne', 'age': [34, 56]}
+
+        assert_that(apply_collect_to_group(group, [('age', 'default')]),
+                    is_({
+                        'name': 'Joanne', 'age:set': [34, 56], 'age': [34, 56]}))
+
+    def test_double_level_collect_sum(self):
+        group = {'name': 'Joanne', '_subgroup':[
+            {'place': 'Kettering', 'age': [34, 56]},
+            {'place': 'Keswick', 'age': [87, 2]},
+        ]}
+
+        collected = apply_collect_to_group(group, [('age', 'sum')])
+
+        # level one
+        assert_that(collected, has_entry('age:sum', 179))
+        # level two
+        assert_that(collected, has_entry('_subgroup',
+                                         contains(
+                                             has_entry('age:sum', 90),
+                                             has_entry('age:sum', 89)
+                                         )))
+
+    def test_double_level_collect_default(self):
+        group = {'name': 'Joanne', '_subgroup':[
+            {'place': 'Kettering', 'age': [34, 56]},
+            {'place': 'Keswick', 'age': [87, 2]},
+        ]}
+
+        collected = apply_collect_to_group(group, [('age', 'default')])
+
+        assert_that(collected, has_entries({
+            'age:set': [2, 34, 56, 87],
+            'age': [2, 34, 56, 87],
+        }))
+
+        assert_that(collected, has_entry('_subgroup',
+                                         contains(
+                                             has_entries({
+                                                 'age:set': [34, 56],
+                                                 'age': [34, 56],
+                                             }),
+                                             has_entries({
+                                                 'age:set': [2, 87],
+                                                 'age': [2, 87],
+                                             }),
+                                         )))
 
 
 class TestCollectAllValues(object):
-    pass
+    def test_single_level_collect(self):
+        group = {
+            'age': [5]
+        }
+        assert_that(collect_all_values(group, 'age'), [5])
 
-
-class TestRemoveCollectedKey(object):
-    pass
+    def test_double_level_collect(self):
+        group = {
+            'age': [5], # This will be discarded as there are sub groups.
+            '_subgroup': [
+                {'age': [1, 2]},
+                {'age': [3, 4]},
+            ]
+        }
+        assert_that(collect_all_values(group, 'age'), [1, 2, 3, 4])
 
 
 class TestReduceCollectedValues(unittest.TestCase):
