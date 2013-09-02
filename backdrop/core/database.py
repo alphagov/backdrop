@@ -95,8 +95,8 @@ class MongoDriver(object):
 
 
 class Repository(object):
-    def __init__(self, mongo):
-        self._mongo = mongo
+    def __init__(self, mongo_driver):
+        self._mongo_driver = mongo_driver
 
     def _validate_sort(self, sort):
         if len(sort) != 2:
@@ -111,7 +111,7 @@ class Repository(object):
 
         self._validate_sort(sort)
 
-        return self._mongo.find(query.to_mongo_query(), sort, limit)
+        return self._mongo_driver.find(query.to_mongo_query(), sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
@@ -125,7 +125,7 @@ class Repository(object):
 
     def save(self, obj):
         obj['_updated_at'] = timeutils.now()
-        self._mongo.save(obj)
+        self._mongo_driver.save(obj)
 
     def multi_group(self, key1, key2, query,
                     sort=None, limit=None, collect=None):
@@ -148,7 +148,7 @@ class Repository(object):
 
     def _group(self, keys, query, sort=None, limit=None, collect=None):
         collect_fields = unique_collect_fields(collect)
-        results = self._mongo.group(keys, query, list(collect_fields))
+        results = self._mongo_driver.group(keys, query, list(collect_fields))
 
         results = nested_merge(keys, collect, results)
 
