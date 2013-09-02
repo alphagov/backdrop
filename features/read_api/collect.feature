@@ -38,13 +38,12 @@ Feature: collect fields into grouped responses
          and the "1st" result should have "value:sum" with json "27"
          and the "1st" result should have "value:mean" with json "6.75"
     
-    @wip
     Scenario: should be able to perform maths on sub groups
         Given "evl_volumetrics.json" is in "foo" bucket
          when I go to "/foo?period=month&group_by=channel&collect=volume:sum"
          then I should get back a status of "200"
-         and the "1st" result should have "volume:sum" with json "92595.0"
-         and the "1st" result should have a sub group with "volume:sum" with json "95295.0"
+         and the "1st" result should have "volume:sum" with json "1862526.0"
+         and the "1st" result should have a sub group with "volume:sum" with json "1862526.0"
 
     Scenario: should receive a nice error when performing invalid operation
         Given "dinosaurs.json" is in "foo" bucket
