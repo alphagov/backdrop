@@ -472,9 +472,22 @@ class TestRepositoryIntegration_Grouping(RepositoryIntegrationTest):
             "person:set": ["Jack", "John"]
         })))
 
+        subgroup_matcher = has_item(
+            has_entries({
+                "person:set": ["Jack"],
+                "_count": 1
+            }))
 
-class TestRepositoryIntegration_MultiGroupWithMissingFields(
-        RepositoryIntegrationTest):
+        assert_that(
+            results,
+            has_item(
+                has_entries({
+                    "_subgroup": subgroup_matcher
+                })
+            ))
+
+
+class TestRepositoryIntegration_MultiGroupWithMissingFields(RepositoryIntegrationTest):
     def test_query_for_data_with_different_missing_fields_no_results(self):
         self.mongo_collection.save({
             "_week_start_at": d(2013, 4, 2, 0, 0, 0),

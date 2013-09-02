@@ -8,22 +8,22 @@ Feature: grouping queries for read api
          when I go to "/foo?group_by=authority"
          then I should get back a status of "200"
           and the JSON should have "2" results
-          and the "1st" result should be "{"authority": "Westminster", "_count": 4}"
-          and the "2nd" result should be "{"authority": "Camden", "_count": 2}"
+          and the "1st" result should be "{"authority": "Camden", "_count": 2}"
+          and the "2nd" result should be "{"authority": "Westminster", "_count": 4}"
 
     Scenario: grouping and filtering by different keys
         Given "licensing_2.json" is in "foo" bucket
          when I go to "/foo?group_by=authority&filter_by=licence_name:Temporary%20events%20notice"
          then I should get back a status of "200"
           and the JSON should have "2" results
-          and the "1st" result should be "{"authority": "Westminster", "_count": 3}"
+          and the "2nd" result should be "{"authority": "Westminster", "_count": 3}"
 
         Given "licensing_2.json" is in "foo" bucket
          when I go to "/foo?group_by=licence_name&filter_by=authority:Westminster"
          then I should get back a status of "200"
           and the JSON should have "2" results
-          and the "1st" result should be "{"licence_name": "Temporary events notice", "_count": 3}"
-          and the "2nd" result should be "{"licence_name": "Cat herding licence", "_count": 1}"
+          and the "1st" result should be "{"licence_name": "Cat herding licence", "_count": 1}"
+          and the "2nd" result should be "{"licence_name": "Temporary events notice", "_count": 3}"
 
 
     Scenario: grouping data by time period - week

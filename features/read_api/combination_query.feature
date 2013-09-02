@@ -32,10 +32,10 @@ Feature: more complex combination of parameters that are used by clients
          when I go to "/licensing?group_by=licenceUrlSlug&filter_by=authorityUrlSlug:testport&start_at=2013-01-28T00:00:00%2B00:00&end_at=2013-03-29T00:00:00%2B00:00&collect=authorityName&collect=licenceName"
          then I should get back a status of "200"
           and the JSON should have "6" results
-          and the "1st" result should have "licenceUrlSlug" equaling "fake-licence-2"
-          and the "1st" result should have "_count" equaling the integer "12"
-          and the "1st" result should have "licenceName" with item ""Fake Licence 2""
-          and the "2nd" result should have "licenceUrlSlug" equaling "fake-licence-5"
+          and the "2nd" result should have "licenceUrlSlug" equaling "fake-licence-2"
           and the "2nd" result should have "_count" equaling the integer "12"
-          and the "2nd" result should have "licenceName" with item ""Fake Licence 5""
+          and the "2nd" result should have "licenceName" with item ""Fake Licence 2""
+          and the "5th" result should have "licenceUrlSlug" equaling "fake-licence-5"
+          and the "5th" result should have "_count" equaling the integer "12"
+          and the "5th" result should have "licenceName" with item ""Fake Licence 5""
 
