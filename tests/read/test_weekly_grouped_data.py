@@ -1,4 +1,5 @@
 import unittest
+from nose.tools import *
 from hamcrest import *
 from backdrop.read.response import WeeklyGroupedData
 from tests.support.test_helpers import d, d_tz
@@ -14,11 +15,7 @@ class TestWeeklyGroupedData(unittest.TestCase):
         stub_document = {"_subgroup": []}
         data = WeeklyGroupedData([stub_document])
         another_data = data.data()
-        try:
-            another_data.append({"even_more_nonsense": True})
-            assert_that(False, "expected an exception")
-        except AttributeError as e:
-            assert_that(str(e), "'tuple' object has no attribute append")
+        assert_is_instance(another_data, tuple)
 
     def test_adding_multiple_mongo_documents(self):
         stub_document_1 = {
@@ -47,21 +44,11 @@ class TestWeeklyGroupedData(unittest.TestCase):
 
     def test_adding_unrecognized_data_throws_an_error(self):
         stub_document = {"foo": "bar"}
-        try:
-            WeeklyGroupedData([stub_document])
-            assert_that(False, "Expected an exception")
-        except ValueError as e:
-            assert_that(str(e), is_("Expected document to have "
-                                    "key '_subgroup'"))
+        assert_raises(ValueError, WeeklyGroupedData, [stub_document])
 
     def test_adding_subgroups_of_unrecognized_format_throws_an_error(self):
         stub_document = {"_subgroup": { "foo": "bar" }}
-        try:
-            WeeklyGroupedData([stub_document])
-            assert_that(False, "Expected an exception")
-        except ValueError as e:
-            assert_that(str(e), is_("Expected subgroup to have "
-                                    "keys '_count' and '_week_start_at'"))
+        assert_raises(ValueError, WeeklyGroupedData, [stub_document])
 
     def test_adding_additional_fields(self):
         stub_document = {
@@ -89,7 +76,7 @@ class TestWeeklyGroupedData(unittest.TestCase):
         }
         data = WeeklyGroupedData([stub_document])
 
-        data.fill_missing_weeks(d(2013, 4, 1), d(2013, 4, 16))
+        data.fill_missing_periods(d(2013, 4, 1), d(2013, 4, 16))
 
         assert_that(data.data()[0]["values"], has_length(3))
         assert_that(data.data()[0]["values"], has_items(

@@ -97,64 +97,47 @@ class GroupedData(object):
         return tuple(self._data)
 
 
-class WeeklyGroupedData(object):
-    def __init__(self, cursor):
+class PeriodGroupedData(object):
+    def __init__(self, cursor, period, data_factory):
+        self._period = period
+        self._data_factory = data_factory
         self._data = []
         for doc in cursor:
-            self.__add(doc)
+            self._add(doc)
 
-    def __add(self, datum):
-        if "_subgroup" not in datum:
-            raise ValueError("Expected document to have key '_subgroup'")
+    def _add(self, group):
+        if '_subgroup' not in group:
+            raise ValueError("Expected group to have key '_subgroup'")
 
-        _datum = {}
-        _datum.update({
-            "values":
-            [create_period_group(entry) for entry in datum["_subgroup"]]})
-        del datum['_subgroup']
-        _datum.update(datum)
-        self._data.append(_datum)
-
-    def data(self):
-        return tuple(self._data)
-
-    def fill_missing_weeks(self, start_date, end_date):
-        for i, _ in enumerate(self._data):
-            self._data[i]['values'] = timeseries(
-                start=start_date,
-                end=end_date,
-                period=WEEK,
-                data=self._data[i]['values'],
-                default={"_count": 0}
-            )
-
-
-class MonthlyGroupedData(object):
-    def __init__(self, cursor):
-        self._data = []
-        for doc in cursor:
-            self.__add(doc)
-
-    def __add(self, doc):
-        if '_subgroup' not in doc:
-            raise ValueError("Expected document to have key '_subgroup'")
         datum = {}
-        datum.update({
-            "values": [create_period_group_month(subgroup) for
-                       subgroup in doc["_subgroup"]]})
-        del doc["_subgroup"]
-        datum.update(doc)
+        datum['values'] = [
+            self._data_factory(subgroup) for subgroup in group["_subgroup"]]
+        datum.update(
+            (key, value) for key, value in group.items() if key != '_subgroup')
+
         self._data.append(datum)
 
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_months(self, start_date, end_date):
+    def fill_missing_periods(self, start_date, end_date):
         for i, _ in enumerate(self._data):
             self._data[i]['values'] = timeseries(
                 start=start_date,
                 end=end_date,
-                period=MONTH,
+                period=self._period,
                 data=self._data[i]['values'],
                 default={"_count": 0}
             )
+
+
+class WeeklyGroupedData(PeriodGroupedData):
+    def __init__(self, cursor):
+        super(WeeklyGroupedData, self).__init__(
+            cursor, WEEK, create_period_group)
+
+
+class MonthlyGroupedData(PeriodGroupedData):
+    def __init__(self, cursor):
+        super(MonthlyGroupedData, self).__init__(
+            cursor, MONTH, create_period_group_month)

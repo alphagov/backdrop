@@ -1,4 +1,5 @@
 import unittest
+from nose.tools import *
 from hamcrest import *
 from backdrop.read.response import MonthlyGroupedData
 from tests.support.test_helpers import d
@@ -33,27 +34,17 @@ class TestMonthlyGroupedData(unittest.TestCase):
                 }]
         }
         data = MonthlyGroupedData([stub_document])
-        data.fill_missing_months(d(2013, 4, 1), d(2013, 6, 2))
+        data.fill_missing_periods(d(2013, 4, 1), d(2013, 6, 2))
         values = data.data()[0]["values"]
         assert_that(values, has_length(3))
 
     def test_adding_unrecognized_data_throws_an_error(self):
         stub_document = {"foo": "bar"}
-        try:
-            MonthlyGroupedData([stub_document])
-            assert_that(False, "Expected an exception")
-        except ValueError as e:
-            assert_that(str(e), is_("Expected document to have "
-                                    "key '_subgroup'"))
+        assert_raises(ValueError, MonthlyGroupedData, [stub_document])
 
     def test_adding_subgroups_of_unrecognized_format_throws_an_error(self):
         stub_document = {"_subgroup": {"foo": "bar"}}
-        try:
-            MonthlyGroupedData([stub_document])
-            assert_that(False, "Expected an exception")
-        except ValueError as e:
-            assert_that(str(e), is_("Expected subgroup to have "
-                                    "keys '_count' and '_month_start_at'"))
+        assert_raises(ValueError, MonthlyGroupedData, [stub_document])
 
     def test_that_other_fields_get_added_to_response(self):
         stub_document = {

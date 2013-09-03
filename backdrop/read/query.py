@@ -115,11 +115,8 @@ class Query(_Query):
         else:
             results = WeeklyGroupedData(cursor)
 
-        if self.start_at and self.end_at and self.period == "week":
-            results.fill_missing_weeks(self.start_at, self.end_at)
-
-        if self.start_at and self.end_at and self.period == "month":
-            results.fill_missing_months(self.start_at, self.end_at)
+        if self.start_at and self.end_at:
+            results.fill_missing_periods(self.start_at, self.end_at)
 
         return results
 
