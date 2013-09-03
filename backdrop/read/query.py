@@ -111,7 +111,8 @@ class Query(_Query):
         results = PeriodGroupedData(cursor, period=self.period)
 
         if self.start_at and self.end_at:
-            results.fill_missing_periods(self.start_at, self.end_at)
+            results.fill_missing_periods(
+                self.start_at, self.end_at, collect=self.collect)
 
         return results
 
@@ -133,7 +134,8 @@ class Query(_Query):
         results = PeriodData(cursor, period=self.period)
 
         if self.start_at and self.end_at:
-            results.fill_missing_periods(self.start_at, self.end_at)
+            results.fill_missing_periods(
+                self.start_at, self.end_at, collect=self.collect)
 
         return results
 

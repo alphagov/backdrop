@@ -1,5 +1,6 @@
 import datetime
 import pytz
+from backdrop.core.nested_merge import collect_key
 from backdrop.core.timeseries import timeseries, WEEK, MONTH
 from dateutil.relativedelta import relativedelta
 
@@ -52,12 +53,15 @@ class PeriodData(object):
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_periods(self, start, end):
-        self._data = timeseries(start=start,
-                                end=end,
+    def fill_missing_periods(self, start_date, end_date, collect=None):
+        default = {"_count": 0}
+        if collect:
+            default.update((collect_key(k, v), None) for k, v in collect)
+        self._data = timeseries(start=start_date,
+                                end=end_date,
                                 period=self.period,
                                 data=self._data,
-                                default={"_count": 0})
+                                default=default)
 
     def __create_datum(self, doc):
         datum = {}
@@ -107,12 +111,15 @@ class PeriodGroupedData(object):
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_periods(self, start_date, end_date):
+    def fill_missing_periods(self, start_date, end_date, collect=None):
+        default = {"_count": 0}
+        if collect:
+            default.update((collect_key(k, v), None) for k, v in collect)
         for i, _ in enumerate(self._data):
             self._data[i]['values'] = timeseries(
                 start=start_date,
                 end=end_date,
                 period=self._period,
                 data=self._data[i]['values'],
-                default={"_count": 0}
+                default=default
             )
