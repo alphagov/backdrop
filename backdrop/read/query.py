@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 import pytz
+from backdrop.core.timeseries import parse_period
 from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.read.response import *
 
@@ -28,7 +29,8 @@ def parse_request_args(request_args):
         f.split(':', 1) for f in request_args.getlist('filter_by')
     ]
 
-    args['period'] = request_args.get('period')
+    args['period'] = if_present(parse_period,
+                                request_args.get('period'))
 
     args['group_by'] = request_args.get('group_by')
 
@@ -95,11 +97,7 @@ class Query(_Query):
         return result
 
     def __get_period_key(self):
-        period_keys = {
-            "week": "_week_start_at",
-            "month": "_month_start_at"
-        }
-        return period_keys[self.period]
+        return self.period.start_at_key
 
     def __execute_period_group_query(self, repository):
         period_key = self.__get_period_key()
@@ -110,10 +108,7 @@ class Query(_Query):
             collect=self.collect
         )
 
-        if self.period == "month":
-            results = MonthlyGroupedData(cursor)
-        else:
-            results = WeeklyGroupedData(cursor)
+        results = PeriodGroupedData(cursor, period=self.period)
 
         if self.start_at and self.end_at:
             results.fill_missing_periods(self.start_at, self.end_at)

@@ -1,5 +1,7 @@
 import unittest
 from hamcrest import *
+from nose.tools import *
+from backdrop.core.timeseries import WEEK, MONTH
 from backdrop.read.response import PeriodData
 from tests.support.test_helpers import d, d_tz
 
@@ -11,7 +13,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 42
         }
 
-        period_data = PeriodData([stub_doc], period="week")
+        period_data = PeriodData([stub_doc], period=WEEK)
 
         assert_that(len(period_data.data()), is_(1))
         assert_that(period_data.data()[0], has_entry("_count", 42))
@@ -26,7 +28,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 5
         }
 
-        period_data = PeriodData([stub_doc], period="month")
+        period_data = PeriodData([stub_doc], period=MONTH)
 
         assert_that(len(period_data.data()), is_(1))
         assert_that(period_data.data()[0], has_entry("_count", 5))
@@ -41,12 +43,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 0
         }
 
-        try:
-            period_data = PeriodData([stub_doc], period="week")
-            assert_that(False, "expected exception")
-        except ValueError as e:
-            assert_that(str(e), is_("Weeks MUST start on Monday but got date:"
-                                    " " + str(d(2013, 5, 4))))
+        assert_raises(ValueError, PeriodData, [stub_doc], period=WEEK)
 
     def test_adding_more_mongo_documents_to_collection(self):
         stub_doc = {
@@ -58,7 +55,7 @@ class TestPeriodData(unittest.TestCase):
             "_count": 66
         }
 
-        period_data = PeriodData([stub_doc, another_stub_doc], period="week")
+        period_data = PeriodData([stub_doc, another_stub_doc], period=WEEK)
 
         assert_that(len(period_data.data()), is_(2))
 
@@ -77,7 +74,7 @@ class TestPeriodData(unittest.TestCase):
             "_week_start_at": d(2013, 5, 6),
             "_count": 42
         }
-        period_data = PeriodData([stub_doc], period="week")
+        period_data = PeriodData([stub_doc], period=WEEK)
         the_data = period_data.data()
         try:
             the_data.append({"nonsense": True})
@@ -94,7 +91,7 @@ class TestPeriodData(unittest.TestCase):
             "_week_start_at": d(2013, 4, 15),
             "_count": 5
         }
-        period_data = PeriodData([stub_doc_1, stub_doc_2], period="week")
+        period_data = PeriodData([stub_doc_1, stub_doc_2], period=WEEK)
 
         period_data.fill_missing_periods(d(2013, 4, 1), d(2013, 4, 16))
 
@@ -110,6 +107,6 @@ class TestPeriodData(unittest.TestCase):
             "_month_start_at": d(2013, 6, 1),
             "_count": 6
         }
-        period_data = PeriodData([stub_doc_1, stub_doc_2], period="month")
+        period_data = PeriodData([stub_doc_1, stub_doc_2], period=MONTH)
         period_data.fill_missing_periods(d(2013, 4, 1), d(2013, 6, 2))
         assert_that(period_data.data(), has_length(3))

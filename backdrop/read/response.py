@@ -4,30 +4,22 @@ from backdrop.core.timeseries import timeseries, WEEK, MONTH
 from dateutil.relativedelta import relativedelta
 
 
-def create_period_group(doc):
-    if "_week_start_at" not in doc or "_count" not in doc:
+def create_period_group(doc, period):
+    if period.start_at_key not in doc or "_count" not in doc:
         raise ValueError("Expected subgroup to have keys '_count'"
-                         " and '_week_start_at'")
-    if doc["_week_start_at"].weekday() is not 0:
-        raise ValueError("Weeks MUST start on Monday but "
-                         "got date: %s" % doc["_week_start_at"])
-    datum = doc.copy()
-    datum["_start_at"] = datum.pop("_week_start_at").replace(tzinfo=pytz.utc)
-    datum["_end_at"] = datum["_start_at"] + datetime.timedelta(days=7)
-    return datum
+                         " and '{}'".format(period.start_at_key))
 
-
-def create_period_group_month(doc):
-    if "_month_start_at" not in doc or "_count" not in doc:
-        raise ValueError("Expected subgroup to have keys '_count' and "
-                         "'_month_start_at'")
-    if doc["_month_start_at"].day != 1:
-        raise ValueError("Months MUST start on the 1st but "
-                         "got date: %s" % doc["_month_start_at"])
     datum = doc.copy()
-    datum["_start_at"] = datum.pop("_month_start_at").replace(tzinfo=pytz.utc)
-    datum["_end_at"] = (datum["_start_at"]
-                        + relativedelta(months=1)).replace(tzinfo=pytz.UTC)
+
+    start_at = datum.pop(period.start_at_key).replace(tzinfo=pytz.utc)
+
+    if not period.valid_start_at(start_at):
+        raise ValueError(
+            "Invalid {} start: {}".format(period.name, start_at))
+
+    datum['_start_at'] = start_at
+    datum['_end_at'] = start_at + period.delta
+
     return datum
 
 
@@ -61,22 +53,15 @@ class PeriodData(object):
         return tuple(self._data)
 
     def fill_missing_periods(self, start, end):
-        periods = {
-            "week": WEEK,
-            "month": MONTH
-        }
         self._data = timeseries(start=start,
                                 end=end,
-                                period=periods[self.period],
+                                period=self.period,
                                 data=self._data,
                                 default={"_count": 0})
 
     def __create_datum(self, doc):
         datum = {}
-        if self.period == "week":
-            datum = create_period_group(doc)
-        if self.period == "month":
-            datum = create_period_group_month(doc)
+        datum = create_period_group(doc, self.period)
 
         for key in ["_week_start_at", "_month_start_at"]:
             doc.pop(key, None)
@@ -98,12 +83,14 @@ class GroupedData(object):
 
 
 class PeriodGroupedData(object):
-    def __init__(self, cursor, period, data_factory):
+    def __init__(self, cursor, period):
         self._period = period
-        self._data_factory = data_factory
         self._data = []
         for doc in cursor:
             self._add(doc)
+
+    def _create_subgroup(self, subgroup):
+        return create_period_group(subgroup, self._period)
 
     def _add(self, group):
         if '_subgroup' not in group:
@@ -111,7 +98,7 @@ class PeriodGroupedData(object):
 
         datum = {}
         datum['values'] = [
-            self._data_factory(subgroup) for subgroup in group["_subgroup"]]
+            self._create_subgroup(subgroup) for subgroup in group["_subgroup"]]
         datum.update(
             (key, value) for key, value in group.items() if key != '_subgroup')
 
@@ -129,15 +116,3 @@ class PeriodGroupedData(object):
                 data=self._data[i]['values'],
                 default={"_count": 0}
             )
-
-
-class WeeklyGroupedData(PeriodGroupedData):
-    def __init__(self, cursor):
-        super(WeeklyGroupedData, self).__init__(
-            cursor, WEEK, create_period_group)
-
-
-class MonthlyGroupedData(PeriodGroupedData):
-    def __init__(self, cursor):
-        super(MonthlyGroupedData, self).__init__(
-            cursor, MONTH, create_period_group_month)

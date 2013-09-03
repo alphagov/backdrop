@@ -8,6 +8,22 @@ class Week(object):
     def __init__(self):
         self._delta = timedelta(days=7)
 
+    @property
+    def name(self):
+        return "week"
+
+    @property
+    def start_at_key(self):
+        return "_week_start_at"
+
+    @property
+    def delta(self):
+        return self._delta
+
+    def _monday_midnight(self, timestamp):
+        return timestamp.weekday() == 0 \
+            and timestamp.time() == time(0, 0, 0, 0)
+
     def start(self, timestamp):
         return _truncate_time(timestamp) + relativedelta(weekday=MO(-1))
 
@@ -23,14 +39,25 @@ class Week(object):
             yield (_start, _start + self._delta)
             _start += self._delta
 
-    def _monday_midnight(self, timestamp):
-        return timestamp.weekday() == 0 \
-            and timestamp.time() == time(0, 0, 0, 0)
+    def valid_start_at(self, timestamp):
+        return timestamp.weekday() is 0
 
 
 class Month(object):
     def __init__(self):
         self._delta = relativedelta(months=1)
+
+    @property
+    def name(self):
+        return "month"
+
+    @property
+    def start_at_key(self):
+        return "_month_start_at"
+
+    @property
+    def delta(self):
+        return self._delta
 
     def is_month_boundary(self, t):
         return t.day == 1 and t.time() == time(0, 0, 0, 0)
@@ -54,9 +81,19 @@ class Month(object):
             yield (_start, _start + self._delta)
             _start += self._delta
 
+    def valid_start_at(self, timestamp):
+        return timestamp.day == 1
+
 
 WEEK = Week()
 MONTH = Month()
+
+
+def parse_period(period):
+    return {
+        "week": WEEK,
+        "month": MONTH
+    }[period]
 
 
 def _time_to_index(dt):
