@@ -1,4 +1,3 @@
-import unittest
 from nose.tools import *
 from hamcrest import *
 from backdrop.core.timeseries import MONTH
