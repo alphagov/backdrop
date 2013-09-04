@@ -15,6 +15,7 @@ BUCKET_UPLOAD_FORMAT = {
     "evl_services_failures": "excel",
     "evl_channel_volumetrics": "excel",
     "evl_customer_satisfaction": "excel",
+    "evl_volumetrics": "excel",
 }
 BUCKET_UPLOAD_FILTERS = {
     "evl_ceg_data": [
@@ -35,6 +36,9 @@ BUCKET_UPLOAD_FILTERS = {
     "evl_customer_satisfaction": [
         "backdrop.core.upload.filters.first_sheet_filter",
         "backdrop.contrib.evl_upload_filters.customer_satisfaction"
+    ],
+    "evl_volumetrics": [
+       "backdrop.contrib.evl_upload_filters.volumetrics"
     ],
 }
 
