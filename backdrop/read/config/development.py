@@ -15,6 +15,7 @@ RAW_QUERIES_ALLOWED = {
   # electronic vehicle licensing
   "electronic_vehicle_licensing_monitoring": True,
   "evl_customer_satisfaction": True,
+  "evl_volumetrics": True,
   "sorn_monitoring": True,
   "sorn_realtime": True,
   "tax_disc_monitoring": True,

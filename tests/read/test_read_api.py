@@ -4,6 +4,7 @@ import datetime
 from hamcrest import *
 from mock import patch, Mock
 import pytz
+from backdrop.core.timeseries import WEEK
 from backdrop.read import api
 from backdrop.read.query import Query
 
@@ -22,7 +23,7 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.return_value = NoneData()
         self.app.get('/foo?period=week')
         mock_query.assert_called_with(
-            Query.create(period=u"week"))
+            Query.create(period=WEEK))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_filter_by_query_is_executed(self, mock_query):
@@ -59,7 +60,7 @@ class ReadApiTestCase(unittest.TestCase):
             '/foo?period=week&group_by=stuff'
         )
         mock_query.assert_called_with(
-            Query.create(period="week", group_by="stuff"))
+            Query.create(period=WEEK, group_by="stuff"))
 
     @patch('backdrop.core.bucket.Bucket.query')
     def test_sort_query_is_executed(self, mock_query):

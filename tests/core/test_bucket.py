@@ -1,9 +1,11 @@
 import unittest
 from hamcrest import *
+from nose.tools import *
 from mock import Mock, call
 from backdrop.core import bucket
 from backdrop.core.records import Record
 from backdrop.read.query import Query
+from backdrop.core.timeseries import WEEK, MONTH
 from tests.support.test_helpers import d, d_tz
 
 
@@ -141,7 +143,7 @@ class TestBucket(unittest.TestCase):
             {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "_count": 1},
         ]
 
-        query = Query.create(period='week')
+        query = Query.create(period=WEEK)
         query_result = self.bucket.query(query).data()
 
         self.mock_repository.group.assert_called_once_with(
@@ -166,7 +168,7 @@ class TestBucket(unittest.TestCase):
             {"_month_start_at": d(2013, 5, 1), "_count": 3}
         ]
 
-        query = Query.create(period="month")
+        query = Query.create(period=MONTH)
         query_result = self.bucket.query(query).data()
         self.mock_repository.group.assert_called_once_with(
             "_month_start_at", query, sort=['_month_start_at', 'ascending'],
@@ -175,7 +177,7 @@ class TestBucket(unittest.TestCase):
     def test_week_query_with_limit(self):
         self.mock_repository.group.return_value = []
 
-        query = Query.create(period='week', limit=1)
+        query = Query.create(period=WEEK, limit=1)
         self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
@@ -185,7 +187,7 @@ class TestBucket(unittest.TestCase):
     def test_month_query_with_limit(self):
         self.mock_repository.group.return_value = []
 
-        query = Query.create(period='month', limit=1)
+        query = Query.create(period=MONTH, limit=1)
         self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
@@ -201,7 +203,7 @@ class TestBucket(unittest.TestCase):
         self.assertRaises(
             ValueError,
             self.bucket.query,
-            Query.create(period='week')
+            Query.create(period=WEEK)
         )
 
     def test_period_query_fails_when_months_do_not_start_on_the_1st(self):
@@ -213,7 +215,7 @@ class TestBucket(unittest.TestCase):
         self.assertRaises(
             ValueError,
             self.bucket.query,
-            Query.create(period='month')
+            Query.create(period=MONTH)
         )
 
     def test_period_query_adds_missing_periods_in_correct_order(self):
@@ -223,7 +225,7 @@ class TestBucket(unittest.TestCase):
             {"_week_start_at": d(2013, 2, 4, 0, 0, 0), "_count": 17},
         ]
 
-        result = self.bucket.query(Query.create(period='week',
+        result = self.bucket.query(Query.create(period=WEEK,
                                                 start_at=d_tz(2013, 1, 7, 0, 0,
                                                               0),
                                                 end_at=d_tz(2013, 2, 18, 0, 0,
@@ -272,7 +274,7 @@ class TestBucket(unittest.TestCase):
             }
         ]
         query_result = self.bucket.query(
-            Query.create(period="week", group_by="some_group")).data()
+            Query.create(period=WEEK, group_by="some_group")).data()
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
             "values": has_item({
@@ -345,7 +347,7 @@ class TestBucket(unittest.TestCase):
             }
         ]
 
-        query_result = self.bucket.query(Query.create(period="month",
+        query_result = self.bucket.query(Query.create(period=MONTH,
                                                       group_by="some_group"))
         data = query_result.data()
         assert_that(data, has_item(has_entries({"values": has_length(2)})))
@@ -389,7 +391,7 @@ class TestBucket(unittest.TestCase):
             }
         ]
 
-        query_result = self.bucket.query(Query.create(period="month",
+        query_result = self.bucket.query(Query.create(period=MONTH,
                                                       group_by="some_group",
                                                       start_at=d(2013, 1, 1),
                                                       end_at=d(2013, 4, 2)))
@@ -444,7 +446,7 @@ class TestBucket(unittest.TestCase):
         ]
 
         query_result = self.bucket.query(
-            Query.create(period="week", group_by="some_group",
+            Query.create(period=WEEK, group_by="some_group",
                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
                          end_at=d_tz(2013, 2, 4, 0, 0, 0))).data()
 
@@ -502,7 +504,7 @@ class TestBucket(unittest.TestCase):
             },
         ]
 
-        query = Query.create(period="week", group_by="some_group",
+        query = Query.create(period=WEEK, group_by="some_group",
                              sort_by=["_count", "descending"])
         self.bucket.query(query)
 
@@ -534,7 +536,7 @@ class TestBucket(unittest.TestCase):
             }
         ]
 
-        query = Query.create(period="week", group_by="some_group",
+        query = Query.create(period=WEEK, group_by="some_group",
                              sort_by=["_count", "descending"], limit=1,
                              collect=[])
         self.bucket.query(query)
@@ -572,10 +574,5 @@ class TestBucket(unittest.TestCase):
         self.mock_repository.multi_group.return_value = \
             multi_group_results
 
-        try:
-            self.bucket.query(Query.create(period='week', group_by='d')).data()
-            assert_that(False)
-        except ValueError as e:
-            assert_that(str(e), is_(
-                "Weeks MUST start on Monday but got date: 2013-04-09 00:00:00"
-            ))
+        query = Query.create(period=WEEK, group_by='d')
+        assert_raises(ValueError, self.bucket.query, query)

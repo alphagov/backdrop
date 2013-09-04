@@ -19,12 +19,9 @@ def step(context, fixture_name, bucket_name):
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
-            if '_timestamp' in obj:
-                obj['_timestamp'] = parser.parse(obj['_timestamp'])\
-                    .astimezone(pytz.utc)
-            if '_week_start_at' in obj:
-                obj['_week_start_at'] = parser.parse(obj['_week_start_at']) \
-                    .astimezone(pytz.utc)
+            for key in ['_timestamp', '_week_start_at', '_month_start_at']:
+                if key in obj:
+                    obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
             context.client.storage()[bucket_name].save(obj)
     context.bucket = bucket_name
 
@@ -112,11 +109,27 @@ def step(context, nth, key, value):
     assert_that(the_data[i][key], has_item(json.loads(value)))
 
 
+@then('the "{nth}" result should have "{key}" with item with entries "{value}"')
+def step(context, nth, key, value):
+    the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i][key], has_item(has_entries(json.loads(value))))
+
+
 @then('the "{nth}" result should have "{key}" with json "{expected_json}"')
 def impl(context, nth, key, expected_json):
     the_data = json.loads(context.response.data)['data']
     i = parse_position(nth, the_data)
     assert_that(the_data[i][key], is_(json.loads(expected_json)))
+
+
+@then('the "{nth}" result should have a sub group with "{key}" with json "{expected_json}"')
+def impl(context, nth, key, expected_json):
+    the_data = json.loads(context.response.data)['data']
+    i = parse_position(nth, the_data)
+    assert_that(the_data[i]['values'],
+                has_item(
+                    has_entry(key, json.loads(expected_json))))
 
 
 @then('the "{header}" header should be "{value}"')

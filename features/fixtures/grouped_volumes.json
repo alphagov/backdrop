@@ -1,0 +1,40 @@
+{
+  "data": [
+      {
+        "channel": "assisted-digital",
+        "volume:sum": 123142,
+        "values": [
+          {
+            "_start_at": "2012-04-01T00:00:00+00:00",
+            "_end_at": "2012-05-01T00:00:00+00:00",
+            "_count": 12345,
+            "volume:sum": 666,
+          }
+        ]
+      },
+      {
+        "channel": "fully-digital",
+        "volume:sum": 123142,
+        "values": [
+          {
+            "_start_at": "2012-04-01T00:00:00+00:00",
+            "_end_at": "2012-05-01T00:00:00+00:00",
+            "_count": 12345,
+            "volume:sum": 123142,
+          }
+        ]
+      },
+      {
+        "channel": "manual",
+        "volume:sum": 123142,
+        "values": [
+          {
+            "_start_at": "2012-04-01T00:00:00+00:00",
+            "_end_at": "2012-05-01T00:00:00+00:00",
+            "_count": 12345,
+            "volume:sum": 123142,
+          }
+        ]
+      }
+  ]
+}

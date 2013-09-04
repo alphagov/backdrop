@@ -7,15 +7,16 @@ Feature: collect fields into grouped responses
           when I go to "/foo?collect=authority&group_by=licence_name"
           then I should get back a status of "200"
           and the "1st" result should have "authority" with item ""Westminster""
-          and the "1st" result should have "authority" with item ""Camden""
+          and the "2nd" result should have "authority" with item ""Westminster""
+          and the "2nd" result should have "authority" with item ""Camden""
 
 
     Scenario: should be able to collect on a key for period grouped queries
          Given "licensing_2.json" is in "foo" bucket
           when I go to "/foo?collect=authority&period=week&group_by=licence_name"
           then I should get back a status of "200"
-          and the "1st" result should have "authority" with item ""Westminster""
-          and the "1st" result should have "authority" with item ""Camden""
+          and the "2nd" result should have "authority" with item ""Westminster""
+          and the "2nd" result should have "authority" with item ""Camden""
 
 
     Scenario: should not be able to collect on non grouped queries
@@ -36,6 +37,13 @@ Feature: collect fields into grouped responses
          then I should get back a status of "200"
          and the "1st" result should have "value:sum" with json "27"
          and the "1st" result should have "value:mean" with json "6.75"
+    
+    Scenario: should be able to perform maths on sub groups
+        Given "evl_volumetrics.json" is in "foo" bucket
+         when I go to "/foo?period=month&group_by=channel&collect=volume:sum"
+         then I should get back a status of "200"
+         and the "1st" result should have "volume:sum" with json "1862526.0"
+         and the "1st" result should have a sub group with "volume:sum" with json "1862526.0"
 
     Scenario: should receive a nice error when performing invalid operation
         Given "dinosaurs.json" is in "foo" bucket

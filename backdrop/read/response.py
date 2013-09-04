@@ -1,35 +1,26 @@
 import datetime
 import pytz
+from backdrop.core.nested_merge import collect_key
 from backdrop.core.timeseries import timeseries, WEEK, MONTH
 from dateutil.relativedelta import relativedelta
 
 
-def create_period_group(doc):
-    if "_week_start_at" not in doc or "_count" not in doc:
+def create_period_group(doc, period):
+    if period.start_at_key not in doc or "_count" not in doc:
         raise ValueError("Expected subgroup to have keys '_count'"
-                         " and '_week_start_at'")
-    if doc["_week_start_at"].weekday() is not 0:
-        raise ValueError("Weeks MUST start on Monday but "
-                         "got date: %s" % doc["_week_start_at"])
-    datum = {}
-    datum["_start_at"] = doc["_week_start_at"].replace(tzinfo=pytz.utc)
-    datum["_end_at"] = datum["_start_at"] + datetime.timedelta(days=7)
-    datum["_count"] = doc["_count"]
-    return datum
+                         " and '{}'".format(period.start_at_key))
 
+    datum = doc.copy()
 
-def create_period_group_month(doc):
-    if "_month_start_at" not in doc or "_count" not in doc:
-        raise ValueError("Expected subgroup to have keys '_count' and "
-                         "'_month_start_at'")
-    if doc["_month_start_at"].day != 1:
-        raise ValueError("Months MUST start on the 1st but "
-                         "got date: %s" % doc["_month_start_at"])
-    datum = {}
-    datum["_start_at"] = doc["_month_start_at"].replace(tzinfo=pytz.utc)
-    datum["_end_at"] = (doc["_month_start_at"]
-                        + relativedelta(months=1)).replace(tzinfo=pytz.UTC)
-    datum["_count"] = doc["_count"]
+    start_at = datum.pop(period.start_at_key).replace(tzinfo=pytz.utc)
+
+    if not period.valid_start_at(start_at):
+        raise ValueError(
+            "Invalid {} start: {}".format(period.name, start_at))
+
+    datum['_start_at'] = start_at
+    datum['_end_at'] = start_at + period.delta
+
     return datum
 
 
@@ -62,23 +53,19 @@ class PeriodData(object):
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_periods(self, start, end):
-        periods = {
-            "week": WEEK,
-            "month": MONTH
-        }
-        self._data = timeseries(start=start,
-                                end=end,
-                                period=periods[self.period],
+    def fill_missing_periods(self, start_date, end_date, collect=None):
+        default = {"_count": 0}
+        if collect:
+            default.update((collect_key(k, v), None) for k, v in collect)
+        self._data = timeseries(start=start_date,
+                                end=end_date,
+                                period=self.period,
                                 data=self._data,
-                                default={"_count": 0})
+                                default=default)
 
     def __create_datum(self, doc):
         datum = {}
-        if self.period == "week":
-            datum = create_period_group(doc)
-        if self.period == "month":
-            datum = create_period_group_month(doc)
+        datum = create_period_group(doc, self.period)
 
         for key in ["_week_start_at", "_month_start_at"]:
             doc.pop(key, None)
@@ -99,64 +86,40 @@ class GroupedData(object):
         return tuple(self._data)
 
 
-class WeeklyGroupedData(object):
-    def __init__(self, cursor):
+class PeriodGroupedData(object):
+    def __init__(self, cursor, period):
+        self._period = period
         self._data = []
         for doc in cursor:
-            self.__add(doc)
+            self._add(doc)
 
-    def __add(self, datum):
-        if "_subgroup" not in datum:
-            raise ValueError("Expected document to have key '_subgroup'")
+    def _create_subgroup(self, subgroup):
+        return create_period_group(subgroup, self._period)
 
-        _datum = {}
-        _datum.update({
-            "values":
-            [create_period_group(entry) for entry in datum["_subgroup"]]})
-        del datum['_subgroup']
-        _datum.update(datum)
-        self._data.append(_datum)
+    def _add(self, group):
+        if '_subgroup' not in group:
+            raise ValueError("Expected group to have key '_subgroup'")
 
-    def data(self):
-        return tuple(self._data)
-
-    def fill_missing_weeks(self, start_date, end_date):
-        for i, _ in enumerate(self._data):
-            self._data[i]['values'] = timeseries(
-                start=start_date,
-                end=end_date,
-                period=WEEK,
-                data=self._data[i]['values'],
-                default={"_count": 0}
-            )
-
-
-class MonthlyGroupedData(object):
-    def __init__(self, cursor):
-        self._data = []
-        for doc in cursor:
-            self.__add(doc)
-
-    def __add(self, doc):
-        if '_subgroup' not in doc:
-            raise ValueError("Expected document to have key '_subgroup'")
         datum = {}
-        datum.update({
-            "values": [create_period_group_month(subgroup) for
-                       subgroup in doc["_subgroup"]]})
-        del doc["_subgroup"]
-        datum.update(doc)
+        datum['values'] = [
+            self._create_subgroup(subgroup) for subgroup in group["_subgroup"]]
+        datum.update(
+            (key, value) for key, value in group.items() if key != '_subgroup')
+
         self._data.append(datum)
 
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_months(self, start_date, end_date):
+    def fill_missing_periods(self, start_date, end_date, collect=None):
+        default = {"_count": 0}
+        if collect:
+            default.update((collect_key(k, v), None) for k, v in collect)
         for i, _ in enumerate(self._data):
             self._data[i]['values'] = timeseries(
                 start=start_date,
                 end=end_date,
-                period=MONTH,
+                period=self._period,
                 data=self._data[i]['values'],
-                default={"_count": 0}
+                default=default
             )

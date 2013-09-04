@@ -7,6 +7,7 @@ from hamcrest import *
 
 from backdrop.core import database, bucket
 from backdrop.core.records import Record
+from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
@@ -69,7 +70,7 @@ class TestBucketIntegration(unittest.TestCase):
 
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()
-        query = Query.create(period="week")
+        query = Query.create(period=WEEK)
         result = query.execute(self.bucket.repository)
         assert_that(result.data(), contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
