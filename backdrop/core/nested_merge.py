@@ -105,7 +105,7 @@ def apply_collect_to_group(group, collect):
 def collect_key(key, method):
     if method == 'default':
         method = 'set'
-    return '{}:{}'.format(key, method)
+    return '{0}:{1}'.format(key, method)
 
 
 def collect_value(group, key, method):

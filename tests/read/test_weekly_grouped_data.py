@@ -16,7 +16,7 @@ class TestWeeklyGroupedData(unittest.TestCase):
         stub_document = {"_subgroup": []}
         data = PeriodGroupedData([stub_document], WEEK)
         another_data = data.data()
-        assert_is_instance(another_data, tuple)
+        ok_(isinstance(another_data, tuple))
 
     def test_adding_multiple_mongo_documents(self):
         stub_document_1 = {
