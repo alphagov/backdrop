@@ -130,7 +130,6 @@ class TestGroupBy(object):
                     ))
 
 
-# TODO
 class TestApplyCollectToGroup(object):
     def test_single_level_collect_sum(self):
         group = {'name': 'Joanne', 'age': [34, 56]}
