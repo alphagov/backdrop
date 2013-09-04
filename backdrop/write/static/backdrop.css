@@ -2,7 +2,7 @@
     min-height: 500px;
     background: url("images/performance_graphs.svg") no-repeat;
     background-position: 90% 0;
-    background-size: contain;
+    background-size: auto 400px;
 }
 
 .background-image p {
