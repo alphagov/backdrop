@@ -1,11 +1,11 @@
-argh==0.23.1
-Flask==0.9
+argh==0.23.3
+Flask==0.10.1
 Flask-FeatureFlags==0.3
-gunicorn==0.17.2
-pip==1.3.1
-pymongo==2.5.2
+gunicorn==18.0
+pip==1.4.1
+pymongo==2.6.1
 python-dateutil==2.1
 pytz==2013b
-statsd==2.0.1
+statsd==2.0.3
 rauth==0.5.4
 xlrd==0.9.2
