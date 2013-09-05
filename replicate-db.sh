@@ -56,10 +56,10 @@ tar xzvf $FILENAME
 
 if [ -z "$2" ]; then
 	pushd ../puppet/development
-	vagrant ssh -c "cd /var/govuk/backdrop && mongorestore ${DUMPDIR}"
+	vagrant ssh -c "cd /var/govuk/backdrop && mongorestore --drop ${DUMPDIR}"
 	popd
 else
-	mongorestore -h $DESTINATION_HOST $DUMPDIR
+	mongorestore --drop -h $DESTINATION_HOST $DUMPDIR
 fi
 
 # cleanup locally
