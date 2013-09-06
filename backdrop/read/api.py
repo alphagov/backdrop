@@ -47,6 +47,7 @@ class JsonEncoder(json.JSONEncoder):
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
         return json.JSONEncoder.default(self, obj)
+app.json_encoder = JsonEncoder
 
 
 def raw_queries_allowed(bucket_name):
@@ -101,13 +102,7 @@ def query(bucket_name):
         except InvalidOperationError:
             return log_error_and_respond('invalid collect for that data', 400)
 
-        # Taken from flask.helpers.jsonify to add JSONEncoder
-        # NB. this can be removed once fix #471 works it's way into a release
-        # https://github.com/mitsuhiko/flask/pull/471
-        json_data = json.dumps({"data": result_data}, cls=JsonEncoder,
-                               indent=None if request.is_xhr else 2)
-
-        response = app.response_class(json_data, mimetype='application/json')
+        response = jsonify(data=result_data)
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'

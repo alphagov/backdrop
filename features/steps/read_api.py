@@ -33,6 +33,7 @@ def step(context, query):
 
 @when('I send another request to "{query}" with the received etag')
 def step(context, query):
+    print(context.response.data)
     etag = context.response.headers["ETag"]
     context.response = context.client.get(query,
                                           headers={"If-None-Match": etag})
