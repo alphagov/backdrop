@@ -12,7 +12,7 @@ Feature: the read api should provide cache control headers
     Scenario: query returns an etag
         Given "licensing.json" is in "foo" bucket
          when I go to "/foo"
-         then the "ETag" header should be ""f739cff7a1ba212cff7e8003ac193d0bf9101551""
+         then the "ETag" header should be ""7c7cec78f75fa9f30428778f2b6da9b42bd104d0""
 
     Scenario: response is Not Modified when etag matches
         Given "licensing.json" is in "foo" bucket
