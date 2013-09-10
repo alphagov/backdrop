@@ -56,3 +56,15 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
         ))
 
         assert_that(upload.valid, is_(True))
+
+    def test_exe_files_are_not_valid(self):
+        upload = UploadedFile(
+            self._file_storage_wrapper('foo', content_type="application/exe"))
+
+        assert_that(upload.valid, is_(False))
+
+    def test_files_with_no_content_type_are_invalid(self):
+        upload = UploadedFile(
+            self._file_storage_wrapper('foo', content_type=None))
+
+        assert_that(upload.valid, is_(False))
