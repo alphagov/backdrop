@@ -8,7 +8,8 @@ class BucketRepository(object):
     def save(self, bucket):
         doc = {
             "_id": bucket.name,
-            "name": bucket.name
+            "name": bucket.name,
+            "raw_queries_allowed": bucket.raw_queries_allowed,
         }
         self._collection.save(doc)
 
@@ -16,4 +17,5 @@ class BucketRepository(object):
         doc = self._collection.find_one({"name": name})
         if doc is None:
             return None
-        return Bucket(doc["name"])
+        del doc["_id"]
+        return Bucket(**doc)

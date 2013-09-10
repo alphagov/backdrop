@@ -97,7 +97,7 @@ def query(bucket_name):
         response.headers['Access-Control-Allow-Headers'] = 'cache-control'
     else:
         result = validate_request_args(request.args,
-                                       raw_queries_allowed(bucket_name))
+                                       bucket.raw_queries_allowed)
 
         if not result.is_valid:
             return log_error_and_respond(result.message, 400)

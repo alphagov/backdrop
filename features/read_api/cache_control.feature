@@ -12,6 +12,7 @@ Feature: the read api should provide cache control headers
     Scenario: query returns an etag
         Given "licensing.json" is in "foo" bucket
           and I have a bucket named "foo"
+          and bucket setting raw_queries_allowed is true
          when I go to "/foo"
          then the "ETag" header should be ""7c7cec78f75fa9f30428778f2b6da9b42bd104d0""
 

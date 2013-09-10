@@ -15,6 +15,7 @@ def step(context):
 
 
 def ensure_bucket_exists(context, bucket_name):
+    context.bucket = bucket_name
     context.client.storage()["buckets"].save({'_id': bucket_name, 'name': bucket_name})
 
 
@@ -28,12 +29,17 @@ def step(context, fixture_name, bucket_name):
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
             context.client.storage()[bucket_name].save(obj)
-    context.bucket = bucket_name
 
 
 @given('I have a bucket named "{bucket_name}"')
 def step(context, bucket_name):
     ensure_bucket_exists(context, bucket_name)
+
+
+@given('bucket setting {setting} is {set_to}')
+def step(context, setting, set_to):
+    set_to = json.loads(set_to)
+    context.client.storage()["buckets"].update({"_id": context.bucket}, {"$set": {setting: set_to}}, safe=True)
 
 
 @when('I go to "{query}"')
@@ -43,7 +49,6 @@ def step(context, query):
 
 @when('I send another request to "{query}" with the received etag')
 def step(context, query):
-    print(context.response.data)
     etag = context.response.headers["ETag"]
     context.response = context.client.get(query,
                                           headers={"If-None-Match": etag})
@@ -56,7 +61,6 @@ def step(context, expected_status):
 
 @then('I should get a "{header}" header of "{value}"')
 def step(context, header, value):
-    print(context.response.headers)
     assert_that(context.response.headers.get(header), is_(value))
 
 

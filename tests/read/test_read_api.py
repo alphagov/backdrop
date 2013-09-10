@@ -27,7 +27,7 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.assert_called_with(
             Query.create(period=WEEK))
 
-    @setup_bucket("foo")
+    @setup_bucket("foo", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')
     def test_filter_by_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
@@ -43,7 +43,7 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.assert_called_with(
             Query.create(group_by=u'zombies'))
 
-    @setup_bucket("foo")
+    @setup_bucket("foo", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')
     def test_query_with_start_and_end_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
@@ -68,7 +68,7 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.assert_called_with(
             Query.create(period=WEEK, group_by="stuff"))
 
-    @setup_bucket("foo")
+    @setup_bucket("foo", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')
     def test_sort_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
