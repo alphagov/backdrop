@@ -1,33 +1,10 @@
-import unittest
-from flask import session, request
+from flask import session
 from hamcrest import *
 from mock import patch
 from werkzeug.urls import url_decode
 from backdrop.write import api
-from backdrop.write.permissions import Permissions
+from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
-
-
-class OauthTestCase(unittest.TestCase):
-    def setUp(self):
-        self.client = api.app.test_client()
-        self.app = api.app
-
-    def given_user_is_signed_in_as(self, name="testuser",
-                                   email="testuser@example.com"):
-        with self.client.session_transaction() as session:
-            session["user"] = {
-                "name": name,
-                "email": email
-            }
-
-    def given_user_is_not_signed_in(self):
-        with self.client.session_transaction() as session:
-            if "user" in session:
-                del session["user"]
-
-    def given_bucket_permissions(self, bucket, users):
-        self.app.permissions = Permissions({bucket: users})
 
 
 class TestSignonIntegration(OauthTestCase):
