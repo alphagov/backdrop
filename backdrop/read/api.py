@@ -13,6 +13,7 @@ from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
 from ..core.bucket import Bucket
 from ..core.database import InvalidOperationError
+from ..core.repository import BucketRepository
 
 
 def setup_logging():
@@ -33,6 +34,8 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+
+bucket_repository = BucketRepository(db.get_collection("buckets"))
 
 setup_logging()
 
@@ -82,6 +85,10 @@ def log_error_and_respond(message, status_code):
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
+    bucket = bucket_repository.retrieve(name=bucket_name)
+    if bucket is None:
+        return log_error_and_respond('bucket not found', 404)
+
     if request.method == 'OPTIONS':
         # OPTIONS requests are made by XHR as part of the CORS spec
         # if the client uses custom headers

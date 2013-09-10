@@ -44,6 +44,15 @@ class TestMongoDriver(unittest.TestCase):
 
         assert_that(saved_documents, only_contains(updated_document))
 
+    def test_find_one(self):
+        self._setup_people()
+
+        result = self.mongo_driver.find_one(query={"name": "George"})
+
+        assert_that(result, has_entries({
+            "name": "George", "plays": "guitar"
+        }))
+
     def test_find(self):
         self._setup_people()
 
@@ -734,3 +743,7 @@ class TestDatabase(unittest.TestCase):
     def test_getting_a_repository(self):
         repository = self.db.get_repository('my_bucket')
         assert_that(repository, instance_of(Repository))
+
+    def test_getting_a_collection(self):
+        collection = self.db.get_collection('my_collection')
+        assert_that(collection, instance_of(MongoDriver))

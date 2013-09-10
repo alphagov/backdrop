@@ -16,7 +16,10 @@ class Database(object):
         return self._mongo.alive()
 
     def get_repository(self, bucket_name):
-        return Repository(MongoDriver(self._mongo[self.name][bucket_name]))
+        return Repository(self.get_collection(bucket_name))
+
+    def get_collection(self, collection_name):
+        return MongoDriver(self._mongo[self.name][collection_name])
 
     @property
     def connection(self):
@@ -36,6 +39,9 @@ class MongoDriver(object):
             raise InvalidSortError(direction)
 
         cursor.sort(key, self.sort_options[direction])
+
+    def find_one(self, query):
+        return self._collection.find_one(query)
 
     def find(self, query, sort, limit):
         cursor = self._collection.find(query)

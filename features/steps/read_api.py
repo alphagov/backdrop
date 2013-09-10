@@ -14,8 +14,13 @@ def step(context):
     context.client.set_config_parameter('PREVENT_RAW_QUERIES', True)
 
 
+def ensure_bucket_exists(context, bucket_name):
+    context.client.storage()["buckets"].save({'_id': bucket_name, 'name': bucket_name})
+
+
 @given('"{fixture_name}" is in "{bucket_name}" bucket')
 def step(context, fixture_name, bucket_name):
+    ensure_bucket_exists(context, bucket_name)
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
@@ -24,6 +29,11 @@ def step(context, fixture_name, bucket_name):
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
             context.client.storage()[bucket_name].save(obj)
     context.bucket = bucket_name
+
+
+@given('I have a bucket named "{bucket_name}"')
+def step(context, bucket_name):
+    ensure_bucket_exists(context, bucket_name)
 
 
 @when('I go to "{query}"')

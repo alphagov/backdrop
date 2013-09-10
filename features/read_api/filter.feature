@@ -26,6 +26,7 @@ Feature: filtering queries for read api
           and the JSON should have "2" results
 
     Scenario: invalid start_at parameter
+        Given I have a bucket named "foo"
          When I go to "/foo?start_at=not+a+date"
          then I should get back a status of "400"
 

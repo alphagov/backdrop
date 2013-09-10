@@ -13,3 +13,6 @@ Feature: the performance platform read api
          then I should get back a status of "200"
          and the JSON should have "4" results
 
+    Scenario: querying a bucket that does not exist
+        When I go to "/foobar"
+        then I should get back a status of "404"
