@@ -21,5 +21,5 @@ class OauthTestCase(unittest.TestCase):
             if "user" in session:
                 del session["user"]
 
-    def given_bucket_permissions(self, bucket, users):
-        self.app.permissions = Permissions({bucket: users})
+    def given_bucket_permissions(self, email, buckets):
+        self.app.permissions = Permissions({email: buckets})
