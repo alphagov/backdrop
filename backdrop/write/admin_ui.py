@@ -1,5 +1,4 @@
 from functools import wraps
-from pprint import pprint
 from flask import flash, session, render_template, redirect, \
     request, abort
 from admin_ui_helper import url_for
