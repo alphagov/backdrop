@@ -23,3 +23,7 @@ class OauthTestCase(unittest.TestCase):
 
     def given_bucket_permissions(self, email, buckets):
         self.app.permissions = Permissions({email: buckets})
+
+    def given_user_is_signed_in_with_permissions(self, name, email, buckets):
+        self.given_user_is_signed_in_as(name, email)
+        self.given_bucket_permissions(email, buckets=buckets)
