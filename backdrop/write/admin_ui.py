@@ -128,18 +128,18 @@ def setup(app, db):
             return abort(404)
 
         upload_format = _upload_format_for(bucket_name)
-        upload_filters = _upload_filters_for(bucket_name)
 
         if request.method == 'GET':
             return render_template("upload_%s.html" % upload_format,
                                    bucket_name=bucket_name)
 
+        return _store_data(bucket_name, upload_format)
+
+    def _store_data(bucket_name, upload_format):
+        upload_filters = _upload_filters_for(bucket_name)
         parser = create_parser(upload_format, upload_filters)
-
-        return _store_data(bucket_name, parser)
-
-    def _store_data(bucket_name, parser):
         upload = UploadedFile(request.files['file'])
+
         try:
             id_keys = _auto_id_keys_for(bucket_name)
             bucket = Bucket(db, bucket_name,
