@@ -69,6 +69,17 @@ class Test_parse_request_args(unittest.TestCase):
         assert_that(args['filter_by'], has_item(["foo", "bar"]))
         assert_that(args['filter_by'], has_item(["bar", "foo"]))
 
+    def test_build_query_with_boolean_value(self):
+        request_args = MultiDict([
+            ("filter_by", "planet:true"),
+            ("filter_by", "star:false"),
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['filter_by'], has_item([ "planet", True ]))
+        assert_that(args['filter_by'], has_item([ "star", False ]))
+
     def test_group_by_is_passed_through_untouched(self):
         request_args = MultiDict([("group_by", "foobar")])
 

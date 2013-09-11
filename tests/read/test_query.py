@@ -34,11 +34,3 @@ class TestBuild_query(TestCase):
         query = Query.create(filter_by= [[ "foo", "bar" ], ["foobar", "yes"]])
         assert_that(query.to_mongo_query(),
                     is_({ "foo": "bar", "foobar": "yes" }))
-
-    def test_build_query_with_false_value(self):
-        query = Query.create(filter_by=[["planet", "false"]])
-        assert_that(query.to_mongo_query(), is_({ "planet": False }))
-
-    def test_build_query_with_true_value(self):
-        query = Query.create(filter_by=[["planet", "true"]])
-        assert_that(query.to_mongo_query(), is_({ "planet": True }))

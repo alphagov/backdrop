@@ -25,9 +25,18 @@ def parse_request_args(request_args):
     args['end_at'] = if_present(parse_time_as_utc,
                                 request_args.get('end_at'))
 
-    args['filter_by'] = [
-        f.split(':', 1) for f in request_args.getlist('filter_by')
-    ]
+    def boolify(value):
+        return {
+            "true": True,
+            "false": False,
+        }.get(value, value)
+
+    def parse_filter_by(filter_by):
+        key, value = filter_by.split(':', 1)
+
+        return [key, boolify(value)]
+
+    args['filter_by'] = map(parse_filter_by, request_args.getlist('filter_by'))
 
     args['period'] = if_present(parse_period,
                                 request_args.get('period'))
@@ -69,20 +78,16 @@ class Query(_Query):
         return Query(**args)
 
     def to_mongo_query(self):
+
         mongo_query = {}
-        if (self.start_at or self.end_at):
+        if self.start_at or self.end_at:
             mongo_query["_timestamp"] = {}
-            if (self.end_at):
+            if self.end_at:
                 mongo_query["_timestamp"]["$lt"] = self.end_at
-            if (self.start_at):
+            if self.start_at:
                 mongo_query["_timestamp"]["$gte"] = self.start_at
-        if (self.filter_by):
-            for filters in self.filter_by:
-                if filters[1] == "true":
-                    filters[1] = True
-                if filters[1] == "false":
-                    filters[1] = False
-                mongo_query.update({filters[0]: filters[1]})
+        if self.filter_by:
+            mongo_query.update(self.filter_by)
         return mongo_query
 
     def execute(self, repository):
