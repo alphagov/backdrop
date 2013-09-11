@@ -53,11 +53,6 @@ class JsonEncoder(json.JSONEncoder):
 app.json_encoder = JsonEncoder
 
 
-def raw_queries_allowed(bucket_name):
-    raw_queries_config = app.config.get('RAW_QUERIES_ALLOWED', {})
-    return bool(raw_queries_config.get(bucket_name, False))
-
-
 @app.errorhandler(500)
 @app.errorhandler(405)
 @app.errorhandler(404)
