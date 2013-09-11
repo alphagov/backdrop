@@ -22,7 +22,7 @@ class Database(object):
         return MongoDriver(self._mongo[self.name][collection_name])
 
     @property
-    def connection(self):
+    def mongo_database(self):
         return self._mongo[self.name]
 
 
