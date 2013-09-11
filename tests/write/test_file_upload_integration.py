@@ -66,15 +66,14 @@ class TestFileUploadIntegration(OauthTestCase):
         response = self.client.post(
             'integration_test_excel_bucket/upload',
             data = {
-                 'file': open(fixture_path)
+                'file': open(fixture_path)
             }
-
         )
 
-        assert_that(response,has_status(200))
+        assert_that(response, has_status(200))
         db = MongoClient('localhost', 27017).backdrop_test
         record = list(db.integration_test_excel_bucket.find(
             {'name': 'Pawel'}))[0]
 
-        assert_that(record,has_entry('age', 27))
-        assert_that(record,has_entry('nationality', 'Polish'))
+        assert_that(record, has_entry('age', 27))
+        assert_that(record, has_entry('nationality', 'Polish'))
