@@ -1,15 +1,16 @@
 class FileUploadException(IOError):
-    pass
+    def __init__(self, message):
+        self.message = message
 
 
 class UploadedFile(object):
     def __init__(self, file_object):
         self.file_object = file_object
         if file_object.filename is None:
-            raise FileUploadException
+            raise FileUploadException('No file uploaded %s' % self.file_object)
 
-    def content(self):
-        return self.file_object.read()
+    def file_stream(self):
+        return self.file_object.stream
 
     def _is_size_valid(self):
         return self.file_object.content_length < 1000001
@@ -21,6 +22,15 @@ class UploadedFile(object):
             "application/vnd.ms-excel",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         ]
+
+    def save(self, bucket, parser):
+        if not self.valid:
+            self.file_stream().close()
+            raise FileUploadException('Invalid file upload %s' %
+                                      self.file_object)
+        data = parser(self.file_stream())
+        bucket.parse_and_store(data)
+        self.file_stream().close()
 
     @property
     def valid(self):

@@ -8,6 +8,7 @@ from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.upload import create_parser
 from backdrop.core.upload.filters import first_sheet_filter
 from backdrop.write.signonotron2 import Signonotron2
+from backdrop.write.uploaded_file import UploadedFile, FileUploadException
 from ..core import cache_control
 
 
@@ -139,24 +140,17 @@ def setup(app, db):
         return _store_data(bucket_name, parser)
 
     def _store_data(bucket_name, parser):
-        file_stream = request.files["file"].stream
-        if not request.files["file"].filename:
-            return _invalid_upload("file is required")
+        upload = UploadedFile(request.files['file'])
         try:
-            if request.content_length > MAX_UPLOAD_SIZE:
-                return _invalid_upload("file too large")
-            try:
-                data = parser(file_stream)
-
-                auto_id_keys = _auto_id_keys_for(bucket_name)
-                bucket = Bucket(db, bucket_name, generate_id_from=auto_id_keys)
-                bucket.parse_and_store(data)
-
-                return render_template("upload_ok.html")
-            except (ParseError, ValidationError) as e:
-                return _invalid_upload(e.message)
-        finally:
-            file_stream.close()
+            id_keys = _auto_id_keys_for(bucket_name)
+            bucket = Bucket(db, bucket_name,
+                            generate_id_from=id_keys)
+            upload.save(bucket, parser)
+            return render_template('upload_ok.html')
+        except (FileUploadException, ParseError, ValidationError) as e:
+            message = e.message
+            app.logger.error(message)
+            return _invalid_upload(message)
 
     def _upload_format_for(bucket_name):
         return app.config.get("BUCKET_UPLOAD_FORMAT", {})\

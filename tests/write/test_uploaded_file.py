@@ -1,4 +1,5 @@
 from hamcrest import assert_that, is_
+from mock import Mock
 from backdrop.write.uploaded_file import UploadedFile, FileUploadException
 from tests.support.file_upload_test_case import FileUploadTestCase
 
@@ -6,7 +7,7 @@ from tests.support.file_upload_test_case import FileUploadTestCase
 class TestUploadedFile(FileUploadTestCase):
     def test_getting_a_file_stream(self):
         upload = UploadedFile(self._file_storage_wrapper("This is a test", ""))
-        assert_that(upload.content(), is_(u'This is a test'))
+        assert_that(upload.file_stream().read(), is_(u'This is a test'))
 
     def test_files_under_1000000_octets_are_valid(self):
         upload = UploadedFile(self._file_storage_wrapper(
@@ -24,10 +25,31 @@ class TestUploadedFile(FileUploadTestCase):
 
         assert_that(upload.valid, is_(False))
 
+    def test_saving_file(self):
+        upload = UploadedFile(self._file_storage_wrapper(
+            contents="some data",
+            content_type="text/csv"
+        ))
+        bucket = Mock()
+        parser = Mock()
+        parser.return_value = "some data"
+        upload.save(bucket, parser)
+        assert_that(parser.called, is_(True))
+        bucket.parse_and_store.assert_called_with("some data")
+
+    def test_saving_invalid_file_should_throw_an_exception(self):
+        upload = UploadedFile(self._file_storage_wrapper(
+            contents="some content"
+        ))
+        bucket = Mock()
+        parser = Mock()
+        self.assertRaises(FileUploadException, upload.save, bucket, parser )
+        assert_that(bucket.called, is_(False))
 
     def test_uploaded_file_must_have_a_file(self):
         storage = self._file_storage_wrapper("boo", filename=None)
         self.assertRaises(FileUploadException, UploadedFile, storage)
+
 
 class TestUploadedFileContentTypeValidation(FileUploadTestCase):
     def test_csv_uploads_are_valid(self):
