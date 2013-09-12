@@ -1,5 +1,5 @@
+from backdrop.core.bucket import BucketConfig
 from backdrop.core.repository import BucketRepository
-from backdrop.core.bucket_new import Bucket
 from hamcrest import assert_that, equal_to, is_
 from mock import Mock
 
@@ -9,7 +9,7 @@ class TestBucketRepository(object):
         mongo_collection = Mock()
         bucket_repo = BucketRepository(mongo_collection)
 
-        bucket = Bucket("bucket_name")
+        bucket = BucketConfig("bucket_name")
 
         bucket_repo.save(bucket)
         mongo_collection.save.assert_called_with({
@@ -22,7 +22,7 @@ class TestBucketRepository(object):
         mongo_collection = Mock()
         bucket_repo = BucketRepository(mongo_collection)
 
-        bucket = Bucket("bucket_name", raw_queries_allowed=True)
+        bucket = BucketConfig("bucket_name", raw_queries_allowed=True)
 
         bucket_repo.save(bucket)
         mongo_collection.save.assert_called_with({
@@ -42,7 +42,7 @@ class TestBucketRepository(object):
         }
         bucket = bucket_repo.retrieve(name="bucket_name")
 
-        assert_that(bucket, equal_to(Bucket("bucket_name")))
+        assert_that(bucket, equal_to(BucketConfig("bucket_name")))
 
     def test_retrieving_non_existent_bucket_returns_none(self):
         mongo_collection = Mock()
@@ -64,4 +64,4 @@ class TestBucketRepository(object):
         }
         bucket = bucket_repo.retrieve(name="bucket_name")
 
-        assert_that(bucket, equal_to(Bucket("bucket_name", True)))
+        assert_that(bucket, equal_to(BucketConfig("bucket_name", True)))

@@ -1,8 +1,10 @@
 import unittest
 from hamcrest import *
+from hamcrest import assert_that, is_
 from nose.tools import *
 from mock import Mock, call
 from backdrop.core import bucket
+from backdrop.core.bucket import BucketConfig
 from backdrop.core.records import Record
 from backdrop.read.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
@@ -576,3 +578,23 @@ class TestBucket(unittest.TestCase):
 
         query = Query.create(period=WEEK, group_by='d')
         assert_raises(ValueError, self.bucket.query, query)
+
+
+class TestBucketConfig(object):
+    def test_creating_a_bucket_with_raw_queries_allowed(self):
+        bucket = BucketConfig("name", raw_queries_allowed=True)
+        assert_that(bucket.raw_queries_allowed, is_(True))
+
+    def test_bucket_name_validation(self):
+        bucket_names = {
+            "": False,
+            "foo": True,
+            "foo_bar": True,
+            "12foo": False,
+            123: False
+        }
+        for (bucket_name, name_is_valid) in bucket_names.items():
+            if name_is_valid:
+                BucketConfig(bucket_name)
+            else:
+                assert_raises(ValueError, BucketConfig, bucket_name)

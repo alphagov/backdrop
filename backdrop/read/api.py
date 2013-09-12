@@ -80,8 +80,8 @@ def log_error_and_respond(message, status_code):
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
-    bucket = bucket_repository.retrieve(name=bucket_name)
-    if bucket is None:
+    bucket_config = bucket_repository.retrieve(name=bucket_name)
+    if bucket_config is None:
         return log_error_and_respond('bucket not found', 404)
 
     if request.method == 'OPTIONS':
@@ -92,7 +92,7 @@ def query(bucket_name):
         response.headers['Access-Control-Allow-Headers'] = 'cache-control'
     else:
         result = validate_request_args(request.args,
-                                       bucket.raw_queries_allowed)
+                                       bucket_config.raw_queries_allowed)
 
         if not result.is_valid:
             return log_error_and_respond(result.message, 400)

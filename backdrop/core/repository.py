@@ -1,4 +1,4 @@
-from .bucket_new import Bucket
+from backdrop.core.bucket import BucketConfig
 
 
 class BucketRepository(object):
@@ -18,4 +18,4 @@ class BucketRepository(object):
         if doc is None:
             return None
         del doc["_id"]
-        return Bucket(**doc)
+        return BucketConfig(**doc)
