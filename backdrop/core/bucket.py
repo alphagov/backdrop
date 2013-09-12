@@ -1,4 +1,5 @@
 from base64 import b64encode
+from collections import namedtuple
 from flask import logging
 from backdrop.core import records
 from backdrop.core.errors import ValidationError
@@ -46,25 +47,13 @@ class Bucket(object):
         return b64encode(".".join([datum[key] for key in self.auto_id_keys]))
 
 
-class BucketConfig(object):
-    def __init__(self, name, raw_queries_allowed=False):
+_BucketConfig = namedtuple(
+    "_BucketConfig",
+    "name raw_queries_allowed")
+
+class BucketConfig(_BucketConfig):
+    def __new__(cls, name, raw_queries_allowed=False):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 
-        self._bucket_settings = {
-            "name": name,
-            "raw_queries_allowed": raw_queries_allowed,
-        }
-
-    @property
-    def name(self):
-        return self._bucket_settings["name"]
-
-    @property
-    def raw_queries_allowed(self):
-        return self._bucket_settings["raw_queries_allowed"]
-
-    def __eq__(self, other):
-        if other is None:
-            return False
-        return self._bucket_settings == other._bucket_settings
+        return super(BucketConfig, cls).__new__(cls, name, raw_queries_allowed)
