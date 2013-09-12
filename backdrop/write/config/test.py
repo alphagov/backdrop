@@ -15,6 +15,7 @@ BUCKET_AUTO_ID_KEYS = {
 }
 BUCKET_UPLOAD_FORMAT = {
     "bucket_with_timestamp_auto_id": "excel",
+    "integration_test_excel_bucket": "excel",
     "my_xlsx_bucket": "excel",
     "evl_ceg_data": "excel",
     "evl_services_volumetrics": "excel",

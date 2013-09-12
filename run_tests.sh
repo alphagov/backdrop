@@ -34,14 +34,14 @@ rm -f coverage.xml .coverage nosetests.xml
 find . -name '*.pyc' -delete
 
 # run unit tests
-nosetests -v --with-xunit --with-coverage --cover-package=backdrop --cover-inclusive
+nosetests -v --with-xunit --with-coverage --cover-package=backdrop
 display_result $? 1 "Unit tests"
 
 # create coverage report
 python -m coverage.__main__ xml --include=backdrop*
 
 # run feature tests
-behave --stop --tags=-wip
+behave --stop --tags=~@wip --tags=~@file_upload_test
 display_result $? 2 "Feature tests"
 
 # run style checks
