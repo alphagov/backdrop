@@ -1,3 +1,4 @@
+@file_upload_test
 @use_splinter_client
 Feature: excel upload
 
