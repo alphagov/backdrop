@@ -54,7 +54,7 @@ _BucketConfig = namedtuple(
 
 class BucketConfig(_BucketConfig):
     def __new__(cls, name, raw_queries_allowed=False, bearer_token=None,
-                upload_format=None):
+                upload_format="csv"):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 

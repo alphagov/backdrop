@@ -6,11 +6,14 @@ class BucketRepository(object):
         self._collection = collection
 
     def save(self, bucket):
+        if not isinstance(bucket, BucketConfig):
+            raise ValueError("Expected BucketConfig")
+
         doc = {
             "_id": bucket.name,
-            "name": bucket.name,
-            "raw_queries_allowed": bucket.raw_queries_allowed,
         }
+        doc.update(bucket._asdict())
+
         self._collection.save(doc)
 
     def retrieve(self, name):
