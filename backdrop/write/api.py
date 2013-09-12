@@ -7,6 +7,7 @@ from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.core.flaskutils import BucketConverter
+from backdrop.core.repository import BucketRepository
 from backdrop.write.permissions import Permissions
 from backdrop.write.admin_ui import use_single_sign_on
 from backdrop.write import admin_ui
@@ -42,6 +43,8 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+
+bucket_repository = BucketRepository(db.get_collection("buckets"))
 
 setup_logging()
 
@@ -90,12 +93,12 @@ def health_check():
 @app.route('/<bucket:bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
+    bucket_config = bucket_repository.retrieve(name=bucket_name)
     g.bucket_name = bucket_name
 
-    tokens = app.config['TOKENS']
     auth_header = request.headers.get('Authorization', None)
 
-    if not bearer_token_is_valid(tokens, auth_header, bucket_name):
+    if not bearer_token_is_valid(bucket_config, auth_header):
         statsd.incr("write_api.bad_token", bucket=g.bucket_name)
         return jsonify(status='error', message='Forbidden'), 403
 

@@ -4,6 +4,7 @@ Feature: EVL Upload
 
     Scenario: Upload call center volumes
        Given a file named "CEG Data.xlsx" with fixture "contrib/CEG Transaction Tracker.xlsx"
+         and I have a bucket named "evl_ceg_data"
          and I am logged in
         when I go to "/evl_ceg_data/upload"
          and I enter "CEG Data.xlsx" into the file upload field

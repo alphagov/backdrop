@@ -10,13 +10,12 @@ def extract_bearer_token(header):
     return header[7:]
 
 
-def bearer_token_is_valid(tokens, auth_header, bucket_name):
+def bearer_token_is_valid(bucket, auth_header):
 
-    expected_token = tokens.get(bucket_name, None)
     request_token = extract_bearer_token(auth_header)
 
-    if request_token != expected_token:
+    if request_token != bucket.bearer_token:
         log.error("expected <%s> but was <%s>" % (
-            expected_token, request_token))
+            bucket.bearer_token, request_token))
         return False
     return True
