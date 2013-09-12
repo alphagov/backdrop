@@ -4,6 +4,9 @@ class FileUploadException(IOError):
 
 
 class UploadedFile(object):
+    # This is ~ 1mb in octets
+    MAX_FILE_SIZE = 1000001
+
     def __init__(self, file_object):
         self.file_object = file_object
         if file_object.filename is None:
@@ -13,7 +16,7 @@ class UploadedFile(object):
         return self.file_object.stream
 
     def _is_size_valid(self):
-        return self.file_object.content_length < 1000001
+        return self.file_object.content_length < self.MAX_FILE_SIZE
 
     def _is_content_type_valid(self):
         return self.file_object.content_type in [
