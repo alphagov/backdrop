@@ -49,13 +49,14 @@ class Bucket(object):
 
 _BucketConfig = namedtuple(
     "_BucketConfig",
-    "name raw_queries_allowed bearer_token")
+    "name raw_queries_allowed bearer_token upload_format")
 
 
 class BucketConfig(_BucketConfig):
-    def __new__(cls, name, raw_queries_allowed=False, bearer_token=None):
+    def __new__(cls, name, raw_queries_allowed=False, bearer_token=None,
+                upload_format=None):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 
         return super(BucketConfig, cls).__new__(
-            cls, name, raw_queries_allowed, bearer_token)
+            cls, name, raw_queries_allowed, bearer_token, upload_format)

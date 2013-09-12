@@ -2,6 +2,7 @@ from StringIO import StringIO
 import os
 from hamcrest import assert_that, has_entry
 from pymongo import MongoClient
+from tests.support.bucket import setup_bucket
 from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
 
@@ -18,6 +19,7 @@ class TestFileUploadIntegration(OauthTestCase):
             buckets=["test", "test_upload_integration", "integration_test_excel_bucket"]
         )
 
+    @setup_bucket("test", upload_format="csv")
     def test_accepts_content_type_for_csv(self):
         self._sign_in()
         response = self.client.post(
@@ -29,6 +31,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
 
+    @setup_bucket("test", upload_format="csv")
     def test_rejects_content_type_for_exe(self):
         self._sign_in()
 
@@ -41,6 +44,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
+    @setup_bucket("test_upload_integration", upload_format="csv")
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in()
         self._drop_collection('test_upload_integration')
@@ -59,6 +63,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('_id', 'hello'))
         assert_that(record, has_entry('value', 'some_value'))
 
+    @setup_bucket("integration_test_excel_bucket", upload_format="excel")
     def test_data_hits_the_database_when_uploading_xlsx(self):
         self._drop_collection('integration_test_excel_bucket')
         self._sign_in()

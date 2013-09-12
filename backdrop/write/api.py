@@ -57,7 +57,7 @@ app.url_map.converters["bucket"] = BucketConverter
 
 if use_single_sign_on(app):
     app.secret_key = app.config['SECRET_KEY']
-    admin_ui.setup(app, db)
+    admin_ui.setup(app, db, bucket_repository)
 
 
 @app.errorhandler(500)
