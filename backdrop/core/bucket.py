@@ -49,13 +49,14 @@ class Bucket(object):
 
 _BucketConfig = namedtuple(
     "_BucketConfig",
-    "name raw_queries_allowed bearer_token upload_format upload_filters "
-    "auto_ids")
+    "name service data_type raw_queries_allowed bearer_token upload_format "
+    "upload_filters auto_ids")
 
 
 class BucketConfig(_BucketConfig):
-    def __new__(cls, name, raw_queries_allowed=False, bearer_token=None,
-                upload_format="csv", upload_filters=None, auto_ids=None):
+    def __new__(cls, name, service, data_type, raw_queries_allowed=False,
+                bearer_token=None, upload_format="csv", upload_filters=None,
+                auto_ids=None):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 
@@ -63,6 +64,7 @@ class BucketConfig(_BucketConfig):
             upload_filters = [
                 "backdrop.core.upload.filters.first_sheet_filter"]
 
-        return super(BucketConfig, cls).__new__(
-            cls, name, raw_queries_allowed, bearer_token, upload_format,
-            upload_filters, auto_ids)
+        return super(BucketConfig, cls).__new__(cls, name, service, data_type,
+                                                raw_queries_allowed,
+                                                bearer_token, upload_format,
+                                                upload_filters, auto_ids)

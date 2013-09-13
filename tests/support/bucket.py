@@ -5,7 +5,7 @@ from backdrop.core.bucket import BucketConfig
 from backdrop.write.api import bucket_repository
 
 
-def stub_bucket(name, *bucket_args, **bucket_kwargs):
+def stub_bucket(name, service, data_type, *bucket_args, **bucket_kwargs):
     setup_bucket_name = name
 
     def decorator(func):
@@ -14,7 +14,7 @@ def stub_bucket(name, *bucket_args, **bucket_kwargs):
             with patch('backdrop.core.repository.BucketRepository.retrieve') as retrieve:
                 def side_effect(name):
                     if name == setup_bucket_name:
-                        return BucketConfig(setup_bucket_name, *bucket_args, **bucket_kwargs)
+                        return BucketConfig(setup_bucket_name, service, data_type, *bucket_args, **bucket_kwargs)
                 retrieve.side_effect = side_effect
                 func(*args, **kwargs)
         return wrapped_stub_bucket

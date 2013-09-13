@@ -19,6 +19,8 @@ def ensure_bucket_exists(context, bucket_name):
     bucket_data = {
         '_id': bucket_name,
         'name': bucket_name,
+        'service': bucket_name,
+        'data_type': bucket_name,
         'bearer_token': "%s-bearer-token" % bucket_name
     }
     context.client.storage()["buckets"].save(bucket_data)

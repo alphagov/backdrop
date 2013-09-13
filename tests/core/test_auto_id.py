@@ -17,7 +17,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "abc": "def"
         }]
 
-        config = BucketConfig("bucket", auto_ids=["abc"])
+        config = BucketConfig("bucket", service="srv", data_type="type", auto_ids=["abc"])
 
         bucket = Bucket(self.mock_database, config)
 
@@ -35,7 +35,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }]
 
-        config = BucketConfig("bucket", auto_ids=("postcode", "number"))
+        config = BucketConfig("bucket", service="srv", data_type="type", auto_ids=("postcode", "number"))
 
         bucket = Bucket(self.mock_database, config)
 
@@ -55,7 +55,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }
 
-        config = BucketConfig("bucket")
+        config = BucketConfig("bucket", service="srv", data_type="type")
 
         bucket = Bucket(self.mock_database, config)
 
@@ -70,7 +70,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }]
 
-        config = BucketConfig("bucket", auto_ids=("postcode", "number"))
+        config = BucketConfig("bucket", service="srv", data_type="type", auto_ids=("postcode", "number"))
 
         bucket = Bucket(self.mock_database, config)
 
@@ -82,7 +82,7 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "foo": "bar"
         }]
 
-        config = BucketConfig("bucket", auto_ids=["_timestamp", "foo"])
+        config = BucketConfig("bucket", service="srv", data_type="type", auto_ids=["_timestamp", "foo"])
 
         bucket = Bucket(self.mock_database, config)
         bucket.parse_and_store(objects)

@@ -76,6 +76,11 @@ def log_error_and_respond(message, status_code):
     return jsonify(status='error', message=message), status_code
 
 
+@app.route('/service-data/<service>/<data_type>', methods=['GET', 'OPTIONS'])
+def service_data(service, data_type):
+    return "ok"
+
+
 @app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
 @cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag

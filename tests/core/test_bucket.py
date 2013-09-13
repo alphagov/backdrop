@@ -29,7 +29,9 @@ class TestBucket(unittest.TestCase):
     def setUp(self):
         self.mock_repository = mock_repository()
         self.mock_database = mock_database(self.mock_repository)
-        self.bucket = bucket.Bucket(self.mock_database, BucketConfig('test_bucket'))
+        self.bucket = bucket.Bucket(self.mock_database, BucketConfig('test_bucket',
+                                                                     service="service",
+                                                                     data_type="type"))
 
     def test_that_a_single_object_gets_stored(self):
         obj = Record({"name": "Gummo"})
@@ -581,8 +583,9 @@ class TestBucket(unittest.TestCase):
 
 
 class TestBucketConfig(object):
+
     def test_creating_a_bucket_with_raw_queries_allowed(self):
-        bucket = BucketConfig("name", raw_queries_allowed=True)
+        bucket = BucketConfig("name", service="srv", data_type="type", raw_queries_allowed=True)
         assert_that(bucket.raw_queries_allowed, is_(True))
 
     def test_bucket_name_validation(self):
@@ -590,11 +593,12 @@ class TestBucketConfig(object):
             "": False,
             "foo": True,
             "foo_bar": True,
+            "foo-bar": False,
             "12foo": False,
             123: False
         }
         for (bucket_name, name_is_valid) in bucket_names.items():
             if name_is_valid:
-                BucketConfig(bucket_name)
+                BucketConfig(bucket_name, service="service", data_type="type")
             else:
-                assert_raises(ValueError, BucketConfig, bucket_name)
+                assert_raises(ValueError, BucketConfig, bucket_name, "service", "type")

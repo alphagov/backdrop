@@ -22,7 +22,7 @@ class TestFileUploadIntegration(OauthTestCase):
                      "bucket_with_timestamp_auto_id"]
         )
 
-    @stub_bucket("test", upload_format="csv")
+    @stub_bucket("test", service="srv", data_type="type", upload_format="csv")
     def test_accepts_content_type_for_csv(self):
         self._sign_in()
         response = self.client.post(
@@ -34,7 +34,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
 
-    @stub_bucket("test", upload_format="csv")
+    @stub_bucket("test", service="srv", data_type="type", upload_format="csv")
     def test_rejects_content_type_for_exe(self):
         self._sign_in()
 
@@ -47,7 +47,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
-    @stub_bucket("test_upload_integration", upload_format="csv")
+    @stub_bucket("test_upload_integration", service="srv", data_type="type", upload_format="csv")
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in()
         self._drop_collection('test_upload_integration')
@@ -66,7 +66,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('_id', 'hello'))
         assert_that(record, has_entry('value', 'some_value'))
 
-    @stub_bucket("integration_test_excel_bucket", upload_format="excel")
+    @stub_bucket("integration_test_excel_bucket", service="srv", data_type="type", upload_format="excel")
     def test_data_hits_the_database_when_uploading_xlsx(self):
         self._drop_collection('integration_test_excel_bucket')
         self._sign_in()
@@ -86,7 +86,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('age', 27))
         assert_that(record, has_entry('nationality', 'Polish'))
 
-    @setup_bucket("evl_ceg_data", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
+    @setup_bucket("evl_ceg_data", service="srv", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
     def test_upload_applies_filters(self):
         self._drop_collection("evl_ceg_data")
         self._sign_in()
@@ -111,7 +111,7 @@ class TestFileUploadIntegration(OauthTestCase):
             "_timestamp": datetime.datetime(2007, 7, 1, 0, 0),
         }))
 
-    @setup_bucket("bucket_with_timestamp_auto_id", upload_format="excel", auto_ids=["_timestamp", "key"])
+    @setup_bucket("bucket_with_timestamp_auto_id", service="srv", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
     def test_upload_auto_generate_ids(self):
         self._drop_collection("bucket_with_timestamp_auto_id")
         self._sign_in()

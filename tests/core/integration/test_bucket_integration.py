@@ -21,7 +21,7 @@ BUCKET = 'bucket_integration_test'
 class TestBucketIntegration(unittest.TestCase):
     def setUp(self):
         self.db = database.Database(HOST, PORT, DB_NAME)
-        self.bucket = bucket.Bucket(self.db, BucketConfig(BUCKET))
+        self.bucket = bucket.Bucket(self.db, BucketConfig(BUCKET, service="service", data_type="type"))
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
 
     def setup__timestamp_data(self):
