@@ -97,7 +97,7 @@ def query(bucket_name):
         if not result.is_valid:
             return log_error_and_respond(result.message, 400)
 
-        bucket = Bucket(db, bucket_name)
+        bucket = Bucket(db, bucket_config)
 
         try:
             result_data = bucket.query(Query.parse(request.args)).data()

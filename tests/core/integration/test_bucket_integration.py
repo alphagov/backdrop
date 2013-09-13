@@ -6,6 +6,7 @@ from pymongo.database import Database as MongoDatabase
 from hamcrest import *
 
 from backdrop.core import database, bucket
+from backdrop.core.bucket import BucketConfig
 from backdrop.core.records import Record
 from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
@@ -20,7 +21,7 @@ BUCKET = 'bucket_integration_test'
 class TestBucketIntegration(unittest.TestCase):
     def setUp(self):
         self.db = database.Database(HOST, PORT, DB_NAME)
-        self.bucket = bucket.Bucket(self.db, BUCKET)
+        self.bucket = bucket.Bucket(self.db, BucketConfig(BUCKET))
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
 
     def setup__timestamp_data(self):

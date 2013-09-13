@@ -105,7 +105,7 @@ def post_to_bucket(bucket_name):
     try:
         data = load_json(request.json)
 
-        bucket = Bucket(db, bucket_name)
+        bucket = Bucket(db, bucket_config)
         bucket.parse_and_store(data)
 
         return jsonify(status='ok')

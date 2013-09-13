@@ -29,7 +29,7 @@ class TestBucket(unittest.TestCase):
     def setUp(self):
         self.mock_repository = mock_repository()
         self.mock_database = mock_database(self.mock_repository)
-        self.bucket = bucket.Bucket(self.mock_database, 'test_bucket')
+        self.bucket = bucket.Bucket(self.mock_database, BucketConfig('test_bucket'))
 
     def test_that_a_single_object_gets_stored(self):
         obj = Record({"name": "Gummo"})

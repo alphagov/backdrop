@@ -140,8 +140,7 @@ def setup(app, db, bucket_repository):
         upload = UploadedFile(request.files['file'])
 
         try:
-            bucket = Bucket(db, bucket_config.name,
-                            generate_id_from=bucket_config.auto_ids)
+            bucket = Bucket(db, bucket_config)
             upload.save(bucket, parser)
             return render_template('upload_ok.html')
         except (FileUploadException, ParseError, ValidationError) as e:

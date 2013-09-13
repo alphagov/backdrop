@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 
 
 class Bucket(object):
-    def __init__(self, db, bucket_name, generate_id_from=None):
-        self.bucket_name = bucket_name
-        self.repository = db.get_repository(bucket_name)
-        self.auto_id_keys = generate_id_from
+    def __init__(self, db, config):
+        self.bucket_name = config.name
+        self.repository = db.get_repository(config.name)
+        self.auto_id_keys = config.auto_ids
 
     def parse_and_store(self, data):
         log.info("received %s documents" % len(data))

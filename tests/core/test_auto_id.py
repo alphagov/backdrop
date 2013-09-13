@@ -2,7 +2,7 @@ from base64 import b64encode, b64decode
 import unittest
 from hamcrest import *
 from nose.tools import raises
-from backdrop.core.bucket import Bucket
+from backdrop.core.bucket import Bucket, BucketConfig
 from backdrop.core.errors import ValidationError
 from tests.core.test_bucket import mock_repository, mock_database
 
@@ -17,9 +17,9 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "abc": "def"
         }]
 
-        auto_id = ["abc"]
+        config = BucketConfig("bucket", auto_ids=["abc"])
 
-        bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
+        bucket = Bucket(self.mock_database, config)
 
         bucket.parse_and_store(objects)
 
@@ -35,8 +35,9 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }]
 
-        auto_id = ("postcode", "number")
-        bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
+        config = BucketConfig("bucket", auto_ids=("postcode", "number"))
+
+        bucket = Bucket(self.mock_database, config)
 
         bucket.parse_and_store(objects)
 
@@ -54,7 +55,9 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }
 
-        bucket = Bucket(self.mock_database, "bucket", generate_id_from=None)
+        config = BucketConfig("bucket")
+
+        bucket = Bucket(self.mock_database, config)
 
         bucket.parse_and_store([object])
 
@@ -67,8 +70,9 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }]
 
-        auto_id = ("postcode", "number")
-        bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
+        config = BucketConfig("bucket", auto_ids=("postcode", "number"))
+
+        bucket = Bucket(self.mock_database, config)
 
         bucket.parse_and_store(objects)
 
@@ -78,9 +82,9 @@ class TestBucketAutoIdGeneration(unittest.TestCase):
             "foo": "bar"
         }]
 
-        auto_id = ["_timestamp", "foo"]
+        config = BucketConfig("bucket", auto_ids=["_timestamp", "foo"])
 
-        bucket = Bucket(self.mock_database, "bucket", generate_id_from=auto_id)
+        bucket = Bucket(self.mock_database, config)
         bucket.parse_and_store(objects)
 
         saved_object = self.mock_repository.save.call_args[0][0]
