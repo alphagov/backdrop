@@ -1,8 +1,9 @@
 from StringIO import StringIO
 import os
-from hamcrest import assert_that, has_entry
+import datetime
+from hamcrest import assert_that, has_entry, is_, has_entries
 from pymongo import MongoClient
-from tests.support.bucket import setup_bucket
+from tests.support.bucket import stub_bucket, setup_bucket
 from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
 
@@ -16,10 +17,11 @@ class TestFileUploadIntegration(OauthTestCase):
         self.given_user_is_signed_in_with_permissions(
             name="test",
             email="test@example.com",
-            buckets=["test", "test_upload_integration", "integration_test_excel_bucket"]
+            buckets=["test", "test_upload_integration",
+                     "integration_test_excel_bucket", "evl_ceg_data"]
         )
 
-    @setup_bucket("test", upload_format="csv")
+    @stub_bucket("test", upload_format="csv")
     def test_accepts_content_type_for_csv(self):
         self._sign_in()
         response = self.client.post(
@@ -31,7 +33,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
 
-    @setup_bucket("test", upload_format="csv")
+    @stub_bucket("test", upload_format="csv")
     def test_rejects_content_type_for_exe(self):
         self._sign_in()
 
@@ -44,7 +46,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
-    @setup_bucket("test_upload_integration", upload_format="csv")
+    @stub_bucket("test_upload_integration", upload_format="csv")
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in()
         self._drop_collection('test_upload_integration')
@@ -63,7 +65,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('_id', 'hello'))
         assert_that(record, has_entry('value', 'some_value'))
 
-    @setup_bucket("integration_test_excel_bucket", upload_format="excel")
+    @stub_bucket("integration_test_excel_bucket", upload_format="excel")
     def test_data_hits_the_database_when_uploading_xlsx(self):
         self._drop_collection('integration_test_excel_bucket')
         self._sign_in()
@@ -82,3 +84,28 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(record, has_entry('age', 27))
         assert_that(record, has_entry('nationality', 'Polish'))
+
+    @setup_bucket("evl_ceg_data", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
+    def test_evl_ceg_data_upload(self):
+        self._drop_collection("evl_ceg_data")
+        self._sign_in()
+
+        fixture_path = os.path.join('features', 'fixtures', 'contrib',
+                                    'CEG Transaction Tracker.xlsx')
+        response = self.client.post(
+            'evl_ceg_data/upload',
+            data={
+                'file': open(fixture_path)
+            }
+        )
+
+        assert_that(response, has_status(200))
+        db = MongoClient('localhost', 27017).backdrop_test
+        results = list(db.evl_ceg_data.find())
+
+        assert_that(len(results), is_(71))
+        assert_that(results[0], has_entries({
+            "calls_answered_by_advisor": 56383,
+            "sorn_web": 108024,
+            "_timestamp": datetime.datetime(2007, 7, 1, 0, 0),
+        }))

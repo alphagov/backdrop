@@ -1,7 +1,7 @@
 from collections import namedtuple
 from backdrop.core.bucket import BucketConfig
 from backdrop.core.repository import BucketRepository
-from hamcrest import assert_that, equal_to, is_
+from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
 from mock import Mock
 from nose.tools import *
 
@@ -14,13 +14,13 @@ class TestBucketRepository(object):
         bucket = BucketConfig("bucket_name")
 
         bucket_repo.save(bucket)
-        mongo_collection.save.assert_called_with({
+        mongo_collection.save.assert_called_with(match_equality(has_entries({
             "_id": "bucket_name",
             "name": "bucket_name",
             "raw_queries_allowed": False,
             "bearer_token": None,
             "upload_format": "csv",
-        })
+        })))
 
     def test_saving_a_bucket_with_some_attributes(self):
         mongo_collection = Mock()
@@ -31,13 +31,13 @@ class TestBucketRepository(object):
                               upload_format="excel")
 
         bucket_repo.save(bucket)
-        mongo_collection.save.assert_called_with({
+        mongo_collection.save.assert_called_with(match_equality(has_entries({
             "_id": "bucket_name",
             "name": "bucket_name",
             "raw_queries_allowed": True,
             "bearer_token": None,
             "upload_format": "excel",
-        })
+        })))
 
     def test_saving_fails_with_non_bucket_object(self):
         mongo_collection = Mock()

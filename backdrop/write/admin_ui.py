@@ -133,16 +133,17 @@ def setup(app, db, bucket_repository):
                 "upload_%s.html" % bucket_config.upload_format,
                 bucket_name=bucket_name)
 
-        return _store_data(bucket_name, bucket_config.upload_format)
+        return _store_data(bucket_config)
 
-    def _store_data(bucket_name, upload_format):
-        upload_filters = _upload_filters_for(bucket_name)
-        parser = create_parser(upload_format, upload_filters)
+    def _store_data(bucket_config):
+        parser = create_parser(
+            bucket_config.upload_format,
+            bucket_config.upload_filters)
         upload = UploadedFile(request.files['file'])
 
         try:
-            id_keys = _auto_id_keys_for(bucket_name)
-            bucket = Bucket(db, bucket_name,
+            id_keys = _auto_id_keys_for(bucket_config.name)
+            bucket = Bucket(db, bucket_config.name,
                             generate_id_from=id_keys)
             upload.save(bucket, parser)
             return render_template('upload_ok.html')
