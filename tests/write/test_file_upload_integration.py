@@ -18,7 +18,8 @@ class TestFileUploadIntegration(OauthTestCase):
             name="test",
             email="test@example.com",
             buckets=["test", "test_upload_integration",
-                     "integration_test_excel_bucket", "evl_ceg_data"]
+                     "integration_test_excel_bucket", "evl_ceg_data",
+                     "bucket_with_timestamp_auto_id"]
         )
 
     @stub_bucket("test", upload_format="csv")
@@ -86,7 +87,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('nationality', 'Polish'))
 
     @setup_bucket("evl_ceg_data", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
-    def test_evl_ceg_data_upload(self):
+    def test_upload_applies_filters(self):
         self._drop_collection("evl_ceg_data")
         self._sign_in()
 
@@ -108,4 +109,28 @@ class TestFileUploadIntegration(OauthTestCase):
             "calls_answered_by_advisor": 56383,
             "sorn_web": 108024,
             "_timestamp": datetime.datetime(2007, 7, 1, 0, 0),
+        }))
+
+    @setup_bucket("bucket_with_timestamp_auto_id", upload_format="excel", auto_ids=["_timestamp", "key"])
+    def test_upload_auto_generate_ids(self):
+        self._drop_collection("bucket_with_timestamp_auto_id")
+        self._sign_in()
+
+        fixture_path = os.path.join('features', 'fixtures',
+                                    'LPA_MI_EXAMPLE.xls')
+        response = self.client.post(
+            'bucket_with_timestamp_auto_id/upload',
+            data={
+                'file': open(fixture_path)
+            }
+        )
+
+        assert_that(response, has_status(200))
+        db = MongoClient('localhost', 27017).backdrop_test
+        results = list(db.bucket_with_timestamp_auto_id.find())
+        print(results[0])
+
+        assert_that(len(results), is_(18))
+        assert_that(results[0], has_entries({
+            "_id": "MjAxMy0wNy0wMVQwMDowMDowMCswMDowMC5wcm9wZXJ0eV9hbmRfZmluYW5jaWFsX2Zvcm1zX3Bvc3RlZA==",
         }))

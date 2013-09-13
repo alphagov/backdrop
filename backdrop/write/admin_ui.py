@@ -140,18 +140,14 @@ def setup(app, db, bucket_repository):
         upload = UploadedFile(request.files['file'])
 
         try:
-            id_keys = _auto_id_keys_for(bucket_config.name)
             bucket = Bucket(db, bucket_config.name,
-                            generate_id_from=id_keys)
+                            generate_id_from=bucket_config.auto_ids)
             upload.save(bucket, parser)
             return render_template('upload_ok.html')
         except (FileUploadException, ParseError, ValidationError) as e:
             message = e.message
             app.logger.error(message)
             return _invalid_upload(message)
-
-    def _auto_id_keys_for(bucket_name):
-        return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)
 
     def _invalid_upload(msg):
         app.logger.error("Upload error: %s" % msg)
