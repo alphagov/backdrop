@@ -152,10 +152,6 @@ def setup(app, db, bucket_repository):
             app.logger.error(message)
             return _invalid_upload(message)
 
-    def _upload_filters_for(bucket_name):
-        return app.config.get("BUCKET_UPLOAD_FILTERS", {})\
-                         .get(bucket_name, [first_sheet_filter])
-
     def _auto_id_keys_for(bucket_name):
         return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)
 
