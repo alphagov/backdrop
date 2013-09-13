@@ -136,9 +136,7 @@ def setup(app, db, bucket_repository):
         return _store_data(bucket_config)
 
     def _store_data(bucket_config):
-        parser = create_parser(
-            bucket_config.upload_format,
-            bucket_config.upload_filters)
+        parser = create_parser(bucket_config)
         upload = UploadedFile(request.files['file'])
 
         try:
