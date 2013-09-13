@@ -3,7 +3,7 @@ import json
 from os import getenv
 from bson import ObjectId
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from flask_featureflags import FeatureFlag
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
@@ -78,7 +78,8 @@ def log_error_and_respond(message, status_code):
 
 @app.route('/service-data/<service>/<data_type>', methods=['GET', 'OPTIONS'])
 def service_data(service, data_type):
-    return "ok"
+    bucket_config = bucket_repository.get_bucket_for_query(service, data_type)
+    return redirect("/" + bucket_config.name)
 
 
 @app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
