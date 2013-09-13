@@ -44,7 +44,6 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
 
         assert_that(config.name, is_("my_bucket"))
 
-    @nottest
     def test_retrieves_config_for_service_and_data_type(self):
         self.repository.save(BucketConfig("b1", service="my_service", data_type="my_type"))
         self.repository.save(BucketConfig("b2", service="my_service", data_type="not_my_type"))
