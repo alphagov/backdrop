@@ -55,7 +55,7 @@ class TestBucketRepository(object):
         not_bucket = NotBucket("name", True)
         assert_raises(ValueError, bucket_repo.save, not_bucket)
 
-    def test_retrieving_a_bucket(self):
+    def test_bucket_config_is_created_from_retrieved_data(self):
         mongo_collection = Mock()
         bucket_repo = BucketRepository(mongo_collection)
 
