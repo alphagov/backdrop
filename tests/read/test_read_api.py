@@ -8,6 +8,7 @@ from backdrop.core.timeseries import WEEK
 from backdrop.read import api
 from backdrop.read.query import Query
 from tests.support.bucket import stub_bucket
+from tests.support.test_helpers import has_status
 
 
 class NoneData(object):
@@ -106,3 +107,8 @@ class ReadApiTestCase(unittest.TestCase):
         response = self.app.open('/bucket', method='OPTIONS')
         assert_that(response.headers['Access-Control-Allow-Headers'],
                     is_('cache-control'))
+
+    @stub_bucket("bucket", service="srv", data_type="type", queryable=False)
+    def test_returns_404_when_bucket_is_not_queryable(self):
+        response = self.app.get('/bucket')
+        assert_that(response, has_status(404))

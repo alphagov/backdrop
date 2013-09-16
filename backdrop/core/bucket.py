@@ -50,13 +50,13 @@ class Bucket(object):
 _BucketConfig = namedtuple(
     "_BucketConfig",
     "name service data_type raw_queries_allowed bearer_token upload_format "
-    "upload_filters auto_ids")
+    "upload_filters auto_ids queryable")
 
 
 class BucketConfig(_BucketConfig):
     def __new__(cls, name, service, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
-                auto_ids=None):
+                auto_ids=None, queryable=True):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 
@@ -67,4 +67,5 @@ class BucketConfig(_BucketConfig):
         return super(BucketConfig, cls).__new__(cls, name, service, data_type,
                                                 raw_queries_allowed,
                                                 bearer_token, upload_format,
-                                                upload_filters, auto_ids)
+                                                upload_filters, auto_ids,
+                                                queryable)

@@ -87,7 +87,7 @@ def service_data(service, data_type):
 @cache_control.etag
 def query(bucket_name):
     bucket_config = bucket_repository.retrieve(name=bucket_name)
-    if bucket_config is None:
+    if bucket_config is None or not bucket_config.queryable:
         return log_error_and_respond('bucket not found', 404)
 
     if request.method == 'OPTIONS':

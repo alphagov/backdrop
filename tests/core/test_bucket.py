@@ -592,6 +592,7 @@ class TestBucketConfig(object):
         bucket = BucketConfig("default", service="with_defaults", data_type="def_type")
 
         assert_that(bucket.raw_queries_allowed, is_(False))
+        assert_that(bucket.queryable, is_(True))
         assert_that(bucket.bearer_token, is_(None))
         assert_that(bucket.upload_format, is_("csv"))
         assert_that(bucket.upload_filters, is_(["backdrop.core.upload.filters.first_sheet_filter"]))
