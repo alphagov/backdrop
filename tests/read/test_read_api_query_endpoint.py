@@ -16,7 +16,7 @@ class NoneData(object):
         return None
 
 
-class ReadApiTestCase(unittest.TestCase):
+class QueryingApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
@@ -85,6 +85,16 @@ class ReadApiTestCase(unittest.TestCase):
         mock_query.assert_called_with(
             Query.create(sort_by=["value", "descending"]))
 
+    @stub_bucket("bucket", service="srv", data_type="type", queryable=False)
+    def test_returns_404_when_bucket_is_not_queryable(self):
+        response = self.app.get('/bucket')
+        assert_that(response, has_status(404))
+
+
+class PreflightChecksApiTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = api.app.test_client()
+
     @stub_bucket("bucket", service="srv", data_type="type")
     def test_cors_preflight_requests_have_empty_body(self):
         response = self.app.open('/bucket', method='OPTIONS')
@@ -107,8 +117,3 @@ class ReadApiTestCase(unittest.TestCase):
         response = self.app.open('/bucket', method='OPTIONS')
         assert_that(response.headers['Access-Control-Allow-Headers'],
                     is_('cache-control'))
-
-    @stub_bucket("bucket", service="srv", data_type="type", queryable=False)
-    def test_returns_404_when_bucket_is_not_queryable(self):
-        response = self.app.get('/bucket')
-        assert_that(response, has_status(404))
