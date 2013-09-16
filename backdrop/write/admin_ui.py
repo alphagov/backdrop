@@ -119,6 +119,7 @@ def setup(app, db):
                 "email": email
             }})
 
+    #This here place
     @app.route('/<bucket:bucket_name>/upload', methods=['GET', 'POST'])
     @protected
     @cache_control.set("private, must-revalidate")

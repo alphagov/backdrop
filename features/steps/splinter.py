@@ -40,6 +40,11 @@ def step(context, element_text):
     context.client.browser.find_by_value(element_text).first.click()
 
 
+@then(u'I should see the virus error message')
+def step(context):
+    assert context.client.browser.is_text_present(u'This file may could not be uploaded as it may contain a virus!')
+
+
 @then(u'I should see the text "{message}"')
 def step(context, message):
     assert context.client.browser.is_text_present(message)
