@@ -588,6 +588,15 @@ class TestBucketConfig(object):
         bucket = BucketConfig("name", service="srv", data_type="type", raw_queries_allowed=True)
         assert_that(bucket.raw_queries_allowed, is_(True))
 
+    def test_default_values(self):
+        bucket = BucketConfig("default", service="with_defaults", data_type="def_type")
+
+        assert_that(bucket.raw_queries_allowed, is_(False))
+        assert_that(bucket.bearer_token, is_(None))
+        assert_that(bucket.upload_format, is_("csv"))
+        assert_that(bucket.upload_filters, is_(["backdrop.core.upload.filters.first_sheet_filter"]))
+        assert_that(bucket.auto_ids, is_(None))
+
     def test_bucket_name_validation(self):
         bucket_names = {
             "": False,
