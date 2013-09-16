@@ -3,7 +3,7 @@ import os
 import datetime
 from hamcrest import assert_that, has_entry, is_, has_entries
 from pymongo import MongoClient
-from tests.support.bucket import stub_bucket, setup_bucket
+from tests.support.bucket import stub_bucket_retrieve_by_name, setup_bucket
 from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
 
@@ -22,7 +22,7 @@ class TestFileUploadIntegration(OauthTestCase):
                      "bucket_with_timestamp_auto_id"]
         )
 
-    @stub_bucket("test", upload_format="csv")
+    @stub_bucket_retrieve_by_name("test", upload_format="csv")
     def test_accepts_content_type_for_csv(self):
         self._sign_in()
         response = self.client.post(
@@ -34,7 +34,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
 
-    @stub_bucket("test", upload_format="csv")
+    @stub_bucket_retrieve_by_name("test", upload_format="csv")
     def test_rejects_content_type_for_exe(self):
         self._sign_in()
 
@@ -47,7 +47,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
-    @stub_bucket("test_upload_integration", upload_format="csv")
+    @stub_bucket_retrieve_by_name("test_upload_integration", upload_format="csv")
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in()
         self._drop_collection('test_upload_integration')
@@ -66,7 +66,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('_id', 'hello'))
         assert_that(record, has_entry('value', 'some_value'))
 
-    @stub_bucket("integration_test_excel_bucket", upload_format="excel")
+    @stub_bucket_retrieve_by_name("integration_test_excel_bucket", upload_format="excel")
     def test_data_hits_the_database_when_uploading_xlsx(self):
         self._drop_collection('integration_test_excel_bucket')
         self._sign_in()
