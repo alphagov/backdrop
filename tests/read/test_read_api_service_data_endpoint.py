@@ -118,7 +118,13 @@ class PreflightChecksApiTestCase(unittest.TestCase):
         assert_that(response, has_header('Access-Control-Allow-Headers', 'cache-control'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
-    def test_max_age_is_30_min_for_non_realtime(self):
+    def test_max_age_is_30_min_for_non_realtime_buckets(self):
         response = self.app.get('/service-data/some-service/some-type?period=week')
 
-        assert_that(response, has_header('Access-Control-Max-Age', '1800'))
+        assert_that(response, has_header('Cache-Control', 'max-age=1800, must-revalidate'))
+
+    @setup_bucket("bucket", service="some-service", data_type="some-type", realtime=True)
+    def test_max_age_is_2_min_for_realtime_buckets(self):
+        response = self.app.get('/service-data/some-service/some-type?period=week')
+
+        assert_that(response, has_header('Cache-Control', 'max-age=120, must-revalidate'))

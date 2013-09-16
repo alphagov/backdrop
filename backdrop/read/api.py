@@ -83,7 +83,6 @@ def service_data(service, data_type):
 
 
 @app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
-@cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
     bucket_config = bucket_repository.retrieve(name=bucket_name)
@@ -111,10 +110,12 @@ def query(bucket_name):
             return log_error_and_respond('invalid collect for that data', 400)
 
         response = jsonify(data=result_data)
-        response.headers['Access-Control-Max-Age'] = '1800'
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
+
+    max_age = 120 if bucket_config.realtime else 1800
+    response.headers['Cache-Control'] = "max-age=%d, must-revalidate" % max_age
 
     return response
 

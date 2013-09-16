@@ -4,11 +4,6 @@ Feature: the read api should provide cache control headers
          when I go to "/_status"
          then the "Cache-Control" header should be "no-cache"
 
-    Scenario: query is cached for 1 hour
-        Given "licensing.json" is in "foo" bucket
-         when I go to "/foo"
-         then the "Cache-Control" header should be "max-age=3600, must-revalidate"
-
     Scenario: query returns an etag
         Given "licensing.json" is in "foo" bucket
           and I have a bucket named "foo"
