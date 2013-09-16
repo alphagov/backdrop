@@ -37,6 +37,26 @@ def is_ok():
     return has_status(200)
 
 
+class IsHeaderWithValue(BaseMatcher):
+    def __init__(self, header, expected_value):
+        self.header = header
+        self.expected_value = expected_value
+
+    def _matches(self, response):
+        return response.headers.get(self.header, None) == self.expected_value
+
+    def describe_to(self, description):
+        description.append_text(
+            "contain header %s with value %s" % (self.header, self.expected_value))
+
+    def describe_mismatch(self, actual, description):
+        description.append_text("had headers %s" % actual.headers.to_list)
+
+
+def has_header(name, value):
+    return IsHeaderWithValue(name, value)
+
+
 class IsErrorResponse(BaseMatcher):
     def _matches(self, response):
         try:

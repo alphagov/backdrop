@@ -8,7 +8,7 @@ from backdrop.core.timeseries import WEEK
 from backdrop.read import api
 from backdrop.read.query import Query
 from tests.support.bucket import setup_bucket
-from tests.support.test_helpers import has_status
+from tests.support.test_helpers import has_status, has_header
 
 
 class NoneData(object):
@@ -105,16 +105,20 @@ class PreflightChecksApiTestCase(unittest.TestCase):
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_preflight_are_allowed_from_all_origins(self):
         response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
-        assert_that(response.headers['Access-Control-Allow-Origin'], is_('*'))
+        assert_that(response, has_header('Access-Control-Allow-Origin', '*'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_preflight_result_cache(self):
         response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
-        assert_that(response.headers['Access-Control-Max-Age'],
-                    is_('86400'))
+        assert_that(response, has_header('Access-Control-Max-Age', '86400'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_requests_can_cache_control(self):
         response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
-        assert_that(response.headers['Access-Control-Allow-Headers'],
-                    is_('cache-control'))
+        assert_that(response, has_header('Access-Control-Allow-Headers', 'cache-control'))
+
+    @setup_bucket("bucket", service="some-service", data_type="some-type")
+    def test_max_age_is_30_min_for_non_realtime(self):
+        response = self.app.get('/service-data/some-service/some-type?period=week')
+
+        assert_that(response, has_header('Access-Control-Max-Age', '1800'))

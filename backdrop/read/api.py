@@ -111,6 +111,7 @@ def query(bucket_name):
             return log_error_and_respond('invalid collect for that data', 400)
 
         response = jsonify(data=result_data)
+        response.headers['Access-Control-Max-Age'] = '1800'
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
