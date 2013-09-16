@@ -95,7 +95,7 @@ class TestSignonIntegration(OauthTestCase):
         response = self.client.get('/test/upload')
         assert_that(response, has_status(404))
 
-    @stub_bucket("test", service="srv", data_type="type", upload_format="csv")
+    @stub_bucket("test", upload_format="csv")
     def test_upload_page_is_available_to_user_with_permission(self):
         self.given_bucket_permissions("bob@example.com", [ "test" ])
         self.given_user_is_signed_in_as(email="bob@example.com")

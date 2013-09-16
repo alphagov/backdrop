@@ -5,7 +5,7 @@ from backdrop.core.bucket import BucketConfig
 from backdrop.write.api import bucket_repository
 
 
-def stub_bucket(name, service, data_type, *bucket_args, **bucket_kwargs):
+def stub_bucket(name, service="service", data_type="type", *bucket_args, **bucket_kwargs):
     setup_bucket_name = name
 
     def decorator(func):

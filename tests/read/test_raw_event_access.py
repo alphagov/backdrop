@@ -13,17 +13,17 @@ class TestRawEventAccess(unittest.TestCase):
     def tearDown(self):
         api.app.config['RAW_QUERIES_ALLOWED']['foo'] = True
 
-    @stub_bucket("foo", service="srv", data_type="type")
+    @stub_bucket("foo")
     def test_that_querying_for_raw_events_is_disabled(self):
         response = self.app.get("/foo?filter_by=foo:bar")
         assert_that(response, is_bad_request())
 
-    @stub_bucket("bar", service="srv", data_type="type")
+    @stub_bucket("bar")
     def test_that_queries_with_group_by_are_allowed(self):
         response = self.app.get("/bar?filter_by=foo:bar&group_by=pie")
         assert_that(response, is_ok())
 
-    @stub_bucket("pub", service="srv", data_type="type")
+    @stub_bucket("pub")
     def test_that_querying_for_less_than_7_days_periods_is_disabled(self):
         response = self.app.get(
             "/pub?"
@@ -34,14 +34,14 @@ class TestRawEventAccess(unittest.TestCase):
 
         assert_that(response, is_bad_request())
 
-    @stub_bucket("foo", service="srv", data_type="type")
+    @stub_bucket("foo")
     def test_that_querying_for_more_than_7_days_is_valid(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&start_at=2013-04-01T00:00:00Z"
                                 "&end_at=2013-04-08T00:00:00Z")
         assert_that(response, is_ok())
 
-    @stub_bucket("foo", service="srv", data_type="type")
+    @stub_bucket("foo")
     def test_that_non_midnight_values_are_disallowed_for_start_at(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&start_at=2012-01-01T00:01:00Z"
@@ -61,7 +61,7 @@ class TestRawEventAccess(unittest.TestCase):
 
         assert_that(response, is_bad_request())
 
-    @stub_bucket("foo", service="srv", data_type="type")
+    @stub_bucket("foo")
     def test_that_non_midnight_values_are_disallowed_for_end_at(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&end_at=2012-01-20T00:01:00Z"
@@ -81,7 +81,7 @@ class TestRawEventAccess(unittest.TestCase):
 
         assert_that(response, is_bad_request())
 
-    @stub_bucket("foo", service="srv", data_type="type")
+    @stub_bucket("foo")
     def test_on_invalid_dates(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&start_at=foo"
