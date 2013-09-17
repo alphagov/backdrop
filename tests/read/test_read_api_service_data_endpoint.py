@@ -95,6 +95,7 @@ class QueryingApiTestCase(unittest.TestCase):
 class PreflightChecksApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
+        api.db._mongo.drop_database(api.app.config['DATABASE_NAME'])
 
     @setup_bucket("bucket", data_group="some-group", data_type="some-type")
     def test_cors_preflight_requests_have_empty_body(self):

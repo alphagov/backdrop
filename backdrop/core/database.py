@@ -21,6 +21,11 @@ class Database(object):
     def get_collection(self, collection_name):
         return MongoDriver(self._mongo[self.name][collection_name])
 
+    def create_capped_collection(self, collection_name, capped_size):
+        return self.mongo_database.create_collection(name=collection_name,
+                                                     capped=True,
+                                                     size=capped_size)
+
     @property
     def mongo_database(self):
         return self._mongo[self.name]

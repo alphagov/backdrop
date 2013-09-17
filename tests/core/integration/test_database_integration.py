@@ -736,6 +736,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
 class TestDatabase(unittest.TestCase):
     def setUp(self):
         self.db = Database('localhost', 27017, 'backdrop_test')
+        self.db.mongo_database["my_capped_collection"].drop()
 
     def test_alive(self):
         assert_that(self.db.alive(), is_(True))
@@ -747,3 +748,9 @@ class TestDatabase(unittest.TestCase):
     def test_getting_a_collection(self):
         collection = self.db.get_collection('my_collection')
         assert_that(collection, instance_of(MongoDriver))
+
+    def test_create_capped_collection(self):
+        self.db.create_capped_collection("my_capped_collection", 1234)
+
+        assert_that(self.db.mongo_database["my_capped_collection"].options(),
+                    is_({"capped": True, "size": 1234}))

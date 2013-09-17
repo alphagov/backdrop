@@ -50,13 +50,14 @@ class Bucket(object):
 _BucketConfig = namedtuple(
     "_BucketConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
-    "upload_filters auto_ids queryable realtime")
+    "upload_filters auto_ids queryable realtime capped_size")
 
 
 class BucketConfig(_BucketConfig):
     def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
-                auto_ids=None, queryable=True, realtime=False):
+                auto_ids=None, queryable=True, realtime=False,
+                capped_size=5040):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 
@@ -69,4 +70,5 @@ class BucketConfig(_BucketConfig):
                                                 raw_queries_allowed,
                                                 bearer_token, upload_format,
                                                 upload_filters, auto_ids,
-                                                queryable, realtime)
+                                                queryable, realtime,
+                                                capped_size)

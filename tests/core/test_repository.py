@@ -11,10 +11,10 @@ class TestBucketRepository(unittest.TestCase):
     def setUp(self):
         # This is a bit of a smell. Mongo collection responsibilites should be
         # split with repo, once we have more than one repository.
-        db = Mock()
+        self.db = Mock()
         self.mongo_collection = Mock()
-        db.get_collection.return_value = self.mongo_collection
-        self.bucket_repo = BucketRepository(db)
+        self.db.get_collection.return_value = self.mongo_collection
+        self.bucket_repo = BucketRepository(self.db)
 
     def test_saving_a_bucket(self):
         bucket = BucketConfig("bucket_name", data_group="data_group", data_type="type")
@@ -75,6 +75,15 @@ class TestBucketRepository(unittest.TestCase):
                                        upload_format="excel")
 
         assert_that(bucket, equal_to(expected_bucket))
+
+    def test_saving_a_realtime_bucket_creates_a_capped_collection(self):
+        capped_bucket = BucketConfig("capped_bucket",
+                                     data_group="data_group", data_type="type",
+                                     realtime=True, capped_size=7665)
+
+        self.bucket_repo.save(capped_bucket)
+
+        self.db.create_capped_collection.assert_called_with("capped_bucket", 7665)
 
     def test_retrieving_non_existent_bucket_returns_none(self):
         self.mongo_collection.find_one.return_value = None

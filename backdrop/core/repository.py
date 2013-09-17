@@ -3,6 +3,7 @@ from backdrop.core.bucket import BucketConfig
 
 class BucketRepository(object):
     def __init__(self, db):
+        self._db = db
         self._collection = db.get_collection("buckets")
 
     def save(self, bucket):
@@ -13,6 +14,9 @@ class BucketRepository(object):
             "_id": bucket.name,
         }
         doc.update(bucket._asdict())
+
+        if bucket.realtime:
+            self._db.create_capped_collection(bucket.name, bucket.capped_size)
 
         self._collection.save(doc)
 

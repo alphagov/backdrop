@@ -16,6 +16,7 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
 
     def setUp(self):
         self.db = Database(HOST, PORT, DB_NAME)
+        self.db._mongo.drop_database(DB_NAME)
         self.mongo_collection = self.db.get_collection(BUCKET)
         self.mongo_collection._collection.drop()
         self.repository = BucketRepository(self.db)
@@ -35,13 +36,12 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
             "upload_format": "csv"
         }))
 
-    @nottest
     def test_saving_a_realtime_config_creates_a_capped_collection(self):
         config = BucketConfig("realtime_bucket", data_group="group", data_type="type", realtime=True)
 
         self.repository.save(config)
 
-        assert_that(self.db["realtime_bucket"].options(), is_({"capped": True}))
+        assert_that(self.db.mongo_database["realtime_bucket"].options(), is_({"capped": True, "size": 5040}))
 
     def test_retrieves_config_by_name(self):
         self.repository.save(BucketConfig("not_my_bucket", data_group="group", data_type="type"))
