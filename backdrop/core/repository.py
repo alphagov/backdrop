@@ -2,8 +2,8 @@ from backdrop.core.bucket import BucketConfig
 
 
 class BucketRepository(object):
-    def __init__(self, collection):
-        self._collection = collection
+    def __init__(self, db):
+        self._collection = db.get_collection("buckets")
 
     def save(self, bucket):
         if not isinstance(bucket, BucketConfig):

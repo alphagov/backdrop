@@ -30,7 +30,7 @@ def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
                           upload_format=uploadformat,
                           upload_filters=uploadfilters, auto_ids=autoids,
                           queryable=queryable, realtime=realtime)
-    repository = BucketRepository(db.get_collection("buckets"))
+    repository = BucketRepository(db)
 
     repository.save(config)
 

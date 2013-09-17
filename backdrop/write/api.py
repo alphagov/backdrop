@@ -44,7 +44,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketRepository(db.get_collection("buckets"))
+bucket_repository = BucketRepository(db)
 
 setup_logging()
 

@@ -2,31 +2,30 @@ import unittest
 from hamcrest import assert_that, is_, has_entries
 from nose.tools import nottest
 from backdrop.core.bucket import BucketConfig
-from backdrop.core.database import MongoDriver
+from backdrop.core.database import MongoDriver, Database
 from pymongo import MongoClient
 from backdrop.core.repository import BucketRepository
 
 HOST = 'localhost'
 PORT = 27017
 DB_NAME = 'performance_platform_test'
-BUCKET = 'buckets_config_test'
+BUCKET = 'buckets'
 
 
 class TestBucketRepositoryIntegration(unittest.TestCase):
 
     def setUp(self):
-        self.db = MongoClient(HOST, PORT)[DB_NAME]
-        self.mongo_collection = self.db[BUCKET]
-        mongo_driver = MongoDriver(self.mongo_collection)
-        mongo_driver._collection.drop()
-        self.repository = BucketRepository(mongo_driver)
+        self.db = Database(HOST, PORT, DB_NAME)
+        self.mongo_collection = self.db.get_collection(BUCKET)
+        self.mongo_collection._collection.drop()
+        self.repository = BucketRepository(self.db)
 
     def test_saving_a_config_with_default_values(self):
         config = BucketConfig("some_bucket", data_group="group", data_type="type")
 
         self.repository.save(config)
 
-        results = list(self.mongo_collection.find())
+        results = list(self.mongo_collection._collection.find())
 
         assert_that(len(results), is_(1))
         assert_that(results[0], has_entries({
