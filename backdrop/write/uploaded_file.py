@@ -27,6 +27,10 @@ class UploadedFile(object):
         ]
 
     def save(self, bucket, parser):
+        #if self._has_virus_signature:
+            #self.file_stream.close()
+            #raise VirusSignatureException('Virus signature detected in %s' %
+                                           #self.file_object)
         if not self.valid:
             self.file_stream().close()
             raise FileUploadException('Invalid file upload %s' %

@@ -41,6 +41,19 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
+    def test_rejects_content_type_for_virus_signature(self):
+        self._sign_in()
+
+        response = self.client.post(
+            'test/upload',
+            data = {
+                'file': (StringIO(file('tmp/eicar.com').read()), 'kittens.exe')
+            }
+        )
+
+        assert_that(response, has_status(400))
+        #assert renders u'This file may could not be uploaded as it may contain a virus!'
+
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in()
         self._drop_collection('test_upload_integration')
