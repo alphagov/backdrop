@@ -27,8 +27,9 @@ def create_bucket(name, service, datatype, rawqueries=False, token=None,
 
     config = BucketConfig(name=name, service=service, data_type=datatype,
                           raw_queries_allowed=rawqueries, bearer_token=token,
-                          upload_format=uploadformat, upload_filters=uploadfilters,
-                          auto_ids=autoids, queryable=queryable, realtime=realtime)
+                          upload_format=uploadformat,
+                          upload_filters=uploadfilters, auto_ids=autoids,
+                          queryable=queryable, realtime=realtime)
     repository = BucketRepository(db.get_collection("buckets"))
 
     repository.save(config)
@@ -48,7 +49,8 @@ def generate_seed():
             "name": name,
             "service": "service_%s" % name,
             "data_type": "type_%s" % name,
-            "raw_queries_allowed": app.config["RAW_QUERIES_ALLOWED"].get(name, False),
+            "raw_queries_allowed": app.config["RAW_QUERIES_ALLOWED"]
+            .get(name, False),
             "bearer_token": app.config["TOKENS"].get(name),
             "upload_format": app.config["BUCKET_UPLOAD_FORMAT"].get(name),
             "upload_filters": app.config["BUCKET_UPLOAD_FILTERS"].get(name),
