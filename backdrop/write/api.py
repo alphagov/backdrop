@@ -7,7 +7,7 @@ from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.core.flaskutils import BucketConverter
-from backdrop.core.repository import BucketRepository
+from backdrop.core.repository import BucketConfigRepository
 from backdrop.write.permissions import Permissions
 from backdrop.write.admin_ui import use_single_sign_on
 from backdrop.write import admin_ui
@@ -44,7 +44,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketRepository(db)
+bucket_repository = BucketConfigRepository(db)
 
 setup_logging()
 

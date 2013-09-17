@@ -1,22 +1,23 @@
 from backdrop.core.bucket import BucketConfig
 
 
-class BucketRepository(object):
+class BucketConfigRepository(object):
     def __init__(self, db):
         self._db = db
         self._collection = db.get_collection("buckets")
 
-    def save(self, bucket):
-        if not isinstance(bucket, BucketConfig):
+    def save(self, bucket_config):
+        if not isinstance(bucket_config, BucketConfig):
             raise ValueError("Expected BucketConfig")
 
         doc = {
-            "_id": bucket.name,
+            "_id": bucket_config.name,
         }
-        doc.update(bucket._asdict())
+        doc.update(bucket_config._asdict())
 
-        if bucket.realtime:
-            self._db.create_capped_collection(bucket.name, bucket.capped_size)
+        if bucket_config.realtime:
+            self._db.create_capped_collection(bucket_config.name,
+                                              bucket_config.capped_size)
 
         self._collection.save(doc)
 

@@ -1,7 +1,7 @@
 import unittest
 from collections import namedtuple
 from backdrop.core.bucket import BucketConfig
-from backdrop.core.repository import BucketRepository
+from backdrop.core.repository import BucketConfigRepository
 from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
 from mock import Mock
 from nose.tools import *
@@ -14,7 +14,7 @@ class TestBucketRepository(unittest.TestCase):
         self.db = Mock()
         self.mongo_collection = Mock()
         self.db.get_collection.return_value = self.mongo_collection
-        self.bucket_repo = BucketRepository(self.db)
+        self.bucket_repo = BucketConfigRepository(self.db)
 
     def test_saving_a_bucket(self):
         bucket = BucketConfig("bucket_name", data_group="data_group", data_type="type")

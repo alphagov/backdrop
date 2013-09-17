@@ -4,7 +4,7 @@ from os import getenv
 from backdrop.core import database
 from backdrop.write.api import app
 from backdrop.core.bucket import BucketConfig
-from backdrop.core.repository import BucketRepository
+from backdrop.core.repository import BucketConfigRepository
 
 
 def environment():
@@ -30,7 +30,7 @@ def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
                           upload_format=uploadformat,
                           upload_filters=uploadfilters, auto_ids=autoids,
                           queryable=queryable, realtime=realtime)
-    repository = BucketRepository(db)
+    repository = BucketConfigRepository(db)
 
     repository.save(config)
 

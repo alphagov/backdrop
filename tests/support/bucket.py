@@ -11,7 +11,7 @@ def stub_bucket_retrieve_by_name(name, data_group="group", data_type="type", *bu
     def decorator(func):
         @wraps(func)
         def wrapped_stub_bucket_retrieve_by_name(*args, **kwargs):
-            with patch('backdrop.core.repository.BucketRepository.retrieve') as retrieve:
+            with patch('backdrop.core.repository.BucketConfigRepository.retrieve') as retrieve:
                 def side_effect(name):
                     if name == setup_bucket_name:
                         return BucketConfig(setup_bucket_name, data_group, data_type, *bucket_args, **bucket_kwargs)

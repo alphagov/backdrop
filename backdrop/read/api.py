@@ -13,7 +13,7 @@ from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
 from ..core.bucket import Bucket
 from ..core.database import InvalidOperationError
-from ..core.repository import BucketRepository
+from ..core.repository import BucketConfigRepository
 
 
 def setup_logging():
@@ -35,7 +35,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketRepository(db)
+bucket_repository = BucketConfigRepository(db)
 
 setup_logging()
 

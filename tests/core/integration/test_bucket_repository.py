@@ -4,7 +4,7 @@ from nose.tools import nottest
 from backdrop.core.bucket import BucketConfig
 from backdrop.core.database import MongoDriver, Database
 from pymongo import MongoClient
-from backdrop.core.repository import BucketRepository
+from backdrop.core.repository import BucketConfigRepository
 
 HOST = 'localhost'
 PORT = 27017
@@ -19,7 +19,7 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
         self.db._mongo.drop_database(DB_NAME)
         self.mongo_collection = self.db.get_collection(BUCKET)
         self.mongo_collection._collection.drop()
-        self.repository = BucketRepository(self.db)
+        self.repository = BucketConfigRepository(self.db)
 
     def test_saving_a_config_with_default_values(self):
         config = BucketConfig("some_bucket", data_group="group", data_type="type")
