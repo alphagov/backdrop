@@ -24,7 +24,7 @@ class QueryingApiTestCase(unittest.TestCase):
     @patch('backdrop.core.bucket.Bucket.query')
     def test_period_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
-        self.app.get('/service-data/some-service/some-type?period=week')
+        self.app.get('/data/some-service/some-type?period=week')
         mock_query.assert_called_with(
             Query.create(period=WEEK))
 
@@ -32,7 +32,7 @@ class QueryingApiTestCase(unittest.TestCase):
     @patch('backdrop.core.bucket.Bucket.query')
     def test_filter_by_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
-        self.app.get('/service-data/some-service/some-type?filter_by=zombies:yes')
+        self.app.get('/data/some-service/some-type?filter_by=zombies:yes')
         mock_query.assert_called_with(
             Query.create(filter_by=[[u'zombies', u'yes']]))
 
@@ -40,7 +40,7 @@ class QueryingApiTestCase(unittest.TestCase):
     @patch('backdrop.core.bucket.Bucket.query')
     def test_group_by_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
-        self.app.get('/service-data/some-service/some-type?group_by=zombies')
+        self.app.get('/data/some-service/some-type?group_by=zombies')
         mock_query.assert_called_with(
             Query.create(group_by=u'zombies'))
 
@@ -53,7 +53,7 @@ class QueryingApiTestCase(unittest.TestCase):
         expected_end_at = datetime.datetime(2012, 12, 12, 8, 12, 43,
                                             tzinfo=pytz.UTC)
         self.app.get(
-            '/service-data/some-service/some-type?start_at=' +
+            '/data/some-service/some-type?start_at=' +
             urllib.quote("2012-12-05T08:12:43+00:00") +
             '&end_at=' + urllib.quote("2012-12-12T08:12:43+00:00")
         )
@@ -65,7 +65,7 @@ class QueryingApiTestCase(unittest.TestCase):
     def test_group_by_with_period_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
         self.app.get(
-            '/service-data/some-service/some-type?period=week&group_by=stuff'
+            '/data/some-service/some-type?period=week&group_by=stuff'
         )
         mock_query.assert_called_with(
             Query.create(period=WEEK, group_by="stuff"))
@@ -75,20 +75,20 @@ class QueryingApiTestCase(unittest.TestCase):
     def test_sort_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
         self.app.get(
-            '/service-data/some-service/some-type?sort_by=value:ascending'
+            '/data/some-service/some-type?sort_by=value:ascending'
         )
         mock_query.assert_called_with(
             Query.create(sort_by=["value", "ascending"]))
 
         self.app.get(
-            '/service-data/some-service/some-type?sort_by=value:descending'
+            '/data/some-service/some-type?sort_by=value:descending'
         )
         mock_query.assert_called_with(
             Query.create(sort_by=["value", "descending"]))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type", queryable=False)
     def test_returns_404_when_bucket_is_not_queryable(self):
-        response = self.app.get('/service-data/some-service/some-type')
+        response = self.app.get('/data/some-service/some-type')
         assert_that(response, has_status(404))
 
 
@@ -98,33 +98,33 @@ class PreflightChecksApiTestCase(unittest.TestCase):
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_preflight_requests_have_empty_body(self):
-        response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
+        response = self.app.open('/data/some-service/some-type', method='OPTIONS')
         assert_that(response.status_code, is_(200))
         assert_that(response.data, is_(""))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_preflight_are_allowed_from_all_origins(self):
-        response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
+        response = self.app.open('/data/some-service/some-type', method='OPTIONS')
         assert_that(response, has_header('Access-Control-Allow-Origin', '*'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_preflight_result_cache(self):
-        response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
+        response = self.app.open('/data/some-service/some-type', method='OPTIONS')
         assert_that(response, has_header('Access-Control-Max-Age', '86400'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_cors_requests_can_cache_control(self):
-        response = self.app.open('/service-data/some-service/some-type', method='OPTIONS')
+        response = self.app.open('/data/some-service/some-type', method='OPTIONS')
         assert_that(response, has_header('Access-Control-Allow-Headers', 'cache-control'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type")
     def test_max_age_is_30_min_for_non_realtime_buckets(self):
-        response = self.app.get('/service-data/some-service/some-type?period=week')
+        response = self.app.get('/data/some-service/some-type?period=week')
 
         assert_that(response, has_header('Cache-Control', 'max-age=1800, must-revalidate'))
 
     @setup_bucket("bucket", service="some-service", data_type="some-type", realtime=True)
     def test_max_age_is_2_min_for_realtime_buckets(self):
-        response = self.app.get('/service-data/some-service/some-type?period=week')
+        response = self.app.get('/data/some-service/some-type?period=week')
 
         assert_that(response, has_header('Cache-Control', 'max-age=120, must-revalidate'))

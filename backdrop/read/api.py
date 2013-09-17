@@ -76,7 +76,7 @@ def log_error_and_respond(message, status_code):
     return jsonify(status='error', message=message), status_code
 
 
-@app.route('/service-data/<service>/<data_type>', methods=['GET', 'OPTIONS'])
+@app.route('/data/<service>/<data_type>', methods=['GET', 'OPTIONS'])
 def service_data(service, data_type):
     bucket_config = bucket_repository.get_bucket_for_query(service, data_type)
     return query(bucket_config.name)
