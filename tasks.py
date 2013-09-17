@@ -12,7 +12,7 @@ def environment():
 
 
 @task
-def create_bucket(name, service, datatype, rawqueries=False, token=None,
+def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
                   autoids=None, uploadformat=None, uploadfilters=None,
                   queryable=True, realtime=False):
 
@@ -25,7 +25,7 @@ def create_bucket(name, service, datatype, rawqueries=False, token=None,
         app.config['DATABASE_NAME']
     )
 
-    config = BucketConfig(name=name, service=service, data_type=datatype,
+    config = BucketConfig(name=name, data_group=datagroup, data_type=datatype,
                           raw_queries_allowed=rawqueries, bearer_token=token,
                           upload_format=uploadformat,
                           upload_filters=uploadfilters, auto_ids=autoids,
@@ -39,7 +39,6 @@ def create_bucket(name, service, datatype, rawqueries=False, token=None,
 def generate_seed():
     """One off task to generate seed data from current configuration"""
     seed = []
-    # env = "test" #environment()
     env = environment()
     app.config.from_object("backdrop.write.config.%s" % env)
     app.config.from_object("backdrop.read.config.%s" % env)
@@ -47,7 +46,7 @@ def generate_seed():
     def config_for(name):
         return {
             "name": name,
-            "service": "service_%s" % name,
+            "data_group": "group_%s" % name,
             "data_type": "type_%s" % name,
             "raw_queries_allowed": app.config["RAW_QUERIES_ALLOWED"]
             .get(name, False),
