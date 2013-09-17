@@ -30,7 +30,7 @@ class TestBucket(unittest.TestCase):
         self.mock_repository = mock_repository()
         self.mock_database = mock_database(self.mock_repository)
         self.bucket = bucket.Bucket(self.mock_database, BucketConfig('test_bucket',
-                                                                     service="service",
+                                                                     data_group="group",
                                                                      data_type="type"))
 
     def test_that_a_single_object_gets_stored(self):
@@ -585,11 +585,11 @@ class TestBucket(unittest.TestCase):
 class TestBucketConfig(object):
 
     def test_creating_a_bucket_with_raw_queries_allowed(self):
-        bucket = BucketConfig("name", service="srv", data_type="type", raw_queries_allowed=True)
+        bucket = BucketConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
         assert_that(bucket.raw_queries_allowed, is_(True))
 
     def test_default_values(self):
-        bucket = BucketConfig("default", service="with_defaults", data_type="def_type")
+        bucket = BucketConfig("default", data_group="with_defaults", data_type="def_type")
 
         assert_that(bucket.raw_queries_allowed, is_(False))
         assert_that(bucket.queryable, is_(True))
@@ -610,6 +610,6 @@ class TestBucketConfig(object):
         }
         for (bucket_name, name_is_valid) in bucket_names.items():
             if name_is_valid:
-                BucketConfig(bucket_name, service="service", data_type="type")
+                BucketConfig(bucket_name, data_group="group", data_type="type")
             else:
-                assert_raises(ValueError, BucketConfig, bucket_name, "service", "type")
+                assert_raises(ValueError, BucketConfig, bucket_name, "group", "type")

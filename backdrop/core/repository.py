@@ -19,8 +19,9 @@ class BucketRepository(object):
     def retrieve(self, name):
         return self._query_first({"name": name})
 
-    def get_bucket_for_query(self, service, data_type):
-        return self._query_first({"service": service, "data_type": data_type})
+    def get_bucket_for_query(self, data_group, data_type):
+        return self._query_first({"data_group": data_group,
+                                  "data_type": data_type})
 
     def _query_first(self, params):
         doc = self._collection.find_one(params)

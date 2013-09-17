@@ -11,13 +11,13 @@ class TestBucketRepository(object):
         mongo_collection = Mock()
         bucket_repo = BucketRepository(mongo_collection)
 
-        bucket = BucketConfig("bucket_name", service="service", data_type="type")
+        bucket = BucketConfig("bucket_name", data_group="data_group", data_type="type")
 
         bucket_repo.save(bucket)
         mongo_collection.save.assert_called_with(match_equality(has_entries({
             "_id": "bucket_name",
             "name": "bucket_name",
-            "service": "service",
+            "data_group": "data_group",
             "data_type": "type",
             "raw_queries_allowed": False,
             "bearer_token": None,
@@ -29,7 +29,7 @@ class TestBucketRepository(object):
         bucket_repo = BucketRepository(mongo_collection)
 
         bucket = BucketConfig("bucket_name",
-                              service="service", data_type="type",
+                              data_group="data_group", data_type="type",
                               raw_queries_allowed=True,
                               upload_format="excel")
 
@@ -37,7 +37,7 @@ class TestBucketRepository(object):
         mongo_collection.save.assert_called_with(match_equality(has_entries({
             "_id": "bucket_name",
             "name": "bucket_name",
-            "service": "service",
+            "data_group": "data_group",
             "data_type": "type",
             "raw_queries_allowed": True,
             "bearer_token": None,
@@ -67,7 +67,7 @@ class TestBucketRepository(object):
         mongo_collection.find_one.return_value = {
             "_id": "bucket_name",
             "name": "bucket_name",
-            "service": "service",
+            "data_group": "data_group",
             "data_type": "type",
             "raw_queries_allowed": False,
             "bearer_token": "my-bearer-token",
@@ -75,7 +75,7 @@ class TestBucketRepository(object):
         }
         bucket = bucket_repo.retrieve(name="bucket_name")
         expected_bucket = BucketConfig("bucket_name",
-                                       service="service", data_type="type",
+                                       data_group="data_group", data_type="type",
                                        raw_queries_allowed=False,
                                        bearer_token="my-bearer-token",
                                        upload_format="excel")

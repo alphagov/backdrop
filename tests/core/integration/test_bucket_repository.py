@@ -21,7 +21,7 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
         self.repository = BucketRepository(mongo_driver)
 
     def test_saving_a_config_with_default_values(self):
-        config = BucketConfig("some_bucket", service="srv", data_type="type")
+        config = BucketConfig("some_bucket", data_group="group", data_type="type")
 
         self.repository.save(config)
 
@@ -36,19 +36,19 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
         }))
 
     def test_retrieves_config_by_name(self):
-        self.repository.save(BucketConfig("not_my_bucket", service="srv", data_type="type"))
-        self.repository.save(BucketConfig("my_bucket", service="srv", data_type="type"))
-        self.repository.save(BucketConfig("someones_bucket", service="srv", data_type="type"))
+        self.repository.save(BucketConfig("not_my_bucket", data_group="group", data_type="type"))
+        self.repository.save(BucketConfig("my_bucket", data_group="group", data_type="type"))
+        self.repository.save(BucketConfig("someones_bucket", data_group="group", data_type="type"))
 
         config = self.repository.retrieve(name="my_bucket")
 
         assert_that(config.name, is_("my_bucket"))
 
     def test_retrieves_config_for_service_and_data_type(self):
-        self.repository.save(BucketConfig("b1", service="my_service", data_type="my_type"))
-        self.repository.save(BucketConfig("b2", service="my_service", data_type="not_my_type"))
-        self.repository.save(BucketConfig("b3", service="not_my_service", data_type="my_type"))
+        self.repository.save(BucketConfig("b1", data_group="my_service", data_type="my_type"))
+        self.repository.save(BucketConfig("b2", data_group="my_service", data_type="not_my_type"))
+        self.repository.save(BucketConfig("b3", data_group="not_my_service", data_type="my_type"))
 
-        config = self.repository.get_bucket_for_query(service="my_service", data_type="my_type")
+        config = self.repository.get_bucket_for_query(data_group="my_service", data_type="my_type")
 
         assert_that(config.name, is_("b1"))

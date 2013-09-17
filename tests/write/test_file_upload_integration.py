@@ -86,7 +86,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('age', 27))
         assert_that(record, has_entry('nationality', 'Polish'))
 
-    @setup_bucket("evl_ceg_data", service="srv", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
+    @setup_bucket("evl_ceg_data", data_group="group", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
     def test_upload_applies_filters(self):
         self._drop_collection("evl_ceg_data")
         self._sign_in()
@@ -111,7 +111,7 @@ class TestFileUploadIntegration(OauthTestCase):
             "_timestamp": datetime.datetime(2007, 7, 1, 0, 0),
         }))
 
-    @setup_bucket("bucket_with_timestamp_auto_id", service="srv", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
+    @setup_bucket("bucket_with_timestamp_auto_id", data_group="group", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
     def test_upload_auto_generate_ids(self):
         self._drop_collection("bucket_with_timestamp_auto_id")
         self._sign_in()
