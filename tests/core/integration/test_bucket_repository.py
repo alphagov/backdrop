@@ -15,9 +15,10 @@ BUCKET = 'buckets_config_test'
 class TestBucketRepositoryIntegration(unittest.TestCase):
 
     def setUp(self):
-        mongo_driver = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        self.db = MongoClient(HOST, PORT)[DB_NAME]
+        self.mongo_collection = self.db[BUCKET]
+        mongo_driver = MongoDriver(self.mongo_collection)
         mongo_driver._collection.drop()
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
         self.repository = BucketRepository(mongo_driver)
 
     def test_saving_a_config_with_default_values(self):
@@ -34,6 +35,14 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
             "bearer_token": None,
             "upload_format": "csv"
         }))
+
+    @nottest
+    def test_saving_a_realtime_config_creates_a_capped_collection(self):
+        config = BucketConfig("realtime_bucket", data_group="group", data_type="type", realtime=True)
+
+        self.repository.save(config)
+
+        assert_that(self.db["realtime_bucket"].options(), is_({"capped": True}))
 
     def test_retrieves_config_by_name(self):
         self.repository.save(BucketConfig("not_my_bucket", data_group="group", data_type="type"))
