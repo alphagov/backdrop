@@ -15,6 +15,7 @@ def environment():
 def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
                   autoids=None, uploadformat=None, uploadfilters=None,
                   queryable=True, realtime=False):
+    """Create a new bucket configuration in the database."""
 
     app.config.from_object(
         "backdrop.write.config.%s" % environment()
