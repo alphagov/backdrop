@@ -113,7 +113,8 @@ def move_config_into_place(environment):
         local_config_path("write", "production.py")
     )
     copyfile(
-        alphagov_config_path("write.backdrop", "environment.%s.py" % environment),
+        alphagov_config_path("write.backdrop", "environment.%s.py" %
+                                               environment),
         local_config_path("write", "environment.py")
 
     )

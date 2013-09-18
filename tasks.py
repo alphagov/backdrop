@@ -2,7 +2,6 @@ import json
 import os
 from invoke import task
 from os import getenv
-import sys
 from backdrop.core import database
 from backdrop.write.api import app
 from backdrop.core.bucket import BucketConfig
@@ -12,12 +11,14 @@ from backdrop.core.repository import BucketConfigRepository
 def environment():
     return getenv("GOVUK_ENV", "development")
 
+
 def get_database(app):
     return database.Database(
         app.config['MONGO_HOST'],
         app.config['MONGO_PORT'],
         app.config['DATABASE_NAME']
     )
+
 
 @task
 def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
