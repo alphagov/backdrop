@@ -1,6 +1,8 @@
 import json
+import os
 from invoke import task
 from os import getenv
+import sys
 from backdrop.core import database
 from backdrop.write.api import app
 from backdrop.core.bucket import BucketConfig
@@ -10,6 +12,12 @@ from backdrop.core.repository import BucketConfigRepository
 def environment():
     return getenv("GOVUK_ENV", "development")
 
+def get_database(app):
+    return database.Database(
+        app.config['MONGO_HOST'],
+        app.config['MONGO_PORT'],
+        app.config['DATABASE_NAME']
+    )
 
 @task
 def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
@@ -20,11 +28,7 @@ def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
     app.config.from_object(
         "backdrop.write.config.%s" % environment()
     )
-    db = database.Database(
-        app.config['MONGO_HOST'],
-        app.config['MONGO_PORT'],
-        app.config['DATABASE_NAME']
-    )
+    db = get_database(app)
 
     config = BucketConfig(name=name, data_group=datagroup, data_type=datatype,
                           raw_queries_allowed=rawqueries, bearer_token=token,
@@ -37,33 +41,18 @@ def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
 
 
 @task
-def generate_seed():
+def load_seed():
     """One off task to generate seed data from current configuration"""
-    seed = []
-    env = environment()
-    app.config.from_object("backdrop.write.config.%s" % env)
-    app.config.from_object("backdrop.read.config.%s" % env)
 
-    def config_for(name):
-        return {
-            "name": name,
-            "data_group": "group_%s" % name,
-            "data_type": "type_%s" % name,
-            "raw_queries_allowed": app.config["RAW_QUERIES_ALLOWED"]
-            .get(name, False),
-            "bearer_token": app.config["TOKENS"].get(name),
-            "upload_format": app.config["BUCKET_UPLOAD_FORMAT"].get(name),
-            "upload_filters": app.config["BUCKET_UPLOAD_FILTERS"].get(name),
-            "auto_ids": app.config["BUCKET_AUTO_ID_KEYS"].get(name),
-            "queryable": True,
-            "realtime": False
-        }
+    seed_path = os.path.join(os.path.dirname(__file__), "config", "seed.json")
+    with open(seed_path) as f:
+        seed = json.load(f)
 
-    for name in app.config["TOKENS"]:
-        seed.append(config_for(name))
+    app.config.from_object(
+        "backdrop.write.config.%s" % environment()
+    )
+    db = get_database(app)
 
-    for name in app.config["BUCKET_UPLOAD_FORMAT"]:
-        seed.append(config_for(name))
-
-    with open('seed.json', 'w') as outfile:
-        json.dump(seed, outfile)
+    repository = BucketConfigRepository(db)
+    for bucket_json in seed:
+        repository.save(BucketConfig(**bucket_json), create_bucket=False)
