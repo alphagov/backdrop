@@ -85,6 +85,15 @@ class TestBucketRepository(unittest.TestCase):
 
         self.db.create_capped_collection.assert_called_with("capped_bucket", 7665)
 
+    def test_saving_a_realtime_bucket_does_not_create_a_collection_if_creation_flag_is_off(self):
+        capped_bucket = BucketConfig("capped_bucket",
+                                     data_group="data_group", data_type="type",
+                                     realtime=True, capped_size=7665)
+
+        self.bucket_repo.save(capped_bucket, create_bucket=False)
+
+        assert not self.db.create_capped_collection.called
+
     def test_retrieving_non_existent_bucket_returns_none(self):
         self.mongo_collection.find_one.return_value = None
         bucket = self.bucket_repo.retrieve(name="bucket_name")

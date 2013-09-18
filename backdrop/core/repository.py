@@ -6,7 +6,7 @@ class BucketConfigRepository(object):
         self._db = db
         self._collection = db.get_collection("buckets")
 
-    def save(self, bucket_config):
+    def save(self, bucket_config, create_bucket=True):
         if not isinstance(bucket_config, BucketConfig):
             raise ValueError("Expected BucketConfig")
 
@@ -15,7 +15,7 @@ class BucketConfigRepository(object):
         }
         doc.update(bucket_config._asdict())
 
-        if bucket_config.realtime:
+        if bucket_config.realtime and create_bucket:
             self._db.create_capped_collection(bucket_config.name,
                                               bucket_config.capped_size)
 
