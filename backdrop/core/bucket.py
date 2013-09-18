@@ -72,3 +72,7 @@ class BucketConfig(_BucketConfig):
                                                 upload_filters, auto_ids,
                                                 queryable, realtime,
                                                 capped_size)
+
+    @property
+    def max_age(self):
+        return 120 if self.realtime else 1800

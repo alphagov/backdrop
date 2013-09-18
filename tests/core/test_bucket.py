@@ -614,3 +614,10 @@ class TestBucketConfig(object):
                 BucketConfig(bucket_name, data_group="group", data_type="type")
             else:
                 assert_raises(ValueError, BucketConfig, bucket_name, "group", "type")
+
+    def test_max_age(self):
+        bucket = BucketConfig("default", "group", "type", realtime=False)
+        assert_that(bucket.max_age, is_(1800))
+
+        bucket = BucketConfig("default", "group", "type", realtime=True)
+        assert_that(bucket.max_age, is_(120))

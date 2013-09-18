@@ -115,8 +115,8 @@ def query(bucket_name):
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
 
-    max_age = 120 if bucket_config.realtime else 1800
-    response.headers['Cache-Control'] = "max-age=%d, must-revalidate" % max_age
+    response.headers['Cache-Control'] = "max-age=%d, must-revalidate" % \
+                                        bucket_config.max_age
 
     return response
 
