@@ -10,10 +10,16 @@ from backdrop.read.query import Query
 from tests.support.bucket import stub_bucket_retrieve_by_name
 from tests.support.test_helpers import has_status
 
+from warnings import warn
+
 
 class NoneData(object):
     def data(self):
         return None
+
+
+warn("This test is deprecated in favour of "
+     "tests.read.test_read_api_service_data_endpoint")
 
 
 class QueryingApiTestCase(unittest.TestCase):
