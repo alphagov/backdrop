@@ -47,12 +47,11 @@ class TestFileUploadIntegration(OauthTestCase):
         response = self.client.post(
             'test/upload',
             data = {
-                'file': (StringIO(file('tmp/eicar.com').read()), 'kittens.exe')
+                'file': (StringIO(file('tmp/eicar.com').read()), 'kittens.csv')
             }
         )
 
         assert_that(response, has_status(400))
-        #assert renders u'This file may could not be uploaded as it may contain a virus!'
 
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in()

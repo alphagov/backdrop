@@ -1,6 +1,7 @@
 from hamcrest import assert_that, is_
-from mock import Mock
+from mock import Mock, patch
 from backdrop.write.uploaded_file import UploadedFile, FileUploadException
+from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
 from tests.support.file_upload_test_case import FileUploadTestCase
 
 
@@ -90,3 +91,11 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
             self._file_storage_wrapper('foo', content_type=None))
 
         assert_that(upload.valid, is_(False))
+
+    @patch('backdrop.write.scanned_file.ScannedFile.has_virus_signature')
+    def test_perform_virus_scan(self, has_virus_signature):
+        file_storage_wrapper = self._file_storage_wrapper('foo', content_type=None)
+        upload = UploadedFile(file_storage_wrapper)
+        has_virus_signature.return_value = True
+        self.assertRaises(VirusSignatureError, upload.perform_virus_scan)
+
