@@ -120,7 +120,6 @@ def setup(app, db):
                 "email": email
             }})
 
-    #This here place
     @app.route('/<bucket:bucket_name>/upload', methods=['GET', 'POST'])
     @protected
     @cache_control.set("private, must-revalidate")
@@ -148,7 +147,10 @@ def setup(app, db):
                             generate_id_from=id_keys)
             upload.save(bucket, parser)
             return render_template('upload_ok.html')
-        except (VirusSignatureError, FileUploadException, ParseError, ValidationError) as e:
+        except (VirusSignatureError,
+                FileUploadException,
+                ParseError,
+                ValidationError) as e:
             message = e.message
             app.logger.error(message)
             return _invalid_upload(message)
