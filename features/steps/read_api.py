@@ -14,8 +14,21 @@ def step(context):
     context.client.set_config_parameter('PREVENT_RAW_QUERIES', True)
 
 
+def ensure_bucket_exists(context, bucket_name):
+    context.bucket = bucket_name
+    bucket_data = {
+        '_id': bucket_name,
+        'name': bucket_name,
+        'data_group': bucket_name,
+        'data_type': bucket_name,
+        'bearer_token': "%s-bearer-token" % bucket_name
+    }
+    context.client.storage()["buckets"].save(bucket_data)
+
+
 @given('"{fixture_name}" is in "{bucket_name}" bucket')
 def step(context, fixture_name, bucket_name):
+    ensure_bucket_exists(context, bucket_name)
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
@@ -23,7 +36,17 @@ def step(context, fixture_name, bucket_name):
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
             context.client.storage()[bucket_name].save(obj)
-    context.bucket = bucket_name
+
+
+@given('I have a bucket named "{bucket_name}"')
+def step(context, bucket_name):
+    ensure_bucket_exists(context, bucket_name)
+
+
+@given('bucket setting {setting} is {set_to}')
+def step(context, setting, set_to):
+    set_to = json.loads(set_to)
+    context.client.storage()["buckets"].update({"_id": context.bucket}, {"$set": {setting: set_to}}, safe=True)
 
 
 @when('I go to "{query}"')
@@ -33,7 +56,6 @@ def step(context, query):
 
 @when('I send another request to "{query}" with the received etag')
 def step(context, query):
-    print(context.response.data)
     etag = context.response.headers["ETag"]
     context.response = context.client.get(query,
                                           headers={"If-None-Match": etag})
@@ -46,7 +68,6 @@ def step(context, expected_status):
 
 @then('I should get a "{header}" header of "{value}"')
 def step(context, header, value):
-    print(context.response.headers)
     assert_that(context.response.headers.get(header), is_(value))
 
 

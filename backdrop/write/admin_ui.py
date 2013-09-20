@@ -11,7 +11,7 @@ from backdrop.write.uploaded_file import UploadedFile, FileUploadException
 from ..core import cache_control
 
 
-def setup(app, db):
+def setup(app, db, bucket_repository):
     USER_SCOPE = app.config['USER_SCOPE']
     ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
     MAX_UPLOAD_SIZE = 1000000
@@ -123,44 +123,30 @@ def setup(app, db):
     @protected
     @cache_control.set("private, must-revalidate")
     def upload(bucket_name):
+        bucket_config = bucket_repository.retrieve(bucket_name)
         current_user_email = session.get("user").get("email")
         if not app.permissions.allowed(current_user_email, bucket_name):
             return abort(404)
 
-        upload_format = _upload_format_for(bucket_name)
-
         if request.method == 'GET':
-            return render_template("upload_%s.html" % upload_format,
-                                   bucket_name=bucket_name)
+            return render_template(
+                "upload_%s.html" % bucket_config.upload_format,
+                bucket_name=bucket_name)
 
-        return _store_data(bucket_name, upload_format)
+        return _store_data(bucket_config)
 
-    def _store_data(bucket_name, upload_format):
-        upload_filters = _upload_filters_for(bucket_name)
-        parser = create_parser(upload_format, upload_filters)
+    def _store_data(bucket_config):
+        parser = create_parser(bucket_config)
         upload = UploadedFile(request.files['file'])
 
         try:
-            id_keys = _auto_id_keys_for(bucket_name)
-            bucket = Bucket(db, bucket_name,
-                            generate_id_from=id_keys)
+            bucket = Bucket(db, bucket_config)
             upload.save(bucket, parser)
             return render_template('upload_ok.html')
         except (FileUploadException, ParseError, ValidationError) as e:
             message = e.message
             app.logger.error(message)
             return _invalid_upload(message)
-
-    def _upload_format_for(bucket_name):
-        return app.config.get("BUCKET_UPLOAD_FORMAT", {})\
-                         .get(bucket_name, "csv")
-
-    def _upload_filters_for(bucket_name):
-        return app.config.get("BUCKET_UPLOAD_FILTERS", {})\
-                         .get(bucket_name, [first_sheet_filter])
-
-    def _auto_id_keys_for(bucket_name):
-        return app.config.get("BUCKET_AUTO_ID_KEYS", {}).get(bucket_name)
 
     def _invalid_upload(msg):
         app.logger.error("Upload error: %s" % msg)

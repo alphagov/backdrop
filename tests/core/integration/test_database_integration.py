@@ -44,6 +44,15 @@ class TestMongoDriver(unittest.TestCase):
 
         assert_that(saved_documents, only_contains(updated_document))
 
+    def test_find_one(self):
+        self._setup_people()
+
+        result = self.mongo_driver.find_one(query={"name": "George"})
+
+        assert_that(result, has_entries({
+            "name": "George", "plays": "guitar"
+        }))
+
     def test_find(self):
         self._setup_people()
 
@@ -727,6 +736,7 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
 class TestDatabase(unittest.TestCase):
     def setUp(self):
         self.db = Database('localhost', 27017, 'backdrop_test')
+        self.db.mongo_database["my_capped_collection"].drop()
 
     def test_alive(self):
         assert_that(self.db.alive(), is_(True))
@@ -734,3 +744,13 @@ class TestDatabase(unittest.TestCase):
     def test_getting_a_repository(self):
         repository = self.db.get_repository('my_bucket')
         assert_that(repository, instance_of(Repository))
+
+    def test_getting_a_collection(self):
+        collection = self.db.get_collection('my_collection')
+        assert_that(collection, instance_of(MongoDriver))
+
+    def test_create_capped_collection(self):
+        self.db.create_capped_collection("my_capped_collection", 1234)
+
+        assert_that(self.db.mongo_database["my_capped_collection"].options(),
+                    is_({"capped": True, "size": 1234}))

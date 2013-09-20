@@ -6,6 +6,7 @@ from hamcrest import *
 import pytz
 from mock import patch
 from backdrop.core.records import Record
+from tests.support.bucket import stub_bucket_retrieve_by_name
 
 from tests.support.test_helpers import is_bad_request, is_ok, \
     is_error_response, has_status, is_not_found
@@ -17,6 +18,17 @@ class PostDataTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
+    @stub_bucket_retrieve_by_name("foo")
+    def test_needs_an_authorization_header_even_if_no_token_is_configured(self):
+        response = self.app.post(
+            '/foo',
+            data='[]',
+        )
+
+        assert_that( response, is_unauthorized())
+        assert_that( response, is_error_response())
+
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     def test_needs_an_authorization_header(self):
         response = self.app.post(
             '/foo',
@@ -26,6 +38,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     def test_authorization_header_must_be_correct_format(self):
         response = self.app.post(
             '/foo',
@@ -36,6 +49,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     def test_authorization_header_must_match_server_side_value(self):
         response = self.app.post(
             '/foo',
@@ -46,6 +60,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     def test_request_must_be_json(self):
         response = self.app.post(
             '/foo',
@@ -56,6 +71,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
+    @stub_bucket_retrieve_by_name("foo_bucket", bearer_token="foo_bucket-bearer-token")
     @patch("backdrop.core.bucket.Bucket.store")
     def test_empty_list_gets_accepted(self, store):
         self.app.post(
@@ -69,6 +85,7 @@ class PostDataTestCase(unittest.TestCase):
             []
         )
 
+    @stub_bucket_retrieve_by_name("foo_bucket", bearer_token="foo_bucket-bearer-token")
     @patch("backdrop.core.bucket.Bucket.store")
     def test_data_gets_stored(self, store):
         self.app.post(
@@ -82,17 +99,7 @@ class PostDataTestCase(unittest.TestCase):
             [Record({"foo": "bar"})]
         )
 
-    def test_bucket_name_validation(self):
-        response = self.app.post(
-            '/_foo_bucket',
-            data = '{"foo": "bar"}',
-            content_type = "application/json",
-            headers=[('Authorization', 'Bearer _foo_bucket-bearer-token')],
-        )
-
-        assert_that( response, is_not_found() )
-        assert_that( response, is_error_response())
-
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     @patch("backdrop.core.bucket.Bucket.store")
     def test__timestamps_get_stored_as_utc_datetimes(self, store):
         expected_event_with_time = {
@@ -100,16 +107,17 @@ class PostDataTestCase(unittest.TestCase):
         }
 
         self.app.post(
-            '/bucket',
+            '/foo',
             data = '{"_timestamp": "2014-01-02T03:49:00+00:00"}',
             content_type = "application/json",
-            headers=[('Authorization', 'Bearer bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo-bearer-token')],
         )
 
         store.assert_called_with(
             [Record(expected_event_with_time)]
         )
 
+    @stub_bucket_retrieve_by_name("foo_bucket", bearer_token="foo_bucket-bearer-token")
     def test_data_with_empty_keys_400s(self):
         response = self.app.post(
             '/foo_bucket',
@@ -121,6 +129,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     @patch("backdrop.core.bucket.Bucket.store")
     def test__id_gets_stored(self, store):
         response = self.app.post(
@@ -135,6 +144,7 @@ class PostDataTestCase(unittest.TestCase):
             [Record({"_id": "foo"})]
         )
 
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     def test_invalid__id_returns_400(self):
         response = self.app.post(
             '/foo',

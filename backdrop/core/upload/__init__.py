@@ -3,9 +3,9 @@ from .parse_csv import parse_csv
 from .parse_excel import parse_excel
 
 
-def create_parser(upload_format, upload_filters):
-    format_parser = load_format_parser(upload_format)
-    upload_filters = map(load_filter, upload_filters)
+def create_parser(bucket_config):
+    format_parser = load_format_parser(bucket_config.upload_format)
+    upload_filters = map(load_filter, bucket_config.upload_filters)
 
     def parser(file_stream):
         data = format_parser(file_stream)

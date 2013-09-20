@@ -4,6 +4,8 @@ Feature: EVL Upload
 
     Scenario: Upload call center volumes
        Given a file named "CEG Data.xlsx" with fixture "contrib/CEG Transaction Tracker.xlsx"
+         and I have a bucket named "evl_ceg_data"
+         and bucket setting upload_format is "excel"
          and I am logged in
         when I go to "/evl_ceg_data/upload"
          and I enter "CEG Data.xlsx" into the file upload field
@@ -16,6 +18,8 @@ Feature: EVL Upload
 
     Scenario: Upload services volumetrics
        Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
+         and I have a bucket named "evl_services_volumetrics"
+         and bucket setting upload_format is "excel"
          and I am logged in
         when I go to "/evl_services_volumetrics/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
@@ -28,6 +32,8 @@ Feature: EVL Upload
 
     Scenario: Upload service failures
         Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
+         and I have a bucket named "evl_services_failures"
+         and bucket setting upload_format is "excel"
          and I am logged in
         when I go to "/evl_services_failures/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
@@ -42,6 +48,8 @@ Feature: EVL Upload
 
     Scenario: Upload channel volumetrics
         Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Channel Volumetrics Sample.xls"
+         and I have a bucket named "evl_channel_volumetrics"
+         and bucket setting upload_format is "excel"
          and I am logged in
         when I go to "/evl_channel_volumetrics/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
@@ -55,19 +63,8 @@ Feature: EVL Upload
 
     Scenario: Upload customer satisfaction
         Given a file named "EVL Satisfaction.xlsx" with fixture "contrib/EVL Customer Satisfaction.xlsx"
-         and I am logged in
-        when I go to "/evl_customer_satisfaction/upload"
-         and I enter "EVL Satisfaction.xlsx" into the file upload field
-         and I click "Upload"
-        then the platform should have "113" items stored in "evl_customer_satisfaction"
-         and the "evl_customer_satisfaction" bucket should have items:
-             """
-             {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "satisfaction_tax_disc": 1.2487024060928635, "satisfaction_sorn": 1.4370298628996634}
-             {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "satisfaction_tax_disc": 1.1662755514934828, "satisfaction_sorn": 1.3581011781786714}
-             """
-
-    Scenario: Upload customer satisfaction
-        Given a file named "EVL Satisfaction.xlsx" with fixture "contrib/EVL Customer Satisfaction.xlsx"
+         and I have a bucket named "evl_customer_satisfaction"
+         and bucket setting upload_format is "excel"
          and I am logged in
         when I go to "/evl_customer_satisfaction/upload"
          and I enter "EVL Satisfaction.xlsx" into the file upload field
@@ -81,6 +78,8 @@ Feature: EVL Upload
 
     Scenario: Upload evl volumetrics
         Given a file named "evl-volumetrics.xls" with fixture "contrib/evl-volumetrics.xls"
+         and I have a bucket named "evl_volumetrics"
+         and bucket setting upload_format is "excel"
          and I am logged in
         when I go to "/evl_volumetrics/upload"
          and I enter "evl-volumetrics.xls" into the file upload field

@@ -43,6 +43,8 @@ def value_is_valid(value):
 
 
 def key_is_valid(key):
+    if not isinstance(key, basestring):
+        return False
     key = key.lower()
     if not key:
         return False

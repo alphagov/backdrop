@@ -3,7 +3,7 @@ import json
 from os import getenv
 from bson import ObjectId
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from flask_featureflags import FeatureFlag
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
@@ -13,6 +13,7 @@ from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
 from ..core.bucket import Bucket
 from ..core.database import InvalidOperationError
+from ..core.repository import BucketConfigRepository
 
 
 def setup_logging():
@@ -34,6 +35,8 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
+bucket_repository = BucketConfigRepository(db)
+
 setup_logging()
 
 app.before_request(create_request_logger(app))
@@ -48,11 +51,6 @@ class JsonEncoder(json.JSONEncoder):
             return obj.isoformat()
         return json.JSONEncoder.default(self, obj)
 app.json_encoder = JsonEncoder
-
-
-def raw_queries_allowed(bucket_name):
-    raw_queries_config = app.config.get('RAW_QUERIES_ALLOWED', {})
-    return bool(raw_queries_config.get(bucket_name, False))
 
 
 @app.errorhandler(500)
@@ -78,10 +76,20 @@ def log_error_and_respond(message, status_code):
     return jsonify(status='error', message=message), status_code
 
 
+@app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
+def service_data(data_group, data_type):
+    bucket_config = bucket_repository.get_bucket_for_query(data_group,
+                                                           data_type)
+    return query(bucket_config.name)
+
+
 @app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
-@cache_control.set("max-age=3600, must-revalidate")
 @cache_control.etag
 def query(bucket_name):
+    bucket_config = bucket_repository.retrieve(name=bucket_name)
+    if bucket_config is None or not bucket_config.queryable:
+        return log_error_and_respond('bucket not found', 404)
+
     if request.method == 'OPTIONS':
         # OPTIONS requests are made by XHR as part of the CORS spec
         # if the client uses custom headers
@@ -90,12 +98,12 @@ def query(bucket_name):
         response.headers['Access-Control-Allow-Headers'] = 'cache-control'
     else:
         result = validate_request_args(request.args,
-                                       raw_queries_allowed(bucket_name))
+                                       bucket_config.raw_queries_allowed)
 
         if not result.is_valid:
             return log_error_and_respond(result.message, 400)
 
-        bucket = Bucket(db, bucket_name)
+        bucket = Bucket(db, bucket_config)
 
         try:
             result_data = bucket.query(Query.parse(request.args)).data()
@@ -106,6 +114,9 @@ def query(bucket_name):
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
+
+    response.headers['Cache-Control'] = "max-age=%d, must-revalidate" % \
+                                        bucket_config.max_age
 
     return response
 

@@ -1,8 +1,10 @@
 import unittest
 from hamcrest import *
+from hamcrest import assert_that, is_
 from nose.tools import *
 from mock import Mock, call
 from backdrop.core import bucket
+from backdrop.core.bucket import BucketConfig
 from backdrop.core.records import Record
 from backdrop.read.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
@@ -27,7 +29,9 @@ class TestBucket(unittest.TestCase):
     def setUp(self):
         self.mock_repository = mock_repository()
         self.mock_database = mock_database(self.mock_repository)
-        self.bucket = bucket.Bucket(self.mock_database, 'test_bucket')
+        self.bucket = bucket.Bucket(self.mock_database, BucketConfig('test_bucket',
+                                                                     data_group="group",
+                                                                     data_type="type"))
 
     def test_that_a_single_object_gets_stored(self):
         obj = Record({"name": "Gummo"})
@@ -576,3 +580,44 @@ class TestBucket(unittest.TestCase):
 
         query = Query.create(period=WEEK, group_by='d')
         assert_raises(ValueError, self.bucket.query, query)
+
+
+class TestBucketConfig(object):
+
+    def test_creating_a_bucket_with_raw_queries_allowed(self):
+        bucket = BucketConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
+        assert_that(bucket.raw_queries_allowed, is_(True))
+
+    def test_default_values(self):
+        bucket = BucketConfig("default", data_group="with_defaults", data_type="def_type")
+
+        assert_that(bucket.raw_queries_allowed, is_(False))
+        assert_that(bucket.queryable, is_(True))
+        assert_that(bucket.realtime, is_(False))
+        assert_that(bucket.capped_size, is_(5040))
+        assert_that(bucket.bearer_token, is_(None))
+        assert_that(bucket.upload_format, is_("csv"))
+        assert_that(bucket.upload_filters, is_(["backdrop.core.upload.filters.first_sheet_filter"]))
+        assert_that(bucket.auto_ids, is_(None))
+
+    def test_bucket_name_validation(self):
+        bucket_names = {
+            "": False,
+            "foo": True,
+            "foo_bar": True,
+            "foo-bar": False,
+            "12foo": False,
+            123: False
+        }
+        for (bucket_name, name_is_valid) in bucket_names.items():
+            if name_is_valid:
+                BucketConfig(bucket_name, data_group="group", data_type="type")
+            else:
+                assert_raises(ValueError, BucketConfig, bucket_name, "group", "type")
+
+    def test_max_age(self):
+        bucket = BucketConfig("default", "group", "type", realtime=False)
+        assert_that(bucket.max_age, is_(1800))
+
+        bucket = BucketConfig("default", "group", "type", realtime=True)
+        assert_that(bucket.max_age, is_(120))

@@ -37,6 +37,11 @@ class ValidKeysTestCase(unittest.TestCase):
         assert_that(key_is_valid("    "), is_(False))
         assert_that(key_is_valid("\t"), is_(False))
 
+    def test_key_must_be_a_string(self):
+        assert_that(key_is_valid(12), is_(False))
+        assert_that(key_is_valid(12.3), is_(False))
+        assert_that(key_is_valid([]), is_(False))
+
 
 class ReservedKeysTestCase(unittest.TestCase):
     def test_reserved_keys_are_reserved(self):

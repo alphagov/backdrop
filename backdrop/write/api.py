@@ -7,6 +7,7 @@ from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.core.flaskutils import BucketConverter
+from backdrop.core.repository import BucketConfigRepository
 from backdrop.write.permissions import Permissions
 from backdrop.write.admin_ui import use_single_sign_on
 from backdrop.write import admin_ui
@@ -43,6 +44,8 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
+bucket_repository = BucketConfigRepository(db)
+
 setup_logging()
 
 app.before_request(create_request_logger(app))
@@ -54,7 +57,7 @@ app.url_map.converters["bucket"] = BucketConverter
 
 if use_single_sign_on(app):
     app.secret_key = app.config['SECRET_KEY']
-    admin_ui.setup(app, db)
+    admin_ui.setup(app, db, bucket_repository)
 
 
 @app.errorhandler(500)
@@ -90,19 +93,19 @@ def health_check():
 @app.route('/<bucket:bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
+    bucket_config = bucket_repository.retrieve(name=bucket_name)
     g.bucket_name = bucket_name
 
-    tokens = app.config['TOKENS']
     auth_header = request.headers.get('Authorization', None)
 
-    if not bearer_token_is_valid(tokens, auth_header, bucket_name):
+    if not bearer_token_is_valid(bucket_config, auth_header):
         statsd.incr("write_api.bad_token", bucket=g.bucket_name)
         return jsonify(status='error', message='Forbidden'), 403
 
     try:
         data = load_json(request.json)
 
-        bucket = Bucket(db, bucket_name)
+        bucket = Bucket(db, bucket_config)
         bucket.parse_and_store(data)
 
         return jsonify(status='ok')

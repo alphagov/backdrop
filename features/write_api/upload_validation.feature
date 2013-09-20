@@ -8,6 +8,7 @@ Feature: csv upload validation
              Pawel,27,Polish,male
              Max,35,Italian,male
              """
+         and I have a bucket named "foo"
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
@@ -22,6 +23,7 @@ Feature: csv upload validation
              Pawel,27,Polish,male
              Max,35,Italian
              """
+         and I have a bucket named "foo"
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
@@ -31,6 +33,7 @@ Feature: csv upload validation
 
     Scenario: file too large
        Given a file named "data.csv" of size "1000000" bytes
+         and I have a bucket named "foo"
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
@@ -40,6 +43,7 @@ Feature: csv upload validation
 
     Scenario: non UTF8 characters
        Given a file named "data.csv" with fixture "bad-characters.csv"
+         and I have a bucket named "foo"
          and I am logged in
         when I go to "/foo/upload"
          and I enter "data.csv" into the file upload field
@@ -49,6 +53,7 @@ Feature: csv upload validation
 
     Scenario: no file is provided
        Given I am logged in
+         and I have a bucket named "foo"
         when I go to "/foo/upload"
          and I click "Upload"
         then I should see the text "There was an error with your upload"

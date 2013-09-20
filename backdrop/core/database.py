@@ -16,10 +16,18 @@ class Database(object):
         return self._mongo.alive()
 
     def get_repository(self, bucket_name):
-        return Repository(MongoDriver(self._mongo[self.name][bucket_name]))
+        return Repository(self.get_collection(bucket_name))
+
+    def get_collection(self, collection_name):
+        return MongoDriver(self._mongo[self.name][collection_name])
+
+    def create_capped_collection(self, collection_name, capped_size):
+        return self.mongo_database.create_collection(name=collection_name,
+                                                     capped=True,
+                                                     size=capped_size)
 
     @property
-    def connection(self):
+    def mongo_database(self):
         return self._mongo[self.name]
 
 
@@ -36,6 +44,9 @@ class MongoDriver(object):
             raise InvalidSortError(direction)
 
         cursor.sort(key, self.sort_options[direction])
+
+    def find_one(self, query):
+        return self._collection.find_one(query)
 
     def find(self, query, sort, limit):
         cursor = self._collection.find(query)
