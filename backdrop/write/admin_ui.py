@@ -8,6 +8,7 @@ from backdrop.core.upload import create_parser
 from backdrop.core.upload.filters import first_sheet_filter
 from backdrop.write.signonotron2 import Signonotron2
 from backdrop.write.uploaded_file import UploadedFile, FileUploadException
+from backdrop.write.scanned_file import VirusSignatureError
 from ..core import cache_control
 
 
@@ -147,7 +148,7 @@ def setup(app, db):
                             generate_id_from=id_keys)
             upload.save(bucket, parser)
             return render_template('upload_ok.html')
-        except (FileUploadException, ParseError, ValidationError) as e:
+        except (VirusSignatureError, FileUploadException, ParseError, ValidationError) as e:
             message = e.message
             app.logger.error(message)
             return _invalid_upload(message)
