@@ -9,4 +9,3 @@ pytz==2013b
 statsd==2.0.3
 rauth==0.5.4
 xlrd==0.9.2
-clamd==1.0.1
