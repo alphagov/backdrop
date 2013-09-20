@@ -32,8 +32,8 @@ class UploadedFile(object):
     def save(self, bucket, parser):
         if not self.valid:
             self.file_stream().close()
-            raise FileUploadException('Invalid file upload %s' %
-                                      self.file_object)
+            raise FileUploadException('Invalid file upload {0}'
+                                      .format(self.file_object.filename))
         self.perform_virus_scan()
         data = parser(self.file_stream())
         bucket.parse_and_store(data)
