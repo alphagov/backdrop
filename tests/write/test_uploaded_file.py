@@ -18,7 +18,7 @@ class TestUploadedFile(FileUploadTestCase):
 
         assert_that(upload.valid, is_(True))
 
-    def test_files_under_1000000_octets_are_valid(self):
+    def test_files_over_1000000_octets_are_valid(self):
         upload = UploadedFile(self._file_storage_wrapper(
             "foo",
             content_type="text/csv",
@@ -33,6 +33,7 @@ class TestUploadedFile(FileUploadTestCase):
         ))
         bucket = Mock()
         parser = Mock()
+        upload.perform_virus_scan = Mock()
         parser.return_value = "some data"
         upload.save(bucket, parser)
         assert_that(parser.called, is_(True))
@@ -98,4 +99,3 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
         upload = UploadedFile(file_storage_wrapper)
         has_virus_signature.return_value = True
         self.assertRaises(VirusSignatureError, upload.perform_virus_scan)
-
