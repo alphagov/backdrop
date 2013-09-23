@@ -1,3 +1,4 @@
+from functools import wraps
 from os import getenv
 
 from flask import Flask, request, jsonify, g, redirect, url_for
@@ -112,15 +113,35 @@ def post_to_bucket(bucket_name):
     except (ParseError, ValidationError) as e:
         return jsonify(status="error", message=str(e)), 400
 
+
+def check_gds_sso_auth(username, password):
+    return username == app.config['OAUTH_BASIC_AUTH']['username'] and password == app.config['OAUTH_BASIC_AUTH']['password']
+
+def authenticate():
+    return jsonify(error="requires authentication", status="401"), 401
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_gds_sso_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+
 @app.route('/auth/gds/api/users/<user_id>', methods=['POST'])
+@requires_auth
 @cache_control.nocache
 def update_user(user_id):
     return jsonify(status="ok")
 
 @app.route('/auth/gds/api/users/<user_id>/reauth', methods=['PUT'])
+@requires_auth
 @cache_control.nocache
 def force_user_reauth(user_id):
     return jsonify(status="ok")
+
 
 def load_json(data):
     if data is None:

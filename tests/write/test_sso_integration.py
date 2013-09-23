@@ -1,19 +1,38 @@
-from tests.support.oauth_test_case import OauthTestCase
 from hamcrest import assert_that, has_entry, is_, has_entries
+from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
+
+import base64
+
 
 class TestSSOIntegration(OauthTestCase):
 
     def test_accepts_posts_to_reauth(self):
         response = self.client.post(
-            '/auth/gds/api/users/1234'
+            '/auth/gds/api/users/1234',
+            headers={'Authorization': 'Basic ' + base64.b64encode('sso:ssopw')}
         )
 
         assert_that(response, has_status(200))
 
     def test_accepts_put_to_update(self):
         response = self.client.put(
-            '/auth/gds/api/users/1234/reauth'
+            '/auth/gds/api/users/1234/reauth',
+            headers={'Authorization': 'Basic ' + base64.b64encode('sso:ssopw')}
         )
 
         assert_that(response, has_status(200))
+
+    def test_unauthorized_post_to_reauth(self):
+        response = self.client.post(
+            '/auth/gds/api/users/1234',
+        )
+
+        assert_that(response, has_status(401))
+
+    def test_unauthorized_put_to_update(self):
+        response = self.client.put(
+            '/auth/gds/api/users/1234/reauth',
+        )
+
+        assert_that(response, has_status(401))

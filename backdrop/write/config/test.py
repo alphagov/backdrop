@@ -5,6 +5,10 @@ SINGLE_SIGN_ON = True
 SECRET_KEY = "something unique and secret"
 BACKDROP_ADMIN_UI_HOST = "http://backdrop-admin.dev.gov.uk"
 LOG_LEVEL = "DEBUG"
+OAUTH_BASIC_AUTH = {
+    "username": "sso",
+    "password": "ssopw",
+}
 CLIENT_ID = "it's not important here"
 CLIENT_SECRET = "it's not important here"
 ALLOW_TEST_SIGNIN = True

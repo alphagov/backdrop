@@ -2,6 +2,10 @@ DATABASE_NAME = "backdrop"
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 LOG_LEVEL = "DEBUG"
+OAUTH_BASIC_AUTH = {
+    "username": "sso",
+    "password": "ssopw",
+}
 SINGLE_SIGN_ON = True
 SECRET_KEY = "something unique and secret"
 BACKDROP_ADMIN_UI_HOST = "http://backdrop-admin.dev.gov.uk"
