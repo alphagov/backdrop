@@ -1,3 +1,6 @@
+from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
+
+
 class FileUploadException(IOError):
     def __init__(self, message):
         self.message = message
@@ -29,11 +32,19 @@ class UploadedFile(object):
     def save(self, bucket, parser):
         if not self.valid:
             self.file_stream().close()
-            raise FileUploadException('Invalid file upload %s' %
-                                      self.file_object)
+            raise FileUploadException('Invalid file upload {0}'
+                                      .format(self.file_object.filename))
+        self.perform_virus_scan()
         data = parser(self.file_stream())
         bucket.parse_and_store(data)
         self.file_stream().close()
+
+    def perform_virus_scan(self):
+        if ScannedFile(self.file_object).has_virus_signature:
+            self.file_stream().close()
+            raise VirusSignatureError(
+                'File {0} could not be uploaded as it may contain a virus.'
+                .format(self.file_object.filename))
 
     @property
     def valid(self):

@@ -1,6 +1,7 @@
 from hamcrest import assert_that, is_
-from mock import Mock
+from mock import Mock, patch
 from backdrop.write.uploaded_file import UploadedFile, FileUploadException
+from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
 from tests.support.file_upload_test_case import FileUploadTestCase
 
 
@@ -17,7 +18,7 @@ class TestUploadedFile(FileUploadTestCase):
 
         assert_that(upload.valid, is_(True))
 
-    def test_files_under_1000000_octets_are_valid(self):
+    def test_files_over_1000000_octets_are_valid(self):
         upload = UploadedFile(self._file_storage_wrapper(
             "foo",
             content_type="text/csv",
@@ -32,6 +33,7 @@ class TestUploadedFile(FileUploadTestCase):
         ))
         bucket = Mock()
         parser = Mock()
+        upload.perform_virus_scan = Mock()
         parser.return_value = "some data"
         upload.save(bucket, parser)
         assert_that(parser.called, is_(True))
@@ -90,3 +92,10 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
             self._file_storage_wrapper('foo', content_type=None))
 
         assert_that(upload.valid, is_(False))
+
+    @patch('backdrop.write.scanned_file.ScannedFile.has_virus_signature')
+    def test_perform_virus_scan(self, has_virus_signature):
+        file_storage_wrapper = self._file_storage_wrapper('foo', content_type=None)
+        upload = UploadedFile(file_storage_wrapper)
+        has_virus_signature.return_value = True
+        self.assertRaises(VirusSignatureError, upload.perform_virus_scan)
