@@ -112,6 +112,15 @@ def post_to_bucket(bucket_name):
     except (ParseError, ValidationError) as e:
         return jsonify(status="error", message=str(e)), 400
 
+@app.route('/auth/gds/api/users/<user_id>', methods=['POST'])
+@cache_control.nocache
+def update_user(user_id):
+    return jsonify(status="ok")
+
+@app.route('/auth/gds/api/users/<user_id>/reauth', methods=['PUT'])
+@cache_control.nocache
+def force_user_reauth(user_id):
+    return jsonify(status="ok")
 
 def load_json(data):
     if data is None:
