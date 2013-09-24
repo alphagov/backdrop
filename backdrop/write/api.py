@@ -113,16 +113,23 @@ def post_to_bucket(bucket_name):
     except (ParseError, ValidationError) as e:
         return jsonify(status="error", message=str(e)), 400
 
+
 @app.route('/auth/gds/api/users/<user_id>', methods=['POST'])
-@requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'], password = app.config['OAUTH_BASIC_AUTH']['password'])
+@requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'],
+               password = app.config['OAUTH_BASIC_AUTH']['password'])
 def update_user(user_id):
-    app.logger.info("Received signonotron update request from {0}".format(user_id))
+    message = "Received signonotron update request from {0}".format(user_id)
+    app.logger.info(message)
     return jsonify(status="ok")
 
+
 @app.route('/auth/gds/api/users/<user_id>/reauth', methods=['PUT'])
-@requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'], password = app.config['OAUTH_BASIC_AUTH']['password'])
+@requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'],
+               password = app.config['OAUTH_BASIC_AUTH']['password'])
 def force_user_reauth(user_id):
-    app.logger.info("Received signonotron force reauth request from {0}".format(user_id))
+    message = "Received signonotron force reauth \
+               request from {0}".format(user_id)
+    app.logger.info(message)
     return jsonify(status="ok")
 
 
