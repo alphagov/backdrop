@@ -115,6 +115,7 @@ def post_to_bucket(bucket_name):
 
 
 @app.route('/auth/gds/api/users/<user_id>', methods=['POST'])
+@cache_control.nocache
 @requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'],
                password = app.config['OAUTH_BASIC_AUTH']['password'])
 def update_user(user_id):
@@ -124,6 +125,7 @@ def update_user(user_id):
 
 
 @app.route('/auth/gds/api/users/<user_id>/reauth', methods=['PUT'])
+@cache_control.nocache
 @requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'],
                password = app.config['OAUTH_BASIC_AUTH']['password'])
 def force_user_reauth(user_id):
