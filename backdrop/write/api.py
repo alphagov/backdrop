@@ -116,11 +116,13 @@ def post_to_bucket(bucket_name):
 @app.route('/auth/gds/api/users/<user_id>', methods=['POST'])
 @requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'], password = app.config['OAUTH_BASIC_AUTH']['password'])
 def update_user(user_id):
+    app.logger.info("Received signonotron update request from {0}".format(user_id))
     return jsonify(status="ok")
 
 @app.route('/auth/gds/api/users/<user_id>/reauth', methods=['PUT'])
 @requires_auth(username = app.config['OAUTH_BASIC_AUTH']['username'], password = app.config['OAUTH_BASIC_AUTH']['password'])
 def force_user_reauth(user_id):
+    app.logger.info("Received signonotron force reauth request from {0}".format(user_id))
     return jsonify(status="ok")
 
 
