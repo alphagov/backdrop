@@ -1,4 +1,5 @@
 from backdrop.core.bucket import BucketConfig
+from backdrop.core.user import UserConfig
 
 
 class BucketConfigRepository(object):
@@ -34,3 +35,30 @@ class BucketConfigRepository(object):
             return None
         del doc["_id"]
         return BucketConfig(**doc)
+
+
+class UserConfigRepository(object):
+    def __init__(self, db):
+        self._db = db
+        self._collection = db.get_collection("users")
+
+    def save(self, user_config):
+        if not isinstance(user_config, UserConfig):
+            raise ValueError("Expected UserConfig")
+
+        doc = {
+            "_id": user_config.email,
+        }
+        doc.update(user_config._asdict())
+
+        self._collection.save(doc)
+
+    def retrieve(self, email):
+        return self._query_first({"email": email})
+
+    def _query_first(self, params):
+        doc = self._collection.find_one(params)
+        if doc is None:
+            return None
+        del doc["_id"]
+        return UserConfig(**doc)

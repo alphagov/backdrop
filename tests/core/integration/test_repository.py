@@ -1,10 +1,9 @@
 import unittest
 from hamcrest import assert_that, is_, has_entries
-from nose.tools import nottest
 from backdrop.core.bucket import BucketConfig
-from backdrop.core.database import MongoDriver, Database
-from pymongo import MongoClient
-from backdrop.core.repository import BucketConfigRepository
+from backdrop.core.database import Database
+from backdrop.core.repository import BucketConfigRepository, UserConfigRepository
+from backdrop.core.user import UserConfig
 
 HOST = 'localhost'
 PORT = 27017
@@ -60,3 +59,25 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
         config = self.repository.get_bucket_for_query(data_group="my_service", data_type="my_type")
 
         assert_that(config.name, is_("b1"))
+
+
+class TestUserRepositoryIntegration(object):
+    def setUp(self):
+        self.db = Database(HOST, PORT, DB_NAME)
+        self.db._mongo.drop_database(DB_NAME)
+        self.mongo_collection = self.db.get_collection("users")._collection
+        self.mongo_collection.drop()
+        self.repository = UserConfigRepository(self.db)
+
+    def test_saving_a_config_with_no_buckets(self):
+        config = UserConfig(email="test@example.com")
+
+        self.repository.save(config)
+
+        results = list(self.mongo_collection.find())
+
+        assert_that(len(results), is_(1))
+        assert_that(results[0], has_entries({
+            "email": "test@example.com",
+            "buckets": [],
+        }))
