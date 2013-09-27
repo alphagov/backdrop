@@ -30,6 +30,6 @@ def setup_bucket(name, *bucket_args, **bucket_kwargs):
             bucket = BucketConfig(setup_bucket_name, *bucket_args, **bucket_kwargs)
             bucket_repository.save(bucket)
             func(*args, **kwargs)
-            bucket_repository._collection._collection.remove({"_id": setup_bucket_name})
+            bucket_repository._repository.collection._collection.remove({"_id": setup_bucket_name})
         return wrapped_setup_bucket
     return decorator
