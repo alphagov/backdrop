@@ -7,8 +7,8 @@ from backdrop.core.bucket import Bucket
 from backdrop.core.log_handler \
     import create_request_logger, create_response_logger
 from backdrop.core.flaskutils import BucketConverter
-from backdrop.core.repository import BucketConfigRepository
-from backdrop.write.permissions import Permissions
+from backdrop.core.repository import BucketConfigRepository,\
+    UserConfigRepository
 from backdrop.write.admin_ui import use_single_sign_on
 from backdrop.write import admin_ui
 
@@ -45,19 +45,18 @@ db = database.Database(
 )
 
 bucket_repository = BucketConfigRepository(db)
+user_repository = UserConfigRepository(db)
 
 setup_logging()
 
 app.before_request(create_request_logger(app))
 app.after_request(create_response_logger(app))
 
-app.permissions = Permissions(app.config["PERMISSIONS"])
-
 app.url_map.converters["bucket"] = BucketConverter
 
 if use_single_sign_on(app):
     app.secret_key = app.config['SECRET_KEY']
-    admin_ui.setup(app, db, bucket_repository)
+    admin_ui.setup(app, db, bucket_repository, user_repository)
 
 
 @app.errorhandler(500)

@@ -3,7 +3,7 @@ from hamcrest import *
 from mock import patch
 from werkzeug.urls import url_decode
 from backdrop.write import api
-from tests.support.bucket import stub_bucket_retrieve_by_name
+from tests.support.bucket import stub_bucket_retrieve_by_name, stub_user_retrieve_by_email
 from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
 
@@ -88,16 +88,16 @@ class TestSignonIntegration(OauthTestCase):
         response = self.client.get('/test/upload')
         assert_that(response, has_status(302))
 
+    @stub_user_retrieve_by_email("bob@example.com", buckets=[])
     def test_upload_page_is_not_found_if_user_has_no_permissions(self):
-        self.given_bucket_permissions("test", [])
         self.given_user_is_signed_in_as(email="bob@example.com")
 
         response = self.client.get('/test/upload')
         assert_that(response, has_status(404))
 
     @stub_bucket_retrieve_by_name("test", upload_format="csv")
+    @stub_user_retrieve_by_email("bob@example.com", buckets=["test"])
     def test_upload_page_is_available_to_user_with_permission(self):
-        self.given_bucket_permissions("bob@example.com", [ "test" ])
         self.given_user_is_signed_in_as(email="bob@example.com")
 
         response = self.client.get('/test/upload')

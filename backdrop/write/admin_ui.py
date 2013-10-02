@@ -12,7 +12,7 @@ from backdrop.write.scanned_file import VirusSignatureError
 from ..core import cache_control
 
 
-def setup(app, db, bucket_repository):
+def setup(app, db, bucket_repository, user_repository):
     USER_SCOPE = app.config['USER_SCOPE']
     ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
     MAX_UPLOAD_SIZE = 1000000
@@ -46,9 +46,13 @@ def setup(app, db, bucket_repository):
         (with their own buckets)
         """
         if use_single_sign_on(app):
-            buckets_available = app.permissions.buckets_in_session(session)
-            return render_template("index.html",
-                                   buckets_available=buckets_available)
+            user_email = session.get('user', {}).get('email')
+            if user_email:
+                user_config = user_repository.retrieve(user_email)
+            else:
+                user_config = None
+
+            return render_template("index.html", user_config=user_config)
         else:
             return "Backdrop is running."
 
@@ -125,8 +129,9 @@ def setup(app, db, bucket_repository):
     @cache_control.set("private, must-revalidate")
     def upload(bucket_name):
         bucket_config = bucket_repository.retrieve(bucket_name)
-        current_user_email = session.get("user").get("email")
-        if not app.permissions.allowed(current_user_email, bucket_name):
+        user_config = user_repository.retrieve(
+            session.get("user").get("email"))
+        if bucket_name not in user_config.buckets:
             return abort(404)
 
         if request.method == 'GET':
