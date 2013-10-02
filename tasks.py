@@ -3,9 +3,11 @@ import os
 from invoke import task
 from os import getenv
 from backdrop.core import database
+from backdrop.core.user import UserConfig
 from backdrop.write.api import app
 from backdrop.core.bucket import BucketConfig
-from backdrop.core.repository import BucketConfigRepository
+from backdrop.core.repository import BucketConfigRepository,\
+    UserConfigRepository
 
 
 def environment():
@@ -41,8 +43,22 @@ def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
 
 
 @task
+def allow_access(email, bucket):
+    """Give a user access to a bucket."""
+    db = get_database()
+
+    repository = UserConfigRepository(db)
+
+    config = repository.retrieve(email) or UserConfig(email)
+
+    if bucket not in config.buckets:
+        config = UserConfig(email, config.buckets + [bucket])
+        repository.save(config)
+
+
+@task
 def load_seed():
-    """One off task to load buckets and users from a seed file"""
+    """One off task to load buckets and users from seed files"""
     def load_seed_file(filename):
         seed_path = os.path.join(os.path.dirname(__file__), "config", filename)
         with open(seed_path) as f:
@@ -56,3 +72,6 @@ def load_seed():
     save_all("bucket-seed.json",
              BucketConfigRepository,
              BucketConfig, create_bucket=False)
+    save_all("user-seed.json",
+             UserConfigRepository,
+             UserConfig)
