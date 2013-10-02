@@ -1,5 +1,6 @@
 """Generate a BucketConfig seed file for a given environment.
 """
+import argparse
 import os
 from shutil import copyfile
 import sys
@@ -80,25 +81,6 @@ def import_config(app, env):
     return import_string("backdrop.%s.config.%s" % (app, env))
 
 
-def config_for(read, write, nginx, name):
-    bucket = {
-        "name": name,
-        "data_group": nginx.get(name)['data_group'],
-        "data_type": nginx.get(name)['data_type'],
-        "raw_queries_allowed": read.RAW_QUERIES_ALLOWED.get(name, False),
-        "bearer_token": write.TOKENS.get(name),
-        "upload_format": write.BUCKET_UPLOAD_FORMAT.get(name, "csv"),
-        "upload_filters": write.BUCKET_UPLOAD_FILTERS.get(name),
-        "auto_ids": write.BUCKET_AUTO_ID_KEYS.get(name),
-        "queryable": nginx.get(name).get('enabled', True),
-        "realtime": nginx.get(name).get('realtime', False),
-        "capped_size": None
-    }
-    if bucket['realtime']:
-        bucket['capped_size'] = 5040
-    return bucket
-
-
 def alphagov_config_path(app, config):
     return "../alphagov-deployment/%s/to_upload/%s" % (app, config)
 
@@ -167,10 +149,10 @@ def test_bucket(environment, bucket):
 
 def run_tests(environment, buckets):
     passed = True
-    test_results = map(partial(test_bucket, environment), buckets)
-    for name, expected, actual in test_results:
+    for bucket in buckets:
+        url, expected, actual = test_bucket(environment, bucket)
         if expected != actual:
-            print(name, expected, actual)
+            print(url, expected, actual)
             passed = False
     return passed
 
@@ -183,7 +165,7 @@ def is_production_like(environment):
     return environment in ["preview", "staging", "production"]
 
 
-def main(environment):
+def load_config(environment):
     if is_production_like(environment):
         app_env = "production"
         move_config_into_place(environment)
@@ -195,10 +177,40 @@ def main(environment):
     nginx_config = load_nginx_config(
         "../puppet/modules/govuk/manifests/apps/publicapi.pp")
 
-    partial_config_for = partial(config_for,
-                                 read_config, write_config, nginx_config)
+    return read_config, write_config, nginx_config
 
-    buckets = map(partial_config_for, nginx_config.keys())
+
+def extract_users(environment, read_config, write_config, nginx_config):
+    return [
+        {"email": email, "buckets": buckets}
+        for email, buckets in write_config.PERMISSIONS.items()]
+
+
+def extract_bucket(read_config, write_config, nginx_config, name):
+    bucket = {
+        "name": name,
+        "data_group": nginx_config.get(name)['data_group'],
+        "data_type": nginx_config.get(name)['data_type'],
+        "raw_queries_allowed": read_config.RAW_QUERIES_ALLOWED.get(name,
+                                                                   False),
+        "bearer_token": write_config.TOKENS.get(name),
+        "upload_format": write_config.BUCKET_UPLOAD_FORMAT.get(name, "csv"),
+        "upload_filters": write_config.BUCKET_UPLOAD_FILTERS.get(name),
+        "auto_ids": write_config.BUCKET_AUTO_ID_KEYS.get(name),
+        "queryable": nginx_config.get(name).get('enabled', True),
+        "realtime": nginx_config.get(name).get('realtime', False),
+        "capped_size": None
+    }
+    if bucket['realtime']:
+        bucket['capped_size'] = 5040
+    return bucket
+
+
+def extract_buckets(environment, read_config, write_config, nginx_config):
+    buckets = [
+        extract_bucket(read_config, write_config, nginx_config, name)
+        for name in nginx_config.keys()
+    ]
 
     if is_production(environment):
         buckets = disable_buckets_by_prefix("lpa_", buckets)
@@ -208,11 +220,32 @@ def main(environment):
     if is_production_like(environment) and not run_tests(environment, buckets):
         sys.exit(1)
 
-    print(json.dumps(buckets, indent=2, sort_keys=True))
+    return buckets
+
+
+def main(model, environment):
+    read_config, write_config, nginx_config = load_config(environment)
+
+    extract_models = {
+        "users": extract_users,
+        "buckets": extract_buckets,
+    }[model]
+
+    models = extract_models(environment,
+                            read_config, write_config, nginx_config)
+
+    print(json.dumps(models, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Must provide a target environment")
-        sys.exit(1)
-    main(*sys.argv[1:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("model",
+                        choices=["buckets", "users"],
+                        help="The model to generate a seed file for")
+    parser.add_argument("environment",
+                        choices=["development", "preview", "production"],
+                        help="The environment to generate the seed file for")
+
+    args = parser.parse_args()
+
+    main(args.model, args.environment)
