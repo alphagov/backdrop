@@ -22,9 +22,9 @@ class _Repository(object):
         self.collection.save(doc)
 
     def retrieve(self, value):
-        return self.query_first({self.id_field: value})
+        return self.find_first_instance_of({self.id_field: value})
 
-    def query_first(self, params):
+    def find_first_instance_of(self, params):
         doc = self.collection.find_one(params)
         if doc is None:
             return None
@@ -48,8 +48,9 @@ class BucketConfigRepository(object):
         return self._repository.retrieve(name)
 
     def get_bucket_for_query(self, data_group, data_type):
-        return self._repository.query_first({"data_group": data_group,
-                                             "data_type": data_type})
+        return self._repository.find_first_instance_of(
+            {"data_group": data_group,
+             "data_type": data_type})
 
 
 class UserConfigRepository(object):
