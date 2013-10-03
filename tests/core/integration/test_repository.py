@@ -17,7 +17,6 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
         self.db = Database(HOST, PORT, DB_NAME)
         self.db._mongo.drop_database(DB_NAME)
         self.mongo_collection = self.db.get_collection(BUCKET)
-        self.mongo_collection._collection.drop()
         self.repository = BucketConfigRepository(self.db)
 
     def test_saving_a_config_with_default_values(self):
