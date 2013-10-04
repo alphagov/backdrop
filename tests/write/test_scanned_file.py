@@ -39,8 +39,7 @@ class TestScannedFile(FileUploadTestCase):
         assert_that(os.path.exists('/tmp/abc.txt'), is_(False))
 
     def test_scanning_a_file(self):
-        mock_call = Mock(return_value = True)
-        subprocess.call = mock_call
+        self.scanner._clamscan = Mock(return_value=True)
         self.scanner._scan_file()
         assert_that(self.scanner._virus_signature, is_(True))
-        mock_call.assert_called_once_with(["clamscan", "/tmp/abc.txt"])
+        self.scanner._clamscan.assert_called_once_with("/tmp/abc.txt")
