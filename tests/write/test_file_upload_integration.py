@@ -14,13 +14,9 @@ class TestFileUploadIntegration(OauthTestCase):
         db[collection].drop()
 
     def _sign_in(self, email):
-        self.given_user_is_signed_in_with_permissions(
+        self.given_user_is_signed_in_as(
             name="test",
-            email=email,
-            buckets=["test", "test_upload_integration",
-                     "integration_test_excel_bucket", "evl_ceg_data",
-                     "bucket_with_timestamp_auto_id"]
-        )
+            email=email)
 
     @stub_bucket_retrieve_by_name("test", upload_format="csv")
     @stub_user_retrieve_by_email("test@example.com", buckets=["test"])
