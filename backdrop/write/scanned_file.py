@@ -26,9 +26,11 @@ class ScannedFile(object):
         self.file_object.save(self._file_path)
 
     def _scan_file(self):
-        self._virus_signature = (self._virus_signature or
-                                 bool(subprocess.call(["clamscan",
-                                      self._file_path])))
+        self._virus_signature = self._virus_signature or self._clamscan(
+            self._file_path)
+
+    def _clamscan(self, filename):
+        return bool(subprocess.call(["clamscan", filename]))
 
     def _clean_up(self):
         # Remove temporary file

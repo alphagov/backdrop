@@ -1,0 +1,9 @@
+[
+  {
+    "buckets": [
+      "bucket_one", 
+      "bucket_two"
+    ], 
+    "email": "user@host"
+  }
+]
