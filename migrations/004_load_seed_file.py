@@ -12,12 +12,8 @@ log = logging.getLogger(__name__)
 def up(db):
     names = db.collection_names()
 
-    if "users" in names:
-        log.info("users collection already created")
-        return
-
-    if "buckets" in names:
-        log.info("buckets collection already created")
+    if "users" in names and "buckets" in names:
+        log.info("both users and buckets collections already exist")
         return
 
     invoke = os.path.join(os.path.dirname(sys.executable), "invoke")
