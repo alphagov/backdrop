@@ -16,5 +16,6 @@ def up(db):
         log.info("both users and buckets collections already exist")
         return
 
+    os.chdir(os.path.join(os.path.dirname(__file__), '..'))
     invoke = os.path.join(os.path.dirname(sys.executable), "invoke")
     subprocess.call([invoke, "load_seed"])
