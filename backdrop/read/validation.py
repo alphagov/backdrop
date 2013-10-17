@@ -2,6 +2,7 @@ from datetime import time
 from dateutil import parser
 import pytz
 import api
+from backdrop.core.timeseries import PERIODS
 from ..core.validation import value_is_valid_datetime_string, valid, \
     invalid, key_is_valid
 import re
@@ -265,7 +266,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         ParameterMustBeOneOfTheseValidator(
             request_args,
             param_name='period',
-            must_be_one_of_these=['week', 'month']
+            must_be_one_of_these=[period.name for period in PERIODS]
         ),
         SortByValidator(request_args),
         GroupByValidator(request_args),
