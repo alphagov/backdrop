@@ -4,73 +4,13 @@ from dateutil.relativedelta import relativedelta, MO
 import pytz
 
 
-class Week(object):
-    def __init__(self):
-        self._delta = timedelta(days=7)
-
-    @property
-    def name(self):
-        return "week"
-
-    @property
-    def start_at_key(self):
-        return "_week_start_at"
-
+class Period(object):
     @property
     def delta(self):
         return self._delta
 
-    def _monday_midnight(self, timestamp):
-        return timestamp.weekday() == 0 \
-            and timestamp.time() == time(0, 0, 0, 0)
-
-    def start(self, timestamp):
-        return _truncate_time(timestamp) + relativedelta(weekday=MO(-1))
-
     def end(self, timestamp):
-        if self._monday_midnight(timestamp):
-            return timestamp
-        return self.start(timestamp) + self._delta
-
-    def range(self, start, end):
-        _start = self.start(start).replace(tzinfo=pytz.utc)
-        _end = self.end(end).replace(tzinfo=pytz.utc)
-        while _start < _end:
-            yield (_start, _start + self._delta)
-            _start += self._delta
-
-    def valid_start_at(self, timestamp):
-        return timestamp.weekday() is 0
-
-
-class Month(object):
-    def __init__(self):
-        self._delta = relativedelta(months=1)
-
-    @property
-    def name(self):
-        return "month"
-
-    @property
-    def start_at_key(self):
-        return "_month_start_at"
-
-    @property
-    def delta(self):
-        return self._delta
-
-    def is_month_boundary(self, t):
-        return t.day == 1 and t.time() == time(0, 0, 0, 0)
-
-    def start(self, timestamp):
-        return timestamp.replace(day=1,
-                                 hour=0,
-                                 minute=0,
-                                 second=0,
-                                 microsecond=0)
-
-    def end(self, timestamp):
-        if self.is_month_boundary(timestamp):
+        if self._is_boundary(timestamp):
                 return timestamp
         return self.start(timestamp + self._delta)
 
@@ -80,6 +20,40 @@ class Month(object):
         while (_start < _end):
             yield (_start, _start + self._delta)
             _start += self._delta
+
+
+class Week(Period):
+    def __init__(self):
+        self.name = "week"
+        self.start_at_key = "_week_start_at"
+        self._delta = timedelta(days=7)
+
+    def _is_boundary(self, timestamp):
+        return timestamp.weekday() == 0 \
+            and timestamp.time() == time(0, 0, 0, 0)
+
+    def start(self, timestamp):
+        return _truncate_time(timestamp) + relativedelta(weekday=MO(-1))
+
+    def valid_start_at(self, timestamp):
+        return timestamp.weekday() is 0
+
+
+class Month(Period):
+    def __init__(self):
+        self.name = "month"
+        self.start_at_key = "_month_start_at"
+        self._delta = relativedelta(months=1)
+
+    def _is_boundary(self, t):
+        return t.day == 1 and t.time() == time(0, 0, 0, 0)
+
+    def start(self, timestamp):
+        return timestamp.replace(day=1,
+                                 hour=0,
+                                 minute=0,
+                                 second=0,
+                                 microsecond=0)
 
     def valid_start_at(self, timestamp):
         return timestamp.day == 1
