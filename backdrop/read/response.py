@@ -1,7 +1,7 @@
 import datetime
 import pytz
 from backdrop.core.nested_merge import collect_key
-from backdrop.core.timeseries import timeseries, WEEK, MONTH
+from backdrop.core.timeseries import timeseries, WEEK, MONTH, PERIODS
 from dateutil.relativedelta import relativedelta
 
 
@@ -64,11 +64,10 @@ class PeriodData(object):
                                 default=default)
 
     def __create_datum(self, doc):
-        datum = {}
         datum = create_period_group(doc, self.period)
 
-        for key in ["_week_start_at", "_month_start_at"]:
-            doc.pop(key, None)
+        for period in PERIODS:
+            doc.pop(period.start_at_key, None)
 
         return dict(datum.items() + doc.items())
 

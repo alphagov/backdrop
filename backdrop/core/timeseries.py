@@ -62,13 +62,13 @@ class Month(Period):
 DAY = Day()
 WEEK = Week()
 MONTH = Month()
+PERIODS = [WEEK, MONTH]
 
 
-def parse_period(period):
-    return {
-        "week": WEEK,
-        "month": MONTH
-    }[period]
+def parse_period(period_name):
+    for period in PERIODS:
+        if period.name == period_name:
+            return period
 
 
 def _time_to_index(dt):
