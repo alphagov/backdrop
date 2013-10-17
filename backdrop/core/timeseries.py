@@ -9,6 +9,14 @@ class Period(object):
     def delta(self):
         return self._delta
 
+    @property
+    def start_at_key(self):
+        return "_%s_start_at" % self.name
+
+    def _is_boundary(self, timestamp):
+        return self.valid_start_at(timestamp) \
+            and timestamp.time() == time(0, 0, 0, 0)
+
     def end(self, timestamp):
         if self._is_boundary(timestamp):
                 return timestamp
@@ -25,12 +33,7 @@ class Period(object):
 class Week(Period):
     def __init__(self):
         self.name = "week"
-        self.start_at_key = "_week_start_at"
         self._delta = timedelta(days=7)
-
-    def _is_boundary(self, timestamp):
-        return timestamp.weekday() == 0 \
-            and timestamp.time() == time(0, 0, 0, 0)
 
     def start(self, timestamp):
         return _truncate_time(timestamp) + relativedelta(weekday=MO(-1))
@@ -42,18 +45,11 @@ class Week(Period):
 class Month(Period):
     def __init__(self):
         self.name = "month"
-        self.start_at_key = "_month_start_at"
         self._delta = relativedelta(months=1)
 
-    def _is_boundary(self, t):
-        return t.day == 1 and t.time() == time(0, 0, 0, 0)
-
     def start(self, timestamp):
-        return timestamp.replace(day=1,
-                                 hour=0,
-                                 minute=0,
-                                 second=0,
-                                 microsecond=0)
+        return timestamp.replace(day=1, hour=0, minute=0,
+                                 second=0, microsecond=0)
 
     def valid_start_at(self, timestamp):
         return timestamp.day == 1
