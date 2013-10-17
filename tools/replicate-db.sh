@@ -55,8 +55,8 @@ ssh $SOURCE_HOST "rm -Rf ${FILENAME} ${DUMPDIR}"
 tar xzvf $FILENAME
 
 if [ -z "$2" ]; then
-	pushd ../puppet/development
-	vagrant ssh -c "cd /var/govuk/backdrop && mongorestore --drop ${DUMPDIR}"
+	pushd ../../puppet/development
+	vagrant ssh -c "cd /var/govuk/backdrop/tools && mongorestore --drop ${DUMPDIR}"
 	popd
 else
 	mongorestore --drop -h $DESTINATION_HOST $DUMPDIR
