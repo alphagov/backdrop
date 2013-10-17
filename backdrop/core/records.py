@@ -15,7 +15,8 @@ class Record(object):
 
         if "_timestamp" in self.data:
             for period in PERIODS:
-                self.meta[period.start_at_key] = period.start(self.data['_timestamp'])
+                timestamp_ = self.data['_timestamp']
+                self.meta[period.start_at_key] = period.start(timestamp_)
 
     def to_mongo(self):
         return dict(
