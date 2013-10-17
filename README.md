@@ -31,10 +31,15 @@ This is the OAuth flow we are using to authenticate users with Signonotron2
 
 1. **GET** `/_user/sign_in` redirects user to signonotron2 asking them to give backdrop permission to see their data
 2. User signs in allowing backdrop to see their data
-3. **GET** (redirected from signonotron) `/_user/authorized?code=blahblahblah` 
+3. **GET** (redirected from signonotron) `/_user/authorized?code=blahblahblah`
     - **POST** (to signonotron) `/oauth/token` exchanges authorization code for access token so backdrop can query users data
     - **GET** (to signonotron) `/user.json` uses access token to get user data and see if they have permissions to sign in to backdrop
 4. User is now signed in
+
+### Start the app (read OR write)
+
+1. `./start-app.sh` takes two arguments: app (read or write) and port
+2. `./start-app.sh read 3038` and/or  `./start-app.sh write 3039`
 
 ### Getting set up locally to test signon
 
