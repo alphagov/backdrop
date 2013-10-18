@@ -1,4 +1,4 @@
-from backdrop.core.timeseries import WEEK, MONTH, PERIODS
+from backdrop.core.timeseries import PERIODS
 from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.validation import validate_record_data
 from .errors import ParseError, ValidationError

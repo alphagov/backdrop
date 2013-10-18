@@ -1,7 +1,7 @@
 import datetime
 import pytz
 from backdrop.core.nested_merge import collect_key
-from backdrop.core.timeseries import timeseries, WEEK, MONTH, PERIODS
+from backdrop.core.timeseries import timeseries, PERIODS
 from dateutil.relativedelta import relativedelta
 
 
