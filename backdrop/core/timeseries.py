@@ -38,6 +38,9 @@ class Hour(Period):
         self.name = "hour"
         self._delta = timedelta(hours=1)
 
+    def _is_boundary(self, timestamp):
+        return self.valid_start_at(timestamp)
+
     def start(self, timestamp):
         return timestamp.replace(minute=0, second=0, microsecond=0)
 

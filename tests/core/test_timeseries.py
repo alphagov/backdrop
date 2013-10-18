@@ -281,3 +281,13 @@ class TestHour(TestCase):
 
         assert_that(end, is_(d(2013, 10, 4, 11, 0, 0)))
 
+    def test_that_a_range_of_five_hours_gives_us_five_data_points(self):
+        range = HOUR.range(d_tz(2013, 4, 3, 12), d_tz(2013, 4, 3, 17))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 3, 12), d_tz(2013, 4, 3, 13)),
+            (d_tz(2013, 4, 3, 13), d_tz(2013, 4, 3, 14)),
+            (d_tz(2013, 4, 3, 14), d_tz(2013, 4, 3, 15)),
+            (d_tz(2013, 4, 3, 15), d_tz(2013, 4, 3, 16)),
+            (d_tz(2013, 4, 3, 16), d_tz(2013, 4, 3, 17))
+        ))
