@@ -1,5 +1,6 @@
 import datetime
 import unittest
+import bson
 
 from hamcrest import *
 from hamcrest import assert_that, is_
@@ -66,6 +67,9 @@ class ValidValuesTestCase(unittest.TestCase):
         assert_that(value_is_valid(True), is_(True))
         assert_that(value_is_valid(False), is_(True))
 
+    def test_values_can_be_mongo_objectids(self):
+        assert_that(value_is_valid(bson.ObjectId()), is_(True))
+
     def test_values_cannot_be_arrays(self):
         assert_that(value_is_valid([1, 2, 3, 4]), is_(False))
 
@@ -126,6 +130,9 @@ class IdValueIsValidTestCase(unittest.TestCase):
         assert_that(value_is_valid_id(7), is_(False))
         assert_that(value_is_valid_id(None), is_(False))
         assert_that(value_is_valid_id(u'7'), is_(True))
+
+    def test_id_can_be_a_mongo_objectid(self):
+        assert_that(value_is_valid_id(bson.ObjectId()), is_(True))
 
 
 class TestValidateRecordData(unittest.TestCase):

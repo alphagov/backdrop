@@ -7,6 +7,7 @@ ValidationResult object.
 from collections import namedtuple
 import datetime
 import re
+import bson
 from dateutil import parser
 import pytz
 
@@ -39,7 +40,8 @@ def value_is_valid_datetime_string(value):
 
 
 def value_is_valid(value):
-    return isinstance(value, (int, float, basestring, bool, datetime.datetime))
+    return isinstance(value, (int, float, basestring, bool, datetime.datetime,
+                              bson.ObjectId))
 
 
 def key_is_valid(key):
@@ -68,6 +70,8 @@ def bucket_is_valid(bucket_name):
 
 
 def value_is_valid_id(value):
+    if isinstance(value, bson.ObjectId):
+        return True
     if not isinstance(value, basestring):
         return False
     if re.compile('\s').search(value):
