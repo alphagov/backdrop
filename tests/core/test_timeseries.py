@@ -1,7 +1,7 @@
 from unittest import TestCase
 import datetime
 from hamcrest import assert_that, is_, contains
-from backdrop.core.timeseries import timeseries, WEEK, MONTH
+from backdrop.core.timeseries import timeseries, WEEK, MONTH, DAY, HOUR
 from tests.support.test_helpers import d, d_tz
 
 
@@ -216,4 +216,78 @@ class TestMonth_range(TestCase):
         assert_that(list(range), contains(
             (d_tz(2013, 4, 1), d_tz(2013, 5, 1)),
             (d_tz(2013, 5, 1), d_tz(2013, 6, 1)),
+        ))
+
+
+class TestDay(TestCase):
+    def test_that_returns_the_beginning_of_the_current_day(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+
+        start = DAY.start(some_datetime)
+
+        assert_that(start, is_(d(2013, 10, 4, 0, 0, 0)))
+
+    def test_that_midday_is_not_a_valid_start_at(self):
+        naughty_starttime = d(2013, 10, 18, 12, 00)
+
+        assert_that(DAY.valid_start_at(naughty_starttime), is_(False))
+
+    def test_that_beginning_of_the_day_is_a_valid_start_at(self):
+        lovely_starttime = d(2013, 10, 18, 00, 00)
+
+        assert_that(DAY.valid_start_at(lovely_starttime), is_(True))
+
+    def test_that_end_of_the_day_is_the_beginning_of_the_next_day(self):
+        late_in_the_day = d(2013, 10, 18, 21, 00)
+
+        assert_that(DAY.end(late_in_the_day), is_(d(2013, 10, 19, 00, 00)))
+
+    def test_that_a_range_of_one_week_gives_us_seven_days(self):
+        range = DAY.range(d_tz(2013, 4, 3), d_tz(2013, 4, 10))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 3), d_tz(2013, 4, 4)),
+            (d_tz(2013, 4, 4), d_tz(2013, 4, 5)),
+            (d_tz(2013, 4, 5), d_tz(2013, 4, 6)),
+            (d_tz(2013, 4, 6), d_tz(2013, 4, 7)),
+            (d_tz(2013, 4, 7), d_tz(2013, 4, 8)),
+            (d_tz(2013, 4, 8), d_tz(2013, 4, 9)),
+            (d_tz(2013, 4, 9), d_tz(2013, 4, 10))
+        ))
+
+
+class TestHour(TestCase):
+    def test_that_returns_the_beginning_of_the_current_hour(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+
+        start = HOUR.start(some_datetime)
+
+        assert_that(start, is_(d(2013, 10, 4, 10, 0, 0)))
+
+    def test_that_middle_of_the_hour_is_not_a_valid_start_at(self):
+        middle_of_the_hour = d(2013, 10, 18, 12, 31)
+
+        assert_that(HOUR.valid_start_at(middle_of_the_hour), is_(False))
+
+    def test_that_beginning_of_the_hour_is_a_valid_start_at(self):
+        beginning_of_the_hour = d(2013, 10, 18, 12, 0)
+
+        assert_that(HOUR.valid_start_at(beginning_of_the_hour), is_(True))
+
+    def test_that_returns_the_end_of_the_current_hour(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+
+        end = HOUR.end(some_datetime)
+
+        assert_that(end, is_(d(2013, 10, 4, 11, 0, 0)))
+
+    def test_that_a_range_of_five_hours_gives_us_five_data_points(self):
+        range = HOUR.range(d_tz(2013, 4, 3, 12), d_tz(2013, 4, 3, 17))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 3, 12), d_tz(2013, 4, 3, 13)),
+            (d_tz(2013, 4, 3, 13), d_tz(2013, 4, 3, 14)),
+            (d_tz(2013, 4, 3, 14), d_tz(2013, 4, 3, 15)),
+            (d_tz(2013, 4, 3, 15), d_tz(2013, 4, 3, 16)),
+            (d_tz(2013, 4, 3, 16), d_tz(2013, 4, 3, 17))
         ))

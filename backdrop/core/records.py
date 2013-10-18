@@ -1,4 +1,4 @@
-from backdrop.core.timeseries import WEEK, MONTH
+from backdrop.core.timeseries import PERIODS
 from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.validation import validate_record_data
 from .errors import ParseError, ValidationError
@@ -14,8 +14,9 @@ class Record(object):
         self.meta = {}
 
         if "_timestamp" in self.data:
-            self.meta['_week_start_at'] = WEEK.start(self.data['_timestamp'])
-            self.meta['_month_start_at'] = MONTH.start(self.data['_timestamp'])
+            for period in PERIODS:
+                timestamp_ = self.data['_timestamp']
+                self.meta[period.start_at_key] = period.start(timestamp_)
 
     def to_mongo(self):
         return dict(

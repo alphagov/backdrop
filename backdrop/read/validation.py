@@ -2,6 +2,7 @@ from datetime import time
 from dateutil import parser
 import pytz
 import api
+from backdrop.core.timeseries import PERIODS
 from ..core.validation import value_is_valid_datetime_string, valid, \
     invalid, key_is_valid
 import re
@@ -221,13 +222,14 @@ class TimeSpanValidator(Validator):
 
     def _is_valid_date_query(self, request_args):
         return _is_valid_date(request_args.get('start_at')) \
-            and _is_valid_date(request_args.get('end_at'))
+            and _is_valid_date(request_args.get('end_at')) \
+            and request_args.get('period') != 'hour'
 
 
 class MidnightValidator(Validator):
     def validate(self, request_args, context):
         timestamp = request_args.get(context['param_name'])
-        if _is_valid_date(timestamp):
+        if _is_valid_date(timestamp) and request_args.get('period') != 'hour':
             dt = parser.parse(timestamp).astimezone(pytz.UTC)
             if dt.time() != time(0):
                 self.add_error('%s must be midnight' % context['param_name'])
@@ -265,7 +267,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         ParameterMustBeOneOfTheseValidator(
             request_args,
             param_name='period',
-            must_be_one_of_these=['week', 'month']
+            must_be_one_of_these=[period.name for period in PERIODS]
         ),
         SortByValidator(request_args),
         GroupByValidator(request_args),
