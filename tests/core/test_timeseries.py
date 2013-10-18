@@ -264,4 +264,20 @@ class TestHour(TestCase):
 
         assert_that(start, is_(d(2013, 10, 4, 10, 0, 0)))
 
+    def test_that_middle_of_the_hour_is_not_a_valid_start_at(self):
+        middle_of_the_hour = d(2013, 10, 18, 12, 31)
+
+        assert_that(HOUR.valid_start_at(middle_of_the_hour), is_(False))
+
+    def test_that_beginning_of_the_hour_is_a_valid_start_at(self):
+        beginning_of_the_hour = d(2013, 10, 18, 12, 0)
+
+        assert_that(HOUR.valid_start_at(beginning_of_the_hour), is_(True))
+
+    def test_that_returns_the_end_of_the_current_hour(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+
+        end = HOUR.end(some_datetime)
+
+        assert_that(end, is_(d(2013, 10, 4, 11, 0, 0)))
 

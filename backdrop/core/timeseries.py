@@ -34,8 +34,15 @@ class Period(object):
 
 
 class Hour(Period):
+    def __init__(self):
+        self.name = "hour"
+        self._delta = timedelta(hours=1)
+
     def start(self, timestamp):
         return timestamp.replace(minute=0, second=0, microsecond=0)
+
+    def valid_start_at(self, timestamp):
+        return timestamp.time() == time(timestamp.hour, 0, 0, 0)
 
 
 class Day(Period):
