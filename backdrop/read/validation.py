@@ -228,7 +228,7 @@ class TimeSpanValidator(Validator):
 class MidnightValidator(Validator):
     def validate(self, request_args, context):
         timestamp = request_args.get(context['param_name'])
-        if _is_valid_date(timestamp):
+        if _is_valid_date(timestamp) and request_args.get('period') != 'hour':
             dt = parser.parse(timestamp).astimezone(pytz.UTC)
             if dt.time() != time(0):
                 self.add_error('%s must be midnight' % context['param_name'])

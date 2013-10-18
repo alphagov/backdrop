@@ -88,7 +88,7 @@ HOUR = Hour()
 DAY = Day()
 WEEK = Week()
 MONTH = Month()
-PERIODS = [DAY, WEEK, MONTH]
+PERIODS = [HOUR, DAY, WEEK, MONTH]
 
 
 def parse_period(period_name):

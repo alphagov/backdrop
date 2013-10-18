@@ -268,7 +268,7 @@ class TestRequestValidation(TestCase):
         })
 
         assert_that(validation_result, is_invalid_with_message(
-            "'period' must be one of ['day', 'week', 'month']"))
+            "'period' must be one of ['hour', 'day', 'week', 'month']"))
 
     def test_queries_without_a_colon_in_sort_by_are_disallowed(self):
         validation_result = validate_request_args({
@@ -348,6 +348,14 @@ class TestRequestValidationWithNoRawQueries(TestCase):
         assert_that(validation_result, is_invalid_with_message(
             "start_at must be midnight"
         ))
+
+    def test_queries_for_hour_period_with_dates_at_middle_of_day_are_allowed(self):
+        validation_result = validate_request_args({
+            'period': 'hour',
+            'start_at': '2000-02-02T12:00:00+00:00',
+            'end_at': '2000-02-19T13:00:00+00:00'
+        }, False)
+        assert_that(validation_result, is_valid())
 
 
 class TestValidationHelpers(TestCase):
