@@ -6,10 +6,10 @@ from werkzeug.datastructures import MultiDict
 from tests.support.validity_matcher import is_invalid_with_message, is_valid
 
 
-def validate_request_args(request_args):
+def validate_request_args(request_args, raw_queries_allowed=True):
     if not isinstance(request_args, MultiDict):
         request_args = MultiDict(request_args)
-    return _validate_request_args(request_args, raw_queries_allowed=True)
+    return _validate_request_args(request_args, raw_queries_allowed)
 
 
 class TestRequestValidation(TestCase):
@@ -327,6 +327,27 @@ class TestRequestValidation(TestCase):
         assert_that(validation_result, is_invalid_with_message((
             "Unknown collection method"
         )))
+
+
+class TestRequestValidationWithNoRawQueries(TestCase):
+
+    def test_queries_with_dates_at_beginning_of_day_are_allowed(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'start_at': '2000-02-02T00:00:00+00:00',
+            'end_at': '2000-02-19T00:00:00+00:00'
+        }, False)
+        assert_that(validation_result, is_valid())
+
+    def test_queries_with_dates_at_middle_of_day_are_not_allowed(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'start_at': '2000-02-02T12:00:00+00:00',
+            'end_at': '2000-02-19T13:00:00+00:00'
+        }, False)
+        assert_that(validation_result, is_invalid_with_message(
+            "start_at must be midnight"
+        ))
 
 
 class TestValidationHelpers(TestCase):
