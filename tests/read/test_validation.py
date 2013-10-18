@@ -375,6 +375,14 @@ class TestRequestValidationWithNoRawQueries(TestCase):
             "The minimum time span for a query is 7 days"
         ))
 
+    def test_queries_for_hour_period_spanning_less_than_seven_days_are_allowed(self):
+        validation_result = validate_request_args({
+            'period': 'hour',
+            'start_at': '2000-02-02T00:00:00+00:00',
+            'end_at': '2000-02-08T00:00:00+00:00'
+        }, False)
+        assert_that(validation_result, is_valid())
+
 
 class TestValidationHelpers(TestCase):
     def test_timestamp_is_valid_method(self):

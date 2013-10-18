@@ -222,7 +222,8 @@ class TimeSpanValidator(Validator):
 
     def _is_valid_date_query(self, request_args):
         return _is_valid_date(request_args.get('start_at')) \
-            and _is_valid_date(request_args.get('end_at'))
+            and _is_valid_date(request_args.get('end_at')) \
+            and request_args.get('period') != 'hour'
 
 
 class MidnightValidator(Validator):
