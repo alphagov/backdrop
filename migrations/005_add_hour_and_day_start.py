@@ -1,5 +1,5 @@
 """
-Add _week_start_at field to all documents in all collections
+Add _hour_start_at and _day_start_at field to all documents in all collections
 """
 import logging
 
@@ -15,14 +15,13 @@ def up(db):
         collection = db[name]
         query = {
             "_timestamp": {"$exists": True},
-            "_month_start_at": {"$exists": False}
+            "_day_start_at": {"$exists": False}
         }
         for document in collection.find(query):
             document['_timestamp'] = utc(document['_timestamp'])
-            if '_week_start_at' in document:
-                document.pop('_week_start_at')
-            if '_updated_at' in document:
-                document.pop('_updated_at')
+            for attr in ['_updated_at', '_week_start_at', '_month_start_at']:
+                if attr in document:
+                    document.pop(attr)
             record = Record(document)
 
             collection.save(record.to_mongo())
