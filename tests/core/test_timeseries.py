@@ -1,7 +1,7 @@
 from unittest import TestCase
 import datetime
 from hamcrest import assert_that, is_, contains
-from backdrop.core.timeseries import timeseries, WEEK, MONTH, DAY
+from backdrop.core.timeseries import timeseries, WEEK, MONTH, DAY, HOUR
 from tests.support.test_helpers import d, d_tz
 
 
@@ -219,7 +219,7 @@ class TestMonth_range(TestCase):
         ))
 
 
-class TestDay_start(TestCase):
+class TestDay(TestCase):
     def test_that_returns_the_beginning_of_the_current_day(self):
         some_datetime = d(2013, 10, 4, 10, 23, 43)
 
@@ -254,3 +254,14 @@ class TestDay_start(TestCase):
             (d_tz(2013, 4, 8), d_tz(2013, 4, 9)),
             (d_tz(2013, 4, 9), d_tz(2013, 4, 10))
         ))
+
+
+class TestHour(TestCase):
+    def test_that_returns_the_beginning_of_the_current_hour(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+
+        start = HOUR.start(some_datetime)
+
+        assert_that(start, is_(d(2013, 10, 4, 10, 0, 0)))
+
+

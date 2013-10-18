@@ -33,6 +33,11 @@ class Period(object):
             _start += self._delta
 
 
+class Hour(Period):
+    def start(self, timestamp):
+        return timestamp.replace(minute=0, second=0, microsecond=0)
+
+
 class Day(Period):
     def __init__(self):
         self.name = "day"
@@ -69,6 +74,7 @@ class Month(Period):
     def valid_start_at(self, timestamp):
         return timestamp.day == 1
 
+HOUR = Hour()
 DAY = Day()
 WEEK = Week()
 MONTH = Month()
