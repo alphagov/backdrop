@@ -15,7 +15,10 @@ class Period(object):
 
     def _is_boundary(self, timestamp):
         return self.valid_start_at(timestamp) \
-            and timestamp.time() == time(0, 0, 0, 0)
+            and self._is_start_of_day(timestamp)
+
+    def _is_start_of_day(self, timestamp):
+        return timestamp.time() == time(0, 0, 0, 0)
 
     def end(self, timestamp):
         if self._is_boundary(timestamp):
@@ -32,7 +35,10 @@ class Period(object):
 
 class Day(Period):
     def start(self, timestamp):
-        return timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+        return _truncate_time(timestamp)
+
+    def valid_start_at(self, timestamp):
+        return self._is_start_of_day(timestamp)
 
 
 class Week(Period):

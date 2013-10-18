@@ -226,3 +226,13 @@ class TestDay_start(TestCase):
         start = DAY.start(some_datetime)
 
         assert_that(start, is_(d(2013, 10, 4, 0, 0, 0)))
+
+    def test_that_midday_is_not_a_valid_start_at(self):
+        naughty_starttime = d(2013, 10, 18, 12, 00)
+
+        assert_that(DAY.valid_start_at(naughty_starttime), is_(False))
+
+    def test_that_beginning_of_the_day_is_a_valid_start_at(self):
+        lovely_starttime = d(2013, 10, 18, 00, 00)
+
+        assert_that(DAY.valid_start_at(lovely_starttime), is_(True))
