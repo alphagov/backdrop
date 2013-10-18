@@ -34,6 +34,10 @@ class Period(object):
 
 
 class Day(Period):
+    def __init__(self):
+        self.name = "day"
+        self._delta = timedelta(days=1)
+
     def start(self, timestamp):
         return _truncate_time(timestamp)
 
@@ -68,7 +72,7 @@ class Month(Period):
 DAY = Day()
 WEEK = Week()
 MONTH = Month()
-PERIODS = [WEEK, MONTH]
+PERIODS = [DAY, WEEK, MONTH]
 
 
 def parse_period(period_name):

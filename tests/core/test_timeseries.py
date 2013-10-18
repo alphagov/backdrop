@@ -236,3 +236,21 @@ class TestDay_start(TestCase):
         lovely_starttime = d(2013, 10, 18, 00, 00)
 
         assert_that(DAY.valid_start_at(lovely_starttime), is_(True))
+
+    def test_that_end_of_the_day_is_the_beginning_of_the_next_day(self):
+        late_in_the_day = d(2013, 10, 18, 21, 00)
+
+        assert_that(DAY.end(late_in_the_day), is_(d(2013, 10, 19, 00, 00)))
+
+    def test_that_a_range_of_one_week_gives_us_seven_days(self):
+        range = DAY.range(d_tz(2013, 4, 3), d_tz(2013, 4, 10))
+
+        assert_that(list(range), contains(
+            (d_tz(2013, 4, 3), d_tz(2013, 4, 4)),
+            (d_tz(2013, 4, 4), d_tz(2013, 4, 5)),
+            (d_tz(2013, 4, 5), d_tz(2013, 4, 6)),
+            (d_tz(2013, 4, 6), d_tz(2013, 4, 7)),
+            (d_tz(2013, 4, 7), d_tz(2013, 4, 8)),
+            (d_tz(2013, 4, 8), d_tz(2013, 4, 9)),
+            (d_tz(2013, 4, 9), d_tz(2013, 4, 10))
+        ))
