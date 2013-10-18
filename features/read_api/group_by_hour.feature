@@ -9,7 +9,7 @@ Feature: querying for data grouped by hour
           When I post the data to "/hour"
           Then I should get back a status of "200"
           When I go to "/hour?period=hour"
-          Then the JSON should have "26" results
+          Then the JSON should have "27" results
 
     @wip
     Scenario: grouping data by hour between two timestamps
@@ -17,5 +17,5 @@ Feature: querying for data grouped by hour
            And I have a bucket named "hour"
           When I post the data to "/hour"
           Then I should get back a status of "200"
-          When I go to "/hour?period=hour&start_at=2013-04-01T13:00:00Z&end_at=2013-04-02T13:00:00Z"
+          When I go to "/hour?period=hour&start_at=2013-04-01T13:00:00Z&end_at=2013-04-20T13:00:00Z"
           Then the JSON should have "24" results
