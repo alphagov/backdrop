@@ -80,6 +80,8 @@ def log_error_and_respond(message, status_code):
 def service_data(data_group, data_type):
     bucket_config = bucket_repository.get_bucket_for_query(data_group,
                                                            data_type)
+    if bucket_config is None:
+        return log_error_and_respond('bucket not found', 404)
     return query(bucket_config.name)
 
 
