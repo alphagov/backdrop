@@ -77,16 +77,20 @@ def log_error_and_respond(message, status_code):
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
-def service_data(data_group, data_type):
+def data(data_group, data_type):
     bucket_config = bucket_repository.get_bucket_for_query(data_group,
                                                            data_type)
-    return query(bucket_config.name)
+    return fetch(bucket_config)
 
 
 @app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
 @cache_control.etag
 def query(bucket_name):
     bucket_config = bucket_repository.retrieve(name=bucket_name)
+    return fetch(bucket_config)
+
+
+def fetch(bucket_config):
     if bucket_config is None or not bucket_config.queryable:
         return log_error_and_respond('bucket not found', 404)
 

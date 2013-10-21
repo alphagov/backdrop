@@ -91,6 +91,10 @@ class QueryingApiTestCase(unittest.TestCase):
         response = self.app.get('/data/some-group/some-type')
         assert_that(response, has_status(404))
 
+    def test_returns_404_when_bucket_does_not_exist(self):
+        response = self.app.get('/data/no-group/no-type')
+        assert_that(response, has_status(404))
+
 
 class PreflightChecksApiTestCase(unittest.TestCase):
     def setUp(self):
