@@ -1,11 +1,13 @@
 import logging
 import xlrd
 import datetime
+from backdrop import statsd
 from backdrop.core.errors import ParseError
 from backdrop.core.timeutils import utc
 
 
 class ExcelError(object):
+
     def __init__(self, description):
         self.description = description
 
@@ -19,6 +21,7 @@ class ExcelError(object):
 EXCEL_ERROR = ExcelError("error in cell")
 
 
+@statsd.timer('parse_excel.parse_excel')
 def parse_excel(incoming_data):
     book = xlrd.open_workbook(file_contents=incoming_data.read())
 
@@ -26,15 +29,18 @@ def parse_excel(incoming_data):
         yield _extract_rows(sheet, book)
 
 
+@statsd.timer('parse_excel._extract_rows')
 def _extract_rows(sheet, book):
     for i in range(sheet.nrows):
-            yield _extract_values(sheet.row(i), book)
+        yield _extract_values(sheet.row(i), book)
 
 
+@statsd.timer('parse_excel._extract_values')
 def _extract_values(row, book):
     return [_extract_cell_value(cell, book) for cell in row]
 
 
+@statsd.timer('parse_excel._extract_cell_value')
 def _extract_cell_value(cell, book):
     if cell.ctype == xlrd.XL_CELL_DATE:
         time_tuple = xlrd.xldate_as_tuple(cell.value, book.datemode)

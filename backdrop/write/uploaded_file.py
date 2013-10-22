@@ -1,4 +1,5 @@
 from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
+from backdrop import statsd
 
 
 class FileUploadException(IOError):
@@ -29,6 +30,7 @@ class UploadedFile(object):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         ]
 
+    @statsd.timer('uploaded_file.save')
     def save(self, bucket, parser):
         if not self.valid:
             self.file_stream().close()
@@ -39,6 +41,7 @@ class UploadedFile(object):
         bucket.parse_and_store(data)
         self.file_stream().close()
 
+    @statsd.timer('uploaded_file.perform_virus_scan')
     def perform_virus_scan(self):
         if ScannedFile(self.file_object).has_virus_signature:
             self.file_stream().close()
