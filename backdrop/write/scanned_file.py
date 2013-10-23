@@ -30,7 +30,7 @@ class ScannedFile(object):
             self._file_path)
 
     def _clamscan(self, filename):
-        return bool(subprocess.call(["clamscan", filename]))
+        return bool(subprocess.call(["clamdscan", filename]))
 
     def _clean_up(self):
         # Remove temporary file
