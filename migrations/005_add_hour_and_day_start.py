@@ -17,7 +17,7 @@ def up(db):
             "_timestamp": {"$exists": True},
             "_day_start_at": {"$exists": False}
         }
-        is_capped = collection.options()['capped']
+        is_capped = name.endswith('_realtime')
         if not is_capped:
             for document in collection.find(query):
                 document['_timestamp'] = utc(document['_timestamp'])
