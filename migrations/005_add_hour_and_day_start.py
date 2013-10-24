@@ -17,11 +17,13 @@ def up(db):
             "_timestamp": {"$exists": True},
             "_day_start_at": {"$exists": False}
         }
-        for document in collection.find(query):
-            document['_timestamp'] = utc(document['_timestamp'])
-            for attr in ['_updated_at', '_week_start_at', '_month_start_at']:
-                if attr in document:
-                    document.pop(attr)
-            record = Record(document)
+        is_capped = collection.options()['capped']
+        if not is_capped:
+            for document in collection.find(query):
+                document['_timestamp'] = utc(document['_timestamp'])
+                for attr in ['_updated_at', '_week_start_at', '_month_start_at']:
+                    if attr in document:
+                        document.pop(attr)
+                record = Record(document)
 
-            collection.save(record.to_mongo())
+                collection.save(record.to_mongo())
