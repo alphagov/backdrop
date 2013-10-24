@@ -21,7 +21,8 @@ def up(db):
         if not is_capped:
             for document in collection.find(query):
                 document['_timestamp'] = utc(document['_timestamp'])
-                for attr in ['_updated_at', '_week_start_at', '_month_start_at']:
+                attrs = ['_updated_at', '_week_start_at', '_month_start_at']
+                for attr in attrs:
                     if attr in document:
                         document.pop(attr)
                 record = Record(document)
