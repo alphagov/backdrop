@@ -1,4 +1,5 @@
 from logging import FileHandler
+from logstash_formatter import LogstashFormatter
 import logging
 from flask import request
 
@@ -11,10 +12,20 @@ def get_log_file_handler(path, log_level=logging.DEBUG):
     return handler
 
 
+def get_json_log_handler(path):
+    handler = FileHandler(path)
+    formatter = LogstashFormatter()
+    handler.setFormatter(formatter)
+    return handler
+
+
 def set_up_logging(app, name, env):
     log_level = logging._levelNames[app.config['LOG_LEVEL']]
     app.logger.addHandler(
         get_log_file_handler("log/%s.log" % env, log_level)
+    )
+    app.logger.addHandler(
+        get_json_log_handler("log/%s.log.json" % env)
     )
     app.logger.setLevel(log_level)
     app.logger.info("Backdrop %s API logging started" % name)
