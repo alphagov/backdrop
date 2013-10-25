@@ -10,7 +10,7 @@ assets/*
 .coverage
 build
 coverage.xml
-*.log
+*.log*
 nosetests.xml
 pep8.out
 tmp/*
