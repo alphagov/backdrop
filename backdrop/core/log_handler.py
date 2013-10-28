@@ -15,6 +15,7 @@ def get_log_file_handler(path, log_level=logging.DEBUG):
 def get_json_log_handler(path):
     handler = FileHandler(path)
     formatter = LogstashFormatter()
+    formatter.defaults['@tags'] = ['application']
     handler.setFormatter(formatter)
     return handler
 

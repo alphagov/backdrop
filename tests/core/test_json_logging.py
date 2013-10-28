@@ -26,5 +26,10 @@ class TestJsonLogging(unittest.TestCase):
             '@message': 'Writing out JSON formatted logs m8'
         }))
 
+        assert_that(data, has_entries({
+            '@tags': ['application']
+        }))
+
         # Only remove file if assertion passes
         os.remove('log/json_test.log.json')
+        os.remove('log/json_test.log')
