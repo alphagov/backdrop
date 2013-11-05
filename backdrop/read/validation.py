@@ -166,7 +166,7 @@ class ParamDependencyValidator(Validator):
             if all(param not in request_args
                    for param in context['depends_on']):
                 self.add_error(
-                    '%s can be use only with either %s'
+                    '%s can be used only with either %s'
                     % (context['param_name'], context['depends_on']))
 
 
