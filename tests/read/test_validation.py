@@ -185,7 +185,7 @@ class TestRequestValidation(TestCase):
         ]))
         assert_that(validation_result_without_group_by,
                     is_invalid_with_message(
-                        "collect can be use only with either "
+                        "collect can be used only with either "
                         "['group_by', 'period']"))
 
     def test_queries_without_code_injection_collect_values_are_allowed(self):
