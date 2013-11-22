@@ -40,6 +40,10 @@ def create_request_logger(app):
 
 def create_response_logger(app):
     def log_response(response):
-        app.logger.info("response: %s" % response.status)
+        app.logger.info(
+            "response: %s - %s - %s" % (
+                request.method, request.url, response.status
+            )
+        )
         return response
     return log_response
