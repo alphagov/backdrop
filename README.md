@@ -70,3 +70,9 @@ Other parameters:
 - `period` ("week", "month")
 - `sort_by` (field)
 - `limit` (number)
+
+
+## Useful commands
+
+* Copy date from production to local Backdrop DB: `./tools/replicate-db.sh`
+* Run migrations over local Backdrop DB: `python run_migrations.py`
