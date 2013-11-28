@@ -7,9 +7,15 @@
 #
 
 if [ "$(hostname)" == "vm" ]; then
-       echo "This script should be run on the host machine!"
-       exit 1
+    echo "This script should be run on the host machine!"
+    exit 1
 fi
+
+if [ "$(basename $(pwd))" != 'tools' ]; then
+	echo "This script should be run from the backdrop/tools directory!"
+	exit
+fi
+
 
 if [ $# -lt 1 ]; then
 	echo "The script requires at least one argument."
@@ -18,7 +24,7 @@ if [ $# -lt 1 ]; then
 	echo
 	echo "Usage:"
 	echo "  $(basename $0) <user@source_host> [<target_host>]"
-	echo 
+	echo
 	echo "Example:"
 	echo "  $(basename $0) youruser@mongo dev.machine"
 	echo "    This will run mongorestore on the host machine against the specified target host"
