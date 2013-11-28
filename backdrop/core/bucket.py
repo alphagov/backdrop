@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class Bucket(object):
+
     def __init__(self, db, config):
         self.bucket_name = config.name
         self.repository = db.get_repository(config.name)
@@ -50,14 +51,15 @@ class Bucket(object):
 _BucketConfig = namedtuple(
     "_BucketConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
-    "upload_filters auto_ids queryable realtime capped_size")
+    "upload_filters auto_ids queryable realtime capped_size max_age_expected")
 
 
 class BucketConfig(_BucketConfig):
+
     def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
-                capped_size=5040):
+                capped_size=5040, max_age_expected=2678400):
         if not bucket_is_valid(name):
             raise ValueError("Bucket name is not valid")
 
@@ -71,8 +73,9 @@ class BucketConfig(_BucketConfig):
                                                 bearer_token, upload_format,
                                                 upload_filters, auto_ids,
                                                 queryable, realtime,
-                                                capped_size)
+                                                capped_size, max_age_expected)
 
     @property
     def max_age(self):
+        """ Set cache-control header length based on type of bucket. """
         return 120 if self.realtime else 1800
