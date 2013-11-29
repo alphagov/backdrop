@@ -1,5 +1,6 @@
 import unittest
 from mock import patch, call
+import datetime
 
 from pymongo import MongoClient
 from pymongo.database import Database as MongoDatabase
@@ -19,26 +20,31 @@ BUCKET = 'bucket_integration_test'
 
 
 class TestBucketIntegration(unittest.TestCase):
+
     def setUp(self):
         self.db = database.Database(HOST, PORT, DB_NAME)
-        self.bucket = bucket.Bucket(self.db, BucketConfig(BUCKET, data_group="group", data_type="type"))
+        self.bucket = bucket.Bucket(
+            self.db, BucketConfig(BUCKET, data_group="group", data_type="type", max_age_expected=1000))
         self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
 
     def setup__timestamp_data(self):
         self.mongo_collection.save({
             "_id": 'last',
             "_timestamp": d_tz(2013, 3, 1),
-            "_week_start_at": d_tz(2013, 2, 25)
+            "_week_start_at": d_tz(2013, 2, 25),
+            "_updated_at": d_tz(2013, 8, 10)
         })
         self.mongo_collection.save({
             "_id": 'first',
             "_timestamp": d_tz(2013, 1, 1),
-            "_week_start_at": d_tz(2012, 12, 31)
+            "_week_start_at": d_tz(2012, 12, 31),
+            "_updated_at": d_tz(2013, 9, 10)
         })
         self.mongo_collection.save({
             "_id": 'second',
             "_timestamp": d_tz(2013, 2, 1),
-            "_week_start_at": d_tz(2013, 1, 28)
+            "_week_start_at": d_tz(2013, 1, 28),
+            "_updated_at": d_tz(2013, 10, 10)
         })
 
     def tearDown(self):
@@ -78,3 +84,22 @@ class TestBucketIntegration(unittest.TestCase):
             has_entry('_start_at', d_tz(2013, 1, 28)),
             has_entry('_start_at', d_tz(2013, 2, 25))
         ))
+
+    def test_bucket_returns_last_updated(self):
+        self.setup__timestamp_data()
+        assert_that(self.bucket.get_last_updated(),
+                    equal_to(d_tz(2013, 10, 10)))
+
+    def test_bucket_is_recent_enough(self):
+        self.mongo_collection.save({
+            "_id": "first",
+            "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=500)
+        })
+        assert_that(self.bucket.is_recent_enough())
+
+    def test_bucket_is_not_recent_enough(self):
+        self.mongo_collection.save({
+            "_id": "first",
+            "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=50000)
+        })
+        assert_that(not self.bucket.is_recent_enough())
