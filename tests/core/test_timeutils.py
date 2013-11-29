@@ -1,11 +1,13 @@
 import unittest
 from hamcrest import assert_that, equal_to
 import pytz
-from backdrop.core.timeutils import parse_time_as_utc
+import datetime
+from backdrop.core.timeutils import parse_time_as_utc, as_seconds
 from tests.support.test_helpers import d_tz, d
 
 
 class ParseTimeAsUTCTestCase(unittest.TestCase):
+
     def test_valid_time_string_is_parsed(self):
         assert_that(parse_time_as_utc("2012-12-12T12:12:12+00:00"),
                     equal_to(d_tz(2012, 12, 12, 12, 12, 12)))
@@ -26,3 +28,11 @@ class ParseTimeAsUTCTestCase(unittest.TestCase):
     def test_datetime_with_no_timezone_is_given_utc(self):
         assert_that(parse_time_as_utc(d(2012, 12, 12, 12)),
                     equal_to(d_tz(2012, 12, 12, 12)))
+
+
+class TransformTimesTestCase(unittest.TestCase):
+
+    def test_datetime_is_converted_to_seconds(self):
+        assert_that(
+            as_seconds(datetime.datetime(2013, 11, 29, 15, 57, 43, 662372)),
+            equal_to(1385740663.0))
