@@ -5,6 +5,9 @@ from backdrop.core import records
 from backdrop.core.errors import ValidationError
 from backdrop.core.validation import bucket_is_valid
 
+import timeutils
+import datetime
+
 log = logging.getLogger(__name__)
 
 
@@ -14,6 +17,28 @@ class Bucket(object):
         self.bucket_name = config.name
         self.repository = db.get_repository(config.name)
         self.auto_id_keys = config.auto_ids
+        self.config = config
+        self.db = db
+
+    def is_recent_enough(self):
+        max_age_expected = datetime.timedelta(
+            seconds=self.config.max_age_expected)
+        now = timeutils.now()
+        last_updated = self.get_last_updated()
+
+        if not last_updated:
+            return False
+
+        return (now - last_updated) < max_age_expected
+
+    def get_last_updated(self):
+        last_updated = self.db.get_collection(self.config.name).find().sort(
+            "_updated_at", -1).limit(1)
+
+        last_updated = last_updated[0].get('_updated_at')
+
+        if last_updated is not None:
+            return timeutils.utc(last_updated)
 
     def parse_and_store(self, data):
         log.info("received %s documents" % len(data))

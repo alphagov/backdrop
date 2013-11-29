@@ -48,9 +48,10 @@ class MongoDriver(object):
     def find_one(self, query):
         return self._collection.find_one(query)
 
-    def find(self, query, sort, limit):
+    def find(self, query=None, sort=None, limit=None):
         cursor = self._collection.find(query)
-        self._apply_sorting(cursor, sort[0], sort[1])
+        if sort:
+            self._apply_sorting(cursor, sort[0], sort[1])
         if limit:
             cursor.limit(limit)
         return cursor
