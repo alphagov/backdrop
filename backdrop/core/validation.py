@@ -41,7 +41,7 @@ def value_is_valid_datetime_string(value):
 
 def value_is_valid(value):
     return isinstance(value, (int, float, basestring, bool, datetime.datetime,
-                              bson.ObjectId))
+                              bson.ObjectId)) or value is None
 
 
 def key_is_valid(key):

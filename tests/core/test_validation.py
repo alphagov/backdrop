@@ -179,6 +179,12 @@ class TestValidateRecordData(unittest.TestCase):
         assert_that(validate({'_timestamp': valid_timestamp}), is_valid())
         assert_that(validate({'_id': valid_string}), is_valid())
 
+    def test_allow_none_value(self):
+        validation_result = validate_record_data({
+            'none_is_fine': None
+        })
+        assert_that(validation_result, is_valid())
+
 
 class ValidDateObjectTestCase(unittest.TestCase):
     def test_validation_happens_until_error_or_finish(self):
