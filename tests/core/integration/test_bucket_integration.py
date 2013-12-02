@@ -90,6 +90,9 @@ class TestBucketIntegration(unittest.TestCase):
         assert_that(self.bucket.get_last_updated(),
                     equal_to(d_tz(2013, 10, 10)))
 
+    def test_bucket_returns_none_if_there_is_no_last_updated(self):
+        assert_that(self.bucket.get_last_updated(), is_(None))
+
     def test_bucket_is_recent_enough(self):
         self.mongo_collection.save({
             "_id": "first",

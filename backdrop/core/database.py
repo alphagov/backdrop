@@ -39,22 +39,26 @@ class MongoDriver(object):
             "descending": pymongo.DESCENDING
         }
 
-    def _apply_sorting(self, cursor, key, direction):
-        if direction not in self.sort_options.keys():
-            raise InvalidSortError(direction)
-
-        cursor.sort(key, self.sort_options[direction])
-
-    def find_one(self, query):
-        return self._collection.find_one(query)
-
-    def find(self, query=None, sort=None, limit=None):
-        cursor = self._collection.find(query)
+    def _parse_sort(self, sort):
         if sort:
-            self._apply_sorting(cursor, sort[0], sort[1])
-        if limit:
-            cursor.limit(limit)
-        return cursor
+            key, direction = sort
+
+            if direction not in self.sort_options.keys():
+                raise InvalidSortError(direction)
+
+            return [(key, self.sort_options[direction])]
+
+    def find_one(self, query=None, sort=None, limit=0):
+        return self._collection.find_one(
+            query,
+            sort=self._parse_sort(sort),
+            limit=limit or 0)
+
+    def find(self, query=None, sort=None, limit=0):
+        return self._collection.find(
+            query,
+            sort=self._parse_sort(sort),
+            limit=limit or 0)
 
     def _ignore_docs_without_grouping_keys(self, keys, query):
         for key in keys:

@@ -32,13 +32,11 @@ class Bucket(object):
         return (now - last_updated) < max_age_expected
 
     def get_last_updated(self):
-        last_updated = self.db.get_collection(self.config.name).find().sort(
-            "_updated_at", -1).limit(1)
+        last_updated = self.db.get_collection(self.config.name).find_one(
+            sort=['_updated_at', 'descending'], limit=1) or {}
 
-        last_updated = last_updated[0].get('_updated_at')
-
-        if last_updated is not None:
-            return timeutils.utc(last_updated)
+        if last_updated.get('_updated_at') is not None:
+            return timeutils.utc(last_updated.get('_updated_at'))
 
     def parse_and_store(self, data):
         log.info("received %s documents" % len(data))
