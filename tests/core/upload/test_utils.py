@@ -61,6 +61,7 @@ class TestMakeRecords(unittest.TestCase):
             ["name", "size"],
             ["val1", 123],
             ["", ""],
+            [None, None],
             ["val2", 456]
         ]
 
