@@ -45,6 +45,8 @@ def _extract_cell_value(cell, book):
     if cell.ctype == xlrd.XL_CELL_DATE:
         time_tuple = xlrd.xldate_as_tuple(cell.value, book.datemode)
         return utc(datetime.datetime(*time_tuple)).isoformat()
+    if cell.ctype == xlrd.XL_CELL_EMPTY:
+        return None
     elif cell.ctype == xlrd.XL_CELL_ERROR:
         logging.warn("Encountered errors in cells when parsing excel file")
         return EXCEL_ERROR

@@ -46,8 +46,16 @@ class ParseExcelTestCase(unittest.TestCase):
                 ["Nothing exciting"]
             ),
             contains(
-                ["Sheet 2 content", ""],
+                ["Sheet 2 content", None],
                 ["Sheet Name", "Sheet Index"],
                 ["First", 0],
                 ["Second", 1]
+            )))
+
+    def test_parse_xlsx_handle_empty_cells_and_lines(self):
+        assert_that(self._parse_excel("empty_cell_and_row.xlsx"), contains(
+            contains(
+                ["Next cell is none", None, "Previous cell is none"],
+                [None, None, None],
+                ["The above row", "is full", "of nones"]
             )))
