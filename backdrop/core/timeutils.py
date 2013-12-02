@@ -1,10 +1,15 @@
 import datetime
+import time
 from dateutil import parser
 import pytz
 
 
 def now():
     return datetime.datetime.now(pytz.UTC)
+
+
+def as_seconds(dt):
+    return time.mktime(dt.timetuple())
 
 
 def parse_time_as_utc(time_string):

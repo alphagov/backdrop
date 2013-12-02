@@ -3,6 +3,7 @@ from backdrop.core.user import UserConfig
 
 
 class _Repository(object):
+
     def __init__(self, db, model_cls, collection_name, id_field):
         self.db = db
         self.model_cls = model_cls
@@ -28,11 +29,19 @@ class _Repository(object):
         doc = self.collection.find_one(params)
         if doc is None:
             return None
+        return self._create_model(doc)
+
+    def get_all(self):
+        # Return a list of all bucket config instances
+        return [self._create_model(doc) for doc in self.collection.find()]
+
+    def _create_model(self, doc):
         del doc["_id"]
         return self.model_cls(**doc)
 
 
 class BucketConfigRepository(object):
+
     def __init__(self, db):
         self._db = db
         self._repository = _Repository(db, BucketConfig, "buckets", "name")
@@ -44,6 +53,9 @@ class BucketConfigRepository(object):
             self._db.create_capped_collection(bucket_config.name,
                                               bucket_config.capped_size)
 
+    def get_all(self):
+        return self._repository.get_all()
+
     def retrieve(self, name):
         return self._repository.retrieve(name)
 
@@ -54,6 +66,7 @@ class BucketConfigRepository(object):
 
 
 class UserConfigRepository(object):
+
     def __init__(self, db):
         self._db = db
         self._repository = _Repository(db, UserConfig, "users", "email")
