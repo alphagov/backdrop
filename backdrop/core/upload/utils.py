@@ -4,7 +4,7 @@ from backdrop.core.errors import ParseError
 
 
 def remove_blanks(rows):
-    return filter(lambda r: not all(len(v) == 0 for v in r), rows)
+    return filter(lambda r: not all(v is None or len(v) == 0 for v in r), rows)
 
 
 def make_dicts(rows):
