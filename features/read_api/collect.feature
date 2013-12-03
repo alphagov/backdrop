@@ -37,7 +37,7 @@ Feature: collect fields into grouped responses
          then I should get back a status of "200"
          and the "1st" result should have "value:sum" with json "27"
          and the "1st" result should have "value:mean" with json "6.75"
-    
+
     Scenario: should be able to perform maths on sub groups
         Given "evl_volumetrics.json" is in "foo" bucket
          when I go to "/foo?period=month&group_by=channel&collect=volume:sum"
@@ -49,4 +49,4 @@ Feature: collect fields into grouped responses
         Given "dinosaurs.json" is in "foo" bucket
          when I go to "/foo?group_by=type&collect=name:sum"
          then I should get back a status of "400"
-         and the error message should be "invalid collect for that data"
+

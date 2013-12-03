@@ -87,8 +87,8 @@ def health_check():
     return jsonify(status='ok', message='database and buckets are fine')
 
 
-def log_error_and_respond(message, status_code):
-    app.logger.error(message)
+def log_error_and_respond(bucket, message, status_code):
+    app.logger.error('%s: %s' % (bucket, message))
     return jsonify(status='error', message=message), status_code
 
 
@@ -108,7 +108,10 @@ def query(bucket_name):
 
 def fetch(bucket_config):
     if bucket_config is None or not bucket_config.queryable:
-        return log_error_and_respond('bucket not found', 404)
+        bname = "" if bucket_config is None else bucket_config.name + " "
+        return log_error_and_respond(
+            bname, 'bucket not found',
+            404)
 
     if request.method == 'OPTIONS':
         # OPTIONS requests are made by XHR as part of the CORS spec
@@ -121,14 +124,18 @@ def fetch(bucket_config):
                                        bucket_config.raw_queries_allowed)
 
         if not result.is_valid:
-            return log_error_and_respond(result.message, 400)
+            return log_error_and_respond(
+                bucket_config.name, result.message,
+                400)
 
         bucket = Bucket(db, bucket_config)
 
         try:
             result_data = bucket.query(Query.parse(request.args)).data()
         except InvalidOperationError:
-            return log_error_and_respond('invalid collect for that data', 400)
+            return log_error_and_respond(
+                bucket.bucket_name, 'invalid collect function',
+                400)
 
         response = jsonify(data=result_data)
 
