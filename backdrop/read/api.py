@@ -95,7 +95,7 @@ def bucket_health():
                        message='%s buckets are out of date' % message), 500
 
     else:
-        return jsonify(status='ok', message='%s all buckets are in date' % okay_buckets)
+        return jsonify(status='ok', message='(%s)\n All buckets are in date' % okay_buckets)
 
 
 def log_error_and_respond(bucket, message, status_code):
