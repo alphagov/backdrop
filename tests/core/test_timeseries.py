@@ -312,3 +312,25 @@ class TestQuarter(TestCase):
         some_datetime = d(2013, 12, 4, 10, 23, 43)
 
         assert_that(QUARTER.start(some_datetime), is_(d(2013, 10, 1, 0, 0, 0)))
+
+    def test_that_beginning_of_quarters_are_valid(self):
+        first_quarter = d(2013, 1, 1, 0, 0, 0)
+        second_quarter = d(2013, 4, 1, 0, 0, 0)
+        third_quarter = d(2013, 7, 1, 0, 0, 0)
+        fourth_quarter = d(2013, 10, 1, 0, 0, 0)
+
+        assert_that(QUARTER.valid_start_at(first_quarter), is_(True))
+        assert_that(QUARTER.valid_start_at(second_quarter), is_(True))
+        assert_that(QUARTER.valid_start_at(third_quarter), is_(True))
+        assert_that(QUARTER.valid_start_at(fourth_quarter), is_(True))
+
+    def test_that_middle_of_quarters_are_invalid(self):
+        middle_first_quarter = d(2013, 1, 10, 0, 0, 0)
+        middle_second_quarter = d(2013, 4, 15, 0, 0, 0)
+        middle_third_quarter = d(2013, 7, 20, 0, 0, 0)
+        middle_fourth_quarter = d(2013, 10, 13, 0, 0, 0)
+
+        assert_that(QUARTER.valid_start_at(middle_first_quarter), is_(False))
+        assert_that(QUARTER.valid_start_at(middle_second_quarter), is_(False))
+        assert_that(QUARTER.valid_start_at(middle_third_quarter), is_(False))
+        assert_that(QUARTER.valid_start_at(middle_fourth_quarter), is_(False))

@@ -99,7 +99,7 @@ class Quarter(Period):
                                  second=0, microsecond=0)
 
     def valid_start_at(self, timestamp):
-        return False
+        return timestamp.day == 1 and timestamp.month in self.quarter_starts
 
 
 HOUR = Hour()
