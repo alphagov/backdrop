@@ -1,7 +1,7 @@
 from unittest import TestCase
 import datetime
 from hamcrest import assert_that, is_, contains
-from backdrop.core.timeseries import timeseries, WEEK, MONTH, DAY, HOUR
+from backdrop.core.timeseries import timeseries, WEEK, MONTH, DAY, HOUR, QUARTER
 from tests.support.test_helpers import d, d_tz
 
 
@@ -290,4 +290,71 @@ class TestHour(TestCase):
             (d_tz(2013, 4, 3, 14), d_tz(2013, 4, 3, 15)),
             (d_tz(2013, 4, 3, 15), d_tz(2013, 4, 3, 16)),
             (d_tz(2013, 4, 3, 16), d_tz(2013, 4, 3, 17))
+        ))
+
+
+class TestQuarter(TestCase):
+    def test_that_returns_the_beginning_of_the_first_quarter(self):
+        some_datetime = d(2013, 1, 20, 0, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 1, 1, 0, 0, 0)))
+
+    def test_that_returns_the_beginning_of_the_second_quarter(self):
+        some_datetime = d(2013, 5, 20, 0, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 4, 1, 0, 0, 0)))
+
+    def test_that_returns_the_beginning_of_the_third_quarter(self):
+        some_datetime = d(2013, 9, 20, 0, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 7, 1, 0, 0, 0)))
+
+    def test_that_returns_the_beginning_of_the_fourth_quarter(self):
+        some_datetime = d(2013, 12, 4, 10, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 10, 1, 0, 0, 0)))
+
+    def test_that_beginning_of_quarters_are_valid(self):
+        first_quarter = d(2013, 1, 1, 0, 0, 0)
+        second_quarter = d(2013, 4, 1, 0, 0, 0)
+        third_quarter = d(2013, 7, 1, 0, 0, 0)
+        fourth_quarter = d(2013, 10, 1, 0, 0, 0)
+
+        assert_that(QUARTER.valid_start_at(first_quarter), is_(True))
+        assert_that(QUARTER.valid_start_at(second_quarter), is_(True))
+        assert_that(QUARTER.valid_start_at(third_quarter), is_(True))
+        assert_that(QUARTER.valid_start_at(fourth_quarter), is_(True))
+
+    def test_that_middle_of_quarters_are_invalid(self):
+        middle_first_quarter = d(2013, 1, 10, 0, 0, 0)
+        middle_second_quarter = d(2013, 4, 15, 0, 0, 0)
+        middle_third_quarter = d(2013, 7, 20, 0, 0, 0)
+        middle_fourth_quarter = d(2013, 10, 13, 0, 0, 0)
+
+        assert_that(QUARTER.valid_start_at(middle_first_quarter), is_(False))
+        assert_that(QUARTER.valid_start_at(middle_second_quarter), is_(False))
+        assert_that(QUARTER.valid_start_at(middle_third_quarter), is_(False))
+        assert_that(QUARTER.valid_start_at(middle_fourth_quarter), is_(False))
+
+    def test_end_of_quarter_is_beginning_of_next_quarter(self):
+        first_quarter = d(2013, 1, 1, 0, 0, 0)
+        second_quarter = d(2013, 4, 1, 0, 0, 0)
+        third_quarter = d(2013, 7, 1, 0, 0, 0)
+        fourth_quarter = d(2013, 10, 1, 0, 0, 0)
+        first_quarter_2014 = d(2014, 1, 1, 0, 0, 0)
+
+        assert_that(QUARTER.end(first_quarter.replace(hour=1)), is_(second_quarter))
+        assert_that(QUARTER.end(second_quarter.replace(hour=1)), is_(third_quarter))
+        assert_that(QUARTER.end(third_quarter.replace(hour=1)), is_(fourth_quarter))
+        assert_that(QUARTER.end(fourth_quarter.replace(hour=1)), is_(first_quarter_2014))
+
+    def test_range_of_quarters(self):
+        range = QUARTER.range(d_tz(2012, 10, 1), d_tz(2013, 12, 30))
+
+        assert_that(list(range), contains(
+            (d_tz(2012, 10, 1), d_tz(2013, 1, 1)),
+            (d_tz(2013, 1, 1),  d_tz(2013, 4, 1)),
+            (d_tz(2013, 4, 1),  d_tz(2013, 7, 1)),
+            (d_tz(2013, 7, 1),  d_tz(2013, 10, 1)),
+            (d_tz(2013, 10, 1), d_tz(2014, 1, 1))
         ))
