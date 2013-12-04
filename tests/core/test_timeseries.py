@@ -292,6 +292,7 @@ class TestHour(TestCase):
             (d_tz(2013, 4, 3, 16), d_tz(2013, 4, 3, 17))
         ))
 
+
 class TestQuarter(TestCase):
     def test_that_returns_the_beginning_of_the_first_quarter(self):
         some_datetime = d(2013, 1, 20, 0, 23, 43)
