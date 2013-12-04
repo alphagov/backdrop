@@ -107,7 +107,7 @@ DAY = Day()
 WEEK = Week()
 MONTH = Month()
 QUARTER = Quarter()
-PERIODS = [HOUR, DAY, WEEK, MONTH]
+PERIODS = [HOUR, DAY, WEEK, MONTH, QUARTER]
 
 
 def parse_period(period_name):
