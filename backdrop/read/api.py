@@ -82,7 +82,7 @@ def health_check():
         message = ', '.join(failing_buckets)
 
         return jsonify(status='error',
-                       message='%s buckets are out of date' % message)
+                       message='%s buckets are out of date' % message), 500
 
     return jsonify(status='ok', message='database and buckets are fine')
 
