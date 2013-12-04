@@ -4,6 +4,8 @@ from behave import *
 from flask import json
 from hamcrest import *
 from dateutil import parser
+import datetime
+import re
 import pytz
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
@@ -38,6 +40,19 @@ def step(context, fixture_name, bucket_name):
             context.client.storage()[bucket_name].save(obj)
 
 
+@given('I have a record updated "{timespan}" ago in the "{bucket_name}" bucket')
+def step(context, timespan, bucket_name):
+    ensure_bucket_exists(context, bucket_name)
+    now = datetime.datetime.now()
+    number_of_seconds = int(re.match(r'^(\d+) seconds?', timespan).group(1))
+    timedelta = datetime.timedelta(seconds=number_of_seconds)
+    updated = now - timedelta
+    record = {
+        "_updated_at": updated
+    }
+    context.client.storage()[bucket_name].save(record)
+
+
 @given('I have a bucket named "{bucket_name}"')
 def step(context, bucket_name):
     ensure_bucket_exists(context, bucket_name)
@@ -45,8 +60,12 @@ def step(context, bucket_name):
 
 @given('bucket setting {setting} is {set_to}')
 def step(context, setting, set_to):
-    set_to = json.loads(set_to)
-    context.client.storage()["buckets"].update({"_id": context.bucket}, {"$set": {setting: set_to}}, safe=True)
+    if set_to == "None":
+        set_to = None
+    else:
+        set_to = json.loads(set_to)
+    context.client.storage()["buckets"].update(
+        {"_id": context.bucket}, {"$set": {setting: set_to}}, safe=True)
 
 
 @when('I go to "{query}"')
