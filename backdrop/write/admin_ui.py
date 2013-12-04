@@ -17,12 +17,14 @@ def setup(app, db, bucket_repository, user_repository):
     USER_SCOPE = app.config['USER_SCOPE']
     ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
 
-    app.oauth_service = Signonotron2(
-        client_id=app.config['OAUTH_CLIENT_ID'],
-        client_secret=app.config['OAUTH_CLIENT_SECRET'],
-        base_url=app.config['OAUTH_BASE_URL'],
-        backdrop_admin_ui_host=ADMIN_UI_HOST
-    )
+    @app.before_first_request
+    def setup_oauth_service():
+        app.oauth_service = Signonotron2(
+            client_id=app.config['OAUTH_CLIENT_ID'],
+            client_secret=app.config['OAUTH_CLIENT_SECRET'],
+            base_url=app.config['OAUTH_BASE_URL'],
+            redirect_url=url_for(ADMIN_UI_HOST, "oauth_authorized")
+        )
 
     @app.after_request
     def prevent_clickjacking(response):
@@ -63,7 +65,7 @@ def setup(app, db, bucket_repository, user_repository):
         This returns a redirect to the OAuth provider, so we shouldn't
         allow this response to be cached.
         """
-        return app.oauth_service.authorize()
+        return redirect(app.oauth_service.authorize())
 
     @app.route(USER_SCOPE + "/sign_out")
     @cache_control.set("private, must-revalidate")

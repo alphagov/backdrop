@@ -16,14 +16,14 @@ class Signonotron2TestCase(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
 
-    def test_authorize_returns_a_redirect_to_signon_service(self):
+    def test_authorize_returns_a_url_to_signon_service(self):
         oauth_service = Signonotron2(None, None, None, "")
         oauth_service.signon = Mock()
-        oauth_service.signon.get_authorize_url.return_value = ""
+        oauth_service.signon.get_authorize_url.return_value = "http://example.com"
 
-        response = oauth_service.authorize()
+        url = oauth_service.authorize()
 
-        assert_that(response, has_status(302))
+        assert_that(url, equal_to("http://example.com"))
 
     def test_exchange_returns_none_when_code_is_none(self):
         oauth_service = Signonotron2(None, None, None, "")
