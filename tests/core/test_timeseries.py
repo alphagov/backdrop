@@ -293,9 +293,22 @@ class TestHour(TestCase):
         ))
 
 class TestQuarter(TestCase):
-    def test_that_returns_the_beginning_of_the_current_quarter(self):
+    def test_that_returns_the_beginning_of_the_first_quarter(self):
+        some_datetime = d(2013, 1, 20, 0, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 1, 1, 0, 0, 0)))
+
+    def test_that_returns_the_beginning_of_the_second_quarter(self):
+        some_datetime = d(2013, 5, 20, 0, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 4, 1, 0, 0, 0)))
+
+    def test_that_returns_the_beginning_of_the_third_quarter(self):
+        some_datetime = d(2013, 9, 20, 0, 23, 43)
+
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 7, 1, 0, 0, 0)))
+
+    def test_that_returns_the_beginning_of_the_fourth_quarter(self):
         some_datetime = d(2013, 12, 4, 10, 23, 43)
 
-        start = QUARTER.start(some_datetime)
-
-        assert_that(start, is_(d(2013, 10, 1, 0, 0, 0)))
+        assert_that(QUARTER.start(some_datetime), is_(d(2013, 10, 1, 0, 0, 0)))

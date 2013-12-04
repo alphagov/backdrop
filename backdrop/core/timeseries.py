@@ -89,9 +89,13 @@ class Quarter(Period):
     def __init__(self):
         self.name = "month"
         self._delta = relativedelta(months=3)
+        self.quarter_starts = [10, 7, 4, 1]
 
     def start(self, timestamp):
-        return timestamp.replace(month=10, day=1, hour=0, minute=0,
+        quarter_month = next(quarter for quarter in self.quarter_starts
+                             if timestamp.month >= quarter)
+
+        return timestamp.replace(month=quarter_month, day=1, hour=0, minute=0,
                                  second=0, microsecond=0)
 
     def valid_start_at(self, timestamp):
