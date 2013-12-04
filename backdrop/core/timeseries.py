@@ -84,10 +84,25 @@ class Month(Period):
     def valid_start_at(self, timestamp):
         return timestamp.day == 1
 
+
+class Quarter(Period):
+    def __init__(self):
+        self.name = "month"
+        self._delta = relativedelta(months=3)
+
+    def start(self, timestamp):
+        return timestamp.replace(month=10, day=1, hour=0, minute=0,
+                                 second=0, microsecond=0)
+
+    def valid_start_at(self, timestamp):
+        return False
+
+
 HOUR = Hour()
 DAY = Day()
 WEEK = Week()
 MONTH = Month()
+QUARTER = Quarter()
 PERIODS = [HOUR, DAY, WEEK, MONTH]
 
 
