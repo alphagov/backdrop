@@ -12,27 +12,27 @@ if [ "$(hostname)" == "vm" ]; then
 fi
 
 if [ "$(basename $(pwd))" != 'tools' ]; then
-	echo "This script should be run from the backdrop/tools directory!"
-	exit
+    echo "This script should be run from the backdrop/tools directory!"
+    exit
 fi
 
 
 if [ $# -lt 1 ]; then
-	echo "The script requires at least one argument."
-	echo
-	echo "Replicate backdrop data from a source host to a target host."
-	echo
-	echo "Usage:"
-	echo "  $(basename $0) <user@source_host> [<target_host>]"
-	echo
-	echo "Example:"
-	echo "  $(basename $0) youruser@mongo dev.machine"
-	echo "    This will run mongorestore on the host machine against the specified target host"
-	echo "  $(basename $0) youruser@mongo"
-	echo "    This will run mongorestore from within the development VM"
-	echo
+    echo "The script requires at least one argument."
+    echo
+    echo "Replicate backdrop data from a source host to a target host."
+    echo
+    echo "Usage:"
+    echo "  $(basename $0) <user@source_host> [<target_host>]"
+    echo
+    echo "Example:"
+    echo "  $(basename $0) youruser@mongo dev.machine"
+    echo "    This will run mongorestore on the host machine against the specified target host"
+    echo "  $(basename $0) youruser@mongo"
+    echo "    This will run mongorestore from within the development VM"
+    echo
 
-	exit 2
+    exit 2
 fi
 
 SOURCE_HOST=$1
@@ -61,11 +61,11 @@ ssh $SOURCE_HOST "rm -Rf ${FILENAME} ${DUMPDIR}"
 tar xzvf $FILENAME
 
 if [ -z "$2" ]; then
-	pushd ../../puppet/development
-	vagrant ssh -c "cd /var/govuk/backdrop/tools && mongorestore --drop ${DUMPDIR}"
-	popd
+    pushd ../../pp-development/
+    vagrant ssh -c "cd /var/apps/backdrop/tools && mongorestore --drop ${DUMPDIR}"
+    popd
 else
-	mongorestore --drop -h $DESTINATION_HOST $DUMPDIR
+    mongorestore --drop -h $DESTINATION_HOST $DUMPDIR
 fi
 
 # cleanup locally
