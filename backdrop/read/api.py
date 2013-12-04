@@ -70,21 +70,34 @@ def health_check():
         return jsonify(status='error',
                        message='cannot connect to database'), 500
 
+    return jsonify(status='ok', message='database is up')
+
+
+@app.route('/_status/buckets', methods=['GET'])
+@cache_control.nocache
+def bucket_health():
+
     failing_buckets = []
+    okay_buckets = []
     bucket_configs = bucket_repository.get_all()
 
     for bucket_config in bucket_configs:
         bucket = Bucket(db, bucket_config)
         if not bucket.is_recent_enough():
             failing_buckets.append(bucket.bucket_name)
+        else:
+            okay_buckets.append(bucket.bucket_name)
 
     if len(failing_buckets):
         message = ', '.join(failing_buckets)
 
         return jsonify(status='error',
-                       message='%s buckets are out of date' % message)
+                       message='%s buckets are out of date' % message), 500
 
-    return jsonify(status='ok', message='database and buckets are fine')
+    else:
+        return jsonify(status='ok',
+                       message='(%s)\n All buckets are in date' %
+                       okay_buckets)
 
 
 def log_error_and_respond(bucket, message, status_code):

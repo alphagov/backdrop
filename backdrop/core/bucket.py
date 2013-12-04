@@ -21,8 +21,12 @@ class Bucket(object):
         self.db = db
 
     def is_recent_enough(self):
+        if self.config.max_age_expected is None:
+            return True
+
         max_age_expected = datetime.timedelta(
             seconds=self.config.max_age_expected)
+
         now = timeutils.now()
         last_updated = self.get_last_updated()
 

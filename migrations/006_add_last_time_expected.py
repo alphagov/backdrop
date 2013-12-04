@@ -45,6 +45,18 @@ def up(db):
 def calculate_max_age(bucket):
     dt = bucket['data_type']
 
+    dead_buckets = [
+        'evl_channel_volumetrics',
+        'government_annotations',
+        'land_registry_search_volumetrics',
+        'hmrc_preview',
+        'housing_policy_annual_mortgage_lending',
+        'housing_policy_monthly_mortgage_lending'
+    ]
+
+    if bucket in dead_buckets:
+        return None
+
     return {
         'realtime': minutes(5),  # 5mins for realtime buckets
         'journey': hours(25),  # Journey buckets should update daily
