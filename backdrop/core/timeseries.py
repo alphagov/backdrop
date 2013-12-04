@@ -87,7 +87,7 @@ class Month(Period):
 
 class Quarter(Period):
     def __init__(self):
-        self.name = "month"
+        self.name = "quarter"
         self._delta = relativedelta(months=3)
         self.quarter_starts = [10, 7, 4, 1]
 

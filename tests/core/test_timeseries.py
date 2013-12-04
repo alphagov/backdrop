@@ -334,3 +334,15 @@ class TestQuarter(TestCase):
         assert_that(QUARTER.valid_start_at(middle_second_quarter), is_(False))
         assert_that(QUARTER.valid_start_at(middle_third_quarter), is_(False))
         assert_that(QUARTER.valid_start_at(middle_fourth_quarter), is_(False))
+
+    def test_end_of_quarter_is_beginning_of_next_quarter(self):
+        first_quarter = d(2013, 1, 1, 0, 0, 0)
+        second_quarter = d(2013, 4, 1, 0, 0, 0)
+        third_quarter = d(2013, 7, 1, 0, 0, 0)
+        fourth_quarter = d(2013, 10, 1, 0, 0, 0)
+        first_quarter_2014 = d(2014, 1, 1, 0, 0, 0)
+
+        assert_that(QUARTER.end(first_quarter.replace(hour=1)), is_(second_quarter))
+        assert_that(QUARTER.end(second_quarter.replace(hour=1)), is_(third_quarter))
+        assert_that(QUARTER.end(third_quarter.replace(hour=1)), is_(fourth_quarter))
+        assert_that(QUARTER.end(fourth_quarter.replace(hour=1)), is_(first_quarter_2014))
