@@ -346,3 +346,14 @@ class TestQuarter(TestCase):
         assert_that(QUARTER.end(second_quarter.replace(hour=1)), is_(third_quarter))
         assert_that(QUARTER.end(third_quarter.replace(hour=1)), is_(fourth_quarter))
         assert_that(QUARTER.end(fourth_quarter.replace(hour=1)), is_(first_quarter_2014))
+
+    def test_range_of_quarters(self):
+        range = QUARTER.range(d_tz(2012, 10, 1), d_tz(2013, 12, 30))
+
+        assert_that(list(range), contains(
+            (d_tz(2012, 10, 1), d_tz(2013, 1, 1)),
+            (d_tz(2013, 1, 1),  d_tz(2013, 4, 1)),
+            (d_tz(2013, 4, 1),  d_tz(2013, 7, 1)),
+            (d_tz(2013, 7, 1),  d_tz(2013, 10, 1)),
+            (d_tz(2013, 10, 1), d_tz(2014, 1, 1))
+        ))
