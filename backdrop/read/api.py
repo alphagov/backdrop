@@ -78,8 +78,8 @@ def health_check():
 def bucket_health():
 
     failing_buckets = []
-    okay_buckets    = []
-    bucket_configs  = bucket_repository.get_all()
+    okay_buckets = []
+    bucket_configs = bucket_repository.get_all()
 
     for bucket_config in bucket_configs:
         bucket = Bucket(db, bucket_config)
@@ -95,7 +95,9 @@ def bucket_health():
                        message='%s buckets are out of date' % message), 500
 
     else:
-        return jsonify(status='ok', message='(%s)\n All buckets are in date' % okay_buckets)
+        return jsonify(status='ok',
+                       message='(%s)\n All buckets are in date' %
+                       okay_buckets)
 
 
 def log_error_and_respond(bucket, message, status_code):
