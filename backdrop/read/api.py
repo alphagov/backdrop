@@ -84,20 +84,32 @@ def bucket_health():
     for bucket_config in bucket_configs:
         bucket = Bucket(db, bucket_config)
         if not bucket.is_recent_enough():
-            failing_buckets.append(bucket.bucket_name)
+            failing_buckets.append({
+                'name': bucket.bucket_name,
+                'last_updated': bucket.get_last_updated()
+            })
         else:
             okay_buckets.append(bucket.bucket_name)
 
     if len(failing_buckets):
-        message = ', '.join(failing_buckets)
+        message = _bucket_message(failing_buckets)
+        buck_string = ((len(failing_buckets) > 1) and 'buckets' or 'bucket')
 
         return jsonify(status='error',
-                       message='%s buckets are out of date' % message), 500
+                       message='%s %s are out of date' % (message, buck_string)), 500
 
     else:
         return jsonify(status='ok',
                        message='(%s)\n All buckets are in date' %
                        okay_buckets)
+
+
+def _bucket_message(buckets):
+    message = ', '.join(
+        '%s (%s)' % (bucket['name'],
+                     bucket['last_updated'])
+        for bucket in buckets)
+    return message
 
 
 def log_error_and_respond(bucket, message, status_code):
