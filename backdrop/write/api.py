@@ -89,11 +89,29 @@ def health_check():
                        message='cannot connect to database'), 500
 
 
+@app.route('/data/<data_group>/<data_type>', methods=['POST'])
+@cache_control.nocache
+def write_by_group(data_group, data_type):
+    bucket_config = bucket_repository.get_bucket_for_query(
+        data_group,
+        data_type)
+    return _write_to_bucket(bucket_config)
+
+
 @app.route('/<bucket:bucket_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_bucket(bucket_name):
     bucket_config = bucket_repository.retrieve(name=bucket_name)
-    g.bucket_name = bucket_name
+    return _write_to_bucket(bucket_config)
+
+
+def _write_to_bucket(bucket_config):
+    print(bucket_config)
+    if bucket_config is None:
+        return jsonify(status="error",
+                       message='Could not find bucket_config'), 404
+
+    g.bucket_name = bucket_config.name
 
     auth_header = request.headers.get('Authorization', None)
 
