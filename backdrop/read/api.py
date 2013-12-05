@@ -96,7 +96,8 @@ def bucket_health():
         buck_string = ((len(failing_buckets) > 1) and 'buckets' or 'bucket')
 
         return jsonify(status='error',
-                       message='%s %s are out of date' % (message, buck_string)), 500
+                       message='%s %s are out of date' %
+                       (message, buck_string)), 500
 
     else:
         return jsonify(status='ok',
