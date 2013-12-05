@@ -92,6 +92,10 @@ def health_check():
 @app.route('/data/<data_group>/<data_type>', methods=['POST'])
 @cache_control.nocache
 def write_by_group(data_group, data_type):
+    """
+    Write by group/type
+    e.g. POST https://BACKDROP/data/my-transaction-name/volumetrics
+    """
     bucket_config = bucket_repository.get_bucket_for_query(
         data_group,
         data_type)
