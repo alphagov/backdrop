@@ -26,6 +26,16 @@ def step(context, bucket_name):
     )
 
 
+@when('I post to the specific path "{path}"')
+def step(context, path):
+    context.response = context.client.post(
+        path,
+        data=context.data_to_post,
+        content_type="application/json",
+        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
+    )
+
+
 @when('I post the file "{filename}" to "/{bucket_name}/upload"')
 def step(context, filename, bucket_name):
     context.bucket = bucket_name.replace('/', '')
