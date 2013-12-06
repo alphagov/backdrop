@@ -74,5 +74,5 @@ Other parameters:
 
 ## Useful commands
 
-* Copy date from production to local Backdrop DB: `./tools/replicate-db.sh`
+* Copy date from an environment to the local Backdrop DB: `cd tools; ./replicate-db.sh <youruser>@mongo-1.pp-preview`
 * Run migrations over local Backdrop DB: `python run_migrations.py`
