@@ -37,3 +37,12 @@ Feature: the performance platform write api
          then I should get back a status of "200"
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"
           and the stored data should contain "2" "_week_start_at" on "2013-03-18"
+
+    Scenario: posting to a bucket with data group and data type
+        Given I have the data in "....json"
+          and I have a bucket with a data group "GROUP" and a data type of "TYPE"
+         when I post the data to "/bucket_that_should_resolve"
+         then I should get back a status of "200"
+          ....
+
+
