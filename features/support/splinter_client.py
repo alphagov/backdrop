@@ -19,7 +19,7 @@ class SplinterClient(BaseClient):
         return MongoClient('localhost', 27017)[self.database_name]
 
     def before_scenario(self):
-        self.browser = Browser('phantomjs', wait_time=10)
+        self.browser = Browser('phantomjs', wait_time=3)
 
     def after_scenario(self, scenario):
         if scenario.status == 'failed':
