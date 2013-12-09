@@ -45,11 +45,11 @@ This is the OAuth flow we are using to authenticate users with Signonotron2
 
 1. Clone [the Sign-on-o-Tron II project](https://github.com/alphagov/signonotron2)
 2. Use the rake tasks (`bundle exec rake -T` to list them) in order to create:
-    1. A new application: `bundle exec rake applications:create name=backdrop redirect_uri=http://backdrop-admin.dev.gov.uk/_user/authorized`
+    1. A new application: `bundle exec rake applications:create name=backdrop redirect_uri=http://admin.perfplat.dev/_user/authorized`
     3. Edit `development_environment.py` to contain your OAuth consumer tokens from the previous step.
     4. A user: `bundle exec rake users:create name=Test email=test@example.com applications=backdrop` (then set the password etc)
 3. Start backdrop_write and signon: `bowl performance`
-4. Visit `http://backdrop-admin.dev.gov.uk`
+4. Visit `http://admin.perfplat.dev`
 
 ## Requesting data
 
