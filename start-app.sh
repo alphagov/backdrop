@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 
