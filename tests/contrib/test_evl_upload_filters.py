@@ -36,7 +36,7 @@ class EVLServiceVolumetrics(unittest.TestCase):
             [["Failure 1", 0, 10, 0, 2]] +
             [["Failure 2", 1, 20, 0, 3]] +
             [["Failure 3", 2, 30, 0, 4]] +
-            [["", "Blank first column means end of failures list"]]
+            [[None, "None in first column means end of failures list"]]
         ]
 
         data = list(service_failures(failures_raw_data))
@@ -60,7 +60,7 @@ class EVLServiceVolumetrics(unittest.TestCase):
             self.ignore_rows(4) +
             [["No tax-disc failure", 0, '', 0, 2]] +
             [["No sorn failure", 1, 20, 0, '']] +
-            [["", "Blank first column means end of failures list"]]
+            [[None, "None in first column means end of failures list"]]
         ]
 
         data = list(service_failures(failures_raw_data))

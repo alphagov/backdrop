@@ -83,7 +83,7 @@ def service_failures(sheets):
 
     for row in rows[6:]:
         description = row[0]
-        if len(description) == 0:
+        if description is None:
             return
 
         reason_code = int(row[1])
