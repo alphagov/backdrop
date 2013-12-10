@@ -160,7 +160,10 @@ def setup(app, db, bucket_repository, user_repository):
 
     def _invalid_upload(msg, bucket_name):
         app.logger.error("Upload error: %s" % msg)
-        return render_template("upload_error.html", message=msg, bucket_name=bucket_name), 400
+        return render_template(
+            "upload_error.html",
+            message=msg,
+            bucket_name=bucket_name), 400
 
 
 def allow_test_signin(app):
