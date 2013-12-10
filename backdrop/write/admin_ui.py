@@ -5,7 +5,6 @@ from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.upload import create_parser
-from backdrop.core.upload.filters import first_sheet_filter
 from backdrop.write.signonotron2 import Signonotron2
 from backdrop.write.uploaded_file import UploadedFile, FileUploadException
 from backdrop.write.scanned_file import VirusSignatureError
@@ -15,7 +14,6 @@ from ..core import cache_control
 def setup(app, db, bucket_repository, user_repository):
     USER_SCOPE = app.config['USER_SCOPE']
     ADMIN_UI_HOST = app.config["BACKDROP_ADMIN_UI_HOST"]
-    MAX_UPLOAD_SIZE = 1000000
 
     app.oauth_service = Signonotron2(
         client_id=app.config['OAUTH_CLIENT_ID'],
