@@ -2,7 +2,9 @@
 
 venvdir=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))
 
-virtualenv --no-site-packages "$venvdir"
+if [ ! -d "${venvdir}" ]; then
+    virtualenv --no-site-packages "$venvdir"
+fi
 
 source "$venvdir/bin/activate"
 
