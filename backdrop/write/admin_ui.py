@@ -145,21 +145,25 @@ def setup(app, db, bucket_repository, user_repository):
         parser = create_parser(bucket_config)
         upload = UploadedFile(request.files['file'])
 
+        bucket = Bucket(db, bucket_config)
         try:
-            bucket = Bucket(db, bucket_config)
             upload.save(bucket, parser)
-            return render_template('upload_ok.html')
         except (VirusSignatureError,
                 FileUploadException,
                 ParseError,
                 ValidationError) as e:
             message = e.message
             app.logger.error(message)
-            return _invalid_upload(message)
+            return _invalid_upload(message, bucket.bucket_name)
 
-    def _invalid_upload(msg):
+        return render_template('upload_ok.html')
+
+    def _invalid_upload(msg, bucket_name):
         app.logger.error("Upload error: %s" % msg)
-        return render_template("upload_error.html", message=msg), 400
+        return render_template(
+            "upload_error.html",
+            message=msg,
+            bucket_name=bucket_name), 400
 
 
 def allow_test_signin(app):
