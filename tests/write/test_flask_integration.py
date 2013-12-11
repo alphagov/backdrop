@@ -158,6 +158,7 @@ class PostDataTestCase(unittest.TestCase):
 
     @patch("backdrop.write.api.statsd")
     @patch("backdrop.core.bucket.Bucket.parse_and_store")
+    @stub_bucket_retrieve_by_name("foo", bearer_token="foo-bearer-token")
     def test_exception_handling(self, parse_and_store, statsd):
         parse_and_store.side_effect = RuntimeError("BOOM")
 

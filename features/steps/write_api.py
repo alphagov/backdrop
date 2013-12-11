@@ -17,9 +17,20 @@ def step(context, fixture_name):
 
 @when('I post the data to "{bucket_name}"')
 def step(context, bucket_name):
-    context.bucket = bucket_name.replace('/', '')
+    if not (context and 'bucket' in context):
+        context.bucket = bucket_name.replace('/', '')
     context.response = context.client.post(
         bucket_name,
+        data=context.data_to_post,
+        content_type="application/json",
+        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
+    )
+
+
+@when('I post to the specific path "{path}"')
+def step(context, path):
+    context.response = context.client.post(
+        path,
         data=context.data_to_post,
         content_type="application/json",
         headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
