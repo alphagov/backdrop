@@ -110,7 +110,6 @@ def post_to_bucket(bucket_name):
 
 
 def _write_to_bucket(bucket_config):
-    print(bucket_config)
     if bucket_config is None:
         return jsonify(status="error",
                        message='Could not find bucket_config'), 404
