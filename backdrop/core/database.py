@@ -21,7 +21,6 @@ class Database(object):
     def get_collection(self, collection_name):
         return MongoDriver(self._mongo[self.name][collection_name])
 
-
     def collection_names(self):
         return self._mongo[self.name].collection_names()
 
