@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 
 
 def up(db):
-    all_buckets = db['buckets'].find()
+    all_buckets = db.get_collection('buckets').find()
     for bucket in all_buckets:
         if 'max_age_expected' in bucket:
             continue

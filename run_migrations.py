@@ -7,6 +7,7 @@ import sys
 import pymongo
 from os.path import join
 import logging
+from backdrop.core.database import Database
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -29,9 +30,7 @@ def load_config(env):
 
 
 def get_database(config):
-    client = pymongo.MongoClient(config.MONGO_HOST, config.MONGO_PORT)
-
-    return client[config.DATABASE_NAME]
+    return Database(config.MONGO_HOST, config.MONGO_PORT, config.DATABASE_NAME)
 
 
 def get_migrations():

@@ -754,3 +754,8 @@ class TestDatabase(unittest.TestCase):
 
         assert_that(self.db.mongo_database["my_capped_collection"].options(),
                     is_({"capped": True, "size": 1234}))
+
+    def test_get_collection_names(self):
+        self.db.create_capped_collection("foo", 1234)
+
+        assert_that('foo', is_in(self.db.collection_names()))

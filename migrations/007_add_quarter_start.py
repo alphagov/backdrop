@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 def up(db):
     for name in db.collection_names():
         log.info("Migrating collection: {0}".format(name))
-        collection = db[name]
+        collection = db.get_collection(name)
         query = {
             "_timestamp": {"$exists": True},
             "_quarter_start_at": {"$exists": False}
