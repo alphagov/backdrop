@@ -18,12 +18,12 @@ Backdrop is a datastore built with Python and MongoDB. It is made up of two sepa
 
 This assumes you are using the GDS dev environment and so have python and mongo installed.
 
-0. Check that you have virtualenv installed, if not ```sudo apt-get install python-virtualenv```.
-1. If you don't have virtualenvwrapper installed, create a virtualenv using ```virtualenv venv``` and ```source venv/bin/activate``` to enable it.
-2. Navigate to the top level backdrop directory and run ```./run_tests.sh```.
+1. Check that you have virtualenv installed, if not ```sudo apt-get install python-virtualenv```.
+2. If you don't have virtualenvwrapper installed, create a virtualenv using ```virtualenv venv``` and ```source venv/bin/activate``` to enable it.
+3. Navigate to the top level backdrop directory and run ```./run_tests.sh```.
 This will create a new virtualenv (if virtualenvwraper is installed), install all dependencies and run the tests.
-3. ```source venv/bin/activate``` to enable the virtualenv if you didn't do this in step 2.
-4. Copy `backdrop/write/config/development_environment_sample.py` to `development_environment.py`
+4. ```source venv/bin/activate``` to enable the virtualenv if you didn't do this in step 2.
+5. Copy `backdrop/write/config/development_environment_sample.py` to `development_environment.py`
 (if you want to) and edit as needed.
 
 ## Single-sign-on integration and OAuth flow
