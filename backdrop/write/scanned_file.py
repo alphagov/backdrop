@@ -26,11 +26,20 @@ class ScannedFile(object):
         self.file_object.save(self._file_path)
 
     def _scan_file(self):
-        self._virus_signature = self._virus_signature or self._clamscan(
-            self._file_path)
+        self._virus_signature = (self._virus_signature or
+                                 self._clamscan(self._file_path))
 
     def _clamscan(self, filename):
-        return bool(subprocess.call(["clamdscan", filename]))
+        retcode = subprocess.call(["clamdscan", filename])
+        # 0 : No virus found.
+        # 1 : Virus(es) found.
+        # 2 : An error occured.
+        if retcode == 0:
+            return False
+        elif retcode == 1:
+            return True
+        elif retcode == 2:
+            raise SystemError('Error running the clamdscan virus scanner')
 
     def _clean_up(self):
         # Remove temporary file
