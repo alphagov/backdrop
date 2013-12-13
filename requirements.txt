@@ -6,6 +6,7 @@ invoke
 pip==1.4.1
 pymongo==2.6.1
 python-dateutil==2.1
+python-magic==0.4.6
 pytz==2013b
 rauth==0.5.4
 statsd==2.0.3
