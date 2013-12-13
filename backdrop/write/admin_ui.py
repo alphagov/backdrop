@@ -150,6 +150,7 @@ def setup(app, db, bucket_repository, user_repository):
                 FileUploadException,
                 ParseError,
                 ValidationError) as e:
+            app.logger.error("Upload error: %s" % e.message)
             return render_template("upload_error.html", message=e.message), 400
 
         return render_template('upload_ok.html')
