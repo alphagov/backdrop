@@ -27,7 +27,7 @@ class ScannedFile(object):
 
     def _scan_file(self):
         self._virus_signature = (self._virus_signature or
-            self._clamscan(self._file_path))
+                                 self._clamscan(self._file_path))
 
     def _clamscan(self, filename):
         retcode = subprocess.call(["clamdscan", filename])
@@ -39,7 +39,7 @@ class ScannedFile(object):
         elif retcode == 1:
             return True
         elif retcode == 2:
-            raise SystemError('An error occurred running the clamdscan virus scanner')
+            raise SystemError('Error running the clamdscan virus scanner')
 
     def _clean_up(self):
         # Remove temporary file
