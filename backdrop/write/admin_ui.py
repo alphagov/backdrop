@@ -150,18 +150,12 @@ def setup(app, db, bucket_repository, user_repository):
                 FileUploadException,
                 ParseError,
                 ValidationError) as e:
-            message = e.message
-            app.logger.error(message)
-            return _invalid_upload(message, bucket.name)
+            app.logger.error("Upload error: %s" % e.message)
+            return render_template("upload_error.html",
+                                   message=e.message,
+                                   bucket_name=bucket.name), 400
 
         return render_template('upload_ok.html')
-
-    def _invalid_upload(msg, bucket_name):
-        app.logger.error("Upload error: %s" % msg)
-        return render_template(
-            "upload_error.html",
-            message=msg,
-            bucket_name=bucket_name), 400
 
 
 def allow_test_signin(app):
