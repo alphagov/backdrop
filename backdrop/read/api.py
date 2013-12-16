@@ -107,7 +107,7 @@ def bucket_health():
 
 def _bucket_message(buckets):
     message = ', '.join(
-        '%s (%s)' % (bucket['name'],
+        '%s (last updated: %s)' % (bucket['name'],
                      bucket['last_updated'])
         for bucket in buckets)
     return message
