@@ -131,7 +131,10 @@ class Repository(object):
 
         self._validate_sort(sort)
 
-        return self._mongo_driver.find(query.to_mongo_query(), sort, limit)
+        is_class = hasattr(query, 'to_mongo_query')
+        mongo_query = query.to_mongo_query() if is_class else query
+
+        return self._mongo_driver.find(mongo_query, sort, limit)
 
     def group(self, group_by, query, sort=None, limit=None, collect=None):
         if sort:
