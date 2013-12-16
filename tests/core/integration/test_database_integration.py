@@ -733,6 +733,33 @@ class TestRepositoryIntegration_Sorting(RepositoryIntegrationTest):
         assert_that(result, has_item(has_entry("_count", 1)))
 
 
+class TestRepositoryIntegration_Finding(RepositoryIntegrationTest):
+    def test_query_class(self):
+        self.mongo_collection.save({"foo": 1})
+        self.mongo_collection.save({"foo": 2})
+        self.mongo_collection.save({"foo": 3})
+
+        result = self.repo.find(Query.create())
+
+        assert_that(list(result), contains(
+            has_entry("foo", 1),
+            has_entry("foo", 2),
+            has_entry("foo", 3),
+        ))
+
+    def test_query_map(self):
+        self.mongo_collection.save({"foo": 1})
+        self.mongo_collection.save({"foo": 2})
+        self.mongo_collection.save({"foo": 3})
+
+        result = self.repo.find({"foo": 1})
+
+        assert_that(result.count(), equal_to(1))
+        assert_that(list(result), contains(
+            has_entry("foo", 1),
+        ))
+
+
 class TestDatabase(unittest.TestCase):
     def setUp(self):
         self.db = Database('localhost', 27017, 'backdrop_test')
