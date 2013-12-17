@@ -24,7 +24,7 @@ def _size_of_file_on_disk(filename):
 
 class UploadedFile(object):
     # This is ~ 1mb in octets
-    MAX_FILE_SIZE = 1000001
+    MAX_FILE_SIZE = 1000000  # exclusive, so anything >= to this is invalid
 
     def __init__(self, file_storage, server_filename):
         self.file_storage = file_storage
