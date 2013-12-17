@@ -1,7 +1,8 @@
 from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
 from backdrop import statsd
 
-import magic
+import mimetypes
+import os
 from os import SEEK_END
 
 
@@ -17,20 +18,22 @@ def _size_of_file_object(f):
     return size
 
 
+def _size_of_file_on_disk(filename):
+    return os.path.getsize(filename)
+
+
 class UploadedFile(object):
     # This is ~ 1mb in octets
     MAX_FILE_SIZE = 1000001
 
-    def __init__(self, file_object):
-        self.file_object = file_object
-        if file_object.filename is None:
-            raise FileUploadException('No file uploaded %s' % self.file_object)
-        self.file_size = _size_of_file_object(file_object) # we don't trust the browser's content_length
-        self.magic_mimetype = magic.from_buffer(file_object.read(), mime=True) # we don't trust the browser's content_type
-        file_object.seek(0)
+    def __init__(self, file_storage, server_filename):
+        self.file_storage = file_storage # TODO: don't save or use this any more if possible
+        self.server_filename = server_filename
+        self.file_size = _size_of_file_on_disk(server_filename) # we don't trust the browser's content_length
+        self.guessed_mimetype, _ = mimetypes.guess_type(server_filename) # we don't trust the browser's content_type
 
     def file_stream(self):
-        return self.file_object.stream
+        return self.file_storage.stream
 
     def _is_empty(self):
         return self.file_size == 0
@@ -39,8 +42,8 @@ class UploadedFile(object):
         return self.file_size >= self.MAX_FILE_SIZE
 
     def _is_strange_content_type(self):
-        return self.magic_mimetype not in [
-            "text/plain", # magic (a wraper around unix's file command) tells us that csv files are 'text/plain'
+        return self.guessed_mimetype not in [
+            "text/plain", # mimetypes.guess_type() tells us that csv files are 'text/plain'
             "text/csv",
             "application/json",
             "application/vnd.ms-excel",
@@ -55,24 +58,21 @@ class UploadedFile(object):
         if self._is_too_big():
             problems += ['file too big ({})'.format(self.file_size)]
         if self._is_strange_content_type():
-            problems += ['strange content type of {}'.format(self.magic_mimetype)]
+            problems += ['strange content type of {}'.format(self.guessed_mimetype)]
         if problems:
-            self.file_stream().close()
             raise FileUploadException('Invalid file upload {0} - {1}'.format(
-                    self.file_object.filename,
+                    self.file_storage.filename,
                     ' and '.join(problems)))
         self.perform_virus_scan()
         data = parser(self.file_stream())
         bucket.parse_and_store(data)
-        self.file_stream().close()
 
     @statsd.timer('uploaded_file.perform_virus_scan')
     def perform_virus_scan(self):
-        if ScannedFile(self.file_object).has_virus_signature:
-            self.file_stream().close()
+        if ScannedFile(self.file_storage).has_virus_signature:
             raise VirusSignatureError(
                 'File {0} could not be uploaded as it may contain a virus.'
-                .format(self.file_object.filename))
+                .format(self.file_storage.filename))
 
     @property
     def valid(self):
