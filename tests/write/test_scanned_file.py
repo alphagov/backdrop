@@ -10,7 +10,7 @@ from tests.support.file_upload_test_case import FileUploadTestCase
 class TestScannedFile(FileUploadTestCase):
 
     def setUp(self):
-        self.file_object = self._file_storage_wrapper("This is a test", "abc.txt")
+        self.file_object = self._file_storage_wrapper("This is a test", browser_filename="abc.txt")
         self.scanner = ScannedFile(self.file_object)
 
     def tearDown(self):

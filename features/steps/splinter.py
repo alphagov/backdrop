@@ -61,6 +61,8 @@ def bucket_contains(context, bucket_name, sequence_matcher):
 
     bucket = context.client.storage()[bucket_name]
     records = [datetimes_to_strings(record) for record in bucket.find()]
+    records = [ints_to_floats(record) for record in records]
+    records = [nones_to_zeroes(record) for record in records]
 
     assert_that(records, sequence_matcher(*matchers))
 
@@ -68,7 +70,23 @@ def bucket_contains(context, bucket_name, sequence_matcher):
 def datetimes_to_strings(record):
     for key, value in record.items():
         if isinstance(value, datetime.datetime):
-            record[key] = utc(value).isoformat()
+            record[key] = unicode(utc(value).isoformat())
+
+    return record
+
+
+def ints_to_floats(record):
+    for key, value in record.items():
+        if isinstance(value, int):
+            record[key] = float(value)
+
+    return record
+
+
+def nones_to_zeroes(record):
+    for key, value in record.items():
+        if value is None:
+            record[key] = 0.0
 
     return record
 
