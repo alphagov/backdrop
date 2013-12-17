@@ -85,11 +85,11 @@ def bucket_health():
         bucket = Bucket(db, bucket_config)
         if not bucket.is_recent_enough():
             failing_buckets.append({
-                'name': bucket.bucket_name,
+                'name': bucket.name,
                 'last_updated': bucket.get_last_updated()
             })
         else:
-            okay_buckets.append(bucket.bucket_name)
+            okay_buckets.append(bucket.name)
 
     if len(failing_buckets):
         message = _bucket_message(failing_buckets)
@@ -160,7 +160,7 @@ def fetch(bucket_config):
             result_data = bucket.query(Query.parse(request.args)).data()
         except InvalidOperationError:
             return log_error_and_respond(
-                bucket.bucket_name, 'invalid collect function',
+                bucket.name, 'invalid collect function',
                 400)
 
         response = jsonify(data=result_data)
