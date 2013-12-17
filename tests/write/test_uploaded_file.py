@@ -7,95 +7,68 @@ from tests.support.file_upload_test_case import FileUploadTestCase
 
 class TestUploadedFile(FileUploadTestCase):
     def test_getting_a_file_stream(self):
-        upload = UploadedFile(self._file_storage_wrapper("This is a test", ""))
-        assert_that(upload.file_stream().read(), is_(u'This is a test'))
+        contents = 'This is a test'
+
+        upload = self._uploaded_file_wrapper(contents)
+        assert_that(upload.file_stream().read(), is_(contents))
 
     def test_files_under_1000000_octets_are_valid(self):
-        upload = UploadedFile(self._file_storage_wrapper(
-            "foo",
-            content_type="text/csv",
-            content_length=999999))
+        csv_length_999999 = '\n'.join(['aa,bb,ccc' for i in range(100000)])
+        upload = self._uploaded_file_wrapper(contents=csv_length_999999)
 
         assert_that(upload.valid, is_(True))
 
-    def test_files_over_1000000_octets_are_valid(self):
-        upload = UploadedFile(self._file_storage_wrapper(
-            "foo",
-            content_type="text/csv",
-            content_length=1000001))
+    def test_files_over_1000000_octets_are_not_valid(self):
+        csv_length_1000009 = '\n'.join(['aa,bb,ccc' for i in range(100001)])
+        upload = self._uploaded_file_wrapper(contents=csv_length_1000009)
 
         assert_that(upload.valid, is_(False))
 
     def test_saving_file(self):
-        upload = UploadedFile(self._file_storage_wrapper(
-            contents="some data",
-            content_type="text/csv"
-        ))
+        csv_contents = '\n'.join(['aa,bb,ccc' for i in range(100000)])
+        upload = self._uploaded_file_wrapper(contents=csv_contents)
         bucket = Mock()
         parser = Mock()
         upload.perform_virus_scan = Mock()
-        parser.return_value = "some data"
+        parser.return_value = csv_contents
         upload.save(bucket, parser)
         assert_that(parser.called, is_(True))
-        bucket.parse_and_store.assert_called_with("some data")
+        bucket.parse_and_store.assert_called_with(csv_contents)
 
     def test_saving_invalid_file_should_throw_an_exception(self):
-        upload = UploadedFile(self._file_storage_wrapper(
-            contents="some content"
-        ))
+        upload = self._uploaded_file_wrapper(contents='')
         bucket = Mock()
         parser = Mock()
-        self.assertRaises(FileUploadException, upload.save, bucket, parser )
+        self.assertRaises(FileUploadException, upload.save, bucket, parser)
         assert_that(bucket.called, is_(False))
-
-    def test_uploaded_file_must_have_a_file(self):
-        storage = self._file_storage_wrapper("boo", filename=None)
-        self.assertRaises(FileUploadException, UploadedFile, storage)
 
 
 class TestUploadedFileContentTypeValidation(FileUploadTestCase):
     def test_csv_uploads_are_valid(self):
-        upload = UploadedFile(self._file_storage_wrapper("This is a test",
-                                                         content_type="text/csv"))
+        upload = self._uploaded_file_wrapper("This is a test")
 
         assert_that(upload.valid, is_(True))
 
     def test_json_uploads_are_valid(self):
-        upload = UploadedFile(self._file_storage_wrapper("This is a test",
-                                                         content_type="application/json"))
+        upload = self._uploaded_file_wrapper('{"This": "is a test"}')
 
         assert_that(upload.valid, is_(True))
 
-    def test_excel_uploads_are_valid(self):
-        upload = UploadedFile(self._file_storage_wrapper(
-            "This is a test", filename="test",
-            content_type="application/vnd.ms-excel"))
-
+    def test_xls_uploads_are_valid(self):
+        upload = self._uploaded_file_wrapper(fixture_name='xlsfile.xls')
         assert_that(upload.valid, is_(True))
 
     def test_xlsx_spreadsheets_are_valid(self):
-        upload = UploadedFile(self._file_storage_wrapper(
-            "This is a test",
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ))
 
+        upload = self._uploaded_file_wrapper(fixture_name='data.xlsx')
         assert_that(upload.valid, is_(True))
 
     def test_exe_files_are_not_valid(self):
-        upload = UploadedFile(
-            self._file_storage_wrapper('foo', content_type="application/exe"))
-
-        assert_that(upload.valid, is_(False))
-
-    def test_files_with_no_content_type_are_invalid(self):
-        upload = UploadedFile(
-            self._file_storage_wrapper('foo', content_type=None))
-
+        upload = self._uploaded_file_wrapper(fixture_name='donothing.exe')
         assert_that(upload.valid, is_(False))
 
     @patch('backdrop.write.scanned_file.ScannedFile.has_virus_signature')
     def test_perform_virus_scan(self, has_virus_signature):
-        file_storage_wrapper = self._file_storage_wrapper('foo', content_type=None)
-        upload = UploadedFile(file_storage_wrapper)
+        upload = self._uploaded_file_wrapper('[fake empty content]')
         has_virus_signature.return_value = True
         self.assertRaises(VirusSignatureError, upload.perform_virus_scan)

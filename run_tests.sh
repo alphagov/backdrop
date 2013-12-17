@@ -41,7 +41,7 @@ display_result $? 1 "Unit tests"
 python -m coverage.__main__ xml --include=backdrop*
 
 # run feature tests
-behave --stop --tags=~@wip --tags=~@file_upload_test
+behave --stop --tags=~@wip
 display_result $? 2 "Feature tests"
 
 # run style checks
