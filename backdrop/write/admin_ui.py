@@ -144,14 +144,16 @@ def setup(app, db, bucket_repository, user_repository):
     def _store_data(bucket_config):
         parser = create_parser(bucket_config)
         file_storage = request.files['file']
-        tmp_filename = os.path.join('tmp', secure_filename(file_storage.filename))
+        tmp_filename = os.path.join('tmp',
+                                    secure_filename(file_storage.filename))
         try:
-            file_storage.save(tmp_filename) # we need a filename for UploadedFile
+            file_storage.save(tmp_filename)  # filename needed for UploadedFile
         except Exception as e:
             app.logger.error("Error saving temporary file: %s" % e.message)
             return render_template("upload_error.html", message=e.message), 400
 
-        upload = UploadedFile(file_storage=file_storage, server_filename=tmp_filename)
+        upload = UploadedFile(file_storage=file_storage,
+                              server_filename=tmp_filename)
 
         try:
             os.remove(tmp_filename)
