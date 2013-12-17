@@ -27,10 +27,11 @@ class UploadedFile(object):
     MAX_FILE_SIZE = 1000001
 
     def __init__(self, file_storage, server_filename):
-        self.file_storage = file_storage # TODO: don't save or use this any more if possible
+        self.file_storage = file_storage
         self.server_filename = server_filename
-        self.file_size = _size_of_file_on_disk(server_filename) # we don't trust the browser's content_length
-        self.guessed_mimetype, _ = mimetypes.guess_type(server_filename) # we don't trust the browser's content_type
+        # we don't trust the browser's content_length or content_type
+        self.file_size = _size_of_file_on_disk(server_filename)
+        self.guessed_mimetype, _ = mimetypes.guess_type(server_filename)
 
     def file_stream(self):
         return self.file_storage.stream
@@ -43,7 +44,7 @@ class UploadedFile(object):
 
     def _is_strange_content_type(self):
         return self.guessed_mimetype not in [
-            "text/plain", # mimetypes.guess_type() tells us that csv files are 'text/plain'
+            "text/plain",  # guess_type() says csv files are 'text/plain'
             "text/csv",
             "application/json",
             "application/vnd.ms-excel",
@@ -58,11 +59,12 @@ class UploadedFile(object):
         if self._is_too_big():
             problems += ['file too big ({})'.format(self.file_size)]
         if self._is_strange_content_type():
-            problems += ['strange content type of {}'.format(self.guessed_mimetype)]
+            problems += ['strange content type of {}'.format(
+                self.guessed_mimetype)]
         if problems:
             raise FileUploadException('Invalid file upload {0} - {1}'.format(
-                    self.file_storage.filename,
-                    ' and '.join(problems)))
+                self.file_storage.filename,
+                ' and '.join(problems)))
         self.perform_virus_scan()
         data = parser(self.file_stream())
         bucket.parse_and_store(data)
@@ -76,4 +78,10 @@ class UploadedFile(object):
 
     @property
     def valid(self):
-        return not any([self._is_empty(), self._is_too_big(), self._is_strange_content_type()])
+        return not any(
+            [
+                self._is_empty(),
+                self._is_too_big(),
+                self._is_strange_content_type()
+            ]
+        )
