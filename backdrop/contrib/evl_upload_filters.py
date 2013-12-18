@@ -80,13 +80,19 @@ def _to_int(value, value_if_empty=0):
     20
     >>> _to_int(' ', value_if_empty=20)
     20
+    >>> _to_int(None, value_if_empty=20)
+    20
     """
+    if not value:
+        return value_if_empty
 
-    if isinstance(value, int):
+    elif isinstance(value, int):
         return value
+
     elif isinstance(value, basestring):
         stripped = value.strip()
         return int(stripped) if len(stripped) else value_if_empty
+
     else:
         return int(value)
 
