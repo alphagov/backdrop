@@ -60,6 +60,7 @@ class EVLServiceVolumetrics(unittest.TestCase):
             self.ignore_rows(4) +
             [["No tax-disc failure", 0, '', 0, 2]] +
             [["No sorn failure", 1, 20, 0, '']] +
+            [["Failure with whitespace in value", 1, 20, 0, ' ']] +
             [[None, "None in first column means end of failures list"]]
         ]
 
@@ -71,6 +72,8 @@ class EVLServiceVolumetrics(unittest.TestCase):
             [timestamp, "2013-07-30.sorn.0",     "sorn",     0, 2,  "No tax-disc failure"],
             [timestamp, "2013-07-30.tax-disc.1", "tax-disc", 1, 20, "No sorn failure"],
             [timestamp, "2013-07-30.sorn.1",     "sorn",     1, 0,  "No sorn failure"],
+            [timestamp, "2013-07-30.tax-disc.1", "tax-disc", 1, 20, "Failure with whitespace in value"],
+            [timestamp, "2013-07-30.sorn.1",     "sorn",     1, 0,  "Failure with whitespace in value"],
         ]))
 
     def test_converts_channel_volumetrics_raw_data_to_normalised_data(self):
