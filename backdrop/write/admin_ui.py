@@ -152,7 +152,7 @@ def setup(app, db, bucket_repository, user_repository):
                 ValidationError) as e:
             message = e.message
             app.logger.error(message)
-            return _invalid_upload(message, bucket.bucket_name)
+            return _invalid_upload(message, bucket.name)
 
         return render_template('upload_ok.html')
 

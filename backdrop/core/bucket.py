@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class Bucket(object):
 
     def __init__(self, db, config):
-        self.bucket_name = config.name
+        self.name = config.name
         self.repository = db.get_repository(config.name)
         self.auto_id_keys = config.auto_ids
         self.config = config
