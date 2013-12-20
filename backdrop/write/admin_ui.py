@@ -1,6 +1,8 @@
 from functools import wraps
-from flask import flash, session, render_template, redirect, \
-    request, abort
+from flask import flash, session, render_template, redirect, request, abort
+import os
+from werkzeug.utils import secure_filename
+
 from admin_ui_helper import url_for
 from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
@@ -141,7 +143,23 @@ def setup(app, db, bucket_repository, user_repository):
 
     def _store_data(bucket_config):
         parser = create_parser(bucket_config)
-        upload = UploadedFile(request.files['file'])
+        file_storage = request.files['file']
+        tmp_filename = os.path.join('tmp',
+                                    secure_filename(file_storage.filename))
+        try:
+            file_storage.save(tmp_filename)  # filename needed for UploadedFile
+        except Exception as e:
+            app.logger.error("Error saving temporary file: %s" % e.message)
+            return render_template("upload_error.html", message=e.message), 400
+
+        upload = UploadedFile(file_storage=file_storage,
+                              server_filename=tmp_filename)
+
+        try:
+            os.remove(tmp_filename)
+        except OSError as e:
+            app.logger.error("Error deleting temporary file: %s" % e.message)
+            return render_template("upload_error.html", message=e.message), 400
 
         bucket = Bucket(db, bucket_config)
         try:
@@ -150,18 +168,12 @@ def setup(app, db, bucket_repository, user_repository):
                 FileUploadException,
                 ParseError,
                 ValidationError) as e:
-            message = e.message
-            app.logger.error(message)
-            return _invalid_upload(message, bucket.name)
+            app.logger.error("Upload error: %s" % e.message)
+            return render_template("upload_error.html",
+                                   message=e.message,
+                                   bucket_name=bucket.name), 400
 
         return render_template('upload_ok.html')
-
-    def _invalid_upload(msg, bucket_name):
-        app.logger.error("Upload error: %s" % msg)
-        return render_template(
-            "upload_error.html",
-            message=msg,
-            bucket_name=bucket_name), 400
 
 
 def allow_test_signin(app):

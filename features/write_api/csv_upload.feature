@@ -9,7 +9,10 @@ Feature: csv upload
              Pawel,27,Polish
              Max,35,Italian
              """
+         and I have a bucket named "my_bucket"
+         and bucket setting upload_format is "csv"
          and I am logged in
+         and I can upload to "my_bucket"
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
          and I click "Upload"
@@ -26,7 +29,10 @@ Feature: csv upload
              city,città
              coffee,caffè
              """
+         and I have a bucket named "my_bucket"
+         and bucket setting upload_format is "csv"
          and I am logged in
+         and I can upload to "my_bucket"
         when I go to "/my_bucket/upload"
          and I enter "data.csv" into the file upload field
          and I click "Upload"
@@ -54,7 +60,10 @@ Feature: csv upload
              2013-01-01,2013-01-07,abc,287
              2013-01-01,2013-01-07,def,425
              """
+         and I have a bucket named "bucket_with_auto_id"
+         and bucket setting upload_format is "csv"
          and I am logged in
+         and I can upload to "bucket_with_auto_id"
         when I go to "/bucket_with_auto_id/upload"
          and I enter "data.csv" into the file upload field
          and I click "Upload"

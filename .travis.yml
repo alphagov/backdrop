@@ -11,6 +11,8 @@ services: mongodb
 install: 
   - pip install -q -r requirements_for_tests.txt --use-mirrors
 # command to run tests
+env:
+  - SKIP_SPLINTER_TESTS=1
 script:
   - ./run_tests.sh
 after_script:
