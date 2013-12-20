@@ -3,7 +3,6 @@ from backdrop import statsd
 
 import mimetypes
 import os
-from os import SEEK_END
 
 
 class FileUploadException(IOError):
