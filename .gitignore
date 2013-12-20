@@ -15,3 +15,6 @@ nosetests.xml
 pep8.out
 tmp/*
 .DS_store
+
+# vim swap files
+.*.swp

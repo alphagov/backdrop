@@ -70,6 +70,33 @@ def service_volumetrics(rows):
            taxDiskApplications, sornApplications]
 
 
+def _to_int(value, value_if_empty=0):
+    """
+    >>> _to_int('56')
+    56
+    >>> _to_int(56)
+    56
+    >>> _to_int('', value_if_empty=20)
+    20
+    >>> _to_int(' ', value_if_empty=20)
+    20
+    >>> _to_int(None, value_if_empty=20)
+    20
+    """
+    if not value:
+        return value_if_empty
+
+    elif isinstance(value, int):
+        return value
+
+    elif isinstance(value, basestring):
+        stripped = value.strip()
+        return int(stripped) if len(stripped) else value_if_empty
+
+    else:
+        return int(value)
+
+
 def service_failures(sheets):
     rows = list(list(sheets)[1])
     timestamp = rows[1][1]
@@ -87,8 +114,8 @@ def service_failures(sheets):
             return
 
         reason_code = int(row[1])
-        tax_disc_failures = int(row[2] or 0)
-        sorn_failures = int(row[4] or 0)
+        tax_disc_failures = _to_int(row[2], value_if_empty=0)
+        sorn_failures = _to_int(row[4], value_if_empty=0)
 
         yield failure("tax-disc", reason_code, tax_disc_failures, description,
                       timestamp)
