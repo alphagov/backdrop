@@ -11,13 +11,6 @@ class FileUploadException(IOError):
         self.message = message
 
 
-def _size_of_file_object(f):
-    f.seek(0, SEEK_END)
-    size = f.tell()
-    f.seek(0)
-    return size
-
-
 def _size_of_file_on_disk(filename):
     return os.path.getsize(filename)
 
