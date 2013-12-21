@@ -16,18 +16,15 @@ from ..core.database import InvalidOperationError
 from ..core.repository import BucketConfigRepository
 
 
-def setup_logging():
-    log_handler.set_up_logging(app, "read", getenv("GOVUK_ENV", "development"))
+GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
-
-app = Flask(__name__)
+app = Flask("backdrop.read.api")
 
 feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
-    "backdrop.read.config.%s" % getenv("GOVUK_ENV", "development")
-)
+    "backdrop.read.config.{}".format(GOVUK_ENV))
 
 db = database.Database(
     app.config['MONGO_HOST'],
@@ -37,10 +34,7 @@ db = database.Database(
 
 bucket_repository = BucketConfigRepository(db)
 
-setup_logging()
-
-app.before_request(create_request_logger(app))
-app.after_request(create_response_logger(app))
+log_handler.set_up_logging(app, GOVUK_ENV)
 
 
 class JsonEncoder(json.JSONEncoder):

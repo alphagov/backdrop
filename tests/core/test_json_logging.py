@@ -16,7 +16,7 @@ class TestJsonLogging(unittest.TestCase):
 
     def test_json_log_written_when_logger_called(self):
 
-        log_handler.set_up_logging(self.app, 'json_test', 'json_test')
+        log_handler.set_up_logging(self.app, 'json_test')
         self.logger.info('Writing out JSON formatted logs m8')
 
         with open('log/json_test.log.json') as log_file:
