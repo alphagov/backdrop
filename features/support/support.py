@@ -24,12 +24,12 @@ class BaseClient(object):
         pass
 
 
-class Api(object):
+class FlaskApp(object):
     @classmethod
-    def start_api(cls, app_name, port):
-        _api = Api(app_name, port)
-        _api.start()
-        return _api
+    def start_app(cls, app_name, port):
+        _app = FlaskApp(app_name, port)
+        _app.start()
+        return _app
 
     def __init__(self, name, port):
         self._name = name
@@ -46,7 +46,7 @@ class Api(object):
     def start(self):
         if self._running():
             raise RuntimeError(
-                "An api is already available on port %s "
+                "An app is already available on port %s "
                 "BEFORE starting the process!" % self._port)
 
         self._process = self._run()

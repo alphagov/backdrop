@@ -3,7 +3,7 @@ import logging
 from pymongo import MongoClient
 from splinter import Browser
 
-from features.support.support import Api, BaseClient
+from features.support.support import FlaskApp, BaseClient
 
 
 logger = logging.getLogger(__name__)
@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 class SplinterClient(BaseClient):
 
-    def __init__(self, database_name):
+    def __init__(self, database_name, app_name, port):
         self.database_name = database_name
-        self._write_api = Api.start_api('write', '5001')
+        self._flask_app = FlaskApp.start_app(app_name, port)
 
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
@@ -27,10 +27,10 @@ class SplinterClient(BaseClient):
         self.browser.quit()
 
     def spin_down(self):
-        self._write_api.stop()
+        self._flask_app.stop()
 
     def get(self, url, headers=None):
-        self.browser.visit(self._write_api.url(url))
+        self.browser.visit(self._flask_app.url(url))
         return SplinterResponse(self.browser)
 
     def _screenshot_name(self, scenario_name):

@@ -54,7 +54,7 @@ def create_client(feature):
     if 'use_http_client' in feature.tags:
         return HTTPTestClient(config.DATABASE_NAME)
     if 'use_splinter_client' in feature.tags:
-        return SplinterClient(config.DATABASE_NAME)
+        return SplinterClient(config.DATABASE_NAME, 'write', '5001')
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "
