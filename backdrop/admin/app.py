@@ -1,9 +1,16 @@
+from os import getenv
+
 from flask import Flask, jsonify
 
 from ..core import cache_control
 
 
 app = Flask(__name__, static_url_path="/static")
+
+# Configuration
+app.config.from_object(
+    "backdrop.admin.config.{}".format(
+        getenv("GOVUK_ENV", "development")))
 
 
 @app.route('/', methods=['GET'])
