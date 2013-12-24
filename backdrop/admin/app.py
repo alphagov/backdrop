@@ -165,16 +165,15 @@ def oauth_sign_out():
 def upload(bucket_name):
     bucket_config = bucket_repository.retrieve(bucket_name)
     user_config = user_repository.retrieve(
-            session.get("user").get("email"))
+        session.get("user").get("email"))
 
     if bucket_name not in user_config.buckets:
         return abort(404)
 
     if request.method == 'GET':
         return render_template(
-                "upload_{}.html".format(
-                    bucket_config.upload_format),
-                bucket_name=bucket_name)
+            "upload_{}.html".format(bucket_config.upload_format),
+            bucket_name=bucket_name)
     return "hellp {}".format(user_config)
 
 
