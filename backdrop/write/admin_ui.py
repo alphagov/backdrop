@@ -165,7 +165,7 @@ def setup(app, db, bucket_repository, user_repository):
 
         bucket = Bucket(db, bucket_config)
         try:
-            upload.save(bucket, parser)
+            bucket.parse_and_store(upload.parse(parser))
         except (VirusSignatureError,
                 FileUploadException,
                 ParseError,

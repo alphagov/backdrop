@@ -43,8 +43,8 @@ class UploadedFile(object):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         ]
 
-    @statsd.timer('uploaded_file.save')
-    def save(self, bucket, parser):
+    @statsd.timer('uploaded_file.parse')
+    def parse(self, parser):
         problems = []
         if self._is_empty():
             problems += ['file is empty']
@@ -58,8 +58,7 @@ class UploadedFile(object):
                 self.file_storage.filename,
                 ' and '.join(problems)))
         self.perform_virus_scan()
-        data = parser(self.file_stream())
-        bucket.parse_and_store(data)
+        return parser(self.file_stream())
 
     @statsd.timer('uploaded_file.perform_virus_scan')
     def perform_virus_scan(self):
