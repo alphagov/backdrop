@@ -20,29 +20,23 @@ class FileUploadTestCase(unittest.TestCase):
         return storage
 
     def _uploaded_file_wrapper(self, contents=None, fixture_name=None):
-        if len([i for i in [contents, fixture_name] if i is not None]) != 1:
+        if contents is not None:
+            return self._uploaded_file_from_contents(contents)
+        elif fixture_name is not None:
+            return self._uploaded_file_from_fixture(fixture_name)
+        else:
             raise TypeError("Takes one of contents or fixture_name argument")
 
-        if contents is not None:
-            server_filename = '/tmp/file.txt'
-            file_storage = self._file_storage_wrapper(
+    def _uploaded_file_from_contents(self, contents):
+        return UploadedFile(
+            self._file_storage_wrapper(
                 contents=contents,
-                server_filename=server_filename)
+                browser_filename="file.txt"))
 
-            upload = UploadedFile(
-                file_storage,
-                server_filename
-            )
-            return upload
-
-        elif fixture_name is not None:
-            full_filename = fixture_path = os.path.join('features', 'fixtures', fixture_name)
-            with open(full_filename, 'rb') as f:
-                file_storage = self._file_storage_wrapper(
+    def _uploaded_file_from_fixture(self, fixture_name):
+        fixture_path = os.path.join('features', 'fixtures', fixture_name)
+        with open(fixture_path) as f:
+            return UploadedFile(
+                self._file_storage_wrapper(
                     contents=f.read(),
-                    server_filename=full_filename)
-            upload = UploadedFile(
-                file_storage,
-                full_filename  # server filename
-            )
-            return upload
+                    browser_filename=fixture_name))

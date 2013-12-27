@@ -1,6 +1,6 @@
 from hamcrest import assert_that, is_, equal_to
 from mock import Mock, patch
-from backdrop.write.uploaded_file import UploadedFile, FileUploadException
+from backdrop.write.uploaded_file import UploadedFile, FileUploadError
 from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
 from tests.support.file_upload_test_case import FileUploadTestCase
 
@@ -24,23 +24,18 @@ class TestUploadedFile(FileUploadTestCase):
 
         assert_that(upload.valid, is_(False))
 
-    def test_parsing_file(self):
+    def test_loading_file(self):
         csv_contents = '\n'.join(['aa,bb,ccc' for i in range(100000)])
         upload = self._uploaded_file_wrapper(contents=csv_contents)
-        parser = Mock()
-        upload.perform_virus_scan = Mock()
-        parser.return_value = csv_contents
 
-        parsed_content = upload.parse(parser)
+        with upload.file_stream() as f:
+            loaded_contents = f.read()
 
-        assert_that(parser.called, is_(True))
-        assert_that(parsed_content, equal_to(csv_contents))
+        assert_that(loaded_contents, equal_to(csv_contents))
 
-    def test_parsing_invalid_file_should_throw_an_exception(self):
+    def test_loading_invalid_file_should_throw_an_exception(self):
         upload = self._uploaded_file_wrapper(contents='')
-        bucket = Mock()
-        parser = Mock()
-        self.assertRaises(FileUploadException, upload.parse, parser)
+        self.assertRaises(FileUploadError, upload.file_stream)
 
 
 class TestUploadedFileContentTypeValidation(FileUploadTestCase):
@@ -71,4 +66,4 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
     def test_perform_virus_scan(self, has_virus_signature):
         upload = self._uploaded_file_wrapper('[fake empty content]')
         has_virus_signature.return_value = True
-        self.assertRaises(VirusSignatureError, upload.perform_virus_scan)
+        assert_that(upload.valid, is_(False))

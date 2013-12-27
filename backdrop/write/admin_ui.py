@@ -8,8 +8,7 @@ from backdrop.core.bucket import Bucket
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.upload import create_parser
 from backdrop.write.signonotron2 import Signonotron2
-from backdrop.write.uploaded_file import UploadedFile, FileUploadException
-from backdrop.write.scanned_file import VirusSignatureError
+from backdrop.write.uploaded_file import UploadedFile, FileUploadError
 from ..core import cache_control
 
 
@@ -144,34 +143,17 @@ def setup(app, db, bucket_repository, user_repository):
         return _store_data(bucket_config)
 
     def _store_data(bucket_config):
-        parser = create_parser(bucket_config)
-        file_storage = request.files['file']
-        tmp_filename = os.path.join('tmp',
-                                    secure_filename(file_storage.filename))
-        try:
-            file_storage.save(tmp_filename)  # filename needed for UploadedFile
-        except Exception as e:
-            app.logger.error("Error saving temporary file: %s" % e.message)
-            return render_template("upload_error.html", message=e.message), 400
-
-        upload = UploadedFile(file_storage=file_storage,
-                              server_filename=tmp_filename)
-
-        try:
-            os.remove(tmp_filename)
-        except OSError as e:
-            app.logger.error("Error deleting temporary file: %s" % e.message)
-            return render_template("upload_error.html", message=e.message), 400
-
+        parse_file = create_parser(bucket_config)
         bucket = Bucket(db, bucket_config)
+        expected_errors = (FileUploadError, ParseError, ValidationError)
+
         try:
-            bucket.parse_and_store(upload.parse(parser))
-        except (VirusSignatureError,
-                FileUploadException,
-                ParseError,
-                ValidationError) as e:
-            app.logger.error("Upload error: %s" % e.message)
-            return render_template("upload_error.html",
+            with UploadedFile(request.files['file']) as uploaded_file:
+                raw_data = parse_file(uploaded_file.file_stream())
+                bucket.parse_and_store(raw_data)
+        except expected_errors as e:
+            app.logger.error('Upload error: {}'.format(e.message))
+            return render_template('upload_error.html',
                                    message=e.message,
                                    bucket_name=bucket.name), 400
 
