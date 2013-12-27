@@ -41,12 +41,10 @@ class TestUploadedFile(FileUploadTestCase):
 class TestUploadedFileContentTypeValidation(FileUploadTestCase):
     def test_csv_uploads_are_valid(self):
         upload = self._uploaded_file_wrapper("This is a test")
-
         assert_that(upload.valid, is_(True))
 
     def test_json_uploads_are_valid(self):
         upload = self._uploaded_file_wrapper('{"This": "is a test"}')
-
         assert_that(upload.valid, is_(True))
 
     def test_xls_uploads_are_valid(self):
@@ -54,7 +52,6 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
         assert_that(upload.valid, is_(True))
 
     def test_xlsx_spreadsheets_are_valid(self):
-
         upload = self._uploaded_file_wrapper(fixture_name='data.xlsx')
         assert_that(upload.valid, is_(True))
 
@@ -62,8 +59,6 @@ class TestUploadedFileContentTypeValidation(FileUploadTestCase):
         upload = self._uploaded_file_wrapper(fixture_name='donothing.exe')
         assert_that(upload.valid, is_(False))
 
-    @patch('backdrop.write.scanned_file.ScannedFile.has_virus_signature')
-    def test_perform_virus_scan(self, has_virus_signature):
-        upload = self._uploaded_file_wrapper('[fake empty content]')
-        has_virus_signature.return_value = True
+    def test_perform_virus_scan(self):
+        upload = self._uploaded_file_wrapper('[fake empty content]', is_virus=True)
         assert_that(upload.valid, is_(False))

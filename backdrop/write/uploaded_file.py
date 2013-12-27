@@ -40,7 +40,7 @@ class UploadedFile(object):
 
     def file_stream(self):
         self.validate()
-        return self.file_storage.stream
+        return open(self.server_filename)
 
     def _is_empty(self):
         return self.file_size == 0

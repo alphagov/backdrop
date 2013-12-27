@@ -3,6 +3,7 @@ import os
 import unittest
 import werkzeug.datastructures
 from backdrop.write.uploaded_file import UploadedFile
+from mock import MagicMock
 
 
 class FileUploadTestCase(unittest.TestCase):
@@ -19,13 +20,17 @@ class FileUploadTestCase(unittest.TestCase):
                          content_length=content_length)
         return storage
 
-    def _uploaded_file_wrapper(self, contents=None, fixture_name=None):
+    def _uploaded_file_wrapper(self, contents=None, fixture_name=None, is_virus=False):
         if contents is not None:
-            return self._uploaded_file_from_contents(contents)
+            upload = self._uploaded_file_from_contents(contents)
         elif fixture_name is not None:
-            return self._uploaded_file_from_fixture(fixture_name)
+            upload = self._uploaded_file_from_fixture(fixture_name)
         else:
             raise TypeError("Takes one of contents or fixture_name argument")
+
+        upload._is_potential_virus = MagicMock(return_value=is_virus)
+
+        return upload
 
     def _uploaded_file_from_contents(self, contents):
         return UploadedFile(
