@@ -1,5 +1,4 @@
 LOG_LEVEL = "DEBUG"
-SINGLE_SIGN_ON = True
 BACKDROP_ADMIN_UI_HOST = "http://backdrop-admin.dev.gov.uk"
 ALLOW_TEST_SIGNIN=True
 SECRET_KEY = "something unique and secret"
