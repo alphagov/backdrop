@@ -59,6 +59,9 @@ class UploadedFile(object):
 
     @statsd.timer('uploaded_file._is_potential_virus')
     def _is_potential_virus(self):
+        if os.getenv('SKIP_VIRUS_SCAN'):
+            return False
+
         return ScannedFile(self.file_storage).has_virus_signature
 
     def validate(self):
