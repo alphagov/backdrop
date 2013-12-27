@@ -4,6 +4,7 @@ from functools import wraps
 from flask import Flask, jsonify, url_for, request, \
     session, render_template, flash, redirect
 
+from .. import statsd
 from ..core import cache_control, log_handler, database
 from ..core.bucket import Bucket
 from ..core.errors import ParseError, ValidationError
@@ -55,7 +56,14 @@ def protected(f):
 def exception_handler(e):
     app.logger.exception(e)
 
-    return "ERROR", getattr(e, 'code', 500)
+    bucket_name = getattr(e, 'bucket_name', request.path)
+    statsd.incr("write.error", bucket=bucket_name)
+
+    code = getattr(e, 'code', 500)
+    name = getattr(e, 'name', 'Internal Error')
+
+    return render_template("error.html", name=name, bucket_name=bucket_name), \
+        code
 
 
 @app.before_first_request
