@@ -5,12 +5,16 @@ from flask import Flask, jsonify, url_for, request, \
     session, render_template, flash, redirect
 
 from ..core import cache_control, log_handler, database
+from ..core.bucket import Bucket
+from ..core.errors import ParseError, ValidationError
 from ..core.log_handler \
     import create_request_logger, create_response_logger
 from ..core.repository \
     import BucketConfigRepository, UserConfigRepository
 from ..core.flaskutils import BucketConverter
+from ..core.upload import create_parser
 from ..write.signonotron2 import Signonotron2
+from ..write.uploaded_file import UploadedFile, FileUploadError
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -49,8 +53,6 @@ def protected(f):
 @app.errorhandler(405)
 @app.errorhandler(404)
 def exception_handler(e):
-    with open('test.rar.log', 'w+') as f:
-        f.write("FOUND ERROR")
     app.logger.exception(e)
 
     return "ERROR", getattr(e, 'code', 500)
@@ -65,7 +67,6 @@ def setup_oauth_service():
         redirect_url=app.config['BACKDROP_ADMIN_UI_HOST']
         + url_for("oauth_authorized")
     )
-    app.logger.info("Setup oauth")
 
 
 @app.after_request
@@ -174,7 +175,26 @@ def upload(bucket_name):
         return render_template(
             "upload_{}.html".format(bucket_config.upload_format),
             bucket_name=bucket_name)
-    return "hellp {}".format(user_config)
+
+    return _store_data(bucket_config)
+
+
+def _store_data(bucket_config):
+    parse_file = create_parser(bucket_config)
+    bucket = Bucket(db, bucket_config)
+    expected_errors = (FileUploadError, ParseError, ValidationError)
+
+    try:
+        with UploadedFile(request.files['file']) as uploaded_file:
+            raw_data = parse_file(uploaded_file.file_stream())
+            bucket.parse_and_store(raw_data)
+    except expected_errors as e:
+        app.logger.error('Upload error: {}'.format(e.message))
+        return render_template('upload_error.html',
+                               message=e.message,
+                               bucket_name=bucket.name), 400
+
+    return render_template('upload_ok.html')
 
 
 def start(port):
