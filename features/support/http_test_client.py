@@ -1,13 +1,13 @@
 from pymongo import MongoClient
 import requests
-from features.support.support import Api, BaseClient
+from features.support.support import FlaskApp, BaseClient
 
 
 class HTTPTestClient(BaseClient):
     def __init__(self, database_name):
         self.database_name = database_name
-        self._read_api = Api("read", "5000")
-        self._write_api = Api("write", "5001")
+        self._read_api = FlaskApp("read", "5000")
+        self._write_api = FlaskApp("write", "5001")
         self._start()
 
     def get(self, url, headers=None):

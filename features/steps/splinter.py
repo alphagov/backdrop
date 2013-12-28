@@ -7,28 +7,6 @@ from hamcrest import *
 from backdrop.core.timeutils import utc
 
 
-@given(u'a file named "{filename}" with fixture "{fixturename}"')
-def step(context, filename, fixturename):
-    filepath = os.path.join("tmp", filename)
-    fixturepath = os.path.join("features", "fixtures", fixturename)
-    shutil.copyfile(fixturepath, filepath)
-
-
-@given(u'a file named "{filename}"')
-def step(context, filename):
-    content = context.text.encode('utf-8')
-    filepath = os.path.join("tmp", filename)
-    with open(filepath, "w") as stream:
-        stream.write(content)
-
-
-@given(u'a file named "{filename}" of size "{number}" bytes')
-def step(context, filename, number):
-    filepath = os.path.join("tmp", filename)
-    with open(filepath, "w") as stream:
-        stream.write("x" * int(number))
-
-
 @when(u'I enter "{filename}" into the file upload field')
 def step(context, filename):
     filepath = "tmp/%s" % filename

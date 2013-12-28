@@ -20,7 +20,7 @@ def get_json_log_handler(path):
     return handler
 
 
-def set_up_logging(app, name, env):
+def set_up_logging(app, env):
     log_level = logging._levelNames[app.config['LOG_LEVEL']]
     app.logger.addHandler(
         get_log_file_handler("log/%s.log" % env, log_level)
@@ -29,7 +29,9 @@ def set_up_logging(app, name, env):
         get_json_log_handler("log/%s.log.json" % env)
     )
     app.logger.setLevel(log_level)
-    app.logger.info("Backdrop %s API logging started" % name)
+    app.logger.info("{} logging started".format(app.name))
+    app.before_request(create_request_logger(app))
+    app.after_request(create_response_logger(app))
 
 
 def create_request_logger(app):

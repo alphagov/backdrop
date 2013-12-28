@@ -18,23 +18,15 @@ from ..core import database, log_handler, cache_control
 from .validation import bearer_token_is_valid
 
 
-def setup_logging():
-    log_handler.set_up_logging(app, "write",
-                               getenv("GOVUK_ENV", "development"))
+GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
-
-def environment():
-    return getenv("GOVUK_ENV", "development")
-
-
-app = Flask(__name__, static_url_path="/_user/static")
+app = Flask("backdrop.write.api", static_url_path="/_user/static")
 
 feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
-    "backdrop.write.config.%s" % environment()
-)
+    "backdrop.write.config.{}".format(GOVUK_ENV))
 
 app.config['USER_SCOPE'] = "/_user"
 
@@ -47,10 +39,7 @@ db = database.Database(
 bucket_repository = BucketConfigRepository(db)
 user_repository = UserConfigRepository(db)
 
-setup_logging()
-
-app.before_request(create_request_logger(app))
-app.after_request(create_response_logger(app))
+log_handler.set_up_logging(app, GOVUK_ENV)
 
 app.url_map.converters["bucket"] = BucketConverter
 

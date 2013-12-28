@@ -137,7 +137,6 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(response, has_status(200))
         db = MongoClient('localhost', 27017).backdrop_test
         results = list(db.bucket_with_timestamp_auto_id.find())
-        print(results[0])
 
         assert_that(len(results), is_(18))
         assert_that(results[0], has_entries({

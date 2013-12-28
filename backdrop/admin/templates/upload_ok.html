@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Upload ok{% endblock %}
+
+{% block body %}
+    <h1>Your upload was ok</h1>
+    <p>Your data have been uploaded successfully to the Performance Platform.</p>
+    <p><a href="{{ url_for('index') }}">Back to admin home page</a></p>
+{% endblock %}

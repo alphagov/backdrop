@@ -36,10 +36,16 @@ def before_scenario(context, _):
     context.client.before_scenario()
     storage = context.client.storage()
     storage.connection.drop_database(storage.name)
+    context.after_handlers = []
 
 
 def after_scenario(context, scenario):
     context.client.after_scenario(scenario)
+    for handler in context.after_handlers:
+        try:
+            handler()
+        except Exception as e:
+            log.exception(e)
 
 
 def after_feature(context, _):
@@ -54,7 +60,9 @@ def create_client(feature):
     if 'use_http_client' in feature.tags:
         return HTTPTestClient(config.DATABASE_NAME)
     if 'use_splinter_client' in feature.tags:
-        return SplinterClient(config.DATABASE_NAME)
+        return SplinterClient(config.DATABASE_NAME, 'write', '5001')
+    if 'use_admin_client' in feature.tags:
+        return SplinterClient(config.DATABASE_NAME, 'admin', '5002')
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "

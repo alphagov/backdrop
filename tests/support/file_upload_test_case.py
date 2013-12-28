@@ -3,6 +3,7 @@ import os
 import unittest
 import werkzeug.datastructures
 from backdrop.write.uploaded_file import UploadedFile
+from mock import MagicMock
 
 
 class FileUploadTestCase(unittest.TestCase):
@@ -19,30 +20,28 @@ class FileUploadTestCase(unittest.TestCase):
                          content_length=content_length)
         return storage
 
-    def _uploaded_file_wrapper(self, contents=None, fixture_name=None):
-        if len([i for i in [contents, fixture_name] if i is not None]) != 1:
+    def _uploaded_file_wrapper(self, contents=None, fixture_name=None, is_virus=False):
+        if contents is not None:
+            upload = self._uploaded_file_from_contents(contents)
+        elif fixture_name is not None:
+            upload = self._uploaded_file_from_fixture(fixture_name)
+        else:
             raise TypeError("Takes one of contents or fixture_name argument")
 
-        if contents is not None:
-            server_filename = '/tmp/file.txt'
-            file_storage = self._file_storage_wrapper(
+        upload._is_potential_virus = MagicMock(return_value=is_virus)
+
+        return upload
+
+    def _uploaded_file_from_contents(self, contents):
+        return UploadedFile(
+            self._file_storage_wrapper(
                 contents=contents,
-                server_filename=server_filename)
+                browser_filename="file.txt"))
 
-            upload = UploadedFile(
-                file_storage,
-                server_filename
-            )
-            return upload
-
-        elif fixture_name is not None:
-            full_filename = fixture_path = os.path.join('features', 'fixtures', fixture_name)
-            with open(full_filename, 'rb') as f:
-                file_storage = self._file_storage_wrapper(
+    def _uploaded_file_from_fixture(self, fixture_name):
+        fixture_path = os.path.join('features', 'fixtures', fixture_name)
+        with open(fixture_path) as f:
+            return UploadedFile(
+                self._file_storage_wrapper(
                     contents=f.read(),
-                    server_filename=full_filename)
-            upload = UploadedFile(
-                file_storage,
-                full_filename  # server filename
-            )
-            return upload
+                    browser_filename=fixture_name))

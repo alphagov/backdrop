@@ -1,17 +1,25 @@
 from argh import arg
 from argh.dispatching import dispatch_command
 
-from backdrop.write import api as write_api
-from backdrop.read import api as read_api
+
+def load_app(name):
+    if name == "admin":
+        from backdrop.admin import app as app
+    elif name == "read":
+        from backdrop.read import api as app
+    elif name == "write":
+        from backdrop.write import api as app
+    return app
 
 
-@arg('app', choices=['read', 'write'], help='The name of the app to start')
+APP_CHOICES = ['admin', 'read', 'write']
+
+
+@arg('name', choices=APP_CHOICES, help='The name of the app to start')
 @arg('port', type=int, help='The port number to bind to')
-def start_app(app, port):
-    if app == 'read':
-        read_api.start(port)
-    else:
-        write_api.start(port)
+def start_app(name, port):
+    load_app(name).start(port)
+
 
 if __name__ == '__main__':
     dispatch_command(start_app)

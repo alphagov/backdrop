@@ -1,29 +1,15 @@
 from behave import *
+from ..support.authentication import \
+    ensure_user_has_permissions, ensure_user_exists
 
 
-def ensure_user_has_permissions(context, email, buckets):
-    user_data = {
-        "_id": email,
-        "email": email,
-        "buckets": buckets
-    }
-    context.client.storage()["users"].save(user_data)
-
-
-def ensure_user_exists(context, email):
-    user_data = {
-        "_id": email,
-        "email": email,
-        "buckets": [],
-    }
-    context.client.storage()["users"].save(user_data)
-
-
+# TODO: remove this step
 @given(u'I am logged in')
 def step(context):
     context.execute_steps(u'given I am logged in as "testuser" with email "test@example.com"')
 
 
+# TODO: remove this step
 @given(u'I am logged in as "{name}" with email "{email}"')
 def step(context, name, email):
     testuser = (name, email)
