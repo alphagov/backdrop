@@ -7,7 +7,7 @@ pip==1.4.1
 pymongo==2.6.3
 python-dateutil==2.1
 pytz==2013b
-rauth==0.6.2
+rauth==0.5.5
 statsd==2.0.3
 xlrd==0.9.2
 -e git+https://github.com/alphagov/python-logstash-formatter.git@fix-docstring#egg=logstash_formatter
