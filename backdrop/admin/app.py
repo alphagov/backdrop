@@ -146,7 +146,7 @@ def oauth_authorized():
     _create_session_user(user_details["user"]["name"],
                          user_details["user"]["email"])
     flash("You were successfully signed in", category="success")
-    return redirect(url_for("user_route"))
+    return redirect(url_for("index"))
 
 
 @app.route("/not-authorized")
