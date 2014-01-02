@@ -149,6 +149,12 @@ def oauth_authorized():
     return redirect(url_for("user_route"))
 
 
+@app.route("/not-authorized")
+@cache_control.nocache
+def not_authorized():
+    return render_template("signon/not_authorized.html")
+
+
 @app.route("/sign-in")
 @cache_control.nocache
 def oauth_sign_in():
