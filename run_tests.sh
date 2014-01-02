@@ -33,6 +33,9 @@ pip install -r requirements_for_tests.txt
 rm -f coverage.xml .coverage nosetests.xml
 find . -name '*.pyc' -delete
 
+# run doctests -- breaks if run with main tests
+nosetests -v --with-xunit --with-coverage --cover-package --with-doctest backdrop
+
 # run unit tests
 nosetests -v --with-xunit --with-coverage --cover-package=backdrop
 display_result $? 1 "Unit tests"

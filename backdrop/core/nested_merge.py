@@ -46,8 +46,17 @@ def remove_key_from_all(groups, key):
 
 
 def remove_key(doc, key):
-    del doc[key]
-    return doc
+    """Return a new document with the key removed
+
+    >>> doc = {'a':1, 'b':2}
+    >>> remove_key(doc, 'a')
+    {'b': 2}
+    >>> # Show that the original document is not affected
+    >>> doc['a']
+    1
+    """
+    return dict(
+        (k, v) for k, v in doc.items() if k != key)
 
 
 def apply_counts(groups):
@@ -93,7 +102,7 @@ def apply_collect_to_group(group, collect):
 
     # remove left over collect keys
     for key, _ in collect:
-        group = remove_collected_key(group, key)
+        group = remove_key(group, key)
 
     # Hack in the old way
     for key, method in collect:
