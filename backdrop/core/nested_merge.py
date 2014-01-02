@@ -111,49 +111,93 @@ def apply_collect_to_group(group, collect):
     return group
 
 
+def replace_default_method(method):
+    return "set" if method == "default" else method
+
+
 def collect_key(key, method):
-    if method == 'default':
-        method = 'set'
-    return '{0}:{1}'.format(key, method)
+    """Return the key for a given collect field and method
+
+    >>> collect_key("foo", "sum")
+    'foo:sum'
+    >>> collect_key("foo", "default")
+    'foo:set'
+    """
+    return '{0}:{1}'.format(key, replace_default_method(method))
 
 
 def collect_value(group, key, method):
-    return reduce_collected_values(collect_all_values(group, key), method)
+    reducer = collect_reducer(method)
+    return reducer(collect_all_values(group, key))
 
 
 def collect_all_values(group, key):
-    collect_values_for_key = lambda subgroup: collect_all_values(subgroup, key)
     if key in group:
         return group[key]
     elif '_subgroup' in group:
-        return reduce(add, map(collect_values_for_key, group['_subgroup']))
+        _subgroup = [
+            collect_all_values(sub, key) for sub in group['_subgroup']]
+        return reduce(add, _subgroup)
 
 
-def reduce_collected_values(values, method):
-    if "sum" == method:
-        try:
-            return sum(values)
-        except TypeError:
-            raise InvalidOperationError("Unable to sum that data")
-    elif "count" == method:
-        return len(values)
-    elif "set" == method:
-        return sorted(list(set(values)))
-    elif "mean" == method:
-        try:
-            return sum(values) / float(len(values))
-        except TypeError:
-            raise InvalidOperationError("Unable to find the mean of that data")
-    elif "default" == method:
-        return reduce_collected_values(values, "set")
-    else:
-        raise ValueError("Unknown collection method")
+def collect_reducer(method):
+    """Return a collector function to be applied over a list of values"""
+    method = replace_default_method(method)
+    try:
+        return globals()['collect_reducer_{}'.format(method)]
+    except KeyError:
+        raise ValueError(
+            "Unknown collection method {}".format(method))
 
 
-def remove_collected_key(group, key):
-    if key in group:
-        del group[key]
-    return group
+def collect_reducer_sum(values):
+    """Return the sum of all values
+
+    >>> collect_reducer_sum([2, 5, 8])
+    15
+    >>> collect_reducer_sum(['sum', 'this'])
+    Traceback (most recent call last):
+        ...
+    InvalidOperationError: Unable to sum that data
+    """
+    try:
+        return sum(values)
+    except TypeError:
+        raise InvalidOperationError("Unable to sum that data")
+
+
+def collect_reducer_count(values):
+    """Return the number of values
+
+    >>> collect_reducer_count(['Sheep', 'Elephant', 'Wolf', 'Dog'])
+    4
+    """
+    return len(values)
+
+
+def collect_reducer_set(values):
+    """Return the set of values
+
+    >>> collect_reducer_set(['Badger', 'Badger', 'Badger', 'Snake'])
+    ['Badger', 'Snake']
+    """
+    return sorted(list(set(values)))
+
+
+def collect_reducer_mean(values):
+    """Return the mean of numeric values
+
+    >>> collect_reducer_mean([13, 19, 15, 2])
+    12.25
+    >>> collect_reducer_mean(['average', 'this'])
+    Traceback (most recent call last):
+        ...
+    InvalidOperationError: Unable to find the mean of that data
+    """
+    try:
+        return sum(values) / float(len(values))
+    except TypeError:
+        raise InvalidOperationError("Unable to find the mean of that data")
 
 
 def sort_all(data, keys):
