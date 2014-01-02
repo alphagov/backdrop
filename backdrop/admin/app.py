@@ -50,6 +50,12 @@ def protected(f):
     return verify_user_logged_in
 
 
+# Redirect from previous location
+@app.route('/_user')
+def old_index():
+    return redirect(url_for("index")), 301
+
+
 @app.errorhandler(500)
 @app.errorhandler(405)
 @app.errorhandler(404)
@@ -146,7 +152,7 @@ def oauth_authorized():
     _create_session_user(user_details["user"]["name"],
                          user_details["user"]["email"])
     flash("You were successfully signed in", category="success")
-    return redirect(url_for("user_route"))
+    return redirect(url_for("index"))
 
 
 @app.route("/not-authorized")
