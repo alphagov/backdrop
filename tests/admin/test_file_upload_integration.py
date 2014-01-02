@@ -4,9 +4,9 @@ import datetime
 from hamcrest import assert_that, has_entry, is_, has_entries
 from pymongo import MongoClient
 from tests.support.bucket import stub_bucket_retrieve_by_name, setup_bucket, stub_user_retrieve_by_email
-from tests.support.clamscan import stub_clamscan
-from tests.support.oauth_test_case import OauthTestCase
 from tests.support.test_helpers import has_status
+from tests.admin.support.clamscan import stub_clamscan
+from tests.admin.support.oauth_test_case import OauthTestCase
 
 
 class TestFileUploadIntegration(OauthTestCase):

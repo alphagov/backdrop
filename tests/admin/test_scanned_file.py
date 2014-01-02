@@ -1,10 +1,10 @@
 import unittest
 from hamcrest import assert_that, is_
 from mock import Mock
-from backdrop.write.scanned_file import ScannedFile
+from backdrop.admin.scanned_file import ScannedFile
 import subprocess
 import os
-from tests.support.file_upload_test_case import FileUploadTestCase
+from tests.admin.support.file_upload_test_case import FileUploadTestCase
 
 
 class TestScannedFile(FileUploadTestCase):

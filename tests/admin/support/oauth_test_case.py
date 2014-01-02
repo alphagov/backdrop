@@ -1,11 +1,13 @@
 import unittest
-from backdrop.write import api
+from backdrop.admin import app
 
 
 class OauthTestCase(unittest.TestCase):
     def setUp(self):
-        self.client = api.app.test_client()
-        self.app = api.app
+        self.client = app.app.test_client()
+        # Hit a url to make the oauth_service
+        self.client.get('/')
+        self.app = app.app
 
     def given_user_is_signed_in_as(self, name="testuser",
                                    email="testuser@example.com"):

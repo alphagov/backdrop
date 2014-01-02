@@ -1,4 +1,4 @@
-from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
+from .scanned_file import ScannedFile, VirusSignatureError
 from backdrop import statsd
 
 import mimetypes

@@ -1,8 +1,8 @@
 from hamcrest import assert_that, is_, equal_to
 from mock import Mock, patch
-from backdrop.write.uploaded_file import UploadedFile, FileUploadError
-from backdrop.write.scanned_file import ScannedFile, VirusSignatureError
-from tests.support.file_upload_test_case import FileUploadTestCase
+from backdrop.admin.uploaded_file import UploadedFile, FileUploadError
+from backdrop.admin.scanned_file import ScannedFile, VirusSignatureError
+from tests.admin.support.file_upload_test_case import FileUploadTestCase
 
 
 class TestUploadedFile(FileUploadTestCase):
