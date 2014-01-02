@@ -6,7 +6,7 @@ Feature: EVL Upload
          and I have a bucket named "evl_ceg_data"
          and bucket setting upload_format is "excel"
          and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.ceg_volumes"]
-         and admin I am logged in
+         and I am logged in
          and I can upload to "evl_ceg_data"
         when I go to "/evl_ceg_data/upload"
          and I enter "CEG Data.xlsx" into the file upload field
@@ -22,7 +22,7 @@ Feature: EVL Upload
          and I have a bucket named "evl_services_volumetrics"
          and bucket setting upload_format is "excel"
          and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.service_volumetrics"]
-         and admin I am logged in
+         and I am logged in
          and I can upload to "evl_services_volumetrics"
         when I go to "/evl_services_volumetrics/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
@@ -38,7 +38,7 @@ Feature: EVL Upload
          and I have a bucket named "evl_services_failures"
          and bucket setting upload_format is "excel"
          and bucket setting upload_filters is ["backdrop.contrib.evl_upload_filters.service_failures"]
-         and admin I am logged in
+         and I am logged in
          and I can upload to "evl_services_failures"
         when I go to "/evl_services_failures/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
@@ -56,7 +56,7 @@ Feature: EVL Upload
          and I have a bucket named "evl_channel_volumetrics"
          and bucket setting upload_format is "excel"
          and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.channel_volumetrics"]
-         and admin I am logged in
+         and I am logged in
          and I can upload to "evl_channel_volumetrics"
         when I go to "/evl_channel_volumetrics/upload"
          and I enter "EVL Volumetrics.xlsx" into the file upload field
@@ -73,7 +73,7 @@ Feature: EVL Upload
          and I have a bucket named "evl_customer_satisfaction"
          and bucket setting upload_format is "excel"
          and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.customer_satisfaction"]
-         and admin I am logged in
+         and I am logged in
          and I can upload to "evl_customer_satisfaction"
         when I go to "/evl_customer_satisfaction/upload"
          and I enter "EVL Satisfaction.xlsx" into the file upload field
@@ -90,7 +90,7 @@ Feature: EVL Upload
          and I have a bucket named "evl_volumetrics"
          and bucket setting upload_format is "excel"
          and bucket setting upload_filters is ["backdrop.contrib.evl_upload_filters.volumetrics"]
-         and admin I am logged in
+         and I am logged in
          and I can upload to "evl_volumetrics"
         when I go to "/evl_volumetrics/upload"
          and I enter "evl-volumetrics.xls" into the file upload field

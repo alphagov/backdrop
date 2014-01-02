@@ -59,8 +59,6 @@ def create_client(feature):
         return FlaskTestClient(write_api)
     if 'use_http_client' in feature.tags:
         return HTTPTestClient(config.DATABASE_NAME)
-    if 'use_splinter_client' in feature.tags:
-        return SplinterClient(config.DATABASE_NAME, 'write', '5001')
     if 'use_admin_client' in feature.tags:
         return SplinterClient(config.DATABASE_NAME, 'admin', '5002')
 
