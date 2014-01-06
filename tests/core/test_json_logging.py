@@ -27,7 +27,7 @@ class TestJsonLogging(unittest.TestCase):
         }))
 
         assert_that(data, has_entries({
-            '@tags': ['application']
+            '@tags': ['application', 'json_test_app']
         }))
 
         # Only remove file if assertion passes
