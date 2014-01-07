@@ -1,6 +1,6 @@
-import unittest
 from hamcrest import assert_that, is_, contains, has_entries, has_entry
-from backdrop.core.nested_merge import reduce_collected_values, InvalidOperationError, nested_merge, group_by, apply_collect_to_group, collect_all_values
+from backdrop.core.nested_merge import nested_merge, group_by, \
+    apply_collect_to_group, collect_all_values
 from backdrop.core.timeseries import WEEK, MONTH
 
 
@@ -203,37 +203,3 @@ class TestCollectAllValues(object):
             ]
         }
         assert_that(collect_all_values(group, 'age'), [1, 2, 3, 4])
-
-
-class TestReduceCollectedValues(unittest.TestCase):
-    def test_sum(self):
-        data = [2, 5, 8]
-        response = reduce_collected_values(data, "sum")
-        assert_that(response, is_(15))
-
-    def test_count(self):
-        data = ['Sheep', 'Elephant', 'Wolf', 'Dog']
-        response = reduce_collected_values(data, "count")
-        assert_that(response, is_(4))
-
-    def test_set(self):
-        data = ['Badger', 'Badger', 'Badger', 'Snake']
-        response = reduce_collected_values(data, "set")
-        assert_that(response, is_(['Badger', 'Snake']))
-
-    def test_mean(self):
-        data = [13, 19, 15, 2]
-        response = reduce_collected_values(data, "mean")
-        assert_that(response, is_(12.25))
-
-    def test_unknown_collection_method_raises_error(self):
-        self.assertRaises(ValueError,
-                          reduce_collected_values, ['foo'], "unknown")
-
-    def test_bad_data_for_sum_raises_error(self):
-        self.assertRaises(InvalidOperationError,
-                          reduce_collected_values, ['sum', 'this'], "sum")
-
-    def test_bad_data_for_mean_raises_error(self):
-        self.assertRaises(InvalidOperationError,
-                          reduce_collected_values, ['average', 'this'], "mean")
