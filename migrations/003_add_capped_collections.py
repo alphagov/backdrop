@@ -22,5 +22,5 @@ def up(db):
 
     for collection_name in capped_collections:
         if not collection_name in existing_collections:
-            db.create_collection(name=collection_name, capped=True, size=5040)
+            db.create_capped_collection(collection_name, 5040)
             log.info("created capped collection: %s" % collection_name)
