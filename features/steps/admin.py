@@ -26,18 +26,3 @@ def step(context, filename):
     with open(filepath, "w") as stream:
         stream.write(content)
     context.after_handlers.append(lambda: os.remove(filepath))
-
-
-# TODO: remove admin prefix
-@given(u'admin I am logged in')
-def step(context):
-    context.execute_steps(u'given admin I am logged in as "testuser" with email "test@example.com"')
-
-
-# TODO: remove admin prefix
-@given(u'admin I am logged in as "{name}" with email "{email}"')
-def step(context, name, email):
-    testuser = (name, email)
-    ensure_user_exists(context, email)
-    context.user_email = email
-    context.client.get("/sign-in/test?user=%s&email=%s" % testuser)

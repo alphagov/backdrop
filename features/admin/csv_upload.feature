@@ -4,7 +4,7 @@ Feature: CSV Upload
   Scenario: Upload CSV data
     Given I have a bucket named "my_bucket"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "my_bucket"
     And   a file named "data.csv"
           """
@@ -30,7 +30,7 @@ Feature: CSV Upload
           """
     And   I have a bucket named "my_bucket"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "my_bucket"
     When  I go to "/my_bucket/upload"
     And   I enter "data.csv" into the file upload field
@@ -61,7 +61,7 @@ Feature: CSV Upload
           """
     And   I have a bucket named "bucket_with_auto_id"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "bucket_with_auto_id"
     When  I go to "/bucket_with_auto_id/upload"
     And   I enter "data.csv" into the file upload field

@@ -2,7 +2,7 @@ import io
 import os
 import unittest
 import werkzeug.datastructures
-from backdrop.write.uploaded_file import UploadedFile
+from backdrop.admin.uploaded_file import UploadedFile
 from mock import MagicMock
 
 

@@ -9,8 +9,6 @@ from backdrop.core.log_handler \
 from backdrop.core.flaskutils import BucketConverter
 from backdrop.core.repository import BucketConfigRepository,\
     UserConfigRepository
-from backdrop.write.admin_ui import use_single_sign_on
-from backdrop.write import admin_ui
 
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
@@ -20,15 +18,13 @@ from .validation import bearer_token_is_valid
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
-app = Flask("backdrop.write.api", static_url_path="/_user/static")
+app = Flask("backdrop.write.api")
 
 feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
     "backdrop.write.config.{}".format(GOVUK_ENV))
-
-app.config['USER_SCOPE'] = "/_user"
 
 db = database.Database(
     app.config['MONGO_HOST'],
@@ -42,10 +38,6 @@ user_repository = UserConfigRepository(db)
 log_handler.set_up_logging(app, GOVUK_ENV)
 
 app.url_map.converters["bucket"] = BucketConverter
-
-if use_single_sign_on(app):
-    app.secret_key = app.config['SECRET_KEY']
-    admin_ui.setup(app, db, bucket_repository, user_repository)
 
 
 @app.errorhandler(500)
@@ -61,11 +53,6 @@ def exception_handler(e):
     name = getattr(e, 'name', "Internal Error")
 
     return jsonify(status='error', message=name), code
-
-
-@app.route("/", methods=['GET'])
-def index():
-    return redirect(url_for('user_route'))
 
 
 @app.route('/_status', methods=['GET'])

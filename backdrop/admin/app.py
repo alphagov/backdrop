@@ -14,8 +14,8 @@ from ..core.repository \
     import BucketConfigRepository, UserConfigRepository
 from ..core.flaskutils import BucketConverter
 from ..core.upload import create_parser
-from ..write.signonotron2 import Signonotron2
-from ..write.uploaded_file import UploadedFile, FileUploadError
+from .signonotron2 import Signonotron2
+from .uploaded_file import UploadedFile, FileUploadError
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 

@@ -44,13 +44,7 @@ display_result $? 1 "Unit tests"
 python -m coverage.__main__ xml --include=backdrop*
 
 # run feature tests
-if [[ -z "$SKIP_SPLINTER_TESTS" ]]; then
-  echo "Not skipping splinter tests"
-  behave --stop --tags=~@wip
-else
-  echo "Skipping splinter tests"
-  behave --stop --tags=~@wip --tags=~@use_splinter_client
-fi
+behave --stop --tags=~@wip
 display_result $? 2 "Feature tests"
 
 # run style checks

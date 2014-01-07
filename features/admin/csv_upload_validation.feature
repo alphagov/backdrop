@@ -10,7 +10,7 @@ Feature: csv upload validation
           """
     And   I have a bucket named "foo"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "foo"
     When  I go to "/foo/upload"
     And   I enter "data.csv" into the file upload field
@@ -27,7 +27,7 @@ Feature: csv upload validation
           """
     And   I have a bucket named "foo"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "foo"
     When  I go to "/foo/upload"
     And   I enter "data.csv" into the file upload field
@@ -39,7 +39,7 @@ Feature: csv upload validation
     Given a file named "data.csv" of size "1000000" bytes
     And   I have a bucket named "foo"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "foo"
     When  I go to "/foo/upload"
     And   I enter "data.csv" into the file upload field
@@ -51,7 +51,7 @@ Feature: csv upload validation
     Given a file named "data.csv" with fixture "bad-characters.csv"
     And   I have a bucket named "foo"
     And   bucket setting upload_format is "csv"
-    And   admin I am logged in
+    And   I am logged in
     And   I can upload to "foo"
     When  I go to "/foo/upload"
     And   I enter "data.csv" into the file upload field
@@ -60,7 +60,7 @@ Feature: csv upload validation
     And   the platform should have "0" items stored in "foo"
 
   Scenario: no file is provided
-    Given admin I am logged in
+    Given I am logged in
     And   I have a bucket named "foo"
     And   I can upload to "foo"
     When  I go to "/foo/upload"

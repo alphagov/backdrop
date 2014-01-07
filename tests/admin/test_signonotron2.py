@@ -3,14 +3,14 @@ import unittest
 from hamcrest import *
 from mock import patch, Mock
 from requests import Response
-from backdrop.write import api, signonotron2
-from backdrop.write.signonotron2 import Signonotron2
+from backdrop.admin import app, signonotron2
+from backdrop.admin.signonotron2 import Signonotron2
 from tests.support.test_helpers import has_status
 
 
 class Signonotron2TestCase(unittest.TestCase):
     def setUp(self):
-        self.ctx = api.app.test_request_context()
+        self.ctx = app.app.test_request_context()
         self.ctx.push()
 
     def tearDown(self):

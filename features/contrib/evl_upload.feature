@@ -1,5 +1,4 @@
-@file_upload_test
-@use_splinter_client
+@use_admin_client
 Feature: EVL Upload
 
     Scenario: Upload call center volumes
