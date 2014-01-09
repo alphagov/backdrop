@@ -47,7 +47,9 @@ class ParameterValidator(Validator):
             'group_by',
             'sort_by',
             'limit',
-            'collect'
+            'collect',
+            'date',
+            'delta',
         ])
         super(ParameterValidator, self).__init__(request_args)
 
@@ -256,6 +258,29 @@ class FirstOfMonthValidator(Validator):
                                    'period=month queries'
                                    % context['param_name'])
 
+class RelativeTimeValidator(Validator):
+    def validate(self, request_args, context):
+
+        period = request_args.get('period')
+        date = request_args.get('date')
+        delta = request_args.get('delta')
+
+        if (request_args.get('start_at') or request_args.get('end_at')) \
+            and (date or delta):
+            self.add_error('Both absolute and relative time cannot be requested')
+
+        if date and not delta:
+            self.add_error('\'date\' requires delta')
+
+        if delta and not period:
+            self.add_error('Relative time requires a \'period\'')
+
+        if delta:
+            try:
+                int(delta)
+            except ValueError:
+                self.add_error('\'delta\' is not a valid Integer')
+
 
 def validate_request_args(request_args, raw_queries_allowed=False):
     validators = [
@@ -263,6 +288,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         PeriodQueryValidator(request_args),
         DatetimeValidator(request_args, param_name='start_at'),
         DatetimeValidator(request_args, param_name='end_at'),
+        DatetimeValidator(request_args, param_name='date'),
         FilterByValidator(request_args),
         ParameterMustBeOneOfTheseValidator(
             request_args,
@@ -274,6 +300,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         PositiveIntegerValidator(request_args, param_name='limit'),
         ParamDependencyValidator(request_args, param_name='collect',
                                  depends_on=['group_by', 'period']),
+        RelativeTimeValidator(request_args),
         CollectValidator(request_args),
     ]
 
