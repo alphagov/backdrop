@@ -5,6 +5,7 @@ import unittest
 from hamcrest import *
 import pytz
 from werkzeug.datastructures import MultiDict
+from freezegun import freeze_time
 
 from backdrop.read.query import parse_request_args
 
@@ -142,3 +143,33 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['collect'], is_([("some_key", "mean")]))
+
+    @freeze_time('2014-01-09 00:00:00')
+    def test_now_and_negative_delta_sets_start_end_window(self):
+        request_args = MultiDict([
+            ('period', 'day'),
+            ('delta', -3),
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['start_at'], is_(
+            datetime(2014, 1, 6, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(args['end_at'], is_(
+            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
+
+    @freeze_time('2014-01-09 00:00:00')
+    def test_now_and_positive_delta_sets_start_end_window(self):
+        request_args = MultiDict([
+            ('period', 'day'),
+            ('delta', 3),
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['start_at'], is_(
+            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(args['end_at'], is_(
+            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))

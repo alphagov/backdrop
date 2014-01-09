@@ -258,6 +258,7 @@ class FirstOfMonthValidator(Validator):
                                    'period=month queries'
                                    % context['param_name'])
 
+
 class RelativeTimeValidator(Validator):
     def validate(self, request_args, context):
 
@@ -266,20 +267,26 @@ class RelativeTimeValidator(Validator):
         delta = request_args.get('delta')
 
         if (request_args.get('start_at') or request_args.get('end_at')) \
-            and (date or delta):
-            self.add_error('Both absolute and relative time cannot be requested')
+                and (delta or date):
+            self.add_error("Absolute ('start_at' and 'end_at') and relative "
+                           "('delta' and/or 'date') time cannot be requested "
+                           "at the same time")
 
         if date and not delta:
-            self.add_error('\'date\' requires delta')
+            self.add_error("Use of 'date' requires 'delta'")
 
-        if delta and not period:
-            self.add_error('Relative time requires a \'period\'')
+        if delta:
+            if delta == 0:
+                self.add_error("'delta' must not be zero")
+            if not period:
+                self.add_error("If 'delta' is requested (for relative time), "
+                               "'period' is required")
 
         if delta:
             try:
                 int(delta)
             except ValueError:
-                self.add_error('\'delta\' is not a valid Integer')
+                self.add_error("'delta' is not a valid Integer")
 
 
 def validate_request_args(request_args, raw_queries_allowed=False):
