@@ -276,7 +276,7 @@ class RelativeTimeValidator(Validator):
             self.add_error("Use of 'date' requires 'delta'")
 
         if delta:
-            if delta == 0:
+            if delta == '0':
                 self.add_error("'delta' must not be zero")
             if not period:
                 self.add_error("If 'delta' is requested (for relative time), "
