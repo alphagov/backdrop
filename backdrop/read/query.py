@@ -24,19 +24,21 @@ def parse_request_args(request_args):
 
     if request_args.get('delta'):
         # relative time range requested
-        delta = request_args['delta']
+        delta = int(request_args['delta'])
 
         date = if_present(parse_time_as_utc, request_args.get('date')) or now()
 
         period_delta = args['period'].delta
         duration = period_delta * delta
-        other_date = date + duration
 
         if delta > 0:
+            date = args['period'].start(date)
             args['start_at'] = date
-            args['end_at'] = other_date
+            args['end_at'] = date + duration
+
         else:
-            args['start_at'] = other_date
+            date = args['period'].end(date)
+            args['start_at'] = date + duration
             args['end_at'] = date
     else:
         # absolute time range requested
