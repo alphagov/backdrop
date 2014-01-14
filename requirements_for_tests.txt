@@ -10,3 +10,4 @@ PyHamcrest==1.7.1
 requests==1.2.3
 selenium==2.37.2
 splinter==0.5.4
+freezegun==0.1.11

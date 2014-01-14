@@ -2,7 +2,7 @@ from collections import namedtuple
 
 import pytz
 from backdrop.core.timeseries import parse_period
-from backdrop.core.timeutils import parse_time_as_utc
+from backdrop.core.timeutils import now, parse_time_as_utc
 from backdrop.read.response import *
 
 
@@ -19,11 +19,34 @@ def if_present(func, value):
 def parse_request_args(request_args):
     args = dict()
 
-    args['start_at'] = if_present(parse_time_as_utc,
-                                  request_args.get('start_at'))
+    args['period'] = if_present(parse_period,
+                                request_args.get('period'))
 
-    args['end_at'] = if_present(parse_time_as_utc,
-                                request_args.get('end_at'))
+    if request_args.get('delta'):
+        # relative time range requested
+        delta = int(request_args['delta'])
+
+        date = if_present(parse_time_as_utc, request_args.get('date')) or now()
+
+        period_delta = args['period'].delta
+        duration = period_delta * delta
+
+        if delta > 0:
+            date = args['period'].start(date)
+            args['start_at'] = date
+            args['end_at'] = date + duration
+
+        else:
+            date = args['period'].end(date)
+            args['start_at'] = date + duration
+            args['end_at'] = date
+    else:
+        # absolute time range requested
+        args['start_at'] = if_present(parse_time_as_utc,
+                                      request_args.get('start_at'))
+
+        args['end_at'] = if_present(parse_time_as_utc,
+                                    request_args.get('end_at'))
 
     def boolify(value):
         return {
@@ -37,9 +60,6 @@ def parse_request_args(request_args):
         return [key, boolify(value)]
 
     args['filter_by'] = map(parse_filter_by, request_args.getlist('filter_by'))
-
-    args['period'] = if_present(parse_period,
-                                request_args.get('period'))
 
     args['group_by'] = request_args.get('group_by')
 

@@ -53,7 +53,10 @@ app.json_encoder = JsonEncoder
 @app.errorhandler(404)
 def exception_handler(e):
     app.logger.exception(e)
-    return jsonify(status='error', message=e.name), e.code
+    return jsonify(
+        status='error',
+        message=getattr(e, 'name', 'Internal error')
+    ), getattr(e, 'code', 500)
 
 
 @app.route('/_status', methods=['GET'])

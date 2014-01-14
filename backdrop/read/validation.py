@@ -47,7 +47,9 @@ class ParameterValidator(Validator):
             'group_by',
             'sort_by',
             'limit',
-            'collect'
+            'collect',
+            'date',
+            'delta',
         ])
         super(ParameterValidator, self).__init__(request_args)
 
@@ -257,12 +259,43 @@ class FirstOfMonthValidator(Validator):
                                    % context['param_name'])
 
 
+class RelativeTimeValidator(Validator):
+    def validate(self, request_args, context):
+
+        period = request_args.get('period')
+        date = request_args.get('date')
+        delta = request_args.get('delta')
+
+        if (request_args.get('start_at') or request_args.get('end_at')) \
+                and (delta or date):
+            self.add_error("Absolute ('start_at' and 'end_at') and relative "
+                           "('delta' and/or 'date') time cannot be requested "
+                           "at the same time")
+
+        if date and not delta:
+            self.add_error("Use of 'date' requires 'delta'")
+
+        if delta:
+            if delta == '0':
+                self.add_error("'delta' must not be zero")
+            if not period:
+                self.add_error("If 'delta' is requested (for relative time), "
+                               "'period' is required")
+
+        if delta:
+            try:
+                int(delta)
+            except ValueError:
+                self.add_error("'delta' is not a valid Integer")
+
+
 def validate_request_args(request_args, raw_queries_allowed=False):
     validators = [
         ParameterValidator(request_args),
         PeriodQueryValidator(request_args),
         DatetimeValidator(request_args, param_name='start_at'),
         DatetimeValidator(request_args, param_name='end_at'),
+        DatetimeValidator(request_args, param_name='date'),
         FilterByValidator(request_args),
         ParameterMustBeOneOfTheseValidator(
             request_args,
@@ -274,6 +307,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         PositiveIntegerValidator(request_args, param_name='limit'),
         ParamDependencyValidator(request_args, param_name='collect',
                                  depends_on=['group_by', 'period']),
+        RelativeTimeValidator(request_args),
         CollectValidator(request_args),
     ]
 

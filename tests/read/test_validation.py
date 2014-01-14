@@ -328,6 +328,110 @@ class TestRequestValidation(TestCase):
             "Unknown collection method"
         )))
 
+    def test_period_with_just_positive_delta(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'delta': '3',
+        })
+
+        assert_that(validation_result, is_valid())
+
+    def test_period_with_just_negative_delta(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'delta': '-3',
+        })
+
+        assert_that(validation_result, is_valid())
+
+    def test_period_with_delta_and_date(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'date': '2000-02-02T00:00:00+00:00',
+            'delta': '3',
+        })
+
+        assert_that(validation_result, is_valid())
+
+    def test_just_delta_isnt_allowed(self):
+        validation_result = validate_request_args({
+            'delta': '3',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "If 'delta' is requested (for relative time), "
+            "'period' is required"))
+
+    def test_period_with_zero_delta(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'delta': '0',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+                    "'delta' must not be zero"))
+
+    def test_just_date_isnt_allowed(self):
+        validation_result = validate_request_args({
+            'date': '2000-02-02T00:00:00+00:00',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "Use of 'date' requires 'delta'"))
+
+    def test_delta_and_start_end_isnt_allowed(self):
+        validation_result = validate_request_args({
+            'start_at': '2000-02-02T00:00:00+00:00',
+            'end_at': '2000-02-02T00:00:00+00:00',
+            'delta': '3',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "Absolute ('start_at' and 'end_at') and relative ('delta' "
+            "and/or 'date') time cannot be requested at the same time"))
+
+    def test_date_and_start_end_isnt_allowed(self):
+        validation_result = validate_request_args({
+            'start_at': '2000-02-02T00:00:00+00:00',
+            'end_at': '2000-02-02T00:00:00+00:00',
+            'date': '2000-02-02T00:00:00+00:00',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "Absolute ('start_at' and 'end_at') and relative ('delta' "
+            "and/or 'date') time cannot be requested at the same time"))
+
+    def test_date_delta_and_start_end_isnt_allowed(self):
+        validation_result = validate_request_args({
+            'start_at': '2000-02-02T00:00:00+00:00',
+            'end_at': '2000-02-02T00:00:00+00:00',
+            'date': '2000-02-02T00:00:00+00:00',
+            'delta': '3',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "Absolute ('start_at' and 'end_at') and relative ('delta' "
+            "and/or 'date') time cannot be requested at the same time"))
+
+    def test_date_is_a_valid_date(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'date': 'leirguherag',
+            'delta': '3',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            'date is not a valid datetime'))
+
+    def test_delta_is_a_valid_number(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'delta': 'laierughrelg',
+        })
+
+        assert_that(validation_result, is_invalid_with_message(
+            "'delta' is not a valid Integer"))
+
 
 class TestRequestValidationWithNoRawQueries(TestCase):
 
