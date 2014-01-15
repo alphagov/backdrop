@@ -174,6 +174,36 @@ class Test_parse_request_args(unittest.TestCase):
         assert_that(args['end_at'], is_(
             datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
 
+    def test_date_on_boundary_and_positive_delta_sets_start_end_window(self):
+        request_args = MultiDict([
+            ('date', '2014-01-09T00:00:00+00:00'),
+            ('period', 'day'),
+            ('delta', '3'),
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['start_at'], is_(
+            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(args['end_at'], is_(
+            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
+
+    def test_date_on_boundary_and_negative_delta_sets_start_end_window(self):
+        request_args = MultiDict([
+            ('date', '2014-01-11T0:0:0+00:00'),
+            ('period', 'day'),
+            ('delta', '-3'),
+        ])
+
+        args = parse_request_args(request_args)
+
+        assert_that(args['start_at'], is_(
+            datetime(2014, 1, 8, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(args['end_at'], is_(
+            datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))
+
     def test_date_off_boundary_and_positive_delta_sets_start_end_window(self):
         request_args = MultiDict([
             ('date', '2014-01-09T01:02:03+00:00'),
