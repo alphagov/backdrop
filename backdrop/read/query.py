@@ -28,16 +28,15 @@ def parse_request_args(request_args):
 
         date = if_present(parse_time_as_utc, request_args.get('date')) or now()
 
-        period_delta = args['period'].delta
-        duration = period_delta * delta
+        period = args['period']
+        duration = period.delta * delta
 
         if delta > 0:
-            date = args['period'].start(date)
+            date = period.end(date)
             args['start_at'] = date
             args['end_at'] = date + duration
-
         else:
-            date = args['period'].end(date)
+            date = period.start(date)
             args['start_at'] = date + duration
             args['end_at'] = date
     else:

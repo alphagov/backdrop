@@ -184,10 +184,10 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['start_at'], is_(
-            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
+            datetime(2014, 1, 10, 0, 0, 0, tzinfo=pytz.UTC)))
 
         assert_that(args['end_at'], is_(
-            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
+            datetime(2014, 1, 13, 0, 0, 0, tzinfo=pytz.UTC)))
 
     def test_date_off_boundary_and_negative_delta_sets_start_end_window(self):
         request_args = MultiDict([
@@ -199,7 +199,7 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['start_at'], is_(
-            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
+            datetime(2014, 1, 8, 0, 0, 0, tzinfo=pytz.UTC)))
 
         assert_that(args['end_at'], is_(
-            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
+            datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))
