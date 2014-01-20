@@ -154,13 +154,38 @@ def fetch(bucket_config):
         bucket = Bucket(db, bucket_config)
 
         try:
-            result_data = bucket.query(Query.parse(request.args)).data()
+            query = Query.parse(request.args)
+            data = bucket.query(query).data()
+            if query.skip_blanks and data[0]['_count'] == 0:
+                if query.delta < 0:
+                    data = tuple(reversed(data))
+
+                # we need to skip blank results
+                first_nonempty_idx = next(
+                    (i for i, d in enumerate(data) if d['_count'] > 0), None)
+
+                if first_nonempty_idx is None:
+                    # we currently return no results if none of the results in
+                    # the specified range contained any data
+                    data = tuple()
+                else:
+                    # shift query by the whole amount
+                    shift_by = abs(query.delta)
+                    new_size = first_nonempty_idx
+
+                    query = query.get_shifted_resized(shift_by, new_size)
+                    extra_data = bucket.query(query).data()
+
+                    # add data from first and second queries
+                    data = data[first_nonempty_idx:] + \
+                        tuple(reversed(extra_data))
+
         except InvalidOperationError:
             return log_error_and_respond(
                 bucket.name, 'invalid collect function',
                 400)
 
-        response = jsonify(data=result_data)
+        response = jsonify(data=data)
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'

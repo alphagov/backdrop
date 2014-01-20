@@ -92,6 +92,17 @@ class Query(_Query):
         return Query(**args)
 
     @staticmethod
+    def __shift_date(period, date, delta):
+        duration = period.delta * delta
+
+        if delta > 0:
+            date = period.end(date)
+        else:
+            date = period.start(date)
+
+        return date + duration
+
+    @staticmethod
     def __calculate_start_and_end(period, date, delta):
         date = date or now()
 
@@ -106,6 +117,25 @@ class Query(_Query):
             start_at = date + duration
             end_at = date
         return start_at, end_at
+
+    def get_shifted_resized(self, shift_by, new_size):
+        if not all([self.period, self.date]):
+            raise ValueError("Attempted to shift a query which was missing "
+                             "one or more of 'period' or 'date'")
+        args = self._asdict()
+        shift_from = self.date
+
+        shift_by = abs(shift_by) if self.delta > 0 else -abs(shift_by)
+
+        args['date'] = self.__shift_date(
+            args['period'], shift_from, shift_by)
+
+        args['delta'] = abs(new_size) if self.delta > 0 else -abs(new_size)
+
+        args['start_at'], args['end_at'] = self.__calculate_start_and_end(
+            args['period'], args['date'], args['delta'])
+
+        return Query(**args)
 
     def to_mongo_query(self):
 

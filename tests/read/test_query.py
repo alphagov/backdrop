@@ -93,6 +93,46 @@ class TestBuild_query(TestCase):
         assert_that(query.end_at, is_(
             datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))
 
+    def test_get_shifted_resized_with_positive_delta(self):
+        query = Query.create(
+            date=d_tz(2014, 1, 9, 0, 0, 0),
+            period=Day(),
+            delta=6,
+        )
+
+        shifted = query.get_shifted_resized(12, 5)
+
+        assert_that(shifted.date, is_(
+            datetime(2014, 1, 21, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(shifted.delta, is_(5))
+
+        assert_that(shifted.start_at, is_(
+            datetime(2014, 1, 21, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(shifted.end_at, is_(
+            datetime(2014, 1, 26, 0, 0, 0, tzinfo=pytz.UTC)))
+
+    def test_get_shifted_resized_with_negative_delta(self):
+        query = Query.create(
+            date=d_tz(2014, 1, 9, 0, 0, 0),
+            period=Day(),
+            delta=-6,
+        )
+
+        shifted = query.get_shifted_resized(12, 5)
+
+        assert_that(shifted.date, is_(
+            datetime(2013, 12, 28, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(shifted.delta, is_(-5))
+
+        assert_that(shifted.start_at, is_(
+            datetime(2013, 12, 23, 0, 0, 0, tzinfo=pytz.UTC)))
+
+        assert_that(shifted.end_at, is_(
+            datetime(2013, 12, 28, 0, 0, 0, tzinfo=pytz.UTC)))
+
     def test_build_query_with_filter(self):
         query = Query.create(filter_by= [[ "foo", "bar" ]])
         assert_that(query.to_mongo_query(), is_({ "foo": "bar" }))
