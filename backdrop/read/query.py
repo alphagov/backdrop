@@ -19,33 +19,19 @@ def if_present(func, value):
 def parse_request_args(request_args):
     args = dict()
 
+    args['start_at'] = if_present(parse_time_as_utc,
+                                  request_args.get('start_at'))
+
+    args['end_at'] = if_present(parse_time_as_utc,
+                                request_args.get('end_at'))
+
+    args['delta'] = if_present(int, request_args.get('delta'))
+
+    args['date'] = if_present(parse_time_as_utc,
+                              request_args.get('date'))
+
     args['period'] = if_present(parse_period,
                                 request_args.get('period'))
-
-    if request_args.get('delta'):
-        # relative time range requested
-        delta = int(request_args['delta'])
-
-        date = if_present(parse_time_as_utc, request_args.get('date')) or now()
-
-        period = args['period']
-        duration = period.delta * delta
-
-        if delta > 0:
-            date = period.end(date)
-            args['start_at'] = date
-            args['end_at'] = date + duration
-        else:
-            date = period.start(date)
-            args['start_at'] = date + duration
-            args['end_at'] = date
-    else:
-        # absolute time range requested
-        args['start_at'] = if_present(parse_time_as_utc,
-                                      request_args.get('start_at'))
-
-        args['end_at'] = if_present(parse_time_as_utc,
-                                    request_args.get('end_at'))
 
     def boolify(value):
         return {
@@ -79,22 +65,45 @@ def parse_request_args(request_args):
 
 _Query = namedtuple(
     '_Query',
-    'start_at end_at filter_by period group_by sort_by limit collect'
-)
+    ['start_at', 'end_at', 'date', 'delta', 'period',
+     'filter_by', 'group_by', 'sort_by', 'limit', 'collect'])
 
 
 class Query(_Query):
     @classmethod
     def create(cls,
-               start_at=None, end_at=None, filter_by=None, period=None,
-               group_by=None, sort_by=None, limit=None, collect=None):
-        return Query(start_at, end_at, filter_by or [], period,
-                     group_by, sort_by, limit, collect or [])
+               start_at=None, end_at=None, date=None, delta=None,
+               period=None, filter_by=None, group_by=None, sort_by=None,
+               limit=None, collect=None):
+        if delta is not None:
+            start_at, end_at = cls.__calculate_start_and_end(period, date,
+                                                             delta)
+        return Query(start_at, end_at, date, delta, period,
+                     filter_by or [], group_by, sort_by, limit, collect or [])
 
     @classmethod
     def parse(cls, request_args):
         args = parse_request_args(request_args)
+        if args['delta'] is not None:
+            args['start_at'], args['end_at'] = cls.__calculate_start_and_end(
+                args['period'], args['date'], args['delta'])
         return Query(**args)
+
+    @staticmethod
+    def __calculate_start_and_end(period, date, delta):
+        date = date or now()
+
+        duration = period.delta * delta
+
+        if delta > 0:
+            date = period.end(date)
+            start_at = date
+            end_at = date + duration
+        else:
+            date = period.start(date)
+            start_at = date + duration
+            end_at = date
+        return start_at, end_at
 
     def to_mongo_query(self):
 
