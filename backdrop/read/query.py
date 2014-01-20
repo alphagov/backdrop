@@ -39,6 +39,8 @@ def parse_request_args(request_args):
             "false": False,
         }.get(value, value)
 
+    args['skip_blanks'] = if_present(boolify, request_args.get('skip_blanks'))
+
     def parse_filter_by(filter_by):
         key, value = filter_by.split(':', 1)
 
@@ -65,7 +67,7 @@ def parse_request_args(request_args):
 
 _Query = namedtuple(
     '_Query',
-    ['start_at', 'end_at', 'date', 'delta', 'period',
+    ['start_at', 'end_at', 'date', 'delta', 'period', 'skip_blanks',
      'filter_by', 'group_by', 'sort_by', 'limit', 'collect'])
 
 
@@ -73,12 +75,12 @@ class Query(_Query):
     @classmethod
     def create(cls,
                start_at=None, end_at=None, date=None, delta=None,
-               period=None, filter_by=None, group_by=None, sort_by=None,
-               limit=None, collect=None):
+               period=None, skip_blanks=None, filter_by=None, group_by=None,
+               sort_by=None, limit=None, collect=None):
         if delta is not None:
             start_at, end_at = cls.__calculate_start_and_end(period, date,
                                                              delta)
-        return Query(start_at, end_at, date, delta, period,
+        return Query(start_at, end_at, date, delta, period, skip_blanks,
                      filter_by or [], group_by, sort_by, limit, collect or [])
 
     @classmethod

@@ -42,14 +42,15 @@ class ParameterValidator(Validator):
         self.allowed_parameters = set([
             'start_at',
             'end_at',
-            'filter_by',
+            'date',
+            'delta',
             'period',
+            'skip_blanks',
+            'filter_by',
             'group_by',
             'sort_by',
             'limit',
             'collect',
-            'date',
-            'delta',
         ])
         super(ParameterValidator, self).__init__(request_args)
 
@@ -265,6 +266,7 @@ class RelativeTimeValidator(Validator):
         period = request_args.get('period')
         date = request_args.get('date')
         delta = request_args.get('delta')
+        skip_blanks = request_args.get('skip_blanks')
 
         if (request_args.get('start_at') or request_args.get('end_at')) \
                 and (delta or date):
@@ -287,6 +289,11 @@ class RelativeTimeValidator(Validator):
                 int(delta)
             except ValueError:
                 self.add_error("'delta' is not a valid Integer")
+
+        if skip_blanks:
+            if skip_blanks not in ['true', 'false']:
+                self.add_error("If set, 'skip_blanks' must be "
+                               "'true' or 'false'")
 
 
 def validate_request_args(request_args, raw_queries_allowed=False):
