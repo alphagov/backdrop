@@ -155,33 +155,7 @@ def fetch(bucket_config):
 
         try:
             query = Query.parse(request.args)
-            data = bucket.query(query).data()
-            if query.skip_blanks:
-                if query.delta < 0:
-                    data = tuple(reversed(data))
-
-                if data[0]['_count'] == 0:
-
-                    # we need to skip blank results
-                    first_nonempty_idx = next(
-                        (i for i, d in enumerate(data) if d['_count'] > 0),
-                        None)
-
-                    if first_nonempty_idx is None:
-                        # we currently return no results if none of the
-                        # results in the specified range contained any data
-                        data = tuple()
-                    else:
-                        # shift query by the whole amount
-                        shift_by = abs(query.delta)
-                        new_size = first_nonempty_idx
-
-                        query = query.get_shifted_resized(shift_by, new_size)
-                        extra_data = bucket.query(query).data()
-
-                        # add data from first and second queries
-                        data = data[first_nonempty_idx:] + \
-                            tuple(reversed(extra_data))
+            data = bucket.query(query)
 
         except InvalidOperationError:
             return log_error_and_respond(

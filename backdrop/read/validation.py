@@ -45,7 +45,6 @@ class ParameterValidator(Validator):
             'date',
             'delta',
             'period',
-            'skip_blanks',
             'filter_by',
             'group_by',
             'sort_by',
@@ -266,7 +265,6 @@ class RelativeTimeValidator(Validator):
         period = request_args.get('period')
         date = request_args.get('date')
         delta = request_args.get('delta')
-        skip_blanks = request_args.get('skip_blanks')
 
         if (request_args.get('start_at') or request_args.get('end_at')) \
                 and (delta or date):
@@ -283,17 +281,10 @@ class RelativeTimeValidator(Validator):
             if not period:
                 self.add_error("If 'delta' is requested (for relative time), "
                                "'period' is required")
-
-        if delta:
             try:
                 int(delta)
             except ValueError:
                 self.add_error("'delta' is not a valid Integer")
-
-        if skip_blanks:
-            if skip_blanks not in ['true', 'false']:
-                self.add_error("If set, 'skip_blanks' must be "
-                               "'true' or 'false'")
 
 
 def validate_request_args(request_args, raw_queries_allowed=False):

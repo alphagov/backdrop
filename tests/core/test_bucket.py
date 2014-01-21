@@ -68,7 +68,7 @@ class TestBucket(unittest.TestCase):
         ]
 
         query = Query.create(group_by="name")
-        query_result = self.bucket.query(query).data()
+        query_result = self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
             "name", query, None, None, [])
@@ -148,7 +148,7 @@ class TestBucket(unittest.TestCase):
         ]
 
         query = Query.create(period=WEEK)
-        query_result = self.bucket.query(query).data()
+        query_result = self.bucket.query(query)
 
         self.mock_repository.group.assert_called_once_with(
             "_week_start_at", query, sort=['_week_start_at', 'ascending'],
@@ -173,7 +173,7 @@ class TestBucket(unittest.TestCase):
         ]
 
         query = Query.create(period=MONTH)
-        query_result = self.bucket.query(query).data()
+        query_result = self.bucket.query(query)
         self.mock_repository.group.assert_called_once_with(
             "_month_start_at", query, sort=['_month_start_at', 'ascending'],
             limit=None, collect=[])
@@ -235,7 +235,7 @@ class TestBucket(unittest.TestCase):
                                                 end_at=d_tz(2013, 2, 18, 0, 0,
                                                             0)))
 
-        assert_that(result.data(), contains(
+        assert_that(result, contains(
             has_entries({"_start_at": d_tz(2013, 1, 7), "_count": 0}),
             has_entries({"_start_at": d_tz(2013, 1, 14), "_count": 32}),
             has_entries({"_start_at": d_tz(2013, 1, 21), "_count": 45}),
@@ -278,7 +278,7 @@ class TestBucket(unittest.TestCase):
             }
         ]
         query_result = self.bucket.query(
-            Query.create(period=WEEK, group_by="some_group")).data()
+            Query.create(period=WEEK, group_by="some_group"))
         assert_that(query_result, has_length(2))
         assert_that(query_result, has_item(has_entries({
             "values": has_item({
@@ -353,9 +353,10 @@ class TestBucket(unittest.TestCase):
 
         query_result = self.bucket.query(Query.create(period=MONTH,
                                                       group_by="some_group"))
-        data = query_result.data()
-        assert_that(data, has_item(has_entries({"values": has_length(2)})))
-        assert_that(data, has_item(has_entries({"values": has_length(3)})))
+        assert_that(query_result,
+                    has_item(has_entries({"values": has_length(2)})))
+        assert_that(query_result,
+                    has_item(has_entries({"values": has_length(3)})))
 
     def test_month_and_group_query_with_start_and_end_at(self):
         self.mock_repository.multi_group.return_value = [
@@ -399,17 +400,18 @@ class TestBucket(unittest.TestCase):
                                                       group_by="some_group",
                                                       start_at=d(2013, 1, 1),
                                                       end_at=d(2013, 4, 2)))
-        data = query_result.data()
-        assert_that(data, has_item(has_entries({"values": has_length(4)})))
-        assert_that(data, has_item(has_entries({"values": has_length(4)})))
+        assert_that(query_result,
+                    has_item(has_entries({"values": has_length(4)})))
+        assert_that(query_result,
+                    has_item(has_entries({"values": has_length(4)})))
 
-        first_group = data[0]["values"]
+        first_group = query_result[0]["values"]
         assert_that(first_group, has_item(has_entries({
             "_start_at": d_tz(2013, 3, 1)})))
         assert_that(first_group, has_item(has_entries({
             "_start_at": d_tz(2013, 4, 1)})))
 
-        first_group = data[1]["values"]
+        first_group = query_result[1]["values"]
         assert_that(first_group, has_item(has_entries({
             "_start_at": d_tz(2013, 1, 1)})))
         assert_that(first_group, has_item(has_entries({
@@ -452,7 +454,7 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(
             Query.create(period=WEEK, group_by="some_group",
                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
-                         end_at=d_tz(2013, 2, 4, 0, 0, 0))).data()
+                         end_at=d_tz(2013, 2, 4, 0, 0, 0)))
 
         assert_that(query_result, has_item(has_entries({
             "some_group": "val1",

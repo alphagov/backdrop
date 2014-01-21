@@ -39,8 +39,6 @@ def parse_request_args(request_args):
             "false": False,
         }.get(value, value)
 
-    args['skip_blanks'] = if_present(boolify, request_args.get('skip_blanks'))
-
     def parse_filter_by(filter_by):
         key, value = filter_by.split(':', 1)
 
@@ -67,7 +65,7 @@ def parse_request_args(request_args):
 
 _Query = namedtuple(
     '_Query',
-    ['start_at', 'end_at', 'date', 'delta', 'period', 'skip_blanks',
+    ['start_at', 'end_at', 'date', 'delta', 'period',
      'filter_by', 'group_by', 'sort_by', 'limit', 'collect'])
 
 
@@ -75,12 +73,12 @@ class Query(_Query):
     @classmethod
     def create(cls,
                start_at=None, end_at=None, date=None, delta=None,
-               period=None, skip_blanks=None, filter_by=None, group_by=None,
+               period=None, filter_by=None, group_by=None,
                sort_by=None, limit=None, collect=None):
         if delta is not None:
             start_at, end_at = cls.__calculate_start_and_end(period, date,
                                                              delta)
-        return Query(start_at, end_at, date, delta, period, skip_blanks,
+        return Query(start_at, end_at, date, delta, period,
                      filter_by or [], group_by, sort_by, limit, collect or [])
 
     @classmethod
@@ -118,24 +116,50 @@ class Query(_Query):
             end_at = date
         return start_at, end_at
 
-    def get_shifted_resized(self, shift_by, new_size):
+    def __get_shifted_resized(self, shift_by, new_size):
         if not all([self.period, self.date]):
             raise ValueError("Attempted to shift a query which was missing "
                              "one or more of 'period' or 'date'")
-        args = self._asdict()
-        shift_from = self.date
 
+        new_delta = abs(new_size) if self.delta > 0 else -abs(new_size)
         shift_by = abs(shift_by) if self.delta > 0 else -abs(shift_by)
 
-        args['date'] = self.__shift_date(
-            args['period'], shift_from, shift_by)
+        shifted_date = self.__shift_date(self.period, self.date, shift_by)
 
-        args['delta'] = abs(new_size) if self.delta > 0 else -abs(new_size)
-
+        args = self._asdict()
         args['start_at'], args['end_at'] = self.__calculate_start_and_end(
-            args['period'], args['date'], args['delta'])
+            self.period, shifted_date, new_delta)
+
+        args['delta'] = None  # the new query is not for a relative date range
 
         return Query(**args)
+
+    def __skip_blanks(self, data, repository):
+        if self.delta < 0:
+            data = tuple(reversed(data))
+
+        if data[0]['_count'] == 0:
+            # we need to skip blank results
+            first_nonempty_idx = next(
+                (i for i, d in enumerate(data) if d['_count'] > 0),
+                None)
+
+            if first_nonempty_idx is None:
+                # we currently return no results if none of the
+                # results in the specified range contained any data
+                data = tuple()
+            else:
+                # shift query by the whole amount
+                shift_by = abs(self.delta)
+                new_size = first_nonempty_idx
+
+                extra_query = self.__get_shifted_resized(shift_by, new_size)
+                extra_data = extra_query.execute(repository)
+
+                # add data from first and second queries
+                data = data[first_nonempty_idx:] + \
+                    tuple(reversed(extra_data))
+        return data
 
     def to_mongo_query(self):
 
@@ -152,14 +176,18 @@ class Query(_Query):
 
     def execute(self, repository):
         if self.group_by and self.period:
-            result = self.__execute_period_group_query(repository)
+            data = self.__execute_period_group_query(repository).data()
         elif self.group_by:
-            result = self.__execute_grouped_query(repository)
+            data = self.__execute_grouped_query(repository).data()
         elif self.period:
-            result = self.__execute_period_query(repository)
+            data = self.__execute_period_query(repository).data()
         else:
-            result = self.__execute_query(repository)
-        return result
+            data = self.__execute_query(repository).data()
+
+        if self.delta is not None:
+            data = self.__skip_blanks(data, repository)
+
+        return data
 
     def __get_period_key(self):
         return self.period.start_at_key

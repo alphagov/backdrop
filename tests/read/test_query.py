@@ -100,12 +100,7 @@ class TestBuild_query(TestCase):
             delta=6,
         )
 
-        shifted = query.get_shifted_resized(12, 5)
-
-        assert_that(shifted.date, is_(
-            datetime(2014, 1, 21, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(shifted.delta, is_(5))
+        shifted = query._Query__get_shifted_resized(12, 5)
 
         assert_that(shifted.start_at, is_(
             datetime(2014, 1, 21, 0, 0, 0, tzinfo=pytz.UTC)))
@@ -120,12 +115,7 @@ class TestBuild_query(TestCase):
             delta=-6,
         )
 
-        shifted = query.get_shifted_resized(12, 5)
-
-        assert_that(shifted.date, is_(
-            datetime(2013, 12, 28, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(shifted.delta, is_(-5))
+        shifted = query._Query__get_shifted_resized(12, 5)
 
         assert_that(shifted.start_at, is_(
             datetime(2013, 12, 23, 0, 0, 0, tzinfo=pytz.UTC)))
