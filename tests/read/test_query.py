@@ -88,40 +88,40 @@ class TestBuild_query(TestCase):
         )
 
         assert_that(query.start_at, is_(
-            datetime(2014, 1, 8, 0, 0, 0, tzinfo=pytz.UTC)))
+            d_tz(2014, 1, 8, 0, 0, 0)))
 
         assert_that(query.end_at, is_(
-            datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))
+            d_tz(2014, 1, 11, 0, 0, 0)))
 
-    def test_get_shifted_resized_with_positive_delta(self):
+    def test_shift_query_forward(self):
         query = Query.create(
             date=d_tz(2014, 1, 9, 0, 0, 0),
             period=Day(),
             delta=6,
         )
 
-        shifted = query._Query__get_shifted_resized(12, 5)
+        shifted = query.get_shifted_query(5)
 
         assert_that(shifted.start_at, is_(
-            datetime(2014, 1, 21, 0, 0, 0, tzinfo=pytz.UTC)))
+            d_tz(2014, 1, 14, 0, 0, 0)))
 
         assert_that(shifted.end_at, is_(
-            datetime(2014, 1, 26, 0, 0, 0, tzinfo=pytz.UTC)))
+            d_tz(2014, 1, 20, 0, 0, 0)))
 
-    def test_get_shifted_resized_with_negative_delta(self):
+    def test_shift_query_backwards(self):
         query = Query.create(
             date=d_tz(2014, 1, 9, 0, 0, 0),
             period=Day(),
-            delta=-6,
+            delta=6,
         )
 
-        shifted = query._Query__get_shifted_resized(12, 5)
+        shifted = query.get_shifted_query(-5)
 
         assert_that(shifted.start_at, is_(
-            datetime(2013, 12, 23, 0, 0, 0, tzinfo=pytz.UTC)))
+            d_tz(2014, 1, 4, 0, 0, 0)))
 
         assert_that(shifted.end_at, is_(
-            datetime(2013, 12, 28, 0, 0, 0, tzinfo=pytz.UTC)))
+            d_tz(2014, 1, 10, 0, 0, 0)))
 
     def test_build_query_with_filter(self):
         query = Query.create(filter_by= [[ "foo", "bar" ]])

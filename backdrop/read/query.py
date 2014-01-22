@@ -6,10 +6,6 @@ from backdrop.core.timeutils import now, parse_time_as_utc
 from backdrop.read.response import *
 
 
-def utc(dt):
-    return dt.replace(tzinfo=pytz.UTC)
-
-
 def if_present(func, value):
     """Apply the given function to the value and return if it exists"""
     if value is not None:
@@ -87,17 +83,6 @@ class Query(_Query):
         return Query.create(**args)
 
     @staticmethod
-    def __shift_date(period, date, delta):
-        duration = period.delta * delta
-
-        if delta > 0:
-            date = period.end(date)
-        else:
-            date = period.start(date)
-
-        return date + duration
-
-    @staticmethod
     def __calculate_start_and_end(period, date, delta):
         date = date or now()
 
@@ -113,27 +98,12 @@ class Query(_Query):
             end_at = date
         return start_at, end_at
 
-    def __get_shifted_resized(self, shift_by, new_size):
-        if not all([self.period, self.date]):
-            raise ValueError("Attempted to shift a query which was missing "
-                             "one or more of 'period' or 'date'")
-
-        new_delta = abs(new_size) if self.delta > 0 else -abs(new_size)
-        shift_by = abs(shift_by) if self.delta > 0 else -abs(shift_by)
-
-        shifted_date = self.__shift_date(self.period, self.date, shift_by)
-
-        args = self._asdict()
-        args['start_at'], args['end_at'] = self.__calculate_start_and_end(
-            self.period, shifted_date, new_delta)
-
-        args['delta'] = None  # the new query is not for a relative date range
-
-        return Query(**args)
-
     def __skip_blanks(self, data, repository):
+        direction = 1
+
         if self.delta < 0:
             data = tuple(reversed(data))
+            direction = -1
 
         if data[0]['_count'] == 0:
             # we need to skip blank results
@@ -146,17 +116,18 @@ class Query(_Query):
                 # results in the specified range contained any data
                 data = tuple()
             else:
-                # shift query by the whole amount
-                shift_by = abs(self.delta)
-                new_size = first_nonempty_idx
-
-                extra_query = self.__get_shifted_resized(shift_by, new_size)
-                extra_data = extra_query.execute(repository)
-
-                # add data from first and second queries
-                data = data[first_nonempty_idx:] + \
-                    tuple(reversed(extra_data))
+                query = self.get_shifted_query(first_nonempty_idx * direction)
+                data = query.execute(repository)
         return data
+
+    def get_shifted_query(self, shift):
+        """Return a new Query where the date is shifted by n periods"""
+        new_date = self.date + (self.period.delta * shift)
+
+        args = self._asdict()
+        args['date'] = new_date
+
+        return Query.create(**args)
 
     def to_mongo_query(self):
 
