@@ -84,10 +84,7 @@ class Query(_Query):
     @classmethod
     def parse(cls, request_args):
         args = parse_request_args(request_args)
-        if args['delta'] is not None:
-            args['start_at'], args['end_at'] = cls.__calculate_start_and_end(
-                args['period'], args['date'], args['delta'])
-        return Query(**args)
+        return Query.create(**args)
 
     @staticmethod
     def __shift_date(period, date, delta):
