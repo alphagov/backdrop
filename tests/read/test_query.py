@@ -75,10 +75,10 @@ class TestBuild_query(TestCase):
         )
 
         assert_that(query.start_at, is_(
-            datetime(2014, 1, 10, 0, 0, 0, tzinfo=pytz.UTC)))
+            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
 
         assert_that(query.end_at, is_(
-            datetime(2014, 1, 13, 0, 0, 0, tzinfo=pytz.UTC)))
+            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
 
     def test_date_off_boundary_and_negative_delta(self):
         query = Query.create(

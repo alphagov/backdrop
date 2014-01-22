@@ -87,37 +87,42 @@ class Query(_Query):
         date = date or now()
 
         duration = period.delta * delta
+        start_of_period = period.start(date)
 
-        if delta > 0:
-            date = period.end(date)
-            start_at = date
-            end_at = date + duration
-        else:
-            date = period.start(date)
-            start_at = date + duration
-            end_at = date
+        start_at, end_at = sorted(
+            [start_of_period, start_of_period + duration])
+
         return start_at, end_at
 
+    def __first_nonempty(self, data, is_reversed):
+        if is_reversed:
+            data = reversed(data)
+
+        first_nonempty_index = next(
+            (i for i, d in enumerate(data) if d['_count'] > 0),
+            None)
+
+        if is_reversed:
+            first_nonempty_index = -first_nonempty_index
+
+        return first_nonempty_index
+
     def __skip_blanks(self, data, repository):
-        direction = 1
+        is_reversed = self.delta < 0
+        first_index = -1 if is_reversed else 0
 
-        if self.delta < 0:
-            data = tuple(reversed(data))
-            direction = -1
-
-        if data[0]['_count'] == 0:
+        if data[first_index]['_count'] == 0:
             # we need to skip blank results
-            first_nonempty_idx = next(
-                (i for i, d in enumerate(data) if d['_count'] > 0),
-                None)
+            first_nonempty_index = self.__first_nonempty(data, is_reversed)
 
-            if first_nonempty_idx is None:
+            if first_nonempty_index is None:
                 # we currently return no results if none of the
                 # results in the specified range contained any data
                 data = tuple()
             else:
-                query = self.get_shifted_query(first_nonempty_idx * direction)
+                query = self.get_shifted_query(shift=first_nonempty_index)
                 data = query.execute(repository)
+
         return data
 
     def get_shifted_query(self, shift):
