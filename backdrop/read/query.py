@@ -94,49 +94,13 @@ class Query(_Query):
 
         return start_at, end_at
 
-    def __first_nonempty(self, data, is_reversed):
-        if is_reversed:
-            data = reversed(data)
+    def __skip_blank_periods(self, results, repository):
+        amount_to_shift = results.amount_to_shift(self.delta)
+        if amount_to_shift != 0:
+            query = self.get_shifted_query(shift=amount_to_shift)
+            results = query.execute(repository)
 
-        first_nonempty_index = next(
-            (i for i, d in enumerate(data) if d['_count'] > 0),
-            None)
-
-        if is_reversed:
-            first_nonempty_index = -first_nonempty_index
-
-        return first_nonempty_index
-
-    def __skip_blanks(self, data, repository):
-        is_reversed = self.delta < 0
-        first_index = -1 if is_reversed else 0
-
-        if data[first_index]['_count'] == 0:
-            # we need to skip blank results
-            first_nonempty_index = self.__first_nonempty(data, is_reversed)
-
-            if first_nonempty_index is None:
-                # we currently return no results if none of the
-                # results in the specified range contained any data
-                data = tuple()
-            else:
-                query = self.get_shifted_query(shift=first_nonempty_index)
-                data = query.execute(repository)
-
-        return data
-
-    def __grouped_skip_blanks(self, data, repository):
-        is_reversed = self.delta < 0
-
-        first_nonempty_index = min([
-            self.__first_nonempty(i['values'], is_reversed) for i in data],
-            key=abs)
-
-        if first_nonempty_index != 0:
-            query = self.get_shifted_query(shift=first_nonempty_index)
-            data = query.execute(repository)
-
-        return data
+        return results
 
     def get_shifted_query(self, shift):
         """Return a new Query where the date is shifted by n periods"""
@@ -148,7 +112,6 @@ class Query(_Query):
         return Query.create(**args)
 
     def to_mongo_query(self):
-
         mongo_query = {}
         if self.start_at or self.end_at:
             mongo_query["_timestamp"] = {}
@@ -162,21 +125,18 @@ class Query(_Query):
 
     def execute(self, repository):
         if self.group_by and self.period:
-            data = self.__execute_period_group_query(repository).data()
+            result = self.__execute_period_group_query(repository)
         elif self.group_by:
-            data = self.__execute_grouped_query(repository).data()
+            result = self.__execute_grouped_query(repository)
         elif self.period:
-            data = self.__execute_period_query(repository).data()
+            result = self.__execute_period_query(repository)
         else:
-            data = self.__execute_query(repository).data()
+            result = self.__execute_query(repository)
 
         if self.delta:
-            if self.group_by:
-                data = self.__grouped_skip_blanks(data, repository)
-            else:
-                data = self.__skip_blanks(data, repository)
+            result = self.__skip_blank_periods(result, repository)
 
-        return data
+        return result
 
     def __get_period_key(self):
         return self.period.start_at_key

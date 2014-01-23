@@ -155,7 +155,7 @@ def fetch(bucket_config):
 
         try:
             query = Query.parse(request.args)
-            data = bucket.query(query)
+            data = bucket.query(query).data()
 
         except InvalidOperationError:
             return log_error_and_respond(

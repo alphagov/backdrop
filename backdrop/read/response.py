@@ -24,6 +24,20 @@ def create_period_group(doc, period):
     return datum
 
 
+def first_nonempty(data, is_reversed):
+    if is_reversed:
+        data = reversed(data)
+
+    first_nonempty_index = next(
+        (i for i, d in enumerate(data) if d['_count'] > 0),
+        None)
+
+    if is_reversed:
+        first_nonempty_index = -first_nonempty_index
+
+    return first_nonempty_index
+
+
 class SimpleData(object):
     def __init__(self, cursor):
         self._data = []
@@ -38,6 +52,10 @@ class SimpleData(object):
 
     def data(self):
         return tuple(self._data)
+
+    def amount_to_shift(self, delta):
+        """This response type cannot be shifted"""
+        return 0
 
 
 class PeriodData(object):
@@ -71,6 +89,11 @@ class PeriodData(object):
 
         return dict(datum.items() + doc.items())
 
+    def amount_to_shift(self, delta):
+        is_reversed = delta < 0
+
+        return first_nonempty(self._data, is_reversed)
+
 
 class GroupedData(object):
     def __init__(self, cursor):
@@ -83,6 +106,10 @@ class GroupedData(object):
 
     def data(self):
         return tuple(self._data)
+
+    def amount_to_shift(self, delta):
+        """This response type cannot be shifted"""
+        return 0
 
 
 class PeriodGroupedData(object):
@@ -122,3 +149,10 @@ class PeriodGroupedData(object):
                 data=self._data[i]['values'],
                 default=default
             )
+
+    def amount_to_shift(self, delta):
+        is_reversed = delta < 0
+
+        return min([
+            first_nonempty(i['values'], is_reversed) for i in self._data],
+            key=abs)
