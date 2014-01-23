@@ -125,6 +125,19 @@ class Query(_Query):
 
         return data
 
+    def __grouped_skip_blanks(self, data, repository):
+        is_reversed = self.delta < 0
+
+        first_nonempty_index = min([
+            self.__first_nonempty(i['values'], is_reversed) for i in data],
+            key=abs)
+
+        if first_nonempty_index != 0:
+            query = self.get_shifted_query(shift=first_nonempty_index)
+            data = query.execute(repository)
+
+        return data
+
     def get_shifted_query(self, shift):
         """Return a new Query where the date is shifted by n periods"""
         new_date = self.date + (self.period.delta * shift)
@@ -157,8 +170,11 @@ class Query(_Query):
         else:
             data = self.__execute_query(repository).data()
 
-        if self.delta is not None:
-            data = self.__skip_blanks(data, repository)
+        if self.delta:
+            if self.group_by:
+                data = self.__grouped_skip_blanks(data, repository)
+            else:
+                data = self.__skip_blanks(data, repository)
 
         return data
 
