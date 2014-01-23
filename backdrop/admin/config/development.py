@@ -4,7 +4,7 @@ ALLOW_TEST_SIGNIN=True
 SECRET_KEY = "something unique and secret"
 
 DATABASE_NAME = "backdrop"
-MONGO_HOST = 'localhost'
+MONGO_HOSTS = ['localhost']
 MONGO_PORT = 27017
 
 try:
