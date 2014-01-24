@@ -2,14 +2,6 @@
 Feature: querying for data grouped by day
     This feature is for querying for data grouped by day
 
-    Scenario: grouping data by day
-         Given I have the data in "daily_timestamps.json"
-           And I have a bucket named "day"
-          When I post the data to "/day"
-          Then I should get back a status of "200"
-          When I go to "/day?period=day"
-          Then the JSON should have "12" results
-
     Scenario: grouping data by day between two timestamps
          Given I have the data in "daily_timestamps.json"
            And I have a bucket named "day"

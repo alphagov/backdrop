@@ -33,21 +33,13 @@ Feature: sorting and limiting
 
     Scenario: Sort periodic grouped query on a key
         Given "licensing_2.json" is in "foo" bucket
-         when I go to "/foo?group_by=authority&period=week&sort_by=_count:descending"
+         when I go to "/foo?group_by=authority&period=week&sort_by=_count:descending&start_at=2012-12-03T00:00:00Z&end_at=2012-12-17T00:00:00Z"
          then I should get back a status of "200"
           and the JSON should have "2" results
           and the "1st" result should have "authority" equaling "Westminster"
 
-    Scenario: Sort periodic grouped query on a key and limit
+    Scenario: Limiting a periodic query is not allowed if start and end are defined
         Given "licensing_2.json" is in "foo" bucket
-         when I go to "/foo?group_by=authority&period=week&sort_by=_count:ascending&limit=1"
-         then I should get back a status of "200"
-          and the JSON should have "1" results
-          and the "1st" result should have "authority" equaling "Camden"
+         when I go to "/foo?period=week&limit=1&start_at=2012-12-03T00:00:00Z&end_at=2012-12-17T00:00:00Z"
+         then I should get back a status of "400"
 
-    Scenario: Limit periodic query
-        Given "licensing_2.json" is in "foo" bucket
-         when I go to "/foo?period=week&limit=1"
-         then I should get back a status of "200"
-          and the JSON should have "1" result
-          and the "1st" result should have "_start_at" equaling "2012-12-03T00:00:00+00:00"

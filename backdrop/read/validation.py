@@ -72,10 +72,17 @@ class DatetimeValidator(Validator):
 
 class PeriodQueryValidator(Validator):
     def validate(self, request_args, context):
-        if 'period' in request_args and 'delta' not in request_args:
-            if 'start_at' not in request_args or 'end_at' not in request_args:
-                self.add_error("both 'start_at' and 'end_at' are required "
-                               "for a period query")
+        if 'period' in request_args:
+            if 'delta' not in request_args:
+                if 'start_at' not in request_args or \
+                        'end_at' not in request_args:
+                    self.add_error("both 'start_at' and 'end_at' are required "
+                                   "for a period query")
+            if 'group_by' not in request_args and 'limit' in request_args:
+                # When executing a grouped periodic query, the limit is
+                # applied to the list of groups rather than the time series
+                # inside them
+                self.add_error("A grouped period query cannot be limited")
 
 
 class PositiveIntegerValidator(Validator):

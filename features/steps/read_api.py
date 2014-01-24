@@ -80,9 +80,19 @@ def step(context, query):
                                           headers={"If-None-Match": etag})
 
 
+def get_error_message(response_data):
+    message = ""
+    try:
+        message = json.loads(response_data).get('message', "")
+    except:
+        pass
+    return message
+
+
 @then('I should get back a status of "{expected_status}"')
 def step(context, expected_status):
-    assert_that(context.response.status_code, is_(int(expected_status)))
+    assert_that(context.response.status_code, is_(int(expected_status)),
+                get_error_message(context.response.data))
 
 
 @then('I should get a "{header}" header of "{value}"')
@@ -102,7 +112,9 @@ step_matcher("re")
 
 @then('the JSON should have "(?P<n>\d+)" results?')
 def step(context, n):
-    the_data = json.loads(context.response.data)['data']
+    response_data = json.loads(context.response.data)
+    assert_that('data' in response_data, response_data.get('message', None))
+    the_data = response_data['data']
     assert_that(the_data, has_length(int(n)))
 
 
