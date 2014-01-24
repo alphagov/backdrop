@@ -151,7 +151,9 @@ class TestRequestValidation(TestCase):
     def test_queries_with_sort_by_and_period_are_disallowed(self):
         validation_result = validate_request_args({
             "sort_by": "foo:ascending",
-            "period": "week"
+            "period": "week",
+            "start_at": "2012-11-05T00:00:00Z",
+            "end_at": "2012-12-03T00:00:00Z",
         })
         assert_that( validation_result, is_invalid_with_message(
             "Cannot sort for period queries without group_by. "
@@ -161,7 +163,9 @@ class TestRequestValidation(TestCase):
         validation_result = validate_request_args({
             "sort_by": "foo:ascending",
             "period": "week",
-            "group_by": "foo"
+            "group_by": "foo",
+            "start_at": "2012-11-12T00:00:00+00:00",
+            "end_at": "2012-12-12T00:00:00+00:00",
         })
         assert_that( validation_result, is_valid() )
 
@@ -255,7 +259,9 @@ class TestRequestValidation(TestCase):
     def test_queries_grouping_week_start_at_with_period_are_disallowed(self):
         validation_result = validate_request_args({
             'period': 'week',
-            'group_by': '_week_start_at'
+            'group_by': '_week_start_at',
+            'start_at': '2012-11-05T00:00:00Z',
+            'end_at': '2012-12-03T00:00:00Z',
         })
 
         assert_that(validation_result, is_invalid_with_message(
@@ -264,7 +270,9 @@ class TestRequestValidation(TestCase):
 
     def test_queries_with_period_values_must_be_certain_values(self):
         validation_result = validate_request_args({
-            'period': 'fortnight'
+            'period': 'fortnight',
+            'start_at': '2012-11-12T00:00:00+00:00',
+            'end_at':  '2012-12-12T00:00:00+00:00',
         })
 
         assert_that(validation_result, is_invalid_with_message(
@@ -324,9 +332,9 @@ class TestRequestValidation(TestCase):
             'collect': 'field:infinity',
         })
 
-        assert_that(validation_result, is_invalid_with_message((
+        assert_that(validation_result, is_invalid_with_message(
             "Unknown collection method"
-        )))
+        ))
 
     def test_period_with_just_positive_delta(self):
         validation_result = validate_request_args({

@@ -72,8 +72,8 @@ class DatetimeValidator(Validator):
 
 class PeriodQueryValidator(Validator):
     def validate(self, request_args, context):
-        if 'start_at' in request_args or 'end_at' in request_args:
-            if not ('start_at' in request_args and 'end_at' in request_args):
+        if 'period' in request_args and 'delta' not in request_args:
+            if 'start_at' not in request_args or 'end_at' not in request_args:
                 self.add_error("both 'start_at' and 'end_at' are required "
                                "for a period query")
 

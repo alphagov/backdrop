@@ -16,7 +16,11 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         assert_that(validation_result, is_valid())
 
     def test_that_periodic_queries_are_allowed(self):
-        validation_result = validate_request_args({'period': 'week'})
+        validation_result = validate_request_args({
+            'period': 'day',
+            'start_at': '2012-11-01T00:00:00Z',
+            'end_at': '2012-12-01T00:00:00Z',
+        })
         assert_that(validation_result, is_valid())
 
     def test_that_querying_for_less_than_7_days_of_data_is_disallowed(self):
