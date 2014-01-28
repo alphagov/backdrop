@@ -1,4 +1,5 @@
 import logging
+import os
 from bson import Code
 import pymongo
 from pymongo.errors import AutoReconnect
@@ -11,18 +12,28 @@ class Database(object):
 
     def __init__(self, hosts, port, name):
         """
-        Create a list to feed to the MongoReplicaSetClient in a way it understands
+        Create a list to feed to the MongoReplicaSetClient
         e.g. MongoReplicaSetClient(
-            [u'hostname_one:27017', u'hostname_two:27017', u'hostname_three:27017'])
-        See http://api.mongodb.org/python/current/examples/high_availability.html#mongoreplicasetclient for more
+            [u'hostname_one:27017',
+                u'hostname_two:27017',
+                    u'hostname_three:27017'])
+        See:
+        http://bit.ly/1aF3yk3
+        http://api.mongodb.org/python/current/examples/high_availability.html
+        for more
         """
 
         clientList = []
         for host in hosts:
             clientList.append('{0}:{1}'.format(host, port))
 
+        # We can't always guarantee we'll be on 'production'
+        # so we allow jenkins to add the set as a variable
+        # Some test environments / other envs have their own sets e.g. 'gds-ci'
+        replica_set = os.getenv('MONGO_REPLICA_SET', 'production')
+
         self._mongo = pymongo.MongoReplicaSetClient(
-            ','.join(clientList), replicaSet='production')
+            ','.join(clientList), replicaSet=replica_set)
         self.name = name
 
     def alive(self):
