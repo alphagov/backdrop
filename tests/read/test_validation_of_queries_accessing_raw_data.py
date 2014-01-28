@@ -128,8 +128,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         })
         assert_that(validation_result,
                     is_invalid_with_message(
-                        "both 'start_at' and 'end_at' are required for "
-                        "a period query"))
+                        "Either 'duration' or both 'start_at' and 'end_at' "
+                        "are required for a period query"))
 
     def test_that_end_at_alone_is_disallowed(self):
         validation_result = validate_request_args({
@@ -138,8 +138,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         })
         assert_that(validation_result,
                     is_invalid_with_message(
-                        "both 'start_at' and 'end_at' are required for "
-                        "a period query"))
+                        "Either 'duration' or both 'start_at' and 'end_at' "
+                        "are required for a period query"))
 
     def test_that_grouping_by_month_requires_dates_at_start_of_month(self):
         validation_result = validate_request_args({

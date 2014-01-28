@@ -30,7 +30,7 @@ def first_nonempty(data, is_reversed):
 
     first_nonempty_index = next(
         (i for i, d in enumerate(data) if d['_count'] > 0),
-        None)
+        0)
 
     if is_reversed:
         first_nonempty_index = -first_nonempty_index

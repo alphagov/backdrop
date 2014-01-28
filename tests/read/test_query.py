@@ -32,20 +32,20 @@ class TestBuild_query(TestCase):
         }))
 
     @freeze_time('2014, 1, 09 00:00:00')
-    def test_no_date_means_now(self):
+    def test_no_end_at_means_now(self):
         query = Query.create(
             period=Day(),
-            delta=3,
+            duration=3,
         )
 
-        assert_that(query.start_at, is_(
+        assert_that(query.end_at, is_(
             datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
 
-    def test_date_on_boundary_and_positive_delta(self):
+    def test_start_at_and_duration(self):
         query = Query.create(
-            date=d_tz(2014, 1, 9, 0, 0, 0),
+            start_at=d_tz(2014, 1, 9, 0, 0, 0),
             period=Day(),
-            delta=3,
+            duration=3,
         )
 
         assert_that(query.start_at, is_(
@@ -54,11 +54,11 @@ class TestBuild_query(TestCase):
         assert_that(query.end_at, is_(
             datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
 
-    def test_date_on_boundary_and_negative_delta(self):
+    def test_end_at_and_duration(self):
         query = Query.create(
-            date=d_tz(2014, 1, 11, 0, 0, 0),
+            end_at=d_tz(2014, 1, 11, 0, 0, 0),
             period=Day(),
-            delta=-3,
+            duration=3,
         )
 
         assert_that(query.start_at, is_(
@@ -67,37 +67,11 @@ class TestBuild_query(TestCase):
         assert_that(query.end_at, is_(
             datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))
 
-    def test_date_off_boundary_and_positive_delta(self):
+    def test_shift_query_forwards(self):
         query = Query.create(
-            date=d_tz(2014, 1, 9, 1, 2, 3),
+            start_at=d_tz(2014, 1, 9, 0, 0, 0),
             period=Day(),
-            delta=3,
-        )
-
-        assert_that(query.start_at, is_(
-            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(query.end_at, is_(
-            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
-
-    def test_date_off_boundary_and_negative_delta(self):
-        query = Query.create(
-            date=d_tz(2014, 1, 11, 23, 58, 57),
-            period=Day(),
-            delta=-3,
-        )
-
-        assert_that(query.start_at, is_(
-            d_tz(2014, 1, 8, 0, 0, 0)))
-
-        assert_that(query.end_at, is_(
-            d_tz(2014, 1, 11, 0, 0, 0)))
-
-    def test_shift_query_forward(self):
-        query = Query.create(
-            date=d_tz(2014, 1, 9, 0, 0, 0),
-            period=Day(),
-            delta=6,
+            duration=6,
         )
 
         shifted = query.get_shifted_query(5)
@@ -110,9 +84,9 @@ class TestBuild_query(TestCase):
 
     def test_shift_query_backwards(self):
         query = Query.create(
-            date=d_tz(2014, 1, 9, 0, 0, 0),
+            start_at=d_tz(2014, 1, 9, 0, 0, 0),
             period=Day(),
-            delta=6,
+            duration=6,
         )
 
         shifted = query.get_shifted_query(-5)
