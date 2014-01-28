@@ -19,7 +19,7 @@ def get_database():
         "backdrop.write.config.%s" % environment()
     )
     return database.Database(
-        app.config['MONGO_HOST'],
+        app.config['MONGO_HOSTS'],
         app.config['MONGO_PORT'],
         app.config['DATABASE_NAME']
     )

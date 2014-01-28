@@ -13,7 +13,7 @@ from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
-HOST = 'localhost'
+HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 BUCKET = 'bucket_integration_test'

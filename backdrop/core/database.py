@@ -8,8 +8,21 @@ from backdrop.core.nested_merge import nested_merge, InvalidOperationError
 
 
 class Database(object):
-    def __init__(self, host, port, name):
-        self._mongo = pymongo.MongoClient(host, port)
+
+    def __init__(self, hosts, port, name):
+        """
+        Create a list to feed to the MongoReplicaSetClient in a way it understands
+        e.g. MongoReplicaSetClient(
+            [u'hostname_one:27017', u'hostname_two:27017', u'hostname_three:27017'])
+        See http://api.mongodb.org/python/current/examples/high_availability.html#mongoreplicasetclient for more
+        """
+
+        clientList = []
+        for host in hosts:
+            clientList.append('{0}:{1}'.format(host, port))
+
+        self._mongo = pymongo.MongoReplicaSetClient(
+            ','.join(clientList), replicaSet='production')
         self.name = name
 
     def alive(self):
@@ -35,6 +48,7 @@ class Database(object):
 
 
 class MongoDriver(object):
+
     def __init__(self, collection):
         self._collection = collection
         self.sort_options = {
@@ -115,6 +129,7 @@ class MongoDriver(object):
 
 
 class Repository(object):
+
     def __init__(self, mongo_driver):
         self._mongo_driver = mongo_driver
 

@@ -30,7 +30,7 @@ log_handler.set_up_logging(app, GOVUK_ENV)
 app.url_map.converters["bucket"] = BucketConverter
 
 db = database.Database(
-    app.config['MONGO_HOST'],
+    app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )

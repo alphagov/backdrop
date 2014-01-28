@@ -30,7 +30,8 @@ def load_config(env):
 
 
 def get_database(config):
-    return Database(config.MONGO_HOST, config.MONGO_PORT, config.DATABASE_NAME)
+    return Database(
+        config.MONGO_HOSTS, config.MONGO_PORT, config.DATABASE_NAME)
 
 
 def get_migrations():

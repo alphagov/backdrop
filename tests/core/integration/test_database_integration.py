@@ -9,7 +9,7 @@ from backdrop.core.database import Repository, GroupingError, \
 from backdrop.read.query import Query
 from tests.support.test_helpers import d, d_tz
 
-HOST = 'localhost'
+HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 BUCKET = 'test_repository_integration'
@@ -762,7 +762,7 @@ class TestRepositoryIntegration_Finding(RepositoryIntegrationTest):
 
 class TestDatabase(unittest.TestCase):
     def setUp(self):
-        self.db = Database('localhost', 27017, 'backdrop_test')
+        self.db = Database(HOST, PORT, DB_NAME)
         self.db.mongo_database["my_capped_collection"].drop()
 
     def test_alive(self):

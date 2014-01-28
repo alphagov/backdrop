@@ -27,7 +27,7 @@ app.config.from_object(
     "backdrop.read.config.{}".format(GOVUK_ENV))
 
 db = database.Database(
-    app.config['MONGO_HOST'],
+    app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )

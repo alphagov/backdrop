@@ -5,7 +5,7 @@ from backdrop.core.database import Database
 from backdrop.core.repository import BucketConfigRepository, UserConfigRepository
 from backdrop.core.user import UserConfig
 
-HOST = 'localhost'
+HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 BUCKET = 'buckets'
