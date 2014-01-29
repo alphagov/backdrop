@@ -8,4 +8,4 @@ export PIP_DOWNLOAD_CACHE=/var/tmp/pip_download_cache
 virtualenv --clear --no-site-packages $VIRTUALENV_DIR
 source $VIRTUALENV_DIR/bin/activate
 
-./run_tests.sh
+SKIP_SPLINTER_TESTS=1 ./run_tests.sh

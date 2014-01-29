@@ -60,6 +60,12 @@ def create_client(feature):
     if 'use_http_client' in feature.tags:
         return HTTPTestClient(config.DATABASE_NAME)
     if 'use_admin_client' in feature.tags:
+        if os.environ.get('SKIP_SPLINTER_TESTS'):
+            class DummyClient(object):
+                def spin_down(self):
+                    pass
+            return DummyClient()
+
         return SplinterClient(config.DATABASE_NAME, 'admin', '5002')
 
     raise AssertionError(
