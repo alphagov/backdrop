@@ -404,8 +404,9 @@ class TestRequestValidation(TestCase):
         })
 
         assert_that(validation_result, is_invalid_with_message(
-            "Absolute ('start_at' and 'end_at') and relative ('duration') time "
-            "cannot be requested at the same time"))
+            "Absolute and relative time cannot be requested at the same time "
+            "- either ask for 'start_at' and 'end_at', or ask for "
+            "'start_at'/'end_at' with 'duration'"))
 
     def test_duration_is_a_valid_number(self):
         validation_result = validate_request_args({

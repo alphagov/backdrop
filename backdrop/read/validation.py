@@ -277,9 +277,10 @@ class RelativeTimeValidator(Validator):
         duration = request_args.get('duration')
 
         if start_at and end_at and duration:
-            self.add_error("Absolute ('start_at' and 'end_at') and relative "
-                           "('duration') time cannot be requested at the "
-                           "same time")
+            self.add_error("Absolute and relative time cannot be requested at "
+                           "the same time - either ask for 'start_at' and "
+                           "'end_at', or ask for 'start_at'/'end_at' with "
+                           "'duration'")
 
         if start_at and end_at is None and duration is None:
             self.add_error("Use of 'start_at' requires 'end_at' or 'duration'")
