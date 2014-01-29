@@ -83,7 +83,8 @@ class PeriodQueryValidator(Validator):
             # When executing a grouped periodic query, the limit is
             # applied to the list of groups rather than the time series
             # inside them
-            self.add_error("A grouped period query cannot be limited")
+            self.add_error("A period query can only be limited if it is "
+                           "grouped - please add 'group_by'")
 
 
 class PositiveIntegerValidator(Validator):
