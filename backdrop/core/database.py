@@ -11,6 +11,10 @@ from backdrop.core.nested_merge import nested_merge, InvalidOperationError
 class Database(object):
 
     def __init__(self, hosts, port, name):
+        self._mongo = self.get_client(hosts, port)
+        self.name = name
+
+    def get_client(self, hosts, port):
         """
         Create a list to feed to the MongoReplicaSetClient
         e.g. MongoReplicaSetClient(
@@ -22,19 +26,21 @@ class Database(object):
         http://api.mongodb.org/python/current/examples/high_availability.html
         for more
         """
-
-        clientList = []
-        for host in hosts:
-            clientList.append('{0}:{1}'.format(host, port))
+        client_list = self._client_list(hosts, port)
 
         # We can't always guarantee we'll be on 'production'
         # so we allow jenkins to add the set as a variable
         # Some test environments / other envs have their own sets e.g. 'gds-ci'
         replica_set = os.getenv('MONGO_REPLICA_SET', 'production')
 
-        self._mongo = pymongo.MongoReplicaSetClient(
-            ','.join(clientList), replicaSet=replica_set)
-        self.name = name
+        if replica_set == '':
+            return pymongo.MongoClient(client_list)
+        else:
+            return pymongo.MongoReplicaSetClient(
+                client_list, replicaSet=replica_set)
+
+    def _client_list(self, hosts, port):
+        return ','.join('{}:{}'.format(host, port) for host in hosts)
 
     def alive(self):
         return self._mongo.alive()
