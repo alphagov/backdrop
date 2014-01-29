@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #
 # Replicate backdrop mongo db from a source host to a target host.
