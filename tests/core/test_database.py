@@ -7,7 +7,7 @@ from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
 
-class DatabaseTestCase(unittest.TestCase):
+class TestMongoDriver(unittest.TestCase):
     def setUp(self):
         self.collection = Mock()
         self.driver = MongoDriver(self.collection)
