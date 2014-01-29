@@ -21,6 +21,6 @@ Feature: end-to-end platform test
         Given I have the data in "grouped_timestamps.json"
           and I have a bucket named "flavour_events"
          when I post the data to "/flavour_events"
-          and I go to "/flavour_events?period=week&group_by=flavour"
+          and I go to "/flavour_events?period=week&group_by=flavour&start_at=2013-03-18T00:00:00Z&end_at=2013-04-08T00:00:00Z"
          then I should get back a status of "200"
           and the JSON should have "4" result(s)

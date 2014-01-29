@@ -278,9 +278,12 @@ class TestBucket(unittest.TestCase):
             }
         ]
         query_result = self.bucket.query(
-            Query.create(period=WEEK, group_by="some_group")).data()
-        assert_that(query_result, has_length(2))
-        assert_that(query_result, has_item(has_entries({
+            Query.create(period=WEEK, group_by="some_group"))
+
+        data = query_result.data()
+
+        assert_that(data, has_length(2))
+        assert_that(data, has_item(has_entries({
             "values": has_item({
                 "_start_at": d_tz(2013, 1, 7, 0, 0, 0),
                 "_end_at": d_tz(2013, 1, 14, 0, 0, 0),
@@ -288,7 +291,7 @@ class TestBucket(unittest.TestCase):
             }),
             "some_group": "val1"
         })))
-        assert_that(query_result, has_item(has_entries({
+        assert_that(data, has_item(has_entries({
             "values": has_item({
                 "_start_at": d_tz(2013, 1, 14, 0, 0, 0),
                 "_end_at": d_tz(2013, 1, 21, 0, 0, 0),
@@ -296,7 +299,7 @@ class TestBucket(unittest.TestCase):
             }),
             "some_group": "val1"
         })))
-        assert_that(query_result, has_item(has_entries({
+        assert_that(data, has_item(has_entries({
             "values": has_item({
                 "_start_at": d_tz(2013, 1, 7, 0, 0, 0),
                 "_end_at": d_tz(2013, 1, 14, 0, 0, 0),
@@ -304,7 +307,7 @@ class TestBucket(unittest.TestCase):
             }),
             "some_group": "val2"
         })))
-        assert_that(query_result, has_item(has_entries({
+        assert_that(data, has_item(has_entries({
             "values": has_item({
                 "_start_at": d_tz(2013, 1, 14, 0, 0, 0),
                 "_end_at": d_tz(2013, 1, 21, 0, 0, 0),
@@ -354,8 +357,10 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(Query.create(period=MONTH,
                                                       group_by="some_group"))
         data = query_result.data()
-        assert_that(data, has_item(has_entries({"values": has_length(2)})))
-        assert_that(data, has_item(has_entries({"values": has_length(3)})))
+        assert_that(data,
+                    has_item(has_entries({"values": has_length(2)})))
+        assert_that(data,
+                    has_item(has_entries({"values": has_length(3)})))
 
     def test_month_and_group_query_with_start_and_end_at(self):
         self.mock_repository.multi_group.return_value = [
@@ -400,8 +405,10 @@ class TestBucket(unittest.TestCase):
                                                       start_at=d(2013, 1, 1),
                                                       end_at=d(2013, 4, 2)))
         data = query_result.data()
-        assert_that(data, has_item(has_entries({"values": has_length(4)})))
-        assert_that(data, has_item(has_entries({"values": has_length(4)})))
+        assert_that(data,
+                    has_item(has_entries({"values": has_length(4)})))
+        assert_that(data,
+                    has_item(has_entries({"values": has_length(4)})))
 
         first_group = data[0]["values"]
         assert_that(first_group, has_item(has_entries({
@@ -452,9 +459,9 @@ class TestBucket(unittest.TestCase):
         query_result = self.bucket.query(
             Query.create(period=WEEK, group_by="some_group",
                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
-                         end_at=d_tz(2013, 2, 4, 0, 0, 0))).data()
+                         end_at=d_tz(2013, 2, 4, 0, 0, 0)))
 
-        assert_that(query_result, has_item(has_entries({
+        assert_that(query_result.data(), has_item(has_entries({
             "some_group": "val1",
             "values": contains(
                 has_entries({"_start_at": d_tz(2013, 1, 7), "_count": 0}),
@@ -464,7 +471,7 @@ class TestBucket(unittest.TestCase):
             ),
         })))
 
-        assert_that(query_result, has_item(has_entries({
+        assert_that(query_result.data(), has_item(has_entries({
             "some_group": "val2",
             "values": contains(
                 has_entries({"_start_at": d_tz(2013, 1, 7), "_count": 0}),

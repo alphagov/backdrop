@@ -6,10 +6,6 @@ from backdrop.core.timeutils import now, parse_time_as_utc
 from backdrop.read.response import *
 
 
-def utc(dt):
-    return dt.replace(tzinfo=pytz.UTC)
-
-
 def if_present(func, value):
     """Apply the given function to the value and return if it exists"""
     if value is not None:
@@ -19,33 +15,16 @@ def if_present(func, value):
 def parse_request_args(request_args):
     args = dict()
 
+    args['start_at'] = if_present(parse_time_as_utc,
+                                  request_args.get('start_at'))
+
+    args['end_at'] = if_present(parse_time_as_utc,
+                                request_args.get('end_at'))
+
+    args['duration'] = if_present(int, request_args.get('duration'))
+
     args['period'] = if_present(parse_period,
                                 request_args.get('period'))
-
-    if request_args.get('delta'):
-        # relative time range requested
-        delta = int(request_args['delta'])
-
-        date = if_present(parse_time_as_utc, request_args.get('date')) or now()
-
-        period = args['period']
-        duration = period.delta * delta
-
-        if delta > 0:
-            date = period.end(date)
-            args['start_at'] = date
-            args['end_at'] = date + duration
-        else:
-            date = period.start(date)
-            args['start_at'] = date + duration
-            args['end_at'] = date
-    else:
-        # absolute time range requested
-        args['start_at'] = if_present(parse_time_as_utc,
-                                      request_args.get('start_at'))
-
-        args['end_at'] = if_present(parse_time_as_utc,
-                                    request_args.get('end_at'))
 
     def boolify(value):
         return {
@@ -76,28 +55,65 @@ def parse_request_args(request_args):
 
     return args
 
-
+"""
+This is the internal Query object
+ - Create list of attributes to build the query from
+ - We use delta interally, but the end user will use 'duration'
+"""
 _Query = namedtuple(
     '_Query',
-    'start_at end_at filter_by period group_by sort_by limit collect'
-)
+    ['start_at', 'end_at', 'delta', 'period',
+     'filter_by', 'group_by', 'sort_by', 'limit', 'collect'])
 
 
 class Query(_Query):
     @classmethod
     def create(cls,
-               start_at=None, end_at=None, filter_by=None, period=None,
-               group_by=None, sort_by=None, limit=None, collect=None):
-        return Query(start_at, end_at, filter_by or [], period,
-                     group_by, sort_by, limit, collect or [])
+               start_at=None, end_at=None, duration=None, delta=None,
+               period=None, filter_by=None, group_by=None,
+               sort_by=None, limit=None, collect=None):
+        delta = None
+        if duration is not None:
+            date = start_at or end_at or now()
+            delta = duration if start_at else -duration
+            start_at, end_at = cls.__calculate_start_and_end(period, date,
+                                                             delta)
+        return Query(start_at, end_at, delta, period,
+                     filter_by or [], group_by, sort_by, limit, collect or [])
 
     @classmethod
     def parse(cls, request_args):
         args = parse_request_args(request_args)
-        return Query(**args)
+        return Query.create(**args)
+
+    @staticmethod
+    def __calculate_start_and_end(period, date, delta):
+        duration = period.delta * delta
+        start_of_period = period.start(date)
+
+        start_at, end_at = sorted(
+            [start_of_period, start_of_period + duration])
+
+        return start_at, end_at
+
+    def __skip_blank_periods(self, results, repository):
+        amount_to_shift = results.amount_to_shift(self.delta)
+        if amount_to_shift != 0:
+            query = self.get_shifted_query(shift=amount_to_shift)
+            results = query.execute(repository)
+
+        return results
+
+    def get_shifted_query(self, shift):
+        """Return a new Query where the date is shifted by n periods"""
+        args = self._asdict()
+
+        args['start_at'] = args['start_at'] + (self.period.delta * shift)
+        args['end_at'] = args['end_at'] + (self.period.delta * shift)
+
+        return Query.create(**args)
 
     def to_mongo_query(self):
-
         mongo_query = {}
         if self.start_at or self.end_at:
             mongo_query["_timestamp"] = {}
@@ -118,6 +134,10 @@ class Query(_Query):
             result = self.__execute_period_query(repository)
         else:
             result = self.__execute_query(repository)
+
+        if self.delta:
+            result = self.__skip_blank_periods(result, repository)
+
         return result
 
     def __get_period_key(self):

@@ -8,7 +8,7 @@ from backdrop.core.timeseries import WEEK
 from backdrop.read import api
 from backdrop.read.query import Query
 from tests.support.bucket import setup_bucket
-from tests.support.test_helpers import has_status, has_header
+from tests.support.test_helpers import has_status, has_header, d_tz
 
 
 class NoneData(object):
@@ -24,9 +24,15 @@ class QueryingApiTestCase(unittest.TestCase):
     @patch('backdrop.core.bucket.Bucket.query')
     def test_period_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
-        self.app.get('/data/some-group/some-type?period=week')
+
+        self.app.get(
+            '/data/some-group/some-type?period=week&' +
+            'start_at=' + urllib.quote("2012-11-05T00:00:00Z") + '&' +
+            'end_at=' + urllib.quote("2012-12-03T00:00:00Z"))
         mock_query.assert_called_with(
-            Query.create(period=WEEK))
+            Query.create(period=WEEK,
+                         start_at=d_tz(2012, 11, 5),
+                         end_at=d_tz(2012, 12, 3)))
 
     @setup_bucket("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')
@@ -64,11 +70,17 @@ class QueryingApiTestCase(unittest.TestCase):
     @patch('backdrop.core.bucket.Bucket.query')
     def test_group_by_with_period_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
+
         self.app.get(
-            '/data/some-group/some-type?period=week&group_by=stuff'
-        )
+            '/data/some-group/some-type?period=week&group_by=stuff&' +
+            'start_at=' + urllib.quote("2012-11-05T00:00:00Z") + '&' +
+            'end_at=' + urllib.quote("2012-12-03T00:00:00Z"))
+
         mock_query.assert_called_with(
-            Query.create(period=WEEK, group_by="stuff"))
+            Query.create(period=WEEK,
+                         group_by="stuff",
+                         start_at=d_tz(2012, 11, 5),
+                         end_at=d_tz(2012, 12, 3)))
 
     @setup_bucket("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')
@@ -122,14 +134,14 @@ class PreflightChecksApiTestCase(unittest.TestCase):
         response = self.app.open('/data/some-group/some-type', method='OPTIONS')
         assert_that(response, has_header('Access-Control-Allow-Headers', 'cache-control'))
 
-    @setup_bucket("bucket", data_group="some-group", data_type="some-type")
+    @setup_bucket("bucket", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
     def test_max_age_is_30_min_for_non_realtime_buckets(self):
-        response = self.app.get('/data/some-group/some-type?period=week')
+        response = self.app.get('/data/some-group/some-type')
 
         assert_that(response, has_header('Cache-Control', 'max-age=1800, must-revalidate'))
 
-    @setup_bucket("bucket", data_group="some-group", data_type="some-type", realtime=True)
+    @setup_bucket("bucket", data_group="some-group", data_type="some-type", realtime=True, raw_queries_allowed=True)
     def test_max_age_is_2_min_for_realtime_buckets(self):
-        response = self.app.get('/data/some-group/some-type?period=week')
+        response = self.app.get('/data/some-group/some-type')
 
         assert_that(response, has_header('Cache-Control', 'max-age=120, must-revalidate'))

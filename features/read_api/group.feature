@@ -28,7 +28,7 @@ Feature: grouping queries for read api
 
     Scenario: grouping data by time period - week
         Given "stored_timestamps.json" is in "weekly" bucket
-         when I go to "/weekly?period=week"
+         when I go to "/weekly?period=week&start_at=2013-03-11T00:00:00Z&end_at=2013-03-25T00:00:00Z"
          then I should get back a status of "200"
           and the JSON should have "2" results
           and the "1st" result should be "{"_count": 3.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00"}"
@@ -36,7 +36,7 @@ Feature: grouping queries for read api
 
     Scenario: grouping data by time period (week) and filtering
         Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
-         when I go to "/weekly?period=week&filter_by=name:alpha"
+         when I go to "/weekly?period=week&filter_by=name:alpha&start_at=2013-03-11T00:00:00Z&end_at=2013-03-25T00:00:00Z"
          then I should get back a status of "200"
           and the JSON should have "2" results
           and the "1st" result should be "{"_count": 2.0, "_start_at": "2013-03-11T00:00:00+00:00", "_end_at" : "2013-03-18T00:00:00+00:00"}"
@@ -45,7 +45,7 @@ Feature: grouping queries for read api
 
     Scenario: grouping data by time period (week) and a name
         Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
-          when I go to "/weekly?period=week&group_by=name"
+          when I go to "/weekly?period=week&group_by=name&start_at=2013-03-11T00:00:00Z&end_at=2013-03-25T00:00:00Z"
           then I should get back a status of "200"
            and the JSON should have "2" results
            and the "1st" result should have "values" with item "{"_start_at": "2013-03-11T00:00:00+00:00", "_end_at": "2013-03-18T00:00:00+00:00", "_count": 2.0}"
@@ -53,7 +53,7 @@ Feature: grouping queries for read api
 
     Scenario: grouping data by time period (week) and a name and filtered by a key and value
         Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
-         when I go to "/weekly?period=week&group_by=name&filter_by=name:alpha"
+         when I go to "/weekly?period=week&group_by=name&filter_by=name:alpha&start_at=2013-03-11T00:00:00Z&end_at=2013-03-25T00:00:00Z"
          then I should get back a status of "200"
            and the JSON should have "1" results
            and the "1st" result should have "values" with item "{"_start_at": "2013-03-11T00:00:00+00:00", "_end_at": "2013-03-18T00:00:00+00:00", "_count": 2.0}"
@@ -62,7 +62,7 @@ Feature: grouping queries for read api
 
     Scenario: grouping data by time period (week) and a name that doesn't exist
         Given "stored_timestamps_for_filtering.json" is in "weekly" bucket
-         when I go to "/weekly?period=week&group_by=wibble"
+         when I go to "/weekly?period=week&group_by=wibble&start_at=2013-03-11T00:00:00Z&end_at=2013-03-25T00:00:00Z"
          then I should get back a status of "200"
           and the JSON should have "0" results
 

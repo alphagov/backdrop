@@ -26,14 +26,6 @@ class QueryingApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
-    @stub_bucket_retrieve_by_name("foo")
-    @patch('backdrop.core.bucket.Bucket.query')
-    def test_period_query_is_executed(self, mock_query):
-        mock_query.return_value = NoneData()
-        self.app.get('/foo?period=week')
-        mock_query.assert_called_with(
-            Query.create(period=WEEK))
-
     @stub_bucket_retrieve_by_name("foo", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')
     def test_filter_by_query_is_executed(self, mock_query):
@@ -64,16 +56,6 @@ class QueryingApiTestCase(unittest.TestCase):
         )
         mock_query.assert_called_with(
             Query.create(start_at=expected_start_at, end_at=expected_end_at))
-
-    @stub_bucket_retrieve_by_name("foo")
-    @patch('backdrop.core.bucket.Bucket.query')
-    def test_group_by_with_period_is_executed(self, mock_query):
-        mock_query.return_value = NoneData()
-        self.app.get(
-            '/foo?period=week&group_by=stuff'
-        )
-        mock_query.assert_called_with(
-            Query.create(period=WEEK, group_by="stuff"))
 
     @stub_bucket_retrieve_by_name("foo", raw_queries_allowed=True)
     @patch('backdrop.core.bucket.Bucket.query')

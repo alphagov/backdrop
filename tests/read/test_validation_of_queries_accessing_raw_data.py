@@ -16,7 +16,11 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         assert_that(validation_result, is_valid())
 
     def test_that_periodic_queries_are_allowed(self):
-        validation_result = validate_request_args({'period': 'week'})
+        validation_result = validate_request_args({
+            'period': 'day',
+            'start_at': '2012-11-01T00:00:00Z',
+            'end_at': '2012-12-01T00:00:00Z',
+        })
         assert_that(validation_result, is_valid())
 
     def test_that_querying_for_less_than_7_days_of_data_is_disallowed(self):
@@ -124,8 +128,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         })
         assert_that(validation_result,
                     is_invalid_with_message(
-                        "both 'start_at' and 'end_at' are required for "
-                        "a period query"))
+                        "Either 'duration' or both 'start_at' and 'end_at' "
+                        "are required for a period query"))
 
     def test_that_end_at_alone_is_disallowed(self):
         validation_result = validate_request_args({
@@ -134,8 +138,8 @@ class TestValidationOfQueriesAccessingRawData(TestCase):
         })
         assert_that(validation_result,
                     is_invalid_with_message(
-                        "both 'start_at' and 'end_at' are required for "
-                        "a period query"))
+                        "Either 'duration' or both 'start_at' and 'end_at' "
+                        "are required for a period query"))
 
     def test_that_grouping_by_month_requires_dates_at_start_of_month(self):
         validation_result = validate_request_args({

@@ -154,13 +154,15 @@ def fetch(bucket_config):
         bucket = Bucket(db, bucket_config)
 
         try:
-            result_data = bucket.query(Query.parse(request.args)).data()
+            query = Query.parse(request.args)
+            data = bucket.query(query).data()
+
         except InvalidOperationError:
             return log_error_and_respond(
                 bucket.name, 'invalid collect function',
                 400)
 
-        response = jsonify(data=result_data)
+        response = jsonify(data=data)
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'

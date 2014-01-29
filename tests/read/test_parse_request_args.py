@@ -1,11 +1,9 @@
 from datetime import datetime
 import unittest
 
-
 from hamcrest import *
 import pytz
 from werkzeug.datastructures import MultiDict
-from freezegun import freeze_time
 
 from backdrop.read.query import parse_request_args
 
@@ -143,75 +141,3 @@ class Test_parse_request_args(unittest.TestCase):
         args = parse_request_args(request_args)
 
         assert_that(args['collect'], is_([("some_key", "mean")]))
-
-    @freeze_time('2014-01-09 00:00:00')
-    def test_no_date_means_now(self):
-        request_args = MultiDict([
-            ('period', 'day'),
-            ('delta', '3'),
-        ])
-
-        args = parse_request_args(request_args)
-
-        assert_that(args['start_at'], is_(
-            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
-
-    def test_date_on_boundary_and_positive_delta(self):
-        request_args = MultiDict([
-            ('date', '2014-01-09T00:00:00+00:00'),
-            ('period', 'day'),
-            ('delta', '3'),
-        ])
-
-        args = parse_request_args(request_args)
-
-        assert_that(args['start_at'], is_(
-            datetime(2014, 1, 9, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(args['end_at'], is_(
-            datetime(2014, 1, 12, 0, 0, 0, tzinfo=pytz.UTC)))
-
-    def test_date_on_boundary_and_negative_delta(self):
-        request_args = MultiDict([
-            ('date', '2014-01-11T0:0:0+00:00'),
-            ('period', 'day'),
-            ('delta', '-3'),
-        ])
-
-        args = parse_request_args(request_args)
-
-        assert_that(args['start_at'], is_(
-            datetime(2014, 1, 8, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(args['end_at'], is_(
-            datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))
-
-    def test_date_off_boundary_and_positive_delta(self):
-        request_args = MultiDict([
-            ('date', '2014-01-09T01:02:03+00:00'),
-            ('period', 'day'),
-            ('delta', '3'),
-        ])
-
-        args = parse_request_args(request_args)
-
-        assert_that(args['start_at'], is_(
-            datetime(2014, 1, 10, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(args['end_at'], is_(
-            datetime(2014, 1, 13, 0, 0, 0, tzinfo=pytz.UTC)))
-
-    def test_date_off_boundary_and_negative_delta(self):
-        request_args = MultiDict([
-            ('date', '2014-01-11T23:58:57+00:00'),
-            ('period', 'day'),
-            ('delta', '-3'),
-        ])
-
-        args = parse_request_args(request_args)
-
-        assert_that(args['start_at'], is_(
-            datetime(2014, 1, 8, 0, 0, 0, tzinfo=pytz.UTC)))
-
-        assert_that(args['end_at'], is_(
-            datetime(2014, 1, 11, 0, 0, 0, tzinfo=pytz.UTC)))

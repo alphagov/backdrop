@@ -42,14 +42,13 @@ class ParameterValidator(Validator):
         self.allowed_parameters = set([
             'start_at',
             'end_at',
-            'filter_by',
+            'duration',
             'period',
+            'filter_by',
             'group_by',
             'sort_by',
             'limit',
             'collect',
-            'date',
-            'delta',
         ])
         super(ParameterValidator, self).__init__(request_args)
 
@@ -72,10 +71,20 @@ class DatetimeValidator(Validator):
 
 class PeriodQueryValidator(Validator):
     def validate(self, request_args, context):
-        if 'start_at' in request_args or 'end_at' in request_args:
-            if not ('start_at' in request_args and 'end_at' in request_args):
-                self.add_error("both 'start_at' and 'end_at' are required "
-                               "for a period query")
+        if 'period' not in request_args:
+            return
+
+        if 'duration' not in request_args:
+            if 'start_at' not in request_args or 'end_at' not in request_args:
+                self.add_error("Either 'duration' or both 'start_at' and "
+                               "'end_at' are required for a period query")
+
+        if 'group_by' not in request_args and 'limit' in request_args:
+            # When executing a grouped periodic query, the limit is
+            # applied to the list of groups rather than the time series
+            # inside them
+            self.add_error("A period query can only be limited if it is "
+                           "grouped - please add 'group_by'")
 
 
 class PositiveIntegerValidator(Validator):
@@ -262,31 +271,34 @@ class FirstOfMonthValidator(Validator):
 class RelativeTimeValidator(Validator):
     def validate(self, request_args, context):
 
+        start_at = request_args.get('start_at')
+        end_at = request_args.get('end_at')
         period = request_args.get('period')
-        date = request_args.get('date')
-        delta = request_args.get('delta')
+        duration = request_args.get('duration')
 
-        if (request_args.get('start_at') or request_args.get('end_at')) \
-                and (delta or date):
-            self.add_error("Absolute ('start_at' and 'end_at') and relative "
-                           "('delta' and/or 'date') time cannot be requested "
-                           "at the same time")
+        if start_at and end_at and duration:
+            self.add_error("Absolute and relative time cannot be requested at "
+                           "the same time - either ask for 'start_at' and "
+                           "'end_at', or ask for 'start_at'/'end_at' with "
+                           "'duration'")
 
-        if date and not delta:
-            self.add_error("Use of 'date' requires 'delta'")
+        if start_at and end_at is None and duration is None:
+            self.add_error("Use of 'start_at' requires 'end_at' or 'duration'")
 
-        if delta:
-            if delta == '0':
-                self.add_error("'delta' must not be zero")
+        if end_at and start_at is None and duration is None:
+            self.add_error("Use of 'end_at' requires 'start_at' or 'duration'")
+
+        if duration:
+            if duration == '0':
+                self.add_error("'duration' must not be zero")
             if not period:
-                self.add_error("If 'delta' is requested (for relative time), "
-                               "'period' is required")
-
-        if delta:
+                self.add_error("If 'duration' is requested (for relative "
+                               "time), 'period' is required - please add a "
+                               "period (like 'day', 'month' etc)")
             try:
-                int(delta)
+                int(duration)
             except ValueError:
-                self.add_error("'delta' is not a valid Integer")
+                self.add_error("'duration' is not a valid Integer")
 
 
 def validate_request_args(request_args, raw_queries_allowed=False):
@@ -305,6 +317,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         SortByValidator(request_args),
         GroupByValidator(request_args),
         PositiveIntegerValidator(request_args, param_name='limit'),
+        PositiveIntegerValidator(request_args, param_name='duration'),
         ParamDependencyValidator(request_args, param_name='collect',
                                  depends_on=['group_by', 'period']),
         RelativeTimeValidator(request_args),
