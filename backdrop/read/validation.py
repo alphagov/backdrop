@@ -293,7 +293,8 @@ class RelativeTimeValidator(Validator):
                 self.add_error("'duration' must not be zero")
             if not period:
                 self.add_error("If 'duration' is requested (for relative "
-                               "time), 'period' is required")
+                               "time), 'period' is required - please add a "
+                               "period (like 'day', 'month' etc)")
             try:
                 int(duration)
             except ValueError:

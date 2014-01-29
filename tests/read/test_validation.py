@@ -368,8 +368,8 @@ class TestRequestValidation(TestCase):
         })
 
         assert_that(validation_result, is_invalid_with_message(
-            "If 'duration' is requested (for relative time), "
-            "'period' is required"))
+            "If 'duration' is requested (for relative time), 'period' is "
+            "required - please add a period (like 'day', 'month' etc)"))
 
     def test_zero_duration_isnt_allowed(self):
         validation_result = validate_request_args({
