@@ -28,6 +28,7 @@ def first_nonempty(data, is_reversed):
     if is_reversed:
         data = reversed(data)
 
+    # iterate through data and get the index of the first non-empty result
     first_nonempty_index = next(
         (i for i, d in enumerate(data) if d['_count'] > 0),
         0)
