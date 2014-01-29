@@ -62,6 +62,7 @@ def calculate_max_age(bucket):
         'journey': hours(25),  # Journey buckets should update daily
         # Jobs run every hour, we're giving 2hrs tolerance
         'monitoring': hours(2),
+        'sales': months(1.25),
     }.get(dt, months(1))  # default to a month
 
 
