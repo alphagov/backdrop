@@ -44,7 +44,17 @@ display_result $? 1 "Unit tests"
 python -m coverage.__main__ xml --include=backdrop*
 
 # run feature tests
-behave --stop --tags=~@wip
+
+# NOTE: Skipping tests using tags does not prevent their context from being
+#       created, meaning we still instantiate ie a SplinterClient for skipped
+#       tests(!) Our python code *also* has to change to get round this... yuk.
+
+if [ "${SKIP_SPLINTER_TESTS}" != "" ] ; then
+    behave --stop --tags=~@wip --tags=~@use_admin_client
+else
+    behave --stop --tags=~@wip
+fi
+
 display_result $? 2 "Feature tests"
 
 # run style checks

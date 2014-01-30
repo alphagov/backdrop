@@ -16,7 +16,7 @@ Backdrop is a datastore built with Python and MongoDB. It is made up of two sepa
 - Data can be retrieved in a few useful ways. eg `/<name_of_my_bucket>?period=month` for monthly grouped data.
 - Backdrop is in constant development, the best place to find examples and features are [the feature tests](https://github.com/alphagov/backdrop/tree/master/features)
 
-##Getting set up
+## Getting set up
 
 This assumes you are using the GDS dev environment and so have python and mongo installed.
 
@@ -27,6 +27,12 @@ This will create a new virtualenv (if virtualenvwraper is installed), install al
 4. ```source venv/bin/activate``` to enable the virtualenv if you didn't do this in step 2.
 5. Copy `backdrop/write/config/development_environment_sample.py` to `development_environment.py`
 (if you want to) and edit as needed.
+
+## Testing
+
+Run tests with ```./run_tests.sh```
+
+**WARNING**: Splinter tests are not run in travis or Jenkins due to their instability.
 
 ## Single-sign-on integration and OAuth flow
 
