@@ -2,12 +2,37 @@ import unittest
 from hamcrest import assert_that, is_
 from mock import Mock, patch
 from pymongo.errors import AutoReconnect
-from backdrop.core.database import Repository, InvalidSortError, MongoDriver
+from backdrop.core.database import Repository, InvalidSortError, MongoDriver, Database
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
 
-class DatabaseTestCase(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
+    def setUp(self):
+        self.hosts = ['localhost']
+        self.port = 27017
+        self.db = Database(self.hosts, self.port, 'test')
+
+    @patch('os.getenv', return_value='test')
+    @patch('pymongo.MongoClient')
+    @patch('pymongo.MongoReplicaSetClient')
+    def test_get_replica_set_client(self, MongoReplicaSetClient, MongoClient, getenv):
+        client = self.db.get_client(self.hosts, self.port)
+
+        assert not MongoClient.called
+        MongoReplicaSetClient.assert_called_once_with('localhost:27017', replicaSet='test')
+
+    @patch('os.getenv', return_value='')
+    @patch('pymongo.MongoClient')
+    @patch('pymongo.MongoReplicaSetClient')
+    def test_get_non_replica_set_client(self, MongoReplicaSetClient, MongoClient, getenv):
+        client = self.db.get_client(self.hosts, self.port)
+
+        MongoClient.assert_called_once_with('localhost:27017')
+        assert not MongoReplicaSetClient.called
+
+
+class TestMongoDriver(unittest.TestCase):
     def setUp(self):
         self.collection = Mock()
         self.driver = MongoDriver(self.collection)
