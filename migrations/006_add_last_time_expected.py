@@ -33,7 +33,7 @@ log = logging.getLogger(__name__)
 def up(db):
     all_buckets = db.get_collection('buckets').find()
     for bucket in all_buckets:
-        if 'max_age_expected' in bucket:
+        if bucket.get('max_age_expected') is not None:
             continue
         max_age_expected = calculate_max_age(bucket)
         bucket['max_age_expected'] = max_age_expected
