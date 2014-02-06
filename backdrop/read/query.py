@@ -58,7 +58,7 @@ def parse_request_args(request_args):
 """
 This is the internal Query object
  - Create list of attributes to build the query from
- - We use delta interally, but the end user will use 'duration'
+ - We use delta internally, but the end user will use 'duration'
 """
 _Query = namedtuple(
     '_Query',
