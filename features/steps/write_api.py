@@ -63,6 +63,21 @@ def step(context, amount, key, time):
     assert_that(list(result), has_length(int(amount)))
 
 
+@then('the collection called "{collection}" should exist')
+def step(context, dataset_name):
+    raise NotImplementedError()
+
+
+@then('the collection called "{collection}" should be uncapped')
+def step(context, dataset_name):
+    raise NotImplementedError()
+
+
+@then('the collection called "{collection}" should be capped at "{size}"')
+def step(context, dataset_name):
+    raise NotImplementedError()
+
+
 def _make_headers_from_context(context):
     if context and 'bearer_token' in context:
         return [('Authorization', "Bearer %s" % context.bearer_token)]
