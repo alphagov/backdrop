@@ -1,9 +1,7 @@
 import os
-from behave import *
-import datetime
+from behave import given, when, then
 from dateutil import parser
-from flask import json
-from hamcrest import *
+from hamcrest import assert_that, has_length
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 

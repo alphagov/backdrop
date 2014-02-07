@@ -1,14 +1,12 @@
 from os import getenv
 
-from flask import Flask, request, jsonify, g, redirect, url_for
+from flask import Flask, request, jsonify, g
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
 from backdrop.core.bucket import Bucket
-from backdrop.core.log_handler \
-    import create_request_logger, create_response_logger
 from backdrop.core.flaskutils import BucketConverter
-from backdrop.core.repository import BucketConfigRepository,\
-    UserConfigRepository
+from backdrop.core.repository import (BucketConfigRepository,
+                                      UserConfigRepository)
 
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
@@ -99,7 +97,7 @@ def _write_to_bucket(bucket_config):
         return jsonify(status='error', message='Forbidden'), 403
 
     try:
-        data = load_json(request.json)
+        data = listify_json(request.json)
 
         bucket = Bucket(db, bucket_config)
         bucket.parse_and_store(data)
@@ -109,7 +107,7 @@ def _write_to_bucket(bucket_config):
         return jsonify(status="error", message=str(e)), 400
 
 
-def load_json(data):
+def listify_json(data):
     if data is None:
         raise ValidationError("Request must be JSON")
 
