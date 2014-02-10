@@ -4,6 +4,7 @@ Feature: end-to-end platform test
     Scenario: write data to platform
         Given I have the data in "dinosaurs.json"
           and I have a bucket named "reptiles"
+          and I use the bearer token for the bucket
           and bucket setting raw_queries_allowed is true
          when I post the data to "/reptiles"
          then I should get back a status of "200"
@@ -11,6 +12,7 @@ Feature: end-to-end platform test
     Scenario: write and retrieve data from platform
         Given I have the data in "dinosaurs.json"
           and I have a bucket named "reptiles"
+          and I use the bearer token for the bucket
           and bucket setting raw_queries_allowed is true
          when I post the data to "/reptiles"
           and I go to "/reptiles?filter_by=size:big"
@@ -20,6 +22,7 @@ Feature: end-to-end platform test
     Scenario: writing events and retrieving weekly data
         Given I have the data in "grouped_timestamps.json"
           and I have a bucket named "flavour_events"
+          and I use the bearer token for the bucket
          when I post the data to "/flavour_events"
           and I go to "/flavour_events?period=week&group_by=flavour&start_at=2013-03-18T00:00:00Z&end_at=2013-04-08T00:00:00Z"
          then I should get back a status of "200"

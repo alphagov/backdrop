@@ -15,6 +15,11 @@ def step(context, fixture_name):
         context.data_to_post = fixture.read()
 
 
+@given('I use the bearer token for the bucket')
+def step(context):
+    context.bearer_token = "%s-bearer-token" % context.bucket
+
+
 @when('I post the data to "{bucket_name}"')
 def step(context, bucket_name):
     if not (context and 'bucket' in context):
@@ -23,7 +28,7 @@ def step(context, bucket_name):
         bucket_name,
         data=context.data_to_post,
         content_type="application/json",
-        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
+        headers=_make_headers_from_context(context),
     )
 
 
@@ -33,7 +38,7 @@ def step(context, path):
         path,
         data=context.data_to_post,
         content_type="application/json",
-        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
+        headers=_make_headers_from_context(context),
     )
 
 
@@ -43,7 +48,7 @@ def step(context, filename, bucket_name):
     context.response = context.client.post(
         "/" + bucket_name + "/upload",
         files={"file": open("tmp/%s" % filename, "r")},
-        headers=[('Authorization', "Bearer %s-bearer-token" % context.bucket)],
+        headers=_make_headers_from_context(context),
     )
 
 
@@ -58,3 +63,9 @@ def step(context, amount, key, time):
     time_query = parser.parse(time)
     result = context.client.storage()[context.bucket].find({key: time_query})
     assert_that(list(result), has_length(int(amount)))
+
+
+def _make_headers_from_context(context):
+    if context and 'bearer_token' in context:
+        return [('Authorization', "Bearer %s" % context.bearer_token)]
+    return []
