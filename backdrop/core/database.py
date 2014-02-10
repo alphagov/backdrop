@@ -54,6 +54,14 @@ class Database(object):
     def collection_names(self):
         return self._mongo[self.name].collection_names()
 
+    def collection_exists(self, collection_name):
+        print("{} in? {}".format(collection_name, self.collection_names()))
+        return collection_name in self.collection_names()
+
+    def create_uncapped_collection(self, collection_name):
+        return self.mongo_database.create_collection(
+            name=collection_name, capped=False, size=0)
+
     def create_capped_collection(self, collection_name, capped_size):
         return self.mongo_database.create_collection(name=collection_name,
                                                      capped=True,
