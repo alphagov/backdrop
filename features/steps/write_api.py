@@ -1,9 +1,7 @@
 import os
-from behave import *
-import datetime
+from behave import given, when, then
 from dateutil import parser
-from flask import json
-from hamcrest import *
+from hamcrest import assert_that, has_length, equal_to
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
@@ -15,9 +13,19 @@ def step(context, fixture_name):
         context.data_to_post = fixture.read()
 
 
+@given("I have JSON data '{json}'")
+def step(context, json):
+    context.data_to_post = json
+
+
 @given('I use the bearer token for the bucket')
 def step(context):
     context.bearer_token = "%s-bearer-token" % context.bucket
+
+
+@given(u'I have the bearer token "{token}"')
+def step(context, token):
+    context.bearer_token = token
 
 
 @when('I post the data to "{bucket_name}"')
@@ -63,6 +71,30 @@ def step(context, amount, key, time):
     time_query = parser.parse(time)
     result = context.client.storage()[context.bucket].find({key: time_query})
     assert_that(list(result), has_length(int(amount)))
+
+
+@then('the collection called "{collection}" should exist')
+def step(context, collection):
+    assert collection in context.client.storage().collection_names()
+
+
+@then('the collection called "{collection}" should not exist')
+def step(context, collection):
+    assert collection not in context.client.storage().collection_names()
+
+
+@then('the collection called "{collection}" should be uncapped')
+def step(context, collection):
+    options = context.client.storage()[collection].options()
+    assert options['capped'] is False
+
+
+@then('the collection called "{collection}" should be capped at "{size}"')
+def step(context, collection, size):
+    options = context.client.storage()[collection].options()
+    assert options['capped'] is True
+
+    assert_that(int(options['size']), equal_to(int(size)))
 
 
 def _make_headers_from_context(context):
