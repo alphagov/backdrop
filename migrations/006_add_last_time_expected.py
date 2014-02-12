@@ -39,7 +39,7 @@ def up(db):
         bucket['max_age_expected'] = max_age_expected
         log.info("Adding max age of: %s to %s bucket" %
                  (max_age_expected, bucket['name']))
-        db['buckets'].save(bucket)
+        db.get_collection('buckets').save(bucket)
 
 
 def calculate_max_age(bucket):
@@ -58,9 +58,12 @@ def calculate_max_age(bucket):
         return None
 
     return {
-        'realtime': minutes(5),  # 5mins for realtime buckets
-        'journey': hours(25),  # Journey buckets should update daily
-        # Jobs run every hour, we're giving 2hrs tolerance
+        # 5mins for realtime
+        'realtime': minutes(5),
+        # Journey and customer satisfaction sets should update daily
+        'journey': hours(25),
+        'customer-satisfaction': hours(25),
+        # Jobs run every hour, we're giving 2hrs as tolerance
         'monitoring': hours(2),
         'sales': months(1.25),
     }.get(dt, months(1))  # default to a month
