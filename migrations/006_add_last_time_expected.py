@@ -45,7 +45,7 @@ def up(db):
 def calculate_max_age(bucket):
     dt = bucket['data_type']
 
-    dead_buckets = [
+    dead_bucket_names = [
         'evl_channel_volumetrics',
         'government_annotations',
         'land_registry_search_volumetrics',
@@ -54,7 +54,7 @@ def calculate_max_age(bucket):
         'housing_policy_monthly_mortgage_lending'
     ]
 
-    if bucket in dead_buckets:
+    if bucket['name'] in dead_bucket_names:
         return None
 
     return {
