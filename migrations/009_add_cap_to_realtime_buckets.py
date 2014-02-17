@@ -113,6 +113,15 @@ def up(db):
     realtime_collections_names = get_realtime_collection_names(db)
 
     for collection_name in realtime_collections_names:
+
+        # Check if collection has already been capped
+        # {u'capped': True, u'size': 4194304.0}
+        stats = mongo_db[collection_name].options()
+        if(stats['capped'] is True and stats['size'] is 4194304.0):
+            log.info("Skipping {0}, already capped at {1}".format(
+                collection_name, stats['size']))
+            continue
+
         log.info("Copying down items from {0}".format(collection_name))
         copy_down_collection(db, collection_name)
 
