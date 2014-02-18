@@ -117,7 +117,7 @@ def up(db):
         # Check if collection has already been capped
         # {u'capped': True, u'size': 4194304.0}
         stats = mongo_db[collection_name].options()
-        if(stats['capped'] is True and stats['size'] is 4194304.0):
+        if(stats.get('capped') is True and stats['size'] is 4194304.0):
             log.info("Skipping {0}, already capped at {1}".format(
                 collection_name, stats['size']))
             continue
