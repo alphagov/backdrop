@@ -14,19 +14,27 @@ def get_realtime_collection_names(db):
             if name.endswith("realtime")]
 
 
-def remove_all_capped_references(db):
+def get_all_capped_collections(db):
+    mongo_db = db._mongo['backdrop']
+    return [name for name in mongo_db.collection_names()
+            if mongo_db[name].options().get('capped') is True]
+
+
+def remove_all_capped_references(db, capped_collections):
     mongo_db = db._mongo['backdrop']
     for record in mongo_db['buckets'].find():
-        # log.info("item {0}".format(record))
-        mongo_db['buckets'].update(
-            {"name": record['name']},
-            {"$set":
-                {
-                    "capped_size": None,
-                }
-             },
-            upsert=False,
-            multi=False)
+        if record['name'] not in capped_collections:
+            log.info(
+                "Removing the cap reference for {0}".format(record['name']))
+            mongo_db['buckets'].update(
+                {"name": record['name']},
+                {"$set":
+                    {
+                        "capped_size": None,
+                    }
+                 },
+                upsert=False,
+                multi=False)
 
 
 def remove_old_versions(db, collection_name):
@@ -107,8 +115,9 @@ def up(db):
     mongo_db = db._mongo['backdrop']
 
     # To start off, get rid of all references to caps in the metadata,
-    # because they were all wrong
-    remove_all_capped_references(db)
+    # if the collections they reference are not actually capped
+    all_capped = get_all_capped_collections(db)
+    remove_all_capped_references(db, all_capped)
 
     realtime_collections_names = get_realtime_collection_names(db)
 
