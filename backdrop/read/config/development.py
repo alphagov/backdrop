@@ -44,3 +44,5 @@ RAW_QUERIES_ALLOWED = {
     # LPA / Lasting Power of Attorney
     "lpa_journey": True,
 }
+
+STAGECRAFT_URL = 'stagecraft.perfplat.dev:3204'
