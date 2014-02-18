@@ -33,19 +33,15 @@ def remove_old_versions(db, collection_name):
     mongo_db = db._mongo['backdrop']
     variants = get_temp_collection_names(collection_name)
 
-    # import pdb;pdb.set_trace()
-
     for variant in variants.values():
         log.info("Dropping {0}".format(mongo_db[variant]))
         mongo_db[variant].drop()
-
 
 
 def copy_down_collection(db, collection_name):
     mongo_db = db._mongo['backdrop']
 
     # Create new collection
-    # import pdb;pdb.set_trace()
     new_collection_name = get_temp_collection_names(collection_name)["new"]
 
     # This collection should be temporary, clean up if we have a leftover
@@ -57,7 +53,6 @@ def copy_down_collection(db, collection_name):
 
     # Order this by asc, so that when we copy in, oldest records are pushed
     # out first
-    # import pdb;pdb.set_trace()
     log.info("Copying items from {0}...".format(collection_name))
     for item in mongo_db[collection_name].find():
 
@@ -122,7 +117,7 @@ def up(db):
         # Check if collection has already been capped
         # {u'capped': True, u'size': 4194304.0}
         stats = mongo_db[collection_name].options()
-        if(stats.get('capped') is True and stats['size'] is 4194304.0):
+        if(stats.get('capped') is True and stats['size'] == 4194304.0):
             log.info("Skipping {0}, already capped at {1}".format(
                 collection_name, stats['size']))
             continue
@@ -141,7 +136,6 @@ def up(db):
 
         # Remove old/new versions
         remove_old_versions(db, collection_name)
-
 
         print("Finished copying {}".format(collection_name))
     print("All done <3")
