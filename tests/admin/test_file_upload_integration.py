@@ -3,10 +3,11 @@ import os
 import datetime
 from hamcrest import assert_that, has_entry, is_, has_entries
 from pymongo import MongoClient
-from tests.support.bucket import stub_bucket_retrieve_by_name, setup_bucket, stub_user_retrieve_by_email
+from tests.support.bucket import fake_bucket_exists, stub_user_retrieve_by_email
 from tests.support.test_helpers import has_status
 from tests.admin.support.clamscan import stub_clamscan
 from tests.admin.support.oauth_test_case import OauthTestCase
+from tests.support.bucket import fake_bucket_exists
 
 
 class TestFileUploadIntegration(OauthTestCase):
@@ -19,7 +20,7 @@ class TestFileUploadIntegration(OauthTestCase):
             name="test",
             email=email)
 
-    @stub_bucket_retrieve_by_name("test", upload_format="csv")
+    @fake_bucket_exists("test", upload_format="csv")
     @stub_user_retrieve_by_email("test@example.com", buckets=["test"])
     @stub_clamscan(is_virus=False)
     def test_accepts_content_type_for_csv(self):
@@ -33,7 +34,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
 
-    @stub_bucket_retrieve_by_name("test", upload_format="csv")
+    @fake_bucket_exists("test", upload_format="csv")
     @stub_user_retrieve_by_email("test@example.com", buckets=["test"])
     @stub_clamscan(is_virus=True)
     def test_rejects_content_type_for_exe(self):
@@ -48,7 +49,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
-    @stub_bucket_retrieve_by_name("test_upload_integration", upload_format="csv")
+    @fake_bucket_exists("test_upload_integration", upload_format="csv")
     @stub_user_retrieve_by_email("test@example.com", buckets=["test_upload_integration"])
     @stub_clamscan(is_virus=False)
     def test_data_hits_the_database_when_uploading_csv(self):
@@ -69,7 +70,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('_id', 'hello'))
         assert_that(record, has_entry('value', 'some_value'))
 
-    @stub_bucket_retrieve_by_name("integration_test_excel_bucket", upload_format="excel")
+    @fake_bucket_exists("integration_test_excel_bucket", upload_format="excel")
     @stub_user_retrieve_by_email("test@example.com", buckets=["integration_test_excel_bucket"])
     @stub_clamscan(is_virus=False)
     def test_data_hits_the_database_when_uploading_xlsx(self):
@@ -91,7 +92,7 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('age', 27))
         assert_that(record, has_entry('nationality', 'Polish'))
 
-    @setup_bucket("evl_ceg_data", data_group="group", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
+    @fake_bucket_exists("evl_ceg_data", data_group="group", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
     @stub_user_retrieve_by_email("test@example.com", buckets=["evl_ceg_data"])
     @stub_clamscan(is_virus=False)
     def test_upload_applies_filters(self):
@@ -118,7 +119,7 @@ class TestFileUploadIntegration(OauthTestCase):
             "_timestamp": datetime.datetime(2007, 7, 1, 0, 0),
         }))
 
-    @setup_bucket("bucket_with_timestamp_auto_id", data_group="group", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
+    @fake_bucket_exists("bucket_with_timestamp_auto_id", data_group="group", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
     @stub_user_retrieve_by_email("test@example.com", buckets=["bucket_with_timestamp_auto_id"])
     @stub_clamscan(is_virus=False)
     def test_upload_auto_generate_ids(self):

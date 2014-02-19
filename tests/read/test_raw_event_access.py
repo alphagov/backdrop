@@ -2,7 +2,7 @@ import unittest
 from hamcrest import assert_that
 from backdrop.read import api
 from tests.support.test_helpers import is_bad_request, is_ok
-from tests.support.bucket import stub_bucket_retrieve_by_name
+from tests.support.bucket import fake_bucket_exists
 
 
 class TestRawEventAccess(unittest.TestCase):
@@ -13,17 +13,17 @@ class TestRawEventAccess(unittest.TestCase):
     def tearDown(self):
         api.app.config['RAW_QUERIES_ALLOWED']['foo'] = True
 
-    @stub_bucket_retrieve_by_name("foo")
+    @fake_bucket_exists("foo")
     def test_that_querying_for_raw_events_is_disabled(self):
         response = self.app.get("/foo?filter_by=foo:bar")
         assert_that(response, is_bad_request())
 
-    @stub_bucket_retrieve_by_name("bar")
+    @fake_bucket_exists("bar")
     def test_that_queries_with_group_by_are_allowed(self):
         response = self.app.get("/bar?filter_by=foo:bar&group_by=pie")
         assert_that(response, is_ok())
 
-    @stub_bucket_retrieve_by_name("pub")
+    @fake_bucket_exists("pub")
     def test_that_querying_for_less_than_7_days_periods_is_disabled(self):
         response = self.app.get(
             "/pub?"
@@ -34,14 +34,14 @@ class TestRawEventAccess(unittest.TestCase):
 
         assert_that(response, is_bad_request())
 
-    @stub_bucket_retrieve_by_name("foo")
+    @fake_bucket_exists("foo")
     def test_that_querying_for_more_than_7_days_is_valid(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&start_at=2013-04-01T00:00:00Z"
                                 "&end_at=2013-04-08T00:00:00Z")
         assert_that(response, is_ok())
 
-    @stub_bucket_retrieve_by_name("foo")
+    @fake_bucket_exists("foo")
     def test_that_non_midnight_values_are_disallowed_for_start_at(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&start_at=2012-01-01T00:01:00Z"
@@ -61,7 +61,7 @@ class TestRawEventAccess(unittest.TestCase):
 
         assert_that(response, is_bad_request())
 
-    @stub_bucket_retrieve_by_name("foo")
+    @fake_bucket_exists("foo")
     def test_that_non_midnight_values_are_disallowed_for_end_at(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&end_at=2012-01-20T00:01:00Z"
@@ -81,7 +81,7 @@ class TestRawEventAccess(unittest.TestCase):
 
         assert_that(response, is_bad_request())
 
-    @stub_bucket_retrieve_by_name("foo")
+    @fake_bucket_exists("foo")
     def test_on_invalid_dates(self):
         response = self.app.get("/foo?group_by=pie"
                                 "&start_at=foo"
