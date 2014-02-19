@@ -1,10 +1,11 @@
 import unittest
-from collections import namedtuple
+
 from backdrop.core.bucket import BucketConfig
-from backdrop.core.repository import BucketConfigRepository, UserConfigRepository
+from backdrop.core.repository import (BucketConfigRepository,
+                                      UserConfigRepository)
 from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
 from mock import Mock
-from nose.tools import *
+from nose.tools import assert_raises
 from backdrop.core.user import UserConfig
 
 

@@ -3,10 +3,8 @@ import json
 from os import getenv
 from bson import ObjectId
 
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request
 from flask_featureflags import FeatureFlag
-from backdrop.core.log_handler \
-    import create_request_logger, create_response_logger
 from backdrop.read.query import Query
 
 from .validation import validate_request_args
