@@ -9,69 +9,29 @@ log = logging.getLogger(__name__)
 CAP_SIZE = 4194304
 
 
-def get_realtime_collection_names(db):
-    return [name for name in db.collection_names()
+def get_realtime_collection_names(mongo_db):
+    return [name for name in mongo_db.collection_names()
             if name.endswith("realtime")]
 
 
-def get_all_capped_collections(db):
-    mongo_db = db._mongo['backdrop']
-    return [name for name in mongo_db.collection_names()
-            if mongo_db[name].options().get('capped') is True]
+def get_temp_collection_names(mongo_db):
+    return filter(is_temp_collection_name, mongo_db.collection_names())
 
 
-def remove_all_capped_references(db, capped_collections):
-    mongo_db = db._mongo['backdrop']
-    for record in mongo_db['buckets'].find():
-        if record['name'] not in capped_collections:
-            log.info(
-                "Removing the cap reference for {0}".format(record['name']))
-            mongo_db['buckets'].update(
-                {"name": record['name']},
-                {"$set":
-                    {
-                        "capped_size": None,
-                    }
-                 },
-                upsert=False,
-                multi=False)
+def create_new_capped_collection(mongo_db, collection_name):
+    log.info("Creating new collection {0}".format(collection_name))
+    mongo_db.create_collection(collection_name, capped=True, size=CAP_SIZE)
 
 
-def remove_old_versions(db, collection_name):
-    mongo_db = db._mongo['backdrop']
-    variants = get_temp_collection_names(collection_name)
-
-    for variant in variants.values():
-        log.info("Dropping {0}".format(mongo_db[variant]))
-        mongo_db[variant].drop()
+def copy_collection(mongo_db, collection_name_from, collection_name_to):
+    """Copy all records from one mongodb collection to another"""
+    log.info("Copying items from {0}...".format(collection_name_from))
+    for item in mongo_db[collection_name_from].find():
+        mongo_db[collection_name_to].insert(item)
 
 
-def copy_down_collection(db, collection_name):
-    mongo_db = db._mongo['backdrop']
-
-    # Create new collection
-    new_collection_name = get_temp_collection_names(collection_name)["new"]
-
-    # This collection should be temporary, clean up if we have a leftover
-    mongo_db[new_collection_name].drop()
-
-    # Now create it
-    log.info("Creating new collection {0}".format(new_collection_name))
-    mongo_db.create_collection(new_collection_name, capped=True, size=CAP_SIZE)
-
-    # Order this by asc, so that when we copy in, oldest records are pushed
-    # out first
-    log.info("Copying items from {0}...".format(collection_name))
-    for item in mongo_db[collection_name].find():
-
-        # Insert item into new bucket
-        mongo_db[new_collection_name].insert(item)
-
-
-# Update the reference to capped size in the buckets collection
-def update_bucket_metadata(db, collection_name):
-    mongo_db = db._mongo['backdrop']
-
+def update_bucket_metadata(mongo_db, collection_name):
+    """Update the metadata for a collection to the new cap size"""
     mongo_db['buckets'].update(
         {"name": collection_name},
         {"$set":
@@ -84,67 +44,81 @@ def update_bucket_metadata(db, collection_name):
         multi=False)
 
 
-def rename_collection(db, original_collection_name):
-    mongo_db = db._mongo['backdrop']
-    old_collection_name = get_temp_collection_names(
-        original_collection_name)['old']
-    new_collection_name = get_temp_collection_names(
-        original_collection_name)['new']
-
-    # rename old collection
+def rename_collection(mongo_db, collection_name_from, collection_name_to):
     log.info("Renaming collection from {0} to old name {1}".format(
-        original_collection_name, old_collection_name))
-    mongo_db[original_collection_name].rename(
-        old_collection_name, dropTarget=True)
-
-    # rename new collection
-    log.info("Renaming bucket from {0} to new name {1}".format(
-        new_collection_name, original_collection_name))
-    mongo_db[new_collection_name].rename(
-        original_collection_name, dropTarget=True)
+        collection_name_from, collection_name_to))
+    mongo_db[collection_name_from].rename(
+        collection_name_to, dropTarget=True)
 
 
-def get_temp_collection_names(collection_name):
+def get_temp_names_for_collection(collection_name):
+    """
+    >>> get_temp_names_for_collection("foo")
+    {'new': 'foo_009_migration_new', 'old': 'foo_009_migration_old'}
+    """
+    suffixes = get_temp_collection_suffixes()
     return {
-        "old": collection_name + "_009_migration_old",
-        "new": collection_name + "_009_migration_new"
+        k: collection_name + v for k, v in suffixes.items()}
+
+
+def get_temp_collection_suffixes():
+    return {
+        "old": "_009_migration_old",
+        "new": "_009_migration_new"
     }
+
+
+def is_temp_collection_name(collection_name):
+    """
+    >>> is_temp_collection_name("foo_009_migration_old")
+    True
+    >>> is_temp_collection_name("foo_009_migration_new")
+    True
+    >>> is_temp_collection_name("foo")
+    False
+    """
+    for suffix in get_temp_collection_suffixes().values():
+        if collection_name.endswith(suffix):
+            return True
+    return False
+
+
+def remove_temporary_collections(mongo_db):
+    """Remote any temporary collections that have been left hanging around"""
+    log.info("Dropping temporary collections")
+    for collection_name in get_temp_collection_names(mongo_db):
+        log.info("Dropping temp collection {0}".format(collection_name))
+        mongo_db[collection_name].drop()
+
+
+def realtime_bucket_is_correctly_capped(mongo_db, collection_name):
+    stats = mongo_db[collection_name].options()
+    return stats.get('capped') is True and stats['size'] == CAP_SIZE
 
 
 def up(db):
     mongo_db = db._mongo['backdrop']
 
-    # To start off, get rid of all references to caps in the metadata,
-    # if the collections they reference are not actually capped
-    all_capped = get_all_capped_collections(db)
-    remove_all_capped_references(db, all_capped)
+    remove_temporary_collections(mongo_db)
 
-    realtime_collections_names = get_realtime_collection_names(db)
-
-    for collection_name in realtime_collections_names:
-
-        # Check if collection has already been capped
-        # {u'capped': True, u'size': 4194304.0}
-        stats = mongo_db[collection_name].options()
-        if(stats.get('capped') is True and stats['size'] == 4194304.0):
-            log.info("Skipping {0}, already capped at {1}".format(
-                collection_name, stats['size']))
+    for collection_name in get_realtime_collection_names(mongo_db):
+        if realtime_bucket_is_correctly_capped(mongo_db, collection_name):
+            log.info("Skipping {0}, already correctly capped".format(
+                collection_name))
             continue
 
-        log.info("Copying down items from {0}".format(collection_name))
-        copy_down_collection(db, collection_name)
+        temp_names = get_temp_names_for_collection(collection_name)
 
-        # Rename collections
-        rename_collection(db, collection_name)
+        create_new_capped_collection(mongo_db, temp_names['new'])
 
-        # Clean up by deleting 'old' collection
-        mongo_db[get_temp_collection_names(collection_name)['old']].drop()
+        copy_collection(mongo_db, collection_name, temp_names['new'])
 
-        # Change the cap_size reference in buckets collection
-        update_bucket_metadata(db, collection_name)
+        rename_collection(mongo_db, collection_name, temp_names['old'])
+        rename_collection(mongo_db, temp_names['new'], collection_name)
 
-        # Remove old/new versions
-        remove_old_versions(db, collection_name)
+        mongo_db[temp_names['old']].drop()
+
+        update_bucket_metadata(mongo_db, collection_name)
 
         print("Finished copying {}".format(collection_name))
     print("All done <3")
