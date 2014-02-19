@@ -1,8 +1,8 @@
 import unittest
 import urllib
 import datetime
-from hamcrest import *
-from mock import patch, Mock
+from hamcrest import assert_that, is_
+from mock import patch
 import pytz
 from backdrop.core.timeseries import WEEK
 from backdrop.read import api

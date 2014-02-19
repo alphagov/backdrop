@@ -55,7 +55,8 @@ class TestBucketRepositoryIntegration(unittest.TestCase):
         self.repository.save(BucketConfig("b2", data_group="my_service", data_type="not_my_type"))
         self.repository.save(BucketConfig("b3", data_group="not_my_service", data_type="my_type"))
 
-        config = self.repository.get_bucket_for_query(data_group="my_service", data_type="my_type")
+        config = self.repository.get_bucket_for_query(
+            data_group="my_service", data_type="my_type")
 
         assert_that(config.name, is_("b1"))
 
