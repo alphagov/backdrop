@@ -30,7 +30,9 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketConfigRepository(db)
+bucket_repository = BucketConfigRepository(
+    app.config['STAGECRAFT_URL'],
+    app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
