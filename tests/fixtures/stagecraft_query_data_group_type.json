@@ -1,0 +1,16 @@
+[
+ {
+  "name": "govuk_realtime", 
+  "data_group": "govuk", 
+  "data_type": "realtime", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "", 
+  "upload_format": "", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }
+]

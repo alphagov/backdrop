@@ -1,0 +1,72 @@
+[
+ {
+  "name": "govuk_visitors", 
+  "data_group": "govuk", 
+  "data_type": "visitors", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "", 
+  "upload_format": "", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }, 
+ {
+  "name": "govuk_realtime", 
+  "data_group": "govuk", 
+  "data_type": "realtime", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "", 
+  "upload_format": "", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }, 
+ {
+  "name": "govuk_blarg", 
+  "data_group": "govuk", 
+  "data_type": "blarg", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "", 
+  "upload_format": "", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }, 
+ {
+  "name": "govuk_meh", 
+  "data_group": "govuk", 
+  "data_type": "meh", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "", 
+  "upload_format": "", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }, 
+ {
+  "name": "govuk_abc", 
+  "data_group": "govuk", 
+  "data_type": "abc", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "", 
+  "upload_format": "", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }
+]

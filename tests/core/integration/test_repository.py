@@ -1,4 +1,10 @@
 import unittest
+import mock
+
+from contextlib import contextmanager
+
+from os.path import dirname, join as pjoin
+
 from hamcrest import assert_that, is_, has_entries
 from backdrop.core.bucket import BucketConfig
 from backdrop.core.database import Database
@@ -13,54 +19,40 @@ STAGECRAFT_URL = 'fake_url_should_not_be_called'
 STAGECRAFT_DATA_SET_QUERY_TOKEN = 'fake_token_should_not_be_used'
 
 
+@contextmanager
+def fixture(name):
+    filename = pjoin(dirname(__file__), '..', '..', 'fixtures', name)
+    with open(filename, 'r') as f:
+        yield f.read()
+
+
 class TestBucketRepositoryIntegration(unittest.TestCase):
 
     def setUp(self):
         self.db = Database(HOST, PORT, DB_NAME)
         self.db._mongo.drop_database(DB_NAME)
         self.mongo_collection = self.db.get_collection(BUCKET)
-        self.repository = BucketConfigRepository(self.db)
-
-    def test_saving_a_config_with_default_values(self):
-        config = BucketConfig("some_bucket", data_group="group", data_type="type")
-
-        self.repository.save(config)
-
-        results = list(self.mongo_collection._collection.find())
-
-        assert_that(len(results), is_(1))
-        assert_that(results[0], has_entries({
-            "name": "some_bucket",
-            "raw_queries_allowed": False,
-            "bearer_token": None,
-            "upload_format": "csv"
-        }))
-
-    def test_saving_a_realtime_config_creates_a_capped_collection(self):
-        config = BucketConfig("realtime_bucket", data_group="group", data_type="type", realtime=True)
-
-        self.repository.save(config)
-
-        assert_that(self.db.mongo_database["realtime_bucket"].options(), is_({"capped": True, "size": 5040}))
+        self.repository = BucketConfigRepository(
+            STAGECRAFT_URL, STAGECRAFT_DATA_SET_QUERY_TOKEN)
 
     def test_retrieves_config_by_name(self):
-        self.repository.save(BucketConfig("not_my_bucket", data_group="group", data_type="type"))
-        self.repository.save(BucketConfig("my_bucket", data_group="group", data_type="type"))
-        self.repository.save(BucketConfig("someones_bucket", data_group="group", data_type="type"))
+        with fixture('stagecraft_get_single_data_set.json') as content:
+            with mock.patch('backdrop.core.repository._get_url') as mocked:
+                mocked.return_value = content
+                config = self.repository.retrieve(name="govuk_visitors")
+                mocked.assert_called_once_with(
+                    'fake_url_should_not_be_called/data-sets/govuk_visitors')
 
-        config = self.repository.retrieve(name="my_bucket")
-
-        assert_that(config.name, is_("my_bucket"))
+        assert_that(config.name, is_('govuk_visitors'))
 
     def test_retrieves_config_for_service_and_data_type(self):
-        self.repository.save(BucketConfig("b1", data_group="my_service", data_type="my_type"))
-        self.repository.save(BucketConfig("b2", data_group="my_service", data_type="not_my_type"))
-        self.repository.save(BucketConfig("b3", data_group="not_my_service", data_type="my_type"))
+        with fixture('stagecraft_query_data_group_type.json') as content:
+            with mock.patch('backdrop.core.repository._get_url') as mocked:
+                mocked.return_value = content
+                config = self.repository.get_bucket_for_query(
+                    data_group="govuk", data_type="realtime")
 
-        config = self.repository.get_bucket_for_query(
-            data_group="my_service", data_type="my_type")
-
-        assert_that(config.name, is_("b1"))
+        assert_that(config.name, is_("govuk_realtime"))
 
 
 class TestUserRepositoryIntegration(object):
