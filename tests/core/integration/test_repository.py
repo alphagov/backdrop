@@ -9,6 +9,8 @@ HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 BUCKET = 'buckets'
+STAGECRAFT_URL = 'fake_url_should_not_be_called'
+STAGECRAFT_DATA_SET_QUERY_TOKEN = 'fake_token_should_not_be_used'
 
 
 class TestBucketRepositoryIntegration(unittest.TestCase):

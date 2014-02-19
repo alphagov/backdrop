@@ -10,3 +10,5 @@ RAW_QUERIES_ALLOWED = {
     "rawr": True,
     "month": True,
 }
+
+from development import STAGECRAFT_URL, STAGECRAFT_DATA_SET_QUERY_TOKEN
