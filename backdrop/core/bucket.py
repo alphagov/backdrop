@@ -88,7 +88,7 @@ class BucketConfig(_BucketConfig):
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400):
         if not bucket_is_valid(name):
-            raise ValueError("Bucket name is not valid")
+            raise ValueError("Bucket name is not valid: '{}'".format(name))
 
         if upload_filters is None:
             upload_filters = [
