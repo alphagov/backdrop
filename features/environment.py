@@ -10,7 +10,6 @@ sys.path.append(
 
 os.environ["GOVUK_ENV"] = "test"
 
-from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
 from backdrop.read import api as read_api
 from backdrop.write import api as write_api
@@ -53,12 +52,6 @@ def after_feature(context, _):
 
 
 def create_client(feature):
-    if 'use_read_api_client' in feature.tags:
-        return FlaskTestClient(read_api)
-    if 'use_write_api_client' in feature.tags:
-        return FlaskTestClient(write_api)
-    if 'use_http_client' in feature.tags:
-        return HTTPTestClient(config.DATABASE_NAME)
     if 'use_admin_client' in feature.tags:
         if os.environ.get('SKIP_SPLINTER_TESTS'):
             class DummyClient(object):
@@ -67,6 +60,8 @@ def create_client(feature):
             return DummyClient()
 
         return SplinterClient(config.DATABASE_NAME, 'admin', '5002')
+    else:
+        return FlaskTestClient(read_api, write_api)
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "

@@ -3,6 +3,9 @@ from behave import given, when, then
 from dateutil import parser
 from hamcrest import assert_that, has_length, equal_to
 
+from tests.support.bucket import pretend_this_bucket_exists
+from backdrop.core.bucket import BucketConfig
+
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
 
@@ -27,17 +30,37 @@ def step(context):
 def step(context, token):
     context.bearer_token = token
 
+@contextmanager
+def fake_bucket_if_necessary(contexdt):
+    if 'fake_bucket_name' in context:
+        with pretend_bucket_exists(
+                BucketConfig(context.fake_bucket_name),
+
 
 @when('I post the data to "{bucket_name}"')
 def step(context, bucket_name):
+
     if not (context and 'bucket' in context):
+        # TODO: this is coming out as ie data-setsbucketname - investigate?!
         context.bucket = bucket_name.replace('/', '')
-    context.response = context.client.post(
-        bucket_name,
-        data=context.data_to_post,
-        content_type="application/json",
-        headers=_make_headers_from_context(context),
-    )
+
+    with fake_bucket_if_necessary(context):
+         context.response = context.client.post(
+            bucket_name,
+            data=context.data_to_post,
+            content_type="application/json",
+            headers=_make_headers_from_context(context),
+        )
+
+   if 'should_fake_bucket' in contet and context.should_fake_bucket:
+    token = context.bearer_token if 'bearer_token' in context else None
+    with pretend_this_bucket_exists(
+            BucketConfig(
+                bucket_name.strip('/'),
+                'data_group',
+                'data_type',
+                bearer_token=token
+            )):
 
 
 @when('I post to the specific path "{path}"')

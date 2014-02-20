@@ -55,6 +55,7 @@ def step(context, timespan, bucket_name):
 
 @given('I have a bucket named "{bucket_name}"')
 def step(context, bucket_name):
+    context.fake_bucket_name = bucket_name
     ensure_bucket_exists(context, bucket_name)
 
 

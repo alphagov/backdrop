@@ -84,6 +84,7 @@ def write_by_group(data_group, data_type):
 @cache_control.nocache
 def post_to_bucket(bucket_name):
     bucket_config = bucket_repository.retrieve(name=bucket_name)
+    print("bucket_config: {}".format(bucket_config))
     return _write_to_bucket(bucket_config)
 
 
