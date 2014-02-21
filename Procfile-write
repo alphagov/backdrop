@@ -1,1 +1,0 @@
-web: venv/bin/gunicorn -blocalhost:3039 --workers=4 backdrop.write.api:app

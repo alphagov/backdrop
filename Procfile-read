@@ -1,1 +1,0 @@
-web: venv/bin/gunicorn -blocalhost:3038 --workers=4 backdrop.read.api:app
