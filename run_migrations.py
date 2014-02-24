@@ -45,6 +45,8 @@ def get_database(config):
 def get_migrations(migration_files):
     migrations_path = join(ROOT_PATH, 'migrations')
     for migration_file in os.listdir(migrations_path):
+        if not migration_file.endswith('.py'):
+            continue
         if migration_files is None or migration_file in migration_files:
             migration_path = join(migrations_path, migration_file)
 
