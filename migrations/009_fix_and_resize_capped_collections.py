@@ -56,7 +56,6 @@ def set_bucket_metadata_capped(mongo_db, collection_name):
             "$set": {
                 "capped_size": CAP_SIZE,
                 "realtime": True,
-                "_updated_at":  timeutils.now()
             }
         },
         upsert=False,
@@ -70,7 +69,6 @@ def set_bucket_metadata_uncapped(mongo_db, collection_name):
             "$set": {
                 "capped_size": None,
                 "realtime": False,
-                "_updated_at": timeutils.now()
             }
         },
         upsert=False,
