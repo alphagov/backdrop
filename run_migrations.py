@@ -1,9 +1,17 @@
 """
-Run all migrations
+Run migrations
+
+By default runs all migrations in order. If arguments are provided then
+only migration files that match the arguments are run.
+
+For example:
+
+python run_migrations.py 001_add_week_start.py
+
+Would only run the first migration.
 """
 import imp
 import os
-import re
 import sys
 from os.path import join
 import logging
