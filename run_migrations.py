@@ -1,10 +1,18 @@
 """
-Run all migrations
+Run migrations
+
+By default runs all migrations in order. If arguments are provided then
+only migration files that match the arguments are run.
+
+For example:
+
+python run_migrations.py 001_add_week_start.py
+
+Would only run the first migration.
 """
 import imp
 import os
 import sys
-import pymongo
 from os.path import join
 import logging
 from backdrop.core.database import Database
@@ -34,10 +42,12 @@ def get_database(config):
         config.MONGO_HOSTS, config.MONGO_PORT, config.DATABASE_NAME)
 
 
-def get_migrations():
+def get_migrations(migration_files):
     migrations_path = join(ROOT_PATH, 'migrations')
     for migration_file in os.listdir(migrations_path):
-        if migration_file.endswith('.py'):
+        if not migration_file.endswith('.py'):
+            continue
+        if migration_files is None or migration_file in migration_files:
             migration_path = join(migrations_path, migration_file)
 
             yield imp.load_source('migration', migration_path)
@@ -48,6 +58,8 @@ if __name__ == '__main__':
     config = load_config(os.getenv('GOVUK_ENV', 'development'))
     database = get_database(config)
 
-    for migration in get_migrations():
+    migration_files = sys.argv[1:] or None
+
+    for migration in get_migrations(migration_files):
         log.info("Running migration %s" % migration)
         migration.up(database)
