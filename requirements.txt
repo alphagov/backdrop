@@ -3,6 +3,7 @@ Flask==0.10.1
 Flask-FeatureFlags==0.3
 gunicorn==18.0
 invoke
+logstash_formatter==0.5.7
 pip==1.4.1
 pymongo==2.6.3
 python-dateutil==2.1
@@ -10,5 +11,5 @@ pytz==2013b
 rauth==0.5.5
 requests==1.2.3
 statsd==2.0.3
+Twisted==13.2.0
 xlrd==0.9.2
-logstash_formatter==0.5.7

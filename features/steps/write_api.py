@@ -31,7 +31,7 @@ def step(context, token):
     context.bearer_token = token
 
 @contextmanager
-def fake_bucket_if_necessary(contexdt):
+def fake_bucket_if_necessary(context):
     if 'fake_bucket_name' in context:
         with pretend_bucket_exists(
                 BucketConfig(context.fake_bucket_name),
