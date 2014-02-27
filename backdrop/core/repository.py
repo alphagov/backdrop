@@ -97,9 +97,9 @@ def _get_url(url):
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
-        if e.code == 404:
+        if e.response.status_code == 404:
             return None
-        raise
+        raise e
 
     return response.content
 

@@ -3,9 +3,10 @@ Feature: EVL Upload
 
     Scenario: Upload call center volumes
        Given a file named "CEG Data.xlsx" with fixture "contrib/CEG Transaction Tracker.xlsx"
-         and I have a bucket named "evl_ceg_data"
-         and bucket setting upload_format is "excel"
-         and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.ceg_volumes"]
+         and I have a bucket named "evl_ceg_data" with settings
+            | key            | value                                                                                                 |
+            | upload_format  | "excel"                                                                                               |
+            | upload_filters | ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.ceg_volumes"] |
          and I am logged in
          and I can upload to "evl_ceg_data"
         when I go to "/evl_ceg_data/upload"
@@ -19,9 +20,10 @@ Feature: EVL Upload
 
     Scenario: Upload services volumetrics
        Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
-         and I have a bucket named "evl_services_volumetrics"
-         and bucket setting upload_format is "excel"
-         and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.service_volumetrics"]
+         and I have a bucket named "evl_services_volumetrics" with settings
+            | key            | value                                                                                                         |
+            | upload_format  | "excel"                                                                                                       |
+            | upload_filters | ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.service_volumetrics"] |
          and I am logged in
          and I can upload to "evl_services_volumetrics"
         when I go to "/evl_services_volumetrics/upload"
@@ -35,9 +37,10 @@ Feature: EVL Upload
 
     Scenario: Upload service failures
         Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Services Volumetrics Sample.xls"
-         and I have a bucket named "evl_services_failures"
-         and bucket setting upload_format is "excel"
-         and bucket setting upload_filters is ["backdrop.contrib.evl_upload_filters.service_failures"]
+         and I have a bucket named "evl_services_failures" with settings
+            | key            | value                                                    |
+            | upload_format  | "excel"                                                  |
+            | upload_filters | ["backdrop.contrib.evl_upload_filters.service_failures"] |
          and I am logged in
          and I can upload to "evl_services_failures"
         when I go to "/evl_services_failures/upload"
@@ -53,9 +56,10 @@ Feature: EVL Upload
 
     Scenario: Upload channel volumetrics
         Given a file named "EVL Volumetrics.xlsx" with fixture "contrib/EVL Channel Volumetrics Sample.xls"
-         and I have a bucket named "evl_channel_volumetrics"
-         and bucket setting upload_format is "excel"
-         and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.channel_volumetrics"]
+         and I have a bucket named "evl_channel_volumetrics" with settings
+            | key            | value                                                                                                         |
+            | upload_format  | "excel"                                                                                                       |
+            | upload_filters | ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.channel_volumetrics"] |
          and I am logged in
          and I can upload to "evl_channel_volumetrics"
         when I go to "/evl_channel_volumetrics/upload"
@@ -70,9 +74,10 @@ Feature: EVL Upload
 
     Scenario: Upload customer satisfaction
         Given a file named "EVL Satisfaction.xlsx" with fixture "contrib/EVL Customer Satisfaction.xlsx"
-         and I have a bucket named "evl_customer_satisfaction"
-         and bucket setting upload_format is "excel"
-         and bucket setting upload_filters is ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.customer_satisfaction"]
+         and I have a bucket named "evl_customer_satisfaction" with settings
+            | key            | value                                                                                                           |
+            | upload_format  | "excel"                                                                                                         |
+            | upload_filters | ["backdrop.core.upload.filters.first_sheet_filter","backdrop.contrib.evl_upload_filters.customer_satisfaction"] |
          and I am logged in
          and I can upload to "evl_customer_satisfaction"
         when I go to "/evl_customer_satisfaction/upload"
@@ -87,9 +92,10 @@ Feature: EVL Upload
 
     Scenario: Upload evl volumetrics
         Given a file named "evl-volumetrics.xls" with fixture "contrib/evl-volumetrics.xls"
-         and I have a bucket named "evl_volumetrics"
-         and bucket setting upload_format is "excel"
-         and bucket setting upload_filters is ["backdrop.contrib.evl_upload_filters.volumetrics"]
+         and I have a bucket named "evl_volumetrics" with settings
+            | key            | value                                               |
+            | upload_format  | "excel"                                             |
+            | upload_filters | ["backdrop.contrib.evl_upload_filters.volumetrics"] |
          and I am logged in
          and I can upload to "evl_volumetrics"
         when I go to "/evl_volumetrics/upload"

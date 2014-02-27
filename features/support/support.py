@@ -6,11 +6,10 @@ import requests
 
 def wait_until(condition, timeout=15, interval=0.1):
     deadline = time.time() + timeout
-    while time.time() < deadline:
-        if condition():
-            return
+    while not condition():
+        if time.time() >= deadline:
+            raise RuntimeError('timeout')
         time.sleep(interval)
-    raise RuntimeError("timeout")
 
 
 class BaseClient(object):
