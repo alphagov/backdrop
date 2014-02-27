@@ -4,6 +4,8 @@ import sys
 from backdrop.core.log_handler import get_log_file_handler
 from features.support.splinter_client import SplinterClient
 
+from features.support.stagecraft import StagecraftService
+
 sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')
 )
@@ -46,6 +48,15 @@ def after_scenario(context, scenario):
             handler()
         except Exception as e:
             log.exception(e)
+    if server_running(context):
+        context.mock_stagecraft_server.stop()
+        context.mock_stagecraft_server = None
+
+
+def server_running(context):
+    return 'mock_stagecraft_server' in context and \
+        context.mock_stagecraft_server and \
+        context.mock_stagecraft_server.running
 
 
 def after_feature(context, _):

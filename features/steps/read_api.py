@@ -7,6 +7,7 @@ from dateutil import parser
 import datetime
 import re
 import pytz
+from features.support.stagecraft import StagecraftService
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
@@ -16,7 +17,37 @@ def step(context):
     context.client.set_config_parameter('PREVENT_RAW_QUERIES', True)
 
 
-def ensure_bucket_exists(context, bucket_name):
+def ensure_bucket_exists(context, bucket_name, settings={}):
+    # these should mostly match the default BucketConfig.__new__() kwargs
+    response = {
+        'name': bucket_name,
+        'data_group': bucket_name,
+        'data_type': bucket_name,
+        'raw_queries_allowed': False,
+        'bearer_token': '%s-bearer-token' % bucket_name,
+        'upload_format': 'csv',
+        'upload_filters': ['backdrop.core.upload.filters.first_sheet_filter'],
+        'auto_ids': None,
+        'queryable': True,
+        'realtime': False,
+        'capped_size': 5040,
+        'max_age_expected': 2678400,
+    }
+
+    response.update(settings)
+
+    url_response_dict = {
+        ('GET', u'data-sets/{}'.format(bucket_name)): response,
+        ('GET', u'data-sets/'): [response],
+        ('GET', u'data-sets?data-group={}&data-type={}'.format(
+            response['data_group'], response['data_type'])): [response],
+    }
+
+    if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
+        context.mock_stagecraft_server.stop()
+    context.mock_stagecraft_server = StagecraftService(8080, url_response_dict)
+    context.mock_stagecraft_server.start()
+
     context.bucket = bucket_name
     bucket_data = {
         '_id': bucket_name,
@@ -40,9 +71,31 @@ def step(context, fixture_name, bucket_name):
             context.client.storage()[bucket_name].save(obj)
 
 
+def get_bucket_settings_from_context_table(table):
+    def to_py(string_in):
+        if string_in == "None":
+            return None
+        else:
+            return json.loads(string_in)
+    return {row['key']: to_py(row['value']) for row in table}
+
+
+@given('"{fixture_name}" is in "{bucket_name}" bucket with settings')
+def step(context, fixture_name, bucket_name):
+    settings = get_bucket_settings_from_context_table(context.table)
+
+    ensure_bucket_exists(context, bucket_name, settings)
+    fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
+    with open(fixture_path) as fixture:
+        for obj in json.load(fixture):
+            for key in ['_timestamp', '_day_start_at', '_week_start_at', '_month_start_at']:
+                if key in obj:
+                    obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
+            context.client.storage()[bucket_name].save(obj)
+
+
 @given('I have a record updated "{timespan}" ago in the "{bucket_name}" bucket')
 def step(context, timespan, bucket_name):
-    ensure_bucket_exists(context, bucket_name)
     now = datetime.datetime.now()
     number_of_seconds = int(re.match(r'^(\d+) seconds?', timespan).group(1))
     timedelta = datetime.timedelta(seconds=number_of_seconds)
@@ -53,19 +106,23 @@ def step(context, timespan, bucket_name):
     context.client.storage()[bucket_name].save(record)
 
 
+@given('I have a bucket named "{bucket_name}" with settings')
+def step(context, bucket_name):
+    settings = get_bucket_settings_from_context_table(context.table)
+    ensure_bucket_exists(context, bucket_name, settings)
+
+
 @given('I have a bucket named "{bucket_name}"')
 def step(context, bucket_name):
     ensure_bucket_exists(context, bucket_name)
 
 
-@given('bucket setting {setting} is {set_to}')
-def step(context, setting, set_to):
-    if set_to == "None":
-        set_to = None
-    else:
-        set_to = json.loads(set_to)
-    context.client.storage()["buckets"].update(
-        {"_id": context.bucket}, {"$set": {setting: set_to}}, safe=True)
+@given('Stagecraft is running')
+def step(context):
+    if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
+        context.mock_stagecraft_server.stop()
+    context.mock_stagecraft_server = StagecraftService(8080, {})
+    context.mock_stagecraft_server.start()
 
 
 @when('I go to "{query}"')

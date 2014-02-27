@@ -3,8 +3,9 @@ Feature: more complex combination of parameters that are used by clients
 
 
     Background:
-          Given "licensing_preview.json" is in "licensing" bucket
-            and bucket setting raw_queries_allowed is true
+        Given "licensing_preview.json" is in "licensing" bucket with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
 
 
     Scenario: for an authority get weekly data for the top 3 licences between two points in time

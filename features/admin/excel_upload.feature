@@ -3,8 +3,9 @@ Feature: excel upload
 
   Scenario: Upload XLSX file
     Given a file named "data.xlsx" with fixture "data.xlsx"
-    And   I have a bucket named "my_xlsx_bucket"
-    And   bucket setting upload_format is "excel"
+    And   I have a bucket named "my_xlsx_bucket" with settings
+        | key           | value   |
+        | upload_format | "excel" |
     And   I am logged in
     And   I can upload to "my_xlsx_bucket"
     When  I go to "/my_xlsx_bucket/upload"
@@ -18,8 +19,9 @@ Feature: excel upload
 
   Scenario: using _timestamp for an auto id
     Given a file named "LPA_MI_EXAMPLE.xls" with fixture "LPA_MI_EXAMPLE.xls"
-    And   I have a bucket named "bucket_with_timestamp_auto_id"
-    And   bucket setting upload_format is "excel"
+    And   I have a bucket named "bucket_with_timestamp_auto_id" with settings
+        | key           | value   |
+        | upload_format | "excel" |
     And   I am logged in
     And   I can upload to "bucket_with_timestamp_auto_id"
     When  I go to "/bucket_with_timestamp_auto_id/upload"
