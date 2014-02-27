@@ -45,5 +45,6 @@ RAW_QUERIES_ALLOWED = {
     "lpa_journey": True,
 }
 
-STAGECRAFT_URL = 'http://stagecraft.perfplat.dev:3204'
+#STAGECRAFT_URL = 'http://stagecraft.perfplat.dev:3204'
+STAGECRAFT_URL = 'http://localhost:8080'
 STAGECRAFT_DATA_SET_QUERY_TOKEN = 'stagecraft-data-set-query-token-fake'

@@ -93,13 +93,20 @@ def _decode_json(string):
 
 
 def _get_url(url):
+    #response = requests.get(url)
+    #try:
+    #    response.raise_for_status()
+    #except requests.HTTPError as e:
+    #    if e.code == 404:
+    #        return None
+    #    raise
+
+    #return response.content
+
     response = requests.get(url)
-    try:
-        response.raise_for_status()
-    except requests.HTTPError as e:
-        if e.code == 404:
-            return None
-        raise
+    with open('/var/apps/backdrop/test_output', 'a') as f:
+        f.write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+                "\nurl: %s\nresponse: %s\n" % (url, response))
 
     return response.content
 
