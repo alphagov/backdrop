@@ -45,9 +45,10 @@ class FlaskApp(object):
 
     def start(self):
         if self._running():
-            raise RuntimeError(
-                "An app is already available on port %s "
-                "BEFORE starting the process!" % self._port)
+            return
+            #raise RuntimeError(
+            #    "An app is already available on port %s "
+            #    "BEFORE starting the process!" % self._port)
 
         self._process = self._run()
         wait_until(self._running)

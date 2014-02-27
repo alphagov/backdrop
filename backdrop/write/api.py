@@ -31,8 +31,12 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
+with open('/var/apps/backdrop/test_output', 'a') as f:
+    f.write("app.config['STAGECRAFT_URL']: " + app.config['STAGECRAFT_URL'] + '\n')
+
 bucket_repository = BucketConfigRepository(
-    app.config['STAGECRAFT_URL'],
+    'http://localhost:8080',
+    #app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
 user_repository = UserConfigRepository(db)

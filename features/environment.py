@@ -46,6 +46,8 @@ def after_scenario(context, scenario):
             handler()
         except Exception as e:
             log.exception(e)
+    if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
+        context.mock_stagecraft_server.stop()
 
 
 def after_feature(context, _):
