@@ -29,18 +29,25 @@ class StagecraftService(object):
     def start(self):
         self.__proc = Process(target=self._run)
         self.__proc.start()
-        wait_until(self.__running)
+        wait_until(self.running)
 
-    def __running(self):
+    def running(self):
         try:
             return requests.get('{0}{1}'.format(self.__url, '/_status')).status_code == 200
         except:
             return False
 
+    def stopped(self):
+        try:
+            return not requests.get('{0}{1}'.format(self.__url, '/_status')).status_code == 200
+        except:
+            return True
+
     def stop(self):
-        if self.__running:
+        if self.running:
             self.__proc.terminate()
             self.__proc.join()
+        wait_until(self.stopped)
 
     def _run(self):
         self.__app.run(port=self.__port)

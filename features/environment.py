@@ -4,6 +4,8 @@ import sys
 from backdrop.core.log_handler import get_log_file_handler
 from features.support.splinter_client import SplinterClient
 
+from features.support.stagecraft import StagecraftService
+
 sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')
 )
@@ -27,6 +29,55 @@ handler.setFormatter(logging.Formatter(
 log = logging.getLogger()
 log.addHandler(handler)
 
+def before_all(context):
+    bucket_names = [
+            "reptiles", 
+            "my_bucket", 
+            "foo", 
+            "bucket_with_auto_id", 
+            "my_xlsx_bucket", 
+            "bucket_with_timestamp_auto_id",
+            "evl_ceg_data",
+            "evl_services_volumetrics",
+            "evl_services_failures",
+            "evl_channel_volumetrics",
+            "evl_customer_satisfaction",
+            "evl_volumetrics",
+            "flavour_events",
+            "day",
+            "hour",
+            "month",
+            "month_with_wrong_timestamp",
+            "some_bucket",
+            "licensing",
+            "my_dinosaur_bucket",
+            "data_set_with_times",
+            "new-dataset"
+        ]
+    url_response_dict = {}
+    for bucket_name in bucket_names:
+        url_response_dict[('GET', 'data-sets/' + bucket_name)] = {
+            'bearer_token': "%s-bearer-token" % bucket_name,
+            'capped_size': None,
+            'name': bucket_name,
+            'data_type': bucket_name,
+            'realtime': False,
+            'auto_ids': '',
+            'max_age_expected': 86400,
+            'data_group': bucket_name,
+            'upload_filters': '',
+            'queryable': True,
+            'upload_format': '',
+            'raw_queries_allowed': True,
+        }
+    context.mock_stagecraft_server = StagecraftService(8080, url_response_dict)
+    context.mock_stagecraft_server.start()
+
+
+def after_all(context):
+    if server_running(context):
+        context.mock_stagecraft_server.stop()
+
 
 def before_feature(context, feature):
     context.client = create_client(feature)
@@ -46,8 +97,10 @@ def after_scenario(context, scenario):
             handler()
         except Exception as e:
             log.exception(e)
-    if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
-        context.mock_stagecraft_server.stop()
+
+
+def server_running(context):
+    return 'mock_stagecraft_server' in context and context.mock_stagecraft_server and context.mock_stagecraft_server.running
 
 
 def after_feature(context, _):

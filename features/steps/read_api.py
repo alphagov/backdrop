@@ -8,8 +8,6 @@ import datetime
 import re
 import pytz
 
-from features.support.stagecraft import StagecraftService
-
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
 
@@ -19,25 +17,6 @@ def step(context):
 
 
 def ensure_bucket_exists(context, bucket_name):
-    url_response_dict = {
-        ('GET', 'data-sets/' + bucket_name): {
-            'bearer_token': "%s-bearer-token" % bucket_name,
-            'capped_size': None,
-            'name': bucket_name,
-            'data_type': bucket_name,
-            'realtime': False,
-            'auto_ids': '',
-            'max_age_expected': 86400,
-            'data_group': bucket_name,
-            'upload_filters': '',
-            'queryable': True,
-            'upload_format': '',
-            'raw_queries_allowed': True,
-        }
-    }
-    context.mock_stagecraft_server = StagecraftService(8080, url_response_dict)
-    context.mock_stagecraft_server.start()
-
     context.bucket = bucket_name
     bucket_data = {
         '_id': bucket_name,
