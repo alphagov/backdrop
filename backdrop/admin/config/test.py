@@ -10,5 +10,4 @@ MONGO_PORT = 27017
 
 from test_environment import *
 
-STAGECRAFT_URL = 'http://localhost:8080'
-STAGECRAFT_DATA_SET_QUERY_TOKEN = 'stagecraft-data-set-query-token-fake'
+from development import STAGECRAFT_URL, STAGECRAFT_DATA_SET_QUERY_TOKEN
