@@ -131,7 +131,11 @@ def _write_to_bucket(bucket_config):
 
     g.bucket_name = bucket_config.name
 
-    auth_header = request.headers.get('Authorization', None)
+    try:
+        auth_header = request.headers['Authorization']
+    except KeyError:
+        return jsonify(status='error',
+                       message='Authorization header missing.'), 403
 
     if not bearer_token_is_valid(bucket_config, auth_header):
         statsd.incr("write_api.bad_token", bucket=g.bucket_name)
