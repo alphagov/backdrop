@@ -26,4 +26,4 @@ pip install -r requirements.txt
 
 rmdir $LOCK_DIR
 
-python start.py $1 $2
+exec python start.py $1 $2
