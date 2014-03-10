@@ -51,10 +51,6 @@ class BucketConfigRepository(object):
         self._stagecraft_url = stagecraft_url
         self._stagecraft_token = stagecraft_token
 
-    def save(self, bucket_config, create_bucket=True):
-        raise NotImplementedError("You can't create/update data-sets through "
-                                  "backdrop any more - this is read-only.")
-
     def get_all(self):
         data_set_url = '{url}/data-sets/'.format(url=self._stagecraft_url)
 
@@ -62,6 +58,8 @@ class BucketConfigRepository(object):
         return [_make_bucket_config(data_set) for data_set in data_sets]
 
     def retrieve(self, name):
+        if len(name) == 0:
+            raise ValueError('Name must not be empty')
         data_set_url = ('{url}/data-sets/{data_set_name}'.format(
                         url=self._stagecraft_url,
                         data_set_name=name))
@@ -70,6 +68,13 @@ class BucketConfigRepository(object):
         return _make_bucket_config(data_set)
 
     def get_bucket_for_query(self, data_group, data_type):
+        empty_vars = []
+        if len(data_group) == 0:
+            empty_vars += ['Data Group']
+        if len(data_type) == 0:
+            empty_vars += ['Data Type']
+        if len(empty_vars) > 0:
+            raise ValueError(' and '.join(empty_vars) + 'must not be empty')
         data_set_url = ('{url}/data-sets?data-group={data_group_name}'
                         '&data-type={data_type_name}'.format(
                             url=self._stagecraft_url,
