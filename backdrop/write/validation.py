@@ -3,11 +3,20 @@ from logging import getLogger
 log = getLogger(__name__)
 
 
-def extract_bearer_token(header):
-    if header is None or len(header) < 8:
-        return ''
-        # Strip the leading "Bearer " from the header value
-    return header[7:]
+def extract_bearer_token(auth_header):
+    """
+    >>> extract_bearer_token(u'Bearer some-token')
+    u'some-token'
+    >>> extract_bearer_token('Bearer ') is None
+    True
+    >>> extract_bearer_token('Something Else') is None
+    True
+    """
+    prefix = 'Bearer '
+    if auth_header is None or not auth_header.startswith(prefix):
+        return None
+    token = auth_header[len(prefix):]
+    return token if len(token) else None
 
 
 def bearer_token_is_valid(bucket, auth_header):
