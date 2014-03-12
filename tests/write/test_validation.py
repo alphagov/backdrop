@@ -1,7 +1,6 @@
-from hamcrest import *
-from backdrop.write.validation import \
-    auth_header_is_valid, extract_bearer_token
-import unittest
+from hamcrest import assert_that, is_
+from backdrop.write.validation import (auth_header_is_valid,
+                                       extract_bearer_token)
 from mock import Mock
 
 
