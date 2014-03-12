@@ -12,7 +12,7 @@ from backdrop.core.repository import (BucketConfigRepository,
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
 
-from .validation import bearer_token_is_valid, extract_bearer_token
+from .validation import auth_header_is_valid, extract_bearer_token
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -137,7 +137,7 @@ def _write_to_bucket(bucket_config):
         return jsonify(status='error',
                        message='Authorization header missing.'), 403
 
-    if not bearer_token_is_valid(bucket_config, auth_header):
+    if not auth_header_is_valid(bucket_config, auth_header):
         statsd.incr("write_api.bad_token", bucket=g.bucket_name)
         return jsonify(status='error', message='Forbidden'), 403
 
