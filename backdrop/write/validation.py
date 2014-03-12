@@ -19,7 +19,7 @@ def extract_bearer_token(auth_header):
     return token if len(token) else None
 
 
-def bearer_token_is_valid(bucket, auth_header):
+def auth_header_is_valid(bucket, auth_header):
 
     request_token = extract_bearer_token(auth_header)
 
