@@ -1,10 +1,13 @@
 
 import json
+import logging
 
 import requests
 
 from backdrop.core.bucket import BucketConfig
 from backdrop.core.user import UserConfig
+
+logger = logging.getLogger(__name__)
 
 
 class _Repository(object):
@@ -52,9 +55,12 @@ class BucketConfigRepository(object):
         self._stagecraft_token = stagecraft_token
 
     def get_all(self):
-        data_set_url = '{url}/data-sets/'.format(url=self._stagecraft_url)
+        data_set_url = '{url}/data-sets'.format(url=self._stagecraft_url)
 
-        data_sets = _decode_json(_get_url(data_set_url))
+        # Note: Don't catch HTTP 404 - that should never happen on this URL.
+        json_response = _get_json_url(data_set_url, self._stagecraft_token)
+        data_sets = _decode_json(json_response)
+
         return [_make_bucket_config(data_set) for data_set in data_sets]
 
     def retrieve(self, name):
@@ -64,8 +70,15 @@ class BucketConfigRepository(object):
                         url=self._stagecraft_url,
                         data_set_name=name))
 
-        data_set = _decode_json(_get_url(data_set_url))
-        return _make_bucket_config(data_set)
+        try:
+            json_response = _get_json_url(data_set_url, self._stagecraft_token)
+        except requests.HTTPError as e:
+            if e.response.status_code == 404:
+                return None
+            else:
+                raise
+
+        return _make_bucket_config(_decode_json(json_response))
 
     def get_bucket_for_query(self, data_group, data_type):
         empty_vars = []
@@ -81,9 +94,13 @@ class BucketConfigRepository(object):
                             data_group_name=data_group,
                             data_type_name=data_type))
 
-        data_sets = _decode_json(_get_url(data_set_url))
+        json_response = _get_json_url(
+            data_set_url, self._stagecraft_token)
+
+        data_sets = _decode_json(json_response)
         if len(data_sets) > 0:
             return _make_bucket_config(data_sets[0])
+
         return None
 
 
@@ -97,15 +114,19 @@ def _decode_json(string):
     return json.loads(string) if string is not None else None
 
 
-def _get_url(url):
-    response = requests.get(url)
+def _get_json_url(url, token):
+    auth_header = (
+        'Authorization',
+        'Bearer {}'.format(token))
+    response = requests.get(url, headers=dict([
+        ('content-type', 'application/json'),
+        auth_header]))
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
-        if e.response.status_code == 404:
-            return None
-        raise e
-
+        logger.exception(e)
+        logger.error('Stagecraft said: {}'.format(response.content))
+        raise
     return response.content
 
 

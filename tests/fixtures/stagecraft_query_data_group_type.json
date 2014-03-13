@@ -1,11 +1,11 @@
 [
  {
-  "name": "govuk_realtime", 
+  "name": "govuk_visitors", 
   "data_group": "govuk", 
-  "data_type": "realtime", 
+  "data_type": "visitors", 
   "raw_queries_allowed": true, 
-  "bearer_token": "", 
-  "upload_format": "", 
+  "bearer_token": "my-bearer-token", 
+  "upload_format": "excel", 
   "upload_filters": "", 
   "auto_ids": "", 
   "queryable": true, 
