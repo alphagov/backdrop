@@ -1,10 +1,13 @@
 
 import json
+import logging
 
 import requests
 
 from backdrop.core.bucket import BucketConfig
 from backdrop.core.user import UserConfig
+
+logger = logging.getLogger(__name__)
 
 
 class _Repository(object):
@@ -110,6 +113,8 @@ def _get_json_url(url, token):
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
+        logger.error('Got HTTP 404 for: {}'.format(url))
+        logger.exception(e)
         if e.response.status_code == 404:
             return None
         raise e

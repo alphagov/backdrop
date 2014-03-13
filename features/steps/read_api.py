@@ -38,7 +38,7 @@ def ensure_bucket_exists(context, bucket_name, settings={}):
 
     url_response_dict = {
         ('GET', u'data-sets/{}'.format(bucket_name)): response,
-        ('GET', u'data-sets/'): [response],
+        ('GET', u'data-sets'): [response],
         ('GET', u'data-sets?data-group={}&data-type={}'.format(
             response['data_group'], response['data_type'])): [response],
     }
