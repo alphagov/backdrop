@@ -52,9 +52,10 @@ class BucketConfigRepository(object):
         self._stagecraft_token = stagecraft_token
 
     def get_all(self):
-        data_set_url = '{url}/data-sets/'.format(url=self._stagecraft_url)
+        data_set_url = '{url}/data-sets'.format(url=self._stagecraft_url)
 
-        data_sets = _decode_json(_get_url(data_set_url))
+        data_sets = _decode_json(_get_json_url(
+            data_set_url, self._stagecraft_token))
         return [_make_bucket_config(data_set) for data_set in data_sets]
 
     def retrieve(self, name):
@@ -64,7 +65,8 @@ class BucketConfigRepository(object):
                         url=self._stagecraft_url,
                         data_set_name=name))
 
-        data_set = _decode_json(_get_url(data_set_url))
+        data_set = _decode_json(_get_json_url(
+            data_set_url, self._stagecraft_token))
         return _make_bucket_config(data_set)
 
     def get_bucket_for_query(self, data_group, data_type):
@@ -81,7 +83,8 @@ class BucketConfigRepository(object):
                             data_group_name=data_group,
                             data_type_name=data_type))
 
-        data_sets = _decode_json(_get_url(data_set_url))
+        data_sets = _decode_json(_get_json_url(
+            data_set_url, self._stagecraft_token))
         if len(data_sets) > 0:
             return _make_bucket_config(data_sets[0])
         return None
@@ -97,8 +100,13 @@ def _decode_json(string):
     return json.loads(string) if string is not None else None
 
 
-def _get_url(url):
-    response = requests.get(url)
+def _get_json_url(url, token):
+    auth_header = (
+        'Authorization',
+        'Bearer {}'.format(token))
+    response = requests.get(url, headers=dict([
+        ('content-type', 'application/json'),
+        auth_header]))
     try:
         response.raise_for_status()
     except requests.HTTPError as e:

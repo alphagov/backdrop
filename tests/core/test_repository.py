@@ -1,4 +1,3 @@
-import json
 import mock
 import unittest
 
@@ -9,49 +8,130 @@ from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
 from mock import Mock
 from nose.tools import assert_raises
 from backdrop.core.user import UserConfig
+from contextlib import contextmanager
+from os.path import dirname, join as pjoin
+
+
+@contextmanager
+def fixture(name):
+    filename = pjoin(dirname(__file__), '..', 'fixtures', name)
+    with open(filename, 'r') as f:
+        yield f.read()
+
+#TODO: get json_url needs tests
+
+
+_GET_JSON_URL_FUNC = 'backdrop.core.repository._get_json_url'
 
 
 class TestBucketRepository(unittest.TestCase):
     def setUp(self):
-        # This is a bit of a smell. Mongo collection responsibilites should be
-        # split with repo, once we have more than one repository.
-        self.db = Mock()
-        self.mongo_collection = Mock()
-        self.db.get_collection.return_value = self.mongo_collection
         self.bucket_repo = BucketConfigRepository(
             'fake_stagecraft_url', 'fake_stagecraft_token')
 
-    def test_bucket_config_is_created_from_retrieved_data(self):
-        fake_stagecraft_response = json.dumps({
-            "name": "bucket_name",
-            "data_group": "data_group",
-            "data_type": "type",
-            "raw_queries_allowed": False,
-            "bearer_token": "my-bearer-token",
-            "upload_format": "excel"
-        })
-        with mock.patch('backdrop.core.repository._get_url') as mocked:
-            mocked.return_value = fake_stagecraft_response
+    def test_retrieve_correctly_decodes_stagecraft_response(self):
+        with fixture('stagecraft_get_single_data_set.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
 
-            bucket = self.bucket_repo.retrieve(name="bucket_name")
+                bucket = self.bucket_repo.retrieve(name="bucket_name")
 
-        expected_bucket = BucketConfig("bucket_name",
-                                       data_group="data_group",
-                                       data_type="type",
-                                       raw_queries_allowed=False,
-                                       bearer_token="my-bearer-token",
-                                       upload_format="excel")
+            expected_bucket = BucketConfig("govuk_visitors",
+                                           data_group="govuk",
+                                           data_type="visitors",
+                                           raw_queries_allowed=True,
+                                           bearer_token="my-bearer-token",
+                                           upload_format="excel",
+                                           upload_filters="",
+                                           auto_ids="",
+                                           queryable=True,
+                                           realtime=False,
+                                           capped_size=None,
+                                           max_age_expected=86400)
 
-        assert_that(bucket, equal_to(expected_bucket))
+            assert_that(bucket, equal_to(expected_bucket))
+
+    def test_get_all_correctly_decodes_stagecraft_response(self):
+        with fixture('stagecraft_list_data_sets.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
+
+                buckets = self.bucket_repo.get_all()
+
+            expected_bucket_one = BucketConfig(
+                "govuk_visitors",
+                data_group="govuk",
+                data_type="visitors",
+                raw_queries_allowed=True,
+                bearer_token="my-bearer-token",
+                upload_format="excel",
+                upload_filters="",
+                auto_ids="",
+                queryable=True,
+                realtime=False,
+                capped_size=None,
+                max_age_expected=86400)
+
+            assert_that(len(buckets), equal_to(5))
+            assert_that(buckets[0], equal_to(expected_bucket_one))
+
+    def test_get_bucket_for_query_correctly_decodes_stagecraft_response(self):
+        with fixture('stagecraft_query_data_group_type.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
+
+                bucket = self.bucket_repo.get_bucket_for_query(
+                    data_group="govuk", data_type="realtime")
+
+            expected_bucket = BucketConfig("govuk_visitors",
+                                           data_group="govuk",
+                                           data_type="visitors",
+                                           raw_queries_allowed=True,
+                                           bearer_token="my-bearer-token",
+                                           upload_format="excel",
+                                           upload_filters="",
+                                           auto_ids="",
+                                           queryable=True,
+                                           realtime=False,
+                                           capped_size=None,
+                                           max_age_expected=86400)
+
+            assert_that(bucket, equal_to(expected_bucket))
 
     def test_retrieving_non_existent_bucket_returns_none(self):
-        self.mongo_collection.find_one.return_value = None
-
-        with mock.patch('backdrop.core.repository._get_url') as mocked:
-            mocked.return_value = None
+        with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+            _get_json_url.return_value = None
             bucket = self.bucket_repo.retrieve(name="non_existent")
 
         assert_that(bucket, is_(None))
+
+    def test_retrieve_calls_correct_url_for_data_set_by_name(self):
+        with fixture('stagecraft_get_single_data_set.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
+                self.bucket_repo.retrieve(name="govuk_visitors")
+                _get_json_url.assert_called_once_with(
+                    'fake_stagecraft_url/data-sets/govuk_visitors',
+                    "fake_stagecraft_token")
+
+    def test_get_bucket_for_query_calls_correct_url(self):
+        with fixture('stagecraft_query_data_group_type.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
+                self.bucket_repo.get_bucket_for_query(
+                    data_group="govuk", data_type="realtime")
+                _get_json_url.assert_called_once_with(
+                    'fake_stagecraft_url/data-sets?'
+                    'data-group=govuk&data-type=realtime',
+                    "fake_stagecraft_token")
+
+    def test_get_all_calls_correct_url(self):
+        with fixture('stagecraft_query_data_group_type.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
+                self.bucket_repo.get_all()
+                _get_json_url.assert_called_once_with(
+                    'fake_stagecraft_url/data-sets', "fake_stagecraft_token")
 
 
 class TestUserConfigRepository(object):
