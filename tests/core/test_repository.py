@@ -3,13 +3,15 @@ import unittest
 
 from backdrop.core.bucket import BucketConfig
 from backdrop.core.repository import (BucketConfigRepository,
-                                      UserConfigRepository)
+                                      UserConfigRepository,
+                                      _get_json_url)
 from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
-from mock import Mock
+from mock import Mock, patch
 from nose.tools import assert_raises
 from backdrop.core.user import UserConfig
 from contextlib import contextmanager
 from os.path import dirname, join as pjoin
+import requests
 
 
 @contextmanager
@@ -18,10 +20,38 @@ def fixture(name):
     with open(filename, 'r') as f:
         yield f.read()
 
-#TODO: get json_url needs tests
-
-
 _GET_JSON_URL_FUNC = 'backdrop.core.repository._get_json_url'
+
+
+class TestGetJsonUrl(unittest.TestCase):
+
+    @patch('requests.get', spec=True)
+    def test_get_json_url_sends_correct_request(self, mock_get):
+        mock_response = Mock()
+        mock_response.content = '[]'
+        mock_get.return_value = mock_response
+        response_content = _get_json_url("my_url", "some_token")
+        mock_get.assert_called_once_with(
+            'my_url',
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer some_token'})
+        assert_that(response_content, equal_to('[]'))
+
+    @patch('requests.get', spec=True)
+    def test_get_json_url_returns_none_on_404(self, mock_get):
+        exception = requests.HTTPError()
+        mock_error_response = Mock()
+        mock_error_response.status_code = 404
+        exception.response = mock_error_response
+
+        def fake_raise_for_status():
+            raise exception
+
+        mock_response = Mock()
+        mock_response.raise_for_status = fake_raise_for_status
+        mock_get.return_value = mock_response
+        response_content = _get_json_url("my_url", "some_token")
+        assert_that(response_content, is_(None))
 
 
 class TestBucketRepository(unittest.TestCase):
@@ -98,12 +128,27 @@ class TestBucketRepository(unittest.TestCase):
 
             assert_that(bucket, equal_to(expected_bucket))
 
-    def test_retrieving_non_existent_bucket_returns_none(self):
+    def test_retrieve_for_non_existent_bucket_returns_none(self):
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.return_value = None
             bucket = self.bucket_repo.retrieve(name="non_existent")
 
         assert_that(bucket, is_(None))
+
+    def test_get_bucket_for_query_for_non_existent_bucket_returns_none(self):
+        with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+            _get_json_url.return_value = None
+            bucket = self.bucket_repo.get_bucket_for_query(
+                data_group="govuk", data_type="realtime")
+
+        assert_that(bucket, is_(None))
+
+    def test_get_all_for_non_existent_buckets_returns_empty_array(self):
+        with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+            _get_json_url.return_value = None
+            buckets = self.bucket_repo.get_all()
+
+        assert_that(buckets, is_([]))
 
     def test_retrieve_calls_correct_url_for_data_set_by_name(self):
         with fixture('stagecraft_get_single_data_set.json') as content:

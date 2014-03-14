@@ -57,8 +57,10 @@ class BucketConfigRepository(object):
     def get_all(self):
         data_set_url = '{url}/data-sets'.format(url=self._stagecraft_url)
 
-        data_sets = _decode_json(_get_json_url(
-            data_set_url, self._stagecraft_token))
+        json_response = _get_json_url(
+            data_set_url, self._stagecraft_token) or '[]'
+        data_sets = _decode_json(json_response)
+
         return [_make_bucket_config(data_set) for data_set in data_sets]
 
     def retrieve(self, name):
@@ -85,9 +87,9 @@ class BucketConfigRepository(object):
                             url=self._stagecraft_url,
                             data_group_name=data_group,
                             data_type_name=data_type))
-
-        data_sets = _decode_json(_get_json_url(
-            data_set_url, self._stagecraft_token))
+        json_response = _get_json_url(
+            data_set_url, self._stagecraft_token) or '[]'
+        data_sets = _decode_json(json_response)
         if len(data_sets) > 0:
             return _make_bucket_config(data_sets[0])
         return None
@@ -113,12 +115,11 @@ def _get_json_url(url, token):
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
-        logger.error('Got HTTP 404 for: {}'.format(url))
-        logger.exception(e)
         if e.response.status_code == 404:
+            logger.error('Got HTTP 404 for: {}'.format(url))
+            logger.exception(e)
             return None
         raise e
-
     return response.content
 
 
