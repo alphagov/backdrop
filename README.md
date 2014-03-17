@@ -83,5 +83,34 @@ Other parameters:
 
 ## Useful commands
 
-* Copy data from an environment to the local Backdrop DB (should be run on your host machine): `cd tools; ./replicate-db.sh <youruser>@mongo-1.pp-preview`
-* Run migrations over local Backdrop DB: `python run_migrations.py`
+### Copy data from an existing to local environment
+
+**On the Host machine:**
+
+- Copy data from an existing environment to the local Backdrop dB:
+    - `$ cd <your-path>/backdrop/tools`
+    - `$ ./replicate-db.sh <your-username>@<mongo-instance-environment>` e.g. `dave@mongo-1.pp-preview`
+- Migration files are stored in the directory: `<your-path>/backdrop/migrations`	
+
+**Start and connect to the VM**
+
+- `$ cd <your-path>/pp-development`
+- `$ vagrant up`
+- `$ vagrant ssh`
+	
+**On the Guest VM:**
+
+- Change to the *backdrop* directory - `$ cd /var/apps/backdrop`
+- Setup a vitual environment - [see here for more details on virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
+- *For the non-pythonesque user:* 
+    - *install virtualenv:* `$ pip install virtualenv`
+    - *create virtualenv environment:* `$ virtualenv venv`
+    - *activate the environment:* `$ source venv/bin/activate`
+    - *install any required dependencies:* `pip install -r requirements.txt`
+- Install the data - `(venv)$ python run_migrations.py`
+- De-activate the virtual environment - `(venv)$ deactivate`
+
+Done!
+
+
+
