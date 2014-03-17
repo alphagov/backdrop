@@ -24,13 +24,14 @@ def extract_transaction_rows(sheet):
         21: ["Manual", "Relicensing"],
         22: ["Manual", "Relicensing"],
         23: ["Manual", "Relicensing"],
-        25: ["Manual", "SORN"],
+        24: ["Manual", "Relicensing"],
         26: ["Manual", "SORN"],
         27: ["Manual", "SORN"],
         28: ["Manual", "SORN"],
         29: ["Manual", "SORN"],
         30: ["Manual", "SORN"],
         31: ["Manual", "SORN"],
+        32: ["Manual", "SORN"],
     }
 
     def transaction_row(index):

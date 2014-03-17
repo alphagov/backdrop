@@ -84,11 +84,11 @@ Feature: EVL Upload
              {"_timestamp": "2013-08-01T00:00:00+00:00", "_id": "2013-08-01", "satisfaction_tax_disc": 1.2487024060928635, "satisfaction_sorn": 1.4370298628996634}
              {"_timestamp": "2007-07-01T00:00:00+00:00", "_id": "2007-07-01", "satisfaction_tax_disc": 1.1662755514934828, "satisfaction_sorn": 1.3581011781786714}
              """
-
     Scenario: Upload evl volumetrics
         Given a file named "evl-volumetrics.xls" with fixture "contrib/evl-volumetrics.xls"
          and I have a bucket named "evl_volumetrics"
          and bucket setting upload_format is "excel"
+         and bucket setting auto_ids is ["_timestamp",  "service",  "transaction"]
          and bucket setting upload_filters is ["backdrop.contrib.evl_upload_filters.volumetrics"]
          and I am logged in
          and I can upload to "evl_volumetrics"
