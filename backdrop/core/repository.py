@@ -9,6 +9,8 @@ from backdrop.core.user import UserConfig
 
 logger = logging.getLogger(__name__)
 
+class RepositoryError(Exception):
+  pass
 
 class _Repository(object):
 
@@ -57,10 +59,13 @@ class BucketConfigRepository(object):
     def get_all(self):
         data_set_url = '{url}/data-sets'.format(url=self._stagecraft_url)
 
-        json_response = _get_json_url(
-            data_set_url, self._stagecraft_token) or '[]'
-        data_sets = _decode_json(json_response)
+        try:
+            json_response = _get_json_url(
+                data_set_url, self._stagecraft_token)
+        except requests.HTTPError as e:
+            raise RepositoryError 
 
+        data_sets = _decode_json(json_response)
         return [_make_bucket_config(data_set) for data_set in data_sets]
 
     def retrieve(self, name):
@@ -70,8 +75,14 @@ class BucketConfigRepository(object):
                         url=self._stagecraft_url,
                         data_set_name=name))
 
-        data_set = _decode_json(_get_json_url(
-            data_set_url, self._stagecraft_token))
+        try:
+            data_set = _decode_json(_get_json_url(
+                data_set_url, self._stagecraft_token))
+        except requests.HTTPError as e:
+            if e.response.status_code == 404:
+                return None
+            raise RepositoryError 
+
         return _make_bucket_config(data_set)
 
     def get_bucket_for_query(self, data_group, data_type):
@@ -87,8 +98,13 @@ class BucketConfigRepository(object):
                             url=self._stagecraft_url,
                             data_group_name=data_group,
                             data_type_name=data_type))
-        json_response = _get_json_url(
-            data_set_url, self._stagecraft_token) or '[]'
+
+        try:
+            json_response = _get_json_url(
+                data_set_url, self._stagecraft_token)
+        except requests.HTTPError as e:
+            raise RepositoryError 
+
         data_sets = _decode_json(json_response)
         if len(data_sets) > 0:
             return _make_bucket_config(data_sets[0])
@@ -115,11 +131,9 @@ def _get_json_url(url, token):
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
-        if e.response.status_code == 404:
-            logger.error('Got HTTP 404 for: {}'.format(url))
-            logger.exception(e)
-            return None
-        raise e
+        logger.error('Got HTTP {} for: {}'.format(response.status_code, url))
+        logger.exception(e)
+        raise
     return response.content
 
 
