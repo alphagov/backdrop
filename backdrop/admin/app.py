@@ -8,8 +8,6 @@ from .. import statsd
 from ..core import cache_control, log_handler, database
 from ..core.bucket import Bucket
 from ..core.errors import ParseError, ValidationError
-from ..core.log_handler \
-    import create_request_logger, create_response_logger
 from ..core.repository \
     import BucketConfigRepository, UserConfigRepository
 from ..core.flaskutils import BucketConverter
@@ -35,7 +33,10 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketConfigRepository(db)
+bucket_repository = BucketConfigRepository(
+    app.config['STAGECRAFT_URL'],
+    app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
+
 user_repository = UserConfigRepository(db)
 
 

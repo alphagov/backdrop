@@ -1,0 +1,16 @@
+[
+ {
+  "name": "govuk_visitors", 
+  "data_group": "govuk", 
+  "data_type": "visitors", 
+  "raw_queries_allowed": true, 
+  "bearer_token": "my-bearer-token", 
+  "upload_format": "excel", 
+  "upload_filters": "", 
+  "auto_ids": "", 
+  "queryable": true, 
+  "realtime": false, 
+  "capped_size": null, 
+  "max_age_expected": 86400
+ }
+]

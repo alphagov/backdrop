@@ -10,5 +10,6 @@ BUCKET_AUTO_ID_KEYS = {
     "evl_volumetrics": ["_timestamp", "service", "transaction"],
 }
 
-from development import CREATE_COLLECTION_ENDPOINT_TOKEN
+from development import (CREATE_COLLECTION_ENDPOINT_TOKEN, STAGECRAFT_URL,
+                         STAGECRAFT_DATA_SET_QUERY_TOKEN)
 from test_environment import *

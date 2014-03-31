@@ -3,10 +3,8 @@ import json
 from os import getenv
 from bson import ObjectId
 
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request
 from flask_featureflags import FeatureFlag
-from backdrop.core.log_handler \
-    import create_request_logger, create_response_logger
 from backdrop.read.query import Query
 
 from .validation import validate_request_args
@@ -32,7 +30,9 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketConfigRepository(db)
+bucket_repository = BucketConfigRepository(
+    app.config['STAGECRAFT_URL'],
+    app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 

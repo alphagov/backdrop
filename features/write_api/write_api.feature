@@ -43,10 +43,11 @@ Feature: the performance platform write api
 
     Scenario: posting to a bucket with data group and data type
         Given I have the data in "timestamps.json"
-          and I have a bucket named "data_with_times"
+          and I have a bucket named "data_with_times" with settings
+            | key        | value         |
+            | data_group | "transaction" |
+            | data_type  | "timings"     |
           and I use the bearer token for the bucket
-          and bucket setting data_group is "transaction"
-          and bucket setting data_type is "timings"
          when I post to the specific path "/data/transaction/timings"
          then I should get back a status of "200"
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"

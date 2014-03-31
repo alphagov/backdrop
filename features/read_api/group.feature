@@ -17,8 +17,6 @@ Feature: grouping queries for read api
          then I should get back a status of "200"
           and the JSON should have "2" results
           and the "2nd" result should be "{"authority": "Westminster", "_count": 3}"
-
-        Given "licensing_2.json" is in "foo" bucket
          when I go to "/foo?group_by=licence_name&filter_by=authority:Westminster"
          then I should get back a status of "200"
           and the JSON should have "2" results

@@ -2,8 +2,9 @@
 Feature: CSV Upload
 
   Scenario: Upload CSV data
-    Given I have a bucket named "my_bucket"
-    And   bucket setting upload_format is "csv"
+    Given I have a bucket named "my_bucket" with settings
+        | key           | value |
+        | upload_format | "csv" |
     And   I am logged in
     And   I can upload to "my_bucket"
     And   a file named "data.csv"
@@ -28,8 +29,9 @@ Feature: CSV Upload
           city,città
           coffee,caffè
           """
-    And   I have a bucket named "my_bucket"
-    And   bucket setting upload_format is "csv"
+    And   I have a bucket named "my_bucket" with settings
+        | key           | value |
+        | upload_format | "csv" |
     And   I am logged in
     And   I can upload to "my_bucket"
     When  I go to "/my_bucket/upload"
@@ -59,8 +61,9 @@ Feature: CSV Upload
           2013-01-01,2013-01-07,abc,287
           2013-01-01,2013-01-07,def,425
           """
-    And   I have a bucket named "bucket_with_auto_id"
-    And   bucket setting upload_format is "csv"
+    And   I have a bucket named "bucket_with_auto_id" with settings
+        | key           | value |
+        | upload_format | "csv" |
     And   I am logged in
     And   I can upload to "bucket_with_auto_id"
     When  I go to "/bucket_with_auto_id/upload"
