@@ -120,7 +120,7 @@ def _get_json_url(url, token):
         'Bearer {}'.format(token))
     response = requests.get(url, headers=dict([
         ('content-type', 'application/json'),
-        auth_header]))
+        auth_header]), verify=False)
     try:
         response.raise_for_status()
     except requests.HTTPError as e:
