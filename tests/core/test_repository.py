@@ -33,6 +33,7 @@ class TestGetJsonUrl(unittest.TestCase):
         response_content = _get_json_url("my_url", "some_token")
         mock_get.assert_called_once_with(
             'my_url',
+            verify=False,
             headers={'content-type': 'application/json',
                      'Authorization': 'Bearer some_token'})
         assert_that(response_content, equal_to('[]'))
