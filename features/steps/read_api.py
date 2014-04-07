@@ -10,6 +10,7 @@ import pytz
 from features.support.stagecraft import StagecraftService
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
+TEST_STAGECRAFT_PORT = 3204
 
 
 @given('the api is running in protected mode')
@@ -45,7 +46,8 @@ def ensure_bucket_exists(context, bucket_name, settings={}):
 
     if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
         context.mock_stagecraft_server.stop()
-    context.mock_stagecraft_server = StagecraftService(8080, url_response_dict)
+    context.mock_stagecraft_server = StagecraftService(
+        TEST_STAGECRAFT_PORT, url_response_dict)
     context.mock_stagecraft_server.start()
 
     context.bucket = bucket_name
@@ -121,7 +123,8 @@ def step(context, bucket_name):
 def step(context):
     if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
         context.mock_stagecraft_server.stop()
-    context.mock_stagecraft_server = StagecraftService(8080, {})
+    context.mock_stagecraft_server = StagecraftService(
+        TEST_STAGECRAFT_PORT, {})
     context.mock_stagecraft_server.start()
 
 
