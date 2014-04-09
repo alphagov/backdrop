@@ -4,4 +4,4 @@
 # Generate a random token 
 #
 
-head -c 500 /dev/random | shasum -a 512
+head -c 500 /dev/urandom | shasum -a 512
