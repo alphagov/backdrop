@@ -7,10 +7,10 @@ from mock import Mock
 class TestBearerTokenIsValid(object):
     def test_auth_header_is_valid(self):
         auth_header = "Bearer token"
-        mock_bucket = Mock()
-        mock_bucket.bearer_token = "token"
+        mock_data_set = Mock()
+        mock_data_set.bearer_token = "token"
 
-        assert_that(auth_header_is_valid(mock_bucket, auth_header))
+        assert_that(auth_header_is_valid(mock_data_set, auth_header))
 
     def test_extract_bearer_token_returns_blank_string_if_invalid(self):
         received_token = "token"

@@ -2,7 +2,7 @@
 Feature: combining period and group queries
 
   Background:
-      Given "collectables.json" is in "collect_me" bucket
+      Given "collectables.json" is in "collect_me" data_set
 
   Scenario: combining a period and collect query
     when I go to "/collect_me?period=week&collect=pickup&start_at=2013-08-05T00:00:00Z&end_at=2013-08-12T00:00:00Z"

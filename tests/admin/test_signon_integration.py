@@ -3,7 +3,7 @@ from hamcrest import *
 from mock import patch
 from werkzeug.urls import url_decode
 from backdrop.admin import app
-from tests.support.bucket import fake_bucket_exists, stub_user_retrieve_by_email
+from tests.support.data_set import fake_data_set_exists, stub_user_retrieve_by_email
 from tests.support.test_helpers import has_status
 from tests.admin.support.oauth_test_case import OauthTestCase
 
@@ -88,16 +88,16 @@ class TestSignonIntegration(OauthTestCase):
         response = self.client.get('/test/upload')
         assert_that(response, has_status(302))
 
-    @fake_bucket_exists("test", upload_format="csv")
-    @stub_user_retrieve_by_email("bob@example.com", buckets=[])
+    @fake_data_set_exists("test", upload_format="csv")
+    @stub_user_retrieve_by_email("bob@example.com", data_sets=[])
     def test_upload_page_is_not_found_if_user_has_no_permissions(self):
         self.given_user_is_signed_in_as(email="bob@example.com")
 
         response = self.client.get('/test/upload')
         assert_that(response, has_status(404))
 
-    @fake_bucket_exists("test", upload_format="csv")
-    @stub_user_retrieve_by_email("bob@example.com", buckets=["test"])
+    @fake_data_set_exists("test", upload_format="csv")
+    @stub_user_retrieve_by_email("bob@example.com", data_sets=["test"])
     def test_upload_page_is_available_to_user_with_permission(self):
         self.given_user_is_signed_in_as(email="bob@example.com")
 

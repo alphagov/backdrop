@@ -6,7 +6,7 @@ from flask import Flask, jsonify, url_for, request, \
 
 from .. import statsd
 from ..core import cache_control, log_handler, database
-from ..core.bucket import Bucket
+from ..core.data_set import Bucket
 from ..core.errors import ParseError, ValidationError
 from ..core.repository \
     import BucketConfigRepository, UserConfigRepository
@@ -25,7 +25,7 @@ app.config.from_object(
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
-app.url_map.converters["bucket"] = BucketConverter
+app.url_map.converters["data_set"] = BucketConverter
 
 db = database.Database(
     app.config['MONGO_HOSTS'],
@@ -33,7 +33,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketConfigRepository(
+data_set_repository = BucketConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
@@ -63,13 +63,13 @@ def old_index():
 def exception_handler(e):
     app.logger.exception(e)
 
-    bucket_name = getattr(e, 'bucket_name', request.path)
-    statsd.incr("write.error", bucket=bucket_name)
+    data_set_name = getattr(e, 'data_set_name', request.path)
+    statsd.incr("write.error", data_set=data_set_name)
 
     code = getattr(e, 'code', 500)
     name = getattr(e, 'name', 'Internal Error')
 
-    return render_template("error.html", name=name, bucket_name=bucket_name), \
+    return render_template("error.html", name=name, data_set_name=data_set_name), \
         code
 
 
@@ -95,7 +95,7 @@ def prevent_clickjacking(response):
 def index():
     """
     This representation is private to the logged-in user
-    (with their own buckets)
+    (with their own data_sets)
     """
     user_email = session.get('user', {}).get('email')
     if user_email:
@@ -181,39 +181,39 @@ def oauth_sign_out():
                            oauth_base_url=app.config['OAUTH_BASE_URL'])
 
 
-@app.route('/<bucket:bucket_name>/upload', methods=['GET', 'POST'])
+@app.route('/<data_set:data_set_name>/upload', methods=['GET', 'POST'])
 @protected
 @cache_control.set("private, must-revalidate")
-def upload(bucket_name):
-    bucket_config = bucket_repository.retrieve(bucket_name)
+def upload(data_set_name):
+    data_set_config = data_set_repository.retrieve(data_set_name)
     user_config = user_repository.retrieve(
         session.get("user").get("email"))
 
-    if bucket_name not in user_config.buckets:
+    if data_set_name not in user_config.data_sets:
         return abort(404)
 
     if request.method == 'GET':
         return render_template(
-            "upload_{}.html".format(bucket_config.upload_format),
-            bucket_name=bucket_name)
+            "upload_{}.html".format(data_set_config.upload_format),
+            data_set_name=data_set_name)
 
-    return _store_data(bucket_config)
+    return _store_data(data_set_config)
 
 
-def _store_data(bucket_config):
-    parse_file = create_parser(bucket_config)
-    bucket = Bucket(db, bucket_config)
+def _store_data(data_set_config):
+    parse_file = create_parser(data_set_config)
+    data_set = Bucket(db, data_set_config)
     expected_errors = (FileUploadError, ParseError, ValidationError)
 
     try:
         with UploadedFile(request.files['file']) as uploaded_file:
             raw_data = parse_file(uploaded_file.file_stream())
-            bucket.parse_and_store(raw_data)
+            data_set.parse_and_store(raw_data)
     except expected_errors as e:
         app.logger.error('Upload error: {}'.format(e.message))
         return render_template('upload_error.html',
                                message=e.message,
-                               bucket_name=bucket.name), 400
+                               data_set_name=data_set.name), 400
 
     return render_template('upload_ok.html')
 

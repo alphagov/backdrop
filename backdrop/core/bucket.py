@@ -3,7 +3,7 @@ from collections import namedtuple
 from flask import logging
 from backdrop.core import records
 from backdrop.core.errors import ValidationError
-from backdrop.core.validation import bucket_is_valid
+from backdrop.core.validation import data_set_is_valid
 
 import timeutils
 import datetime
@@ -87,7 +87,7 @@ class BucketConfig(_BucketConfig):
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400):
-        if not bucket_is_valid(name):
+        if not data_set_is_valid(name):
             raise ValueError("Bucket name is not valid: '{}'".format(name))
 
         if upload_filters is None:
@@ -104,5 +104,5 @@ class BucketConfig(_BucketConfig):
 
     @property
     def max_age(self):
-        """ Set cache-control header length based on type of bucket. """
+        """ Set cache-control header length based on type of data_set. """
         return 120 if self.realtime else 1800

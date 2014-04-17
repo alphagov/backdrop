@@ -16,7 +16,7 @@ class TestUserRepositoryIntegration(object):
         self.mongo_collection.drop()
         self.repository = UserConfigRepository(self.db)
 
-    def test_saving_a_config_with_no_buckets(self):
+    def test_saving_a_config_with_no_data_sets(self):
         config = UserConfig(email="test@example.com")
 
         self.repository.save(config)
@@ -26,5 +26,5 @@ class TestUserRepositoryIntegration(object):
         assert_that(len(results), is_(1))
         assert_that(results[0], has_entries({
             "email": "test@example.com",
-            "buckets": [],
+            "data_sets": [],
         }))

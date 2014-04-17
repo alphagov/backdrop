@@ -23,22 +23,22 @@ def step(context, message):
     assert context.client.browser.is_text_present(message)
 
 
-@then(u'the "{bucket_name}" bucket should contain in any order')
-def step(context, bucket_name):
-    bucket_contains(context, bucket_name, contains_inanyorder)
+@then(u'the "{data_set_name}" data_set should contain in any order')
+def step(context, data_set_name):
+    data_set_contains(context, data_set_name, contains_inanyorder)
 
 
-@then(u'the "{bucket_name}" bucket should have items')
-def step(context, bucket_name):
-    bucket_contains(context, bucket_name, has_items)
+@then(u'the "{data_set_name}" data_set should have items')
+def step(context, data_set_name):
+    data_set_contains(context, data_set_name, has_items)
 
 
-def bucket_contains(context, bucket_name, sequence_matcher):
+def data_set_contains(context, data_set_name, sequence_matcher):
     documents = [json.loads(line) for line in context.text.split("\n")]
     matchers = [has_entries(doc) for doc in documents]
 
-    bucket = context.client.storage()[bucket_name]
-    records = [datetimes_to_strings(record) for record in bucket.find()]
+    data_set = context.client.storage()[data_set_name]
+    records = [datetimes_to_strings(record) for record in data_set.find()]
     records = [ints_to_floats(record) for record in records]
     records = [nones_to_zeroes(record) for record in records]
 
@@ -69,7 +69,7 @@ def nones_to_zeroes(record):
     return record
 
 
-@then(u'the platform should have "{n}" items stored in "{bucket_name}"')
-def step(context, n, bucket_name):
-    bucket = context.client.storage()[bucket_name]
-    assert_that(bucket.count(), is_(int(n)))
+@then(u'the platform should have "{n}" items stored in "{data_set_name}"')
+def step(context, n, data_set_name):
+    data_set = context.client.storage()[data_set_name]
+    assert_that(data_set.count(), is_(int(n)))

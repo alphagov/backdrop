@@ -9,7 +9,7 @@ Feature: Sign in
 
   Scenario: Show signed in list of actions
     Given I am logged in as "Alex" with email "test@example.com"
-    And I can upload to "my_bucket"
+    And I can upload to "my_data_set"
     When I go to "/"
-    Then I should see the text "Upload a CSV to the my_bucket bucket"
+    Then I should see the text "Upload a CSV to the my_data_set data_set"
     And I should get a "x-frame-options" header of "SAMEORIGIN"

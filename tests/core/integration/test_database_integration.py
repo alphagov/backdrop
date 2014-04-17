@@ -769,7 +769,7 @@ class TestDatabase(unittest.TestCase):
         assert_that(self.db.alive(), is_(True))
 
     def test_getting_a_repository(self):
-        repository = self.db.get_repository('my_bucket')
+        repository = self.db.get_repository('my_data_set')
         assert_that(repository, instance_of(Repository))
 
     def test_getting_a_collection(self):

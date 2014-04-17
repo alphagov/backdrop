@@ -1,7 +1,7 @@
 import mock
 import unittest
 
-from backdrop.core.bucket import BucketConfig
+from backdrop.core.data_set import BucketConfig
 from backdrop.core.repository import (BucketConfigRepository,
                                       UserConfigRepository,
                                       _get_json_url)
@@ -41,7 +41,7 @@ class TestGetJsonUrl(unittest.TestCase):
 
 class TestBucketRepository(unittest.TestCase):
     def setUp(self):
-        self.bucket_repo = BucketConfigRepository(
+        self.data_set_repo = BucketConfigRepository(
             'fake_stagecraft_url', 'fake_stagecraft_token')
 
     def test_retrieve_correctly_decodes_stagecraft_response(self):
@@ -49,9 +49,9 @@ class TestBucketRepository(unittest.TestCase):
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
 
-                bucket = self.bucket_repo.retrieve(name="bucket_name")
+                data_set = self.data_set_repo.retrieve(name="data_set_name")
 
-            expected_bucket = BucketConfig("govuk_visitors",
+            expected_data_set = BucketConfig("govuk_visitors",
                                            data_group="govuk",
                                            data_type="visitors",
                                            raw_queries_allowed=True,
@@ -64,16 +64,16 @@ class TestBucketRepository(unittest.TestCase):
                                            capped_size=None,
                                            max_age_expected=86400)
 
-            assert_that(bucket, equal_to(expected_bucket))
+            assert_that(data_set, equal_to(expected_data_set))
 
     def test_get_all_correctly_decodes_stagecraft_response(self):
         with fixture('stagecraft_list_data_sets.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
 
-                buckets = self.bucket_repo.get_all()
+                data_sets = self.data_set_repo.get_all()
 
-            expected_bucket_one = BucketConfig(
+            expected_data_set_one = BucketConfig(
                 "govuk_visitors",
                 data_group="govuk",
                 data_type="visitors",
@@ -87,18 +87,18 @@ class TestBucketRepository(unittest.TestCase):
                 capped_size=None,
                 max_age_expected=86400)
 
-            assert_that(len(buckets), equal_to(5))
-            assert_that(buckets[0], equal_to(expected_bucket_one))
+            assert_that(len(data_sets), equal_to(5))
+            assert_that(data_sets[0], equal_to(expected_data_set_one))
 
-    def test_get_bucket_for_query_correctly_decodes_stagecraft_response(self):
+    def test_get_data_set_for_query_correctly_decodes_stagecraft_response(self):
         with fixture('stagecraft_query_data_group_type.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
 
-                bucket = self.bucket_repo.get_bucket_for_query(
+                data_set = self.data_set_repo.get_data_set_for_query(
                     data_group="govuk", data_type="realtime")
 
-            expected_bucket = BucketConfig("govuk_visitors",
+            expected_data_set = BucketConfig("govuk_visitors",
                                            data_group="govuk",
                                            data_type="visitors",
                                            raw_queries_allowed=True,
@@ -111,9 +111,9 @@ class TestBucketRepository(unittest.TestCase):
                                            capped_size=None,
                                            max_age_expected=86400)
 
-            assert_that(bucket, equal_to(expected_bucket))
+            assert_that(data_set, equal_to(expected_data_set))
 
-    def test_retrieve_for_non_existent_bucket_returns_none(self):
+    def test_retrieve_for_non_existent_data_set_returns_none(self):
         def _mock_raise_http_404(*args, **kwargs):
             mock_error_response = Mock()
             mock_error_response.status_code = 404
@@ -124,9 +124,9 @@ class TestBucketRepository(unittest.TestCase):
 
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.side_effect = _mock_raise_http_404
-            bucket = self.bucket_repo.retrieve(name="non_existent")
+            data_set = self.data_set_repo.retrieve(name="non_existent")
 
-        assert_that(bucket, is_(None))
+        assert_that(data_set, is_(None))
 
     def test_retrieve_doesnt_catch_http_errors_other_than_404(self):
         def _mock_raise_http_503(*args, **kwargs):
@@ -142,30 +142,30 @@ class TestBucketRepository(unittest.TestCase):
 
             assert_raises(
                 requests.HTTPError,
-                lambda: self.bucket_repo.retrieve(name="non_existent"))
+                lambda: self.data_set_repo.retrieve(name="non_existent"))
 
-    def test_get_bucket_for_query_for_non_existent_bucket_returns_none(self):
+    def test_get_data_set_for_query_for_non_existent_data_set_returns_none(self):
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.return_value = '[]'
-            bucket = self.bucket_repo.get_bucket_for_query(
+            data_set = self.data_set_repo.get_data_set_for_query(
                 data_group="govuk", data_type="realtime")
 
-        assert_that(bucket, is_(None))
+        assert_that(data_set, is_(None))
 
     def test_retrieve_calls_correct_url_for_data_set_by_name(self):
         with fixture('stagecraft_get_single_data_set.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
-                self.bucket_repo.retrieve(name="govuk_visitors")
+                self.data_set_repo.retrieve(name="govuk_visitors")
                 _get_json_url.assert_called_once_with(
                     'fake_stagecraft_url/data-sets/govuk_visitors',
                     "fake_stagecraft_token")
 
-    def test_get_bucket_for_query_calls_correct_url(self):
+    def test_get_data_set_for_query_calls_correct_url(self):
         with fixture('stagecraft_query_data_group_type.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
-                self.bucket_repo.get_bucket_for_query(
+                self.data_set_repo.get_data_set_for_query(
                     data_group="govuk", data_type="realtime")
                 _get_json_url.assert_called_once_with(
                     'fake_stagecraft_url/data-sets?'
@@ -176,7 +176,7 @@ class TestBucketRepository(unittest.TestCase):
         with fixture('stagecraft_query_data_group_type.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
-                self.bucket_repo.get_all()
+                self.data_set_repo.get_all()
                 _get_json_url.assert_called_once_with(
                     'fake_stagecraft_url/data-sets', "fake_stagecraft_token")
 
@@ -190,13 +190,13 @@ class TestUserConfigRepository(object):
 
     def test_saving_a_user_config(self):
         user = UserConfig("test@example.com",
-                          buckets=["bucket_one", "bucket_two"])
+                          data_sets=["data_set_one", "data_set_two"])
 
         self.repository.save(user)
         self.mongo_collection.save.assert_called_with(
             match_equality(has_entries({
                 "_id": "test@example.com",
-                "buckets": ["bucket_one", "bucket_two"]
+                "data_sets": ["data_set_one", "data_set_two"]
             }))
         )
 
@@ -209,7 +209,7 @@ class TestUserConfigRepository(object):
         self.mongo_collection.find_one.return_value = {
             "_id": "test@example.com",
             "email": "test@example.com",
-            "buckets": ["foo", "bar"],
+            "data_sets": ["foo", "bar"],
         }
 
         user_config = self.repository.retrieve(email="test@example.com")

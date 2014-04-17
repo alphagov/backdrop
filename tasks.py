@@ -5,7 +5,7 @@ from os import getenv
 from backdrop.core import database
 from backdrop.core.user import UserConfig
 from backdrop.write.api import app
-from backdrop.core.bucket import BucketConfig
+from backdrop.core.data_set import BucketConfig
 from backdrop.core.repository import BucketConfigRepository,\
     UserConfigRepository
 
@@ -26,10 +26,10 @@ def get_database():
 
 
 @task
-def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
+def create_data_set(name, datagroup, datatype, rawqueries=False, token=None,
                   autoids=None, uploadformat=None, uploadfilters=None,
                   queryable=True, realtime=False):
-    """Create a new bucket configuration in the database."""
+    """Create a new data_set configuration in the database."""
     db = get_database()
 
     config = BucketConfig(name=name, data_group=datagroup, data_type=datatype,
@@ -43,22 +43,22 @@ def create_bucket(name, datagroup, datatype, rawqueries=False, token=None,
 
 
 @task
-def allow_access(email, bucket):
-    """Give a user access to a bucket."""
+def allow_access(email, data_set):
+    """Give a user access to a data_set."""
     db = get_database()
 
     repository = UserConfigRepository(db)
 
     config = repository.retrieve(email) or UserConfig(email)
 
-    if bucket not in config.buckets:
-        config = UserConfig(email, config.buckets + [bucket])
+    if data_set not in config.data_sets:
+        config = UserConfig(email, config.data_sets + [data_set])
         repository.save(config)
 
 
 @task
 def load_seed():
-    """One off task to load buckets and users from seed files"""
+    """One off task to load data_sets and users from seed files"""
     def load_seed_file(filename):
         seed_path = os.path.join(os.path.dirname(__file__), "config", filename)
         with open(seed_path) as f:
@@ -69,9 +69,9 @@ def load_seed():
         for item in load_seed_file(filename):
             repo.save(model_cls(**item), **save_kwargs)
 
-    save_all("bucket-seed.json",
+    save_all("data_set-seed.json",
              BucketConfigRepository,
-             BucketConfig, create_bucket=False)
+             BucketConfig, create_data_set=False)
     save_all("user-seed.json",
              UserConfigRepository,
              UserConfig)

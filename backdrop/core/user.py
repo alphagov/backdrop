@@ -1,25 +1,25 @@
 from collections import namedtuple
 
 
-def _bucket_list_is_valid(buckets):
-    if not isinstance(buckets, list):
+def _data_set_list_is_valid(data_sets):
+    if not isinstance(data_sets, list):
         return False
 
     is_string = lambda value: isinstance(value, basestring)
 
-    return all(map(is_string, buckets))
+    return all(map(is_string, data_sets))
 
 
 _UserConfig = namedtuple(
     "_UserConfig",
-    "email buckets")
+    "email data_sets")
 
 
 class UserConfig(_UserConfig):
-    def __new__(cls, email, buckets=None):
-        if buckets is None:
-            buckets = []
-        elif not _bucket_list_is_valid(buckets):
-            raise ValueError("buckets must be a list of bucket names")
+    def __new__(cls, email, data_sets=None):
+        if data_sets is None:
+            data_sets = []
+        elif not _data_set_list_is_valid(data_sets):
+            raise ValueError("data_sets must be a list of data_set names")
 
-        return super(UserConfig, cls).__new__(cls, email, buckets)
+        return super(UserConfig, cls).__new__(cls, email, data_sets)

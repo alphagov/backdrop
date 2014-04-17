@@ -6,24 +6,24 @@
             <h1 class="masthead">Performance Platform</h1>
             <p>Welcome to Backdrop, the data collection API for the Performance Platform.</p>
             {% if user_config %}
-                <h2>Available buckets</h2>
-                {% if user_config.buckets %}
+                <h2>Available data_sets</h2>
+                {% if user_config.data_sets %}
                     <p>
-                        If you can't see the bucket you want to upload data to in this list,
+                        If you can't see the data_set you want to upload data to in this list,
                         <a href="mailto:performance-platform@digital.cabinet-office.gov.uk">contact the Performance Platform team</a>.
                     </p>
-                    <ul id="bucket-list">
-                        {% for bucket_name in user_config.buckets %}
+                    <ul id="data_set-list">
+                        {% for data_set_name in user_config.data_sets %}
                         <li>
-                            <h3>{{ bucket_name }}</h3>
-                            <p><a href="{{ url_for('upload', bucket_name=bucket_name) }}">
-                                Upload a CSV to the {{ bucket_name }} bucket
+                            <h3>{{ data_set_name }}</h3>
+                            <p><a href="{{ url_for('upload', data_set_name=data_set_name) }}">
+                                Upload a CSV to the {{ data_set_name }} data_set
                             </a></p>
                         </li>
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p>You don't have permission to upload to any buckets yet.</p>
+                    <p>You don't have permission to upload to any data_sets yet.</p>
                 {% endif %}
             {% else %}
                 <a class="btn btn-primary btn-large btn-block" href={{ url_for("oauth_sign_in") }}>Sign in</a>

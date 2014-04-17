@@ -4,8 +4,8 @@ Feature: querying for data grouped by day
 
     Scenario: grouping data by day between two timestamps
          Given I have the data in "daily_timestamps.json"
-           And I have a bucket named "day"
-           And I use the bearer token for the bucket
+           And I have a data_set named "day"
+           And I use the bearer token for the data_set
           When I post the data to "/day"
           Then I should get back a status of "200"
           When I go to "/day?period=day&start_at=2013-04-04T00:00:00Z&end_at=2013-04-11T00:00:00Z"

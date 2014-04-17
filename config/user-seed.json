@@ -1,8 +1,8 @@
 [
   {
-    "buckets": [
-      "bucket_one", 
-      "bucket_two"
+    "data_sets": [
+      "data_set_one", 
+      "data_set_two"
     ], 
     "email": "user@host"
   }

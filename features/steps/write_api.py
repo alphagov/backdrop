@@ -18,9 +18,9 @@ def step(context, json):
     context.data_to_post = json
 
 
-@given('I use the bearer token for the bucket')
+@given('I use the bearer token for the data_set')
 def step(context):
-    context.bearer_token = "%s-bearer-token" % context.bucket
+    context.bearer_token = "%s-bearer-token" % context.data_set
 
 
 @given(u'I have the bearer token "{token}"')
@@ -28,12 +28,12 @@ def step(context, token):
     context.bearer_token = token
 
 
-@when('I post the data to "{bucket_name}"')
-def step(context, bucket_name):
-    if not (context and 'bucket' in context):
-        context.bucket = bucket_name.replace('/', '')
+@when('I post the data to "{data_set_name}"')
+def step(context, data_set_name):
+    if not (context and 'data_set' in context):
+        context.data_set = data_set_name.replace('/', '')
     context.response = context.client.post(
-        bucket_name,
+        data_set_name,
         data=context.data_to_post,
         content_type="application/json",
         headers=_make_headers_from_context(context),
@@ -50,11 +50,11 @@ def step(context, path):
     )
 
 
-@when('I post the file "{filename}" to "/{bucket_name}/upload"')
-def step(context, filename, bucket_name):
-    context.bucket = bucket_name.replace('/', '')
+@when('I post the file "{filename}" to "/{data_set_name}/upload"')
+def step(context, filename, data_set_name):
+    context.data_set = data_set_name.replace('/', '')
     context.response = context.client.post(
-        "/" + bucket_name + "/upload",
+        "/" + data_set_name + "/upload",
         files={"file": open("tmp/%s" % filename, "r")},
         headers=_make_headers_from_context(context),
     )
@@ -62,14 +62,14 @@ def step(context, filename, bucket_name):
 
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
-    result = context.client.storage()[context.bucket].find({key: value})
+    result = context.client.storage()[context.data_set].find({key: value})
     assert_that(list(result), has_length(int(amount)))
 
 
 @then('the stored data should contain "{amount}" "{key}" on "{time}"')
 def step(context, amount, key, time):
     time_query = parser.parse(time)
-    result = context.client.storage()[context.bucket].find({key: time_query})
+    result = context.client.storage()[context.data_set].find({key: time_query})
     assert_that(list(result), has_length(int(amount)))
 
 

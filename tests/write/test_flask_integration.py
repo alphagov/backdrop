@@ -6,7 +6,7 @@ from hamcrest import *
 import pytz
 from mock import patch
 from backdrop.core.records import Record
-from tests.support.bucket import fake_bucket_exists
+from tests.support.data_set import fake_data_set_exists
 
 from tests.support.test_helpers import is_bad_request, is_ok, \
     is_error_response, has_status, is_not_found
@@ -18,7 +18,7 @@ class PostDataTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
-    @fake_bucket_exists("foo")
+    @fake_data_set_exists("foo")
     def test_needs_an_authorization_header_even_if_no_token_is_configured(self):
         response = self.app.post(
             '/foo',
@@ -28,7 +28,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_needs_an_authorization_header(self):
         response = self.app.post(
             '/foo',
@@ -38,7 +38,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_authorization_header_must_be_correct_format(self):
         response = self.app.post(
             '/foo',
@@ -49,7 +49,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_authorization_header_must_match_server_side_value(self):
         response = self.app.post(
             '/foo',
@@ -60,7 +60,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_request_must_be_json(self):
         response = self.app.post(
             '/foo',
@@ -71,36 +71,36 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
-    @fake_bucket_exists("foo_bucket", bearer_token="foo_bucket-bearer-token")
-    @patch("backdrop.core.bucket.Bucket.store")
+    @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
+    @patch("backdrop.core.data_set.Bucket.store")
     def test_empty_list_gets_accepted(self, store):
         self.app.post(
-            '/foo_bucket',
+            '/foo_data_set',
             data='[]',
             content_type="application/json",
-            headers=[('Authorization', 'Bearer foo_bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo_data_set-bearer-token')],
         )
 
         store.assert_called_with(
             []
         )
 
-    @fake_bucket_exists("foo_bucket", bearer_token="foo_bucket-bearer-token")
-    @patch("backdrop.core.bucket.Bucket.store")
+    @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
+    @patch("backdrop.core.data_set.Bucket.store")
     def test_data_gets_stored(self, store):
         self.app.post(
-            '/foo_bucket',
+            '/foo_data_set',
             data = '{"foo": "bar"}',
             content_type = "application/json",
-            headers=[('Authorization', 'Bearer foo_bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo_data_set-bearer-token')],
         )
 
         store.assert_called_with(
             [Record({"foo": "bar"})]
         )
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.bucket.Bucket.store")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
+    @patch("backdrop.core.data_set.Bucket.store")
     def test__timestamps_get_stored_as_utc_datetimes(self, store):
         expected_event_with_time = {
             u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
@@ -117,20 +117,20 @@ class PostDataTestCase(unittest.TestCase):
             [Record(expected_event_with_time)]
         )
 
-    @fake_bucket_exists("foo_bucket", bearer_token="foo_bucket-bearer-token")
+    @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
     def test_data_with_empty_keys_400s(self):
         response = self.app.post(
-            '/foo_bucket',
+            '/foo_data_set',
             data = '{"": ""}',
             content_type = "application/json",
-            headers=[('Authorization', 'Bearer foo_bucket-bearer-token')],
+            headers=[('Authorization', 'Bearer foo_data_set-bearer-token')],
         )
 
         assert_that( response, is_bad_request())
         assert_that( response, is_error_response())
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.bucket.Bucket.store")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
+    @patch("backdrop.core.data_set.Bucket.store")
     def test__id_gets_stored(self, store):
         response = self.app.post(
             '/foo',
@@ -144,7 +144,7 @@ class PostDataTestCase(unittest.TestCase):
             [Record({"_id": "foo"})]
         )
 
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_invalid__id_returns_400(self):
         response = self.app.post(
             '/foo',
@@ -157,8 +157,8 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.core.bucket.Bucket.parse_and_store")
-    @fake_bucket_exists("foo", bearer_token="foo-bearer-token")
+    @patch("backdrop.core.data_set.Bucket.parse_and_store")
+    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_exception_handling(self, parse_and_store, statsd):
         parse_and_store.side_effect = RuntimeError("BOOM")
 
@@ -172,13 +172,13 @@ class PostDataTestCase(unittest.TestCase):
         assert_that(response, has_status(500))
         assert_that(response, is_error_response())
 
-        statsd.incr.assert_called_with("write.error", bucket="foo")
+        statsd.incr.assert_called_with("write.error", data_set="foo")
 
 
 class ApiHealthCheckTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
-        self.stored_bucket = None
+        self.stored_data_set = None
         self.stored_data = None
 
     def test_api_exposes_a_healthcheck(self):
@@ -200,13 +200,13 @@ class ApiHealthCheckTestCase(unittest.TestCase):
         assert_that(response, has_status(500))
         assert_that(response, is_error_response())
 
-        statsd.incr.assert_called_with("write.error", bucket="/_status")
+        statsd.incr.assert_called_with("write.error", data_set="/_status")
 
 
 class UploadPageTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
 
-    def test_invalid_bucket_name_returns_400(self):
-        response = self.app.get("/$invalid_bucket/upload")
+    def test_invalid_data_set_name_returns_400(self):
+        response = self.app.get("/$invalid_data_set/upload")
         assert_that(response, is_not_found())

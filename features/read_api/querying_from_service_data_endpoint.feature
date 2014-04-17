@@ -2,7 +2,7 @@
 Feature: Querying data from service-data endpoint
 
     Scenario: querying data
-        Given "dinosaurs.json" is in "rawr" bucket with settings
+        Given "dinosaurs.json" is in "rawr" data_set with settings
             | key                 | value       |
             | data_group          | "dinosaurs" |
             | data_type           | "taxonomy"  |
