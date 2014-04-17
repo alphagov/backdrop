@@ -1,0 +1,5 @@
+--ignore-dir=venv
+--ignore-dir=tmp
+--ignore-dir=log
+--ignore-file=match:.coverage
+
