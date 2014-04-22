@@ -6,7 +6,7 @@ Feature: the read/status api
             | key              | value |
             | max_age_expected | 60    |
         and I have a record updated "10 seconds" ago in the "recent" data_set
-        when I go to "/_status/data_sets"
+        when I go to "/_status/data-sets"
         then I should get back a status of "200"
 
     Scenario: checking an out-of-date data_set
@@ -14,7 +14,7 @@ Feature: the read/status api
             | key              | value |
             | max_age_expected | 1     |
         and I have a record updated "10 seconds" ago in the "recent" data_set
-        when I go to "/_status/data_sets"
+        when I go to "/_status/data-sets"
         then I should get back a status of "500"
 
     Scenario: checking a data_set with no max age expected
@@ -22,5 +22,5 @@ Feature: the read/status api
             | key              | value |
             | max_age_expected | None  |
         and I have a record updated "10 seconds" ago in the "recent" data_set
-        when I go to "/_status/data_sets"
+        when I go to "/_status/data-sets"
         then I should get back a status of "200"

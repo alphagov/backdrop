@@ -70,7 +70,7 @@ def health_check():
     return jsonify(status='ok', message='database is up')
 
 
-@app.route('/_status/data_sets', methods=['GET'])
+@app.route('/_status/data-sets', methods=['GET'])
 @cache_control.nocache
 def data_set_health():
 
