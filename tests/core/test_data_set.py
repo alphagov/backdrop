@@ -4,7 +4,7 @@ from hamcrest import assert_that, is_
 from nose.tools import *
 from mock import Mock, call
 from backdrop.core import data_set
-from backdrop.core.data_set import BucketConfig
+from backdrop.core.data_set import DataSetConfig
 from backdrop.core.records import Record
 from backdrop.read.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
@@ -24,12 +24,12 @@ def mock_repository():
     return mock_repository
 
 
-class TestBucket(unittest.TestCase):
+class TestDataSet(unittest.TestCase):
 
     def setUp(self):
         self.mock_repository = mock_repository()
         self.mock_database = mock_database(self.mock_repository)
-        self.data_set = data_set.Bucket(self.mock_database, BucketConfig('test_data_set',
+        self.data_set = data_set.DataSet(self.mock_database, DataSetConfig('test_data_set',
                                                                      data_group="group",
                                                                      data_type="type"))
 
@@ -589,14 +589,14 @@ class TestBucket(unittest.TestCase):
         assert_raises(ValueError, self.data_set.query, query)
 
 
-class TestBucketConfig(object):
+class TestDataSetConfig(object):
 
     def test_creating_a_data_set_with_raw_queries_allowed(self):
-        data_set = BucketConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
+        data_set = DataSetConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
         assert_that(data_set.raw_queries_allowed, is_(True))
 
     def test_default_values(self):
-        data_set = BucketConfig("default", data_group="with_defaults", data_type="def_type")
+        data_set = DataSetConfig("default", data_group="with_defaults", data_type="def_type")
 
         assert_that(data_set.raw_queries_allowed, is_(False))
         assert_that(data_set.queryable, is_(True))
@@ -618,13 +618,13 @@ class TestBucketConfig(object):
         }
         for (data_set_name, name_is_valid) in data_set_names.items():
             if name_is_valid:
-                BucketConfig(data_set_name, data_group="group", data_type="type")
+                DataSetConfig(data_set_name, data_group="group", data_type="type")
             else:
-                assert_raises(ValueError, BucketConfig, data_set_name, "group", "type")
+                assert_raises(ValueError, DataSetConfig, data_set_name, "group", "type")
 
     def test_max_age(self):
-        data_set = BucketConfig("default", "group", "type", realtime=False)
+        data_set = DataSetConfig("default", "group", "type", realtime=False)
         assert_that(data_set.max_age, is_(1800))
 
-        data_set = BucketConfig("default", "group", "type", realtime=True)
+        data_set = DataSetConfig("default", "group", "type", realtime=True)
         assert_that(data_set.max_age, is_(120))

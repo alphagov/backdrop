@@ -6,11 +6,11 @@ from flask import Flask, jsonify, url_for, request, \
 
 from .. import statsd
 from ..core import cache_control, log_handler, database
-from ..core.data_set import Bucket
+from ..core.data_set import DataSet
 from ..core.errors import ParseError, ValidationError
 from ..core.repository \
-    import BucketConfigRepository, UserConfigRepository
-from ..core.flaskutils import BucketConverter
+    import DataSetConfigRepository, UserConfigRepository
+from ..core.flaskutils import DataSetConverter
 from ..core.upload import create_parser
 from .signonotron2 import Signonotron2
 from .uploaded_file import UploadedFile, FileUploadError
@@ -25,7 +25,7 @@ app.config.from_object(
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
-app.url_map.converters["data_set"] = BucketConverter
+app.url_map.converters["data_set"] = DataSetConverter
 
 db = database.Database(
     app.config['MONGO_HOSTS'],
@@ -33,7 +33,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-data_set_repository = BucketConfigRepository(
+data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
@@ -202,7 +202,7 @@ def upload(data_set_name):
 
 def _store_data(data_set_config):
     parse_file = create_parser(data_set_config)
-    data_set = Bucket(db, data_set_config)
+    data_set = DataSet(db, data_set_config)
     expected_errors = (FileUploadError, ParseError, ValidationError)
 
     try:

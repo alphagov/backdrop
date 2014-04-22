@@ -72,7 +72,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
-    @patch("backdrop.core.data_set.Bucket.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test_empty_list_gets_accepted(self, store):
         self.app.post(
             '/foo_data_set',
@@ -86,7 +86,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
-    @patch("backdrop.core.data_set.Bucket.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test_data_gets_stored(self, store):
         self.app.post(
             '/foo_data_set',
@@ -100,7 +100,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.data_set.Bucket.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test__timestamps_get_stored_as_utc_datetimes(self, store):
         expected_event_with_time = {
             u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
@@ -130,7 +130,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.data_set.Bucket.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test__id_gets_stored(self, store):
         response = self.app.post(
             '/foo',
@@ -157,7 +157,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.core.data_set.Bucket.parse_and_store")
+    @patch("backdrop.core.data_set.DataSet.parse_and_store")
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_exception_handling(self, parse_and_store, statsd):
         parse_and_store.side_effect = RuntimeError("BOOM")

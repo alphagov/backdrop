@@ -4,7 +4,7 @@ import logging
 
 import requests
 
-from backdrop.core.data_set import BucketConfig
+from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class _Repository(object):
         return self.model_cls(**doc)
 
 
-class BucketConfigRepository(object):
+class DataSetConfigRepository(object):
 
     def __init__(self, stagecraft_url, stagecraft_token):
         self._stagecraft_url = stagecraft_url
@@ -107,7 +107,7 @@ class BucketConfigRepository(object):
 def _make_data_set_config(stagecraft_dict):
     if stagecraft_dict is None:
         return None
-    return BucketConfig(**stagecraft_dict)
+    return DataSetConfig(**stagecraft_dict)
 
 
 def _decode_json(string):

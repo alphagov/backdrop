@@ -3,7 +3,7 @@ from functools import wraps
 from mock import patch
 from contextlib import contextmanager
 
-from backdrop.core.data_set import BucketConfig
+from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
 
 
@@ -14,7 +14,7 @@ def pretend_this_data_set_exists(data_set_config):
     # a collection will be automatically created by Mongo when written to. This
     # will not use the capped_size specified in data_set_config.
     try:
-        namespace = 'backdrop.core.repository.BucketConfigRepository'
+        namespace = 'backdrop.core.repository.DataSetConfigRepository'
         with patch(namespace + '.retrieve') as retrieve:
             with patch(namespace + '.get_data_set_for_query') as query:
                 with patch(namespace + '.get_all') as get_all:
@@ -44,7 +44,7 @@ def fake_data_set_exists(name, data_group="group", data_type="type",
         @wraps(func)
         def wrapped_fake_data_set_exists(*args, **kwargs):
             with pretend_this_data_set_exists(
-                    BucketConfig(
+                    DataSetConfig(
                         setup_data_set_name,
                         data_group,
                         data_type,
@@ -59,7 +59,7 @@ def fake_no_data_sets_exist():
     def decorator(func):
         @wraps(func)
         def wrapped_fake_no_data_sets_exist(*args, **kwargs):
-            namespace = 'backdrop.core.repository.BucketConfigRepository'
+            namespace = 'backdrop.core.repository.DataSetConfigRepository'
             with patch(namespace + '.retrieve') as retrieve:
                 with patch(namespace + '.get_data_set_for_query') as query:
                     with patch(namespace + '.get_all') as get_all:

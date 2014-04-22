@@ -1,4 +1,4 @@
-"""Generate a BucketConfig seed file for a given environment.
+"""Generate a DataSetConfig seed file for a given environment.
 """
 import argparse
 import os
@@ -194,9 +194,9 @@ def extract_data_set(read_config, write_config, nginx_config, name):
         "raw_queries_allowed": read_config.RAW_QUERIES_ALLOWED.get(name,
                                                                    False),
         "bearer_token": write_config.TOKENS.get(name),
-        "upload_format": write_config.BUCKET_UPLOAD_FORMAT.get(name, "csv"),
-        "upload_filters": write_config.BUCKET_UPLOAD_FILTERS.get(name),
-        "auto_ids": write_config.BUCKET_AUTO_ID_KEYS.get(name),
+        "upload_format": write_config.DATA_SET_UPLOAD_FORMAT.get(name, "csv"),
+        "upload_filters": write_config.DATA_SET_UPLOAD_FILTERS.get(name),
+        "auto_ids": write_config.DATA_SET_AUTO_ID_KEYS.get(name),
         "queryable": nginx_config.get(name).get('enabled', True),
         "realtime": nginx_config.get(name).get('realtime', False),
         "capped_size": None

@@ -1,8 +1,8 @@
 import mock
 import unittest
 
-from backdrop.core.data_set import BucketConfig
-from backdrop.core.repository import (BucketConfigRepository,
+from backdrop.core.data_set import DataSetConfig
+from backdrop.core.repository import (DataSetConfigRepository,
                                       UserConfigRepository,
                                       _get_json_url)
 from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
@@ -39,9 +39,9 @@ class TestGetJsonUrl(unittest.TestCase):
         assert_that(response_content, equal_to('[]'))
 
 
-class TestBucketRepository(unittest.TestCase):
+class TestDataSetRepository(unittest.TestCase):
     def setUp(self):
-        self.data_set_repo = BucketConfigRepository(
+        self.data_set_repo = DataSetConfigRepository(
             'fake_stagecraft_url', 'fake_stagecraft_token')
 
     def test_retrieve_correctly_decodes_stagecraft_response(self):
@@ -51,7 +51,7 @@ class TestBucketRepository(unittest.TestCase):
 
                 data_set = self.data_set_repo.retrieve(name="data_set_name")
 
-            expected_data_set = BucketConfig("govuk_visitors",
+            expected_data_set = DataSetConfig("govuk_visitors",
                                            data_group="govuk",
                                            data_type="visitors",
                                            raw_queries_allowed=True,
@@ -73,7 +73,7 @@ class TestBucketRepository(unittest.TestCase):
 
                 data_sets = self.data_set_repo.get_all()
 
-            expected_data_set_one = BucketConfig(
+            expected_data_set_one = DataSetConfig(
                 "govuk_visitors",
                 data_group="govuk",
                 data_type="visitors",
@@ -98,7 +98,7 @@ class TestBucketRepository(unittest.TestCase):
                 data_set = self.data_set_repo.get_data_set_for_query(
                     data_group="govuk", data_type="realtime")
 
-            expected_data_set = BucketConfig("govuk_visitors",
+            expected_data_set = DataSetConfig("govuk_visitors",
                                            data_group="govuk",
                                            data_type="visitors",
                                            raw_queries_allowed=True,

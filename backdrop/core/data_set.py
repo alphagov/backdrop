@@ -11,7 +11,7 @@ import datetime
 log = logging.getLogger(__name__)
 
 
-class Bucket(object):
+class DataSet(object):
 
     def __init__(self, db, config):
         self.name = config.name
@@ -75,26 +75,26 @@ class Bucket(object):
         return b64encode(".".join([datum[key] for key in self.auto_id_keys]))
 
 
-_BucketConfig = namedtuple(
-    "_BucketConfig",
+_DataSetConfig = namedtuple(
+    "_DataSetConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
     "upload_filters auto_ids queryable realtime capped_size max_age_expected")
 
 
-class BucketConfig(_BucketConfig):
+class DataSetConfig(_DataSetConfig):
 
     def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400):
         if not data_set_is_valid(name):
-            raise ValueError("Bucket name is not valid: '{}'".format(name))
+            raise ValueError("DataSet name is not valid: '{}'".format(name))
 
         if upload_filters is None:
             upload_filters = [
                 "backdrop.core.upload.filters.first_sheet_filter"]
 
-        return super(BucketConfig, cls).__new__(cls, name, data_group,
+        return super(DataSetConfig, cls).__new__(cls, name, data_group,
                                                 data_type,
                                                 raw_queries_allowed,
                                                 bearer_token, upload_format,

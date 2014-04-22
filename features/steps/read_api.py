@@ -19,7 +19,7 @@ def step(context):
 
 
 def ensure_data_set_exists(context, data_set_name, settings={}):
-    # these should mostly match the default BucketConfig.__new__() kwargs
+    # these should mostly match the default DataSetConfig.__new__() kwargs
     response = {
         'name': data_set_name,
         'data_group': data_set_name,

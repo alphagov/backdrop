@@ -21,7 +21,7 @@ class QueryingApiTestCase(unittest.TestCase):
         self.app = api.app.test_client()
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type")
-    @patch('backdrop.core.data_set.Bucket.query')
+    @patch('backdrop.core.data_set.DataSet.query')
     def test_period_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
 
@@ -35,7 +35,7 @@ class QueryingApiTestCase(unittest.TestCase):
                          end_at=d_tz(2012, 12, 3)))
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
-    @patch('backdrop.core.data_set.Bucket.query')
+    @patch('backdrop.core.data_set.DataSet.query')
     def test_filter_by_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
         self.app.get('/data/some-group/some-type?filter_by=zombies:yes')
@@ -43,7 +43,7 @@ class QueryingApiTestCase(unittest.TestCase):
             Query.create(filter_by=[[u'zombies', u'yes']]))
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type")
-    @patch('backdrop.core.data_set.Bucket.query')
+    @patch('backdrop.core.data_set.DataSet.query')
     def test_group_by_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
         self.app.get('/data/some-group/some-type?group_by=zombies')
@@ -51,7 +51,7 @@ class QueryingApiTestCase(unittest.TestCase):
             Query.create(group_by=u'zombies'))
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
-    @patch('backdrop.core.data_set.Bucket.query')
+    @patch('backdrop.core.data_set.DataSet.query')
     def test_query_with_start_and_end_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
         expected_start_at = datetime.datetime(2012, 12, 5, 8, 12, 43,
@@ -67,7 +67,7 @@ class QueryingApiTestCase(unittest.TestCase):
             Query.create(start_at=expected_start_at, end_at=expected_end_at))
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type")
-    @patch('backdrop.core.data_set.Bucket.query')
+    @patch('backdrop.core.data_set.DataSet.query')
     def test_group_by_with_period_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
 
@@ -83,7 +83,7 @@ class QueryingApiTestCase(unittest.TestCase):
                          end_at=d_tz(2012, 12, 3)))
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
-    @patch('backdrop.core.data_set.Bucket.query')
+    @patch('backdrop.core.data_set.DataSet.query')
     def test_sort_query_is_executed(self, mock_query):
         mock_query.return_value = NoneData()
         self.app.get(

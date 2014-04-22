@@ -7,7 +7,7 @@ from pymongo.database import Database as MongoDatabase
 from hamcrest import *
 
 from backdrop.core import database, data_set
-from backdrop.core.data_set import BucketConfig
+from backdrop.core.data_set import DataSetConfig
 from backdrop.core.records import Record
 from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
@@ -16,16 +16,16 @@ from tests.support.test_helpers import d_tz
 HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
-BUCKET = 'data_set_integration_test'
+DATA_SET = 'data_set_integration_test'
 
 
-class TestBucketIntegration(unittest.TestCase):
+class TestDataSetIntegration(unittest.TestCase):
 
     def setUp(self):
         self.db = database.Database(HOST, PORT, DB_NAME)
-        self.data_set = data_set.Bucket(
-            self.db, BucketConfig(BUCKET, data_group="group", data_type="type", max_age_expected=1000))
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+        self.data_set = data_set.DataSet(
+            self.db, DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000))
+        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
 
     def setup__timestamp_data(self):
         self.mongo_collection.save({

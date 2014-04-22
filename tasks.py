@@ -5,8 +5,8 @@ from os import getenv
 from backdrop.core import database
 from backdrop.core.user import UserConfig
 from backdrop.write.api import app
-from backdrop.core.data_set import BucketConfig
-from backdrop.core.repository import BucketConfigRepository,\
+from backdrop.core.data_set import DataSetConfig
+from backdrop.core.repository import DataSetConfigRepository,\
     UserConfigRepository
 
 
@@ -32,12 +32,12 @@ def create_data_set(name, datagroup, datatype, rawqueries=False, token=None,
     """Create a new data_set configuration in the database."""
     db = get_database()
 
-    config = BucketConfig(name=name, data_group=datagroup, data_type=datatype,
+    config = DataSetConfig(name=name, data_group=datagroup, data_type=datatype,
                           raw_queries_allowed=rawqueries, bearer_token=token,
                           upload_format=uploadformat,
                           upload_filters=uploadfilters, auto_ids=autoids,
                           queryable=queryable, realtime=realtime)
-    repository = BucketConfigRepository(db)
+    repository = DataSetConfigRepository(db)
 
     repository.save(config)
 
@@ -70,8 +70,8 @@ def load_seed():
             repo.save(model_cls(**item), **save_kwargs)
 
     save_all("data_set-seed.json",
-             BucketConfigRepository,
-             BucketConfig, create_data_set=False)
+             DataSetConfigRepository,
+             DataSetConfig, create_data_set=False)
     save_all("user-seed.json",
              UserConfigRepository,
              UserConfig)

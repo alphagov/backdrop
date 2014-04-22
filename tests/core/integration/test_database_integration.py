@@ -12,14 +12,14 @@ from tests.support.test_helpers import d, d_tz
 HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
-BUCKET = 'test_repository_integration'
+DATA_SET = 'test_repository_integration'
 
 
 class TestMongoDriver(unittest.TestCase):
     def setUp(self):
-        self.mongo_driver = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        self.mongo_driver = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][DATA_SET])
 
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
         self.mongo_collection.drop()
 
     def test_save(self):
@@ -225,10 +225,10 @@ class RepositoryIntegrationTest(unittest.TestCase):
     __metaclass__ = ABCMeta
 
     def setUp(self):
-        mongo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][BUCKET])
+        mongo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][DATA_SET])
         self.repo = Repository(mongo)
 
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
         self.mongo_collection.drop()
 
 

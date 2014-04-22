@@ -2,13 +2,13 @@ import unittest
 from hamcrest import assert_that, is_
 from nose.tools import raises
 import werkzeug
-from backdrop.core.flaskutils import BucketConverter
+from backdrop.core.flaskutils import DataSetConverter
 
 
-class BucketConverterTestCase(unittest.TestCase):
+class DataSetConverterTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.converter = BucketConverter(None)
+        self.converter = DataSetConverter(None)
 
     def test_returns_when_uri_variable_is_a_valid_data_set_name(self):
         p = self.converter.to_python("valid_data_set_name")

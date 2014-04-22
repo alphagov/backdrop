@@ -9,9 +9,9 @@ from backdrop.read.query import Query
 
 from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
-from ..core.data_set import Bucket
+from ..core.data_set import DataSet
 from ..core.database import InvalidOperationError
-from ..core.repository import BucketConfigRepository
+from ..core.repository import DataSetConfigRepository
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -30,7 +30,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-data_set_repository = BucketConfigRepository(
+data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
@@ -79,7 +79,7 @@ def data_set_health():
     data_set_configs = data_set_repository.get_all()
 
     for data_set_config in data_set_configs:
-        data_set = Bucket(db, data_set_config)
+        data_set = DataSet(db, data_set_config)
         if not data_set.is_recent_enough():
             failing_data_sets.append({
                 'name': data_set.name,
@@ -151,7 +151,7 @@ def fetch(data_set_config):
                 data_set_config.name, result.message,
                 400)
 
-        data_set = Bucket(db, data_set_config)
+        data_set = DataSet(db, data_set_config)
 
         try:
             query = Query.parse(request.args)

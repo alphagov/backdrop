@@ -4,9 +4,9 @@ import json
 from flask import Flask, request, jsonify, g
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
-from backdrop.core.data_set import Bucket
-from backdrop.core.flaskutils import BucketConverter
-from backdrop.core.repository import (BucketConfigRepository,
+from backdrop.core.data_set import DataSet
+from backdrop.core.flaskutils import DataSetConverter
+from backdrop.core.repository import (DataSetConfigRepository,
                                       UserConfigRepository)
 
 from ..core.errors import ParseError, ValidationError
@@ -31,7 +31,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-data_set_repository = BucketConfigRepository(
+data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
@@ -39,7 +39,7 @@ user_repository = UserConfigRepository(db)
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
-app.url_map.converters["data_set"] = BucketConverter
+app.url_map.converters["data_set"] = DataSetConverter
 
 
 @app.errorhandler(500)
@@ -147,7 +147,7 @@ def _write_to_data_set(data_set_config):
     try:
         data = listify_json(request.json)
 
-        data_set = Bucket(db, data_set_config)
+        data_set = DataSet(db, data_set_config)
         data_set.parse_and_store(data)
 
         return jsonify(status='ok')
