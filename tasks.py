@@ -69,7 +69,7 @@ def load_seed():
         for item in load_seed_file(filename):
             repo.save(model_cls(**item), **save_kwargs)
 
-    save_all("data_set-seed.json",
+    save_all("bucket-seed.json",
              DataSetConfigRepository,
              DataSetConfig, create_data_set=False)
     save_all("user-seed.json",
