@@ -29,7 +29,7 @@ def main():
 
 
 def get_all_metadata(database):
-    for metadata in database.get_collection('data_sets').find():
+    for metadata in database.get_collection('buckets').find():
         yield metadata
 
 
