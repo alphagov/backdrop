@@ -37,7 +37,7 @@ def pretend_this_data_set_exists(data_set_config):
 
 
 def fake_data_set_exists(name, data_group="group", data_type="type",
-                       *data_set_args, **data_set_kwargs):
+                         *data_set_args, **data_set_kwargs):
     setup_data_set_name = name
 
     def decorator(func):

@@ -30,8 +30,8 @@ class TestDataSet(unittest.TestCase):
         self.mock_repository = mock_repository()
         self.mock_database = mock_database(self.mock_repository)
         self.data_set = data_set.DataSet(self.mock_database, DataSetConfig('test_data_set',
-                                                                     data_group="group",
-                                                                     data_type="type"))
+                                                                           data_group="group",
+                                                                           data_type="type"))
 
     def test_that_a_single_object_gets_stored(self):
         obj = Record({"name": "Gummo"})
@@ -230,10 +230,10 @@ class TestDataSet(unittest.TestCase):
         ]
 
         result = self.data_set.query(Query.create(period=WEEK,
-                                                start_at=d_tz(2013, 1, 7, 0, 0,
-                                                              0),
-                                                end_at=d_tz(2013, 2, 18, 0, 0,
-                                                            0)))
+                                                  start_at=d_tz(2013, 1, 7, 0, 0,
+                                                                0),
+                                                  end_at=d_tz(2013, 2, 18, 0, 0,
+                                                              0)))
 
         assert_that(result.data(), contains(
             has_entries({"_start_at": d_tz(2013, 1, 7), "_count": 0}),
@@ -355,7 +355,7 @@ class TestDataSet(unittest.TestCase):
         ]
 
         query_result = self.data_set.query(Query.create(period=MONTH,
-                                                      group_by="some_group"))
+                                                        group_by="some_group"))
         data = query_result.data()
         assert_that(data,
                     has_item(has_entries({"values": has_length(2)})))
@@ -401,9 +401,9 @@ class TestDataSet(unittest.TestCase):
         ]
 
         query_result = self.data_set.query(Query.create(period=MONTH,
-                                                      group_by="some_group",
-                                                      start_at=d(2013, 1, 1),
-                                                      end_at=d(2013, 4, 2)))
+                                                        group_by="some_group",
+                                                        start_at=d(2013, 1, 1),
+                                                        end_at=d(2013, 4, 2)))
         data = query_result.data()
         assert_that(data,
                     has_item(has_entries({"values": has_length(4)})))

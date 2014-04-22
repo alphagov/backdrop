@@ -95,12 +95,12 @@ class DataSetConfig(_DataSetConfig):
                 "backdrop.core.upload.filters.first_sheet_filter"]
 
         return super(DataSetConfig, cls).__new__(cls, name, data_group,
-                                                data_type,
-                                                raw_queries_allowed,
-                                                bearer_token, upload_format,
-                                                upload_filters, auto_ids,
-                                                queryable, realtime,
-                                                capped_size, max_age_expected)
+                                                 data_type,
+                                                 raw_queries_allowed,
+                                                 bearer_token, upload_format,
+                                                 upload_filters, auto_ids,
+                                                 queryable, realtime,
+                                                 capped_size, max_age_expected)
 
     @property
     def max_age(self):

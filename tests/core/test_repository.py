@@ -52,17 +52,17 @@ class TestDataSetRepository(unittest.TestCase):
                 data_set = self.data_set_repo.retrieve(name="data_set_name")
 
             expected_data_set = DataSetConfig("govuk_visitors",
-                                           data_group="govuk",
-                                           data_type="visitors",
-                                           raw_queries_allowed=True,
-                                           bearer_token="my-bearer-token",
-                                           upload_format="excel",
-                                           upload_filters="",
-                                           auto_ids="",
-                                           queryable=True,
-                                           realtime=False,
-                                           capped_size=None,
-                                           max_age_expected=86400)
+                                              data_group="govuk",
+                                              data_type="visitors",
+                                              raw_queries_allowed=True,
+                                              bearer_token="my-bearer-token",
+                                              upload_format="excel",
+                                              upload_filters="",
+                                              auto_ids="",
+                                              queryable=True,
+                                              realtime=False,
+                                              capped_size=None,
+                                              max_age_expected=86400)
 
             assert_that(data_set, equal_to(expected_data_set))
 
@@ -99,17 +99,17 @@ class TestDataSetRepository(unittest.TestCase):
                     data_group="govuk", data_type="realtime")
 
             expected_data_set = DataSetConfig("govuk_visitors",
-                                           data_group="govuk",
-                                           data_type="visitors",
-                                           raw_queries_allowed=True,
-                                           bearer_token="my-bearer-token",
-                                           upload_format="excel",
-                                           upload_filters="",
-                                           auto_ids="",
-                                           queryable=True,
-                                           realtime=False,
-                                           capped_size=None,
-                                           max_age_expected=86400)
+                                              data_group="govuk",
+                                              data_type="visitors",
+                                              raw_queries_allowed=True,
+                                              bearer_token="my-bearer-token",
+                                              upload_format="excel",
+                                              upload_filters="",
+                                              auto_ids="",
+                                              queryable=True,
+                                              realtime=False,
+                                              capped_size=None,
+                                              max_age_expected=86400)
 
             assert_that(data_set, equal_to(expected_data_set))
 

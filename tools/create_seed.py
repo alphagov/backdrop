@@ -217,7 +217,8 @@ def extract_data_sets(environment, read_config, write_config, nginx_config):
         data_sets = disable_data_sets_by_match("test", data_sets)
         data_sets = disable_data_sets_by_match("hmrc_preview", data_sets)
 
-    if is_production_like(environment) and not run_tests(environment, data_sets):
+    if is_production_like(environment) and not run_tests(environment,
+                                                         data_sets):
         sys.exit(1)
 
     return data_sets

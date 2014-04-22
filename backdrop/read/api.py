@@ -90,11 +90,14 @@ def data_set_health():
 
     if len(failing_data_sets):
         message = _data_set_message(failing_data_sets)
-        buck_string = ((len(failing_data_sets) > 1) and 'data_sets' or 'data_set')
+        if len(failing_data_sets) > 1:
+            data_set_string = 'data_sets'
+        else:
+            data_set_string = 'data_set'
 
         return jsonify(status='error',
                        message='%s %s are out of date' %
-                       (message, buck_string)), 500
+                       (message, data_set_string)), 500
 
     else:
         return jsonify(status='ok',
@@ -118,7 +121,7 @@ def log_error_and_respond(data_set, message, status_code):
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
 def data(data_group, data_type):
     data_set_config = data_set_repository.get_data_set_for_query(data_group,
-                                                           data_type)
+                                                                 data_type)
     return fetch(data_set_config)
 
 

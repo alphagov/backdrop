@@ -69,7 +69,9 @@ def exception_handler(e):
     code = getattr(e, 'code', 500)
     name = getattr(e, 'name', 'Internal Error')
 
-    return render_template("error.html", name=name, data_set_name=data_set_name), \
+    return render_template("error.html",
+                           name=name,
+                           data_set_name=data_set_name), \
         code
 
 

@@ -27,16 +27,16 @@ def get_database():
 
 @task
 def create_data_set(name, datagroup, datatype, rawqueries=False, token=None,
-                  autoids=None, uploadformat=None, uploadfilters=None,
-                  queryable=True, realtime=False):
+                    autoids=None, uploadformat=None, uploadfilters=None,
+                    queryable=True, realtime=False):
     """Create a new data_set configuration in the database."""
     db = get_database()
 
     config = DataSetConfig(name=name, data_group=datagroup, data_type=datatype,
-                          raw_queries_allowed=rawqueries, bearer_token=token,
-                          upload_format=uploadformat,
-                          upload_filters=uploadfilters, auto_ids=autoids,
-                          queryable=queryable, realtime=realtime)
+                           raw_queries_allowed=rawqueries, bearer_token=token,
+                           upload_format=uploadformat,
+                           upload_filters=uploadfilters, auto_ids=autoids,
+                           queryable=queryable, realtime=realtime)
     repository = DataSetConfigRepository(db)
 
     repository.save(config)
