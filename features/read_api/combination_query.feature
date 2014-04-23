@@ -3,7 +3,7 @@ Feature: more complex combination of parameters that are used by clients
 
 
     Background:
-        Given "licensing_preview.json" is in "licensing" bucket with settings
+        Given "licensing_preview.json" is in "licensing" data_set with settings
             | key                 | value |
             | raw_queries_allowed | true  |
 

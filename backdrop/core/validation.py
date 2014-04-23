@@ -63,8 +63,8 @@ def key_is_internal(key):
     return key.startswith('_')
 
 
-def bucket_is_valid(bucket_name):
-    if key_is_valid(bucket_name) and not key_is_internal(bucket_name):
+def data_set_is_valid(data_set_name):
+    if key_is_valid(data_set_name) and not key_is_internal(data_set_name):
         return True
     return False
 

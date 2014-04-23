@@ -3,9 +3,9 @@ from ..support.authentication import \
     ensure_user_has_permissions, ensure_user_exists
 
 
-@given('I can upload to "{bucket}"')
-def step(context, bucket):
-    ensure_user_has_permissions(context, context.user_email, [bucket])
+@given('I can upload to "{data_set}"')
+def step(context, data_set):
+    ensure_user_has_permissions(context, context.user_email, [data_set])
 
 
 @given(u'I am logged in')

@@ -4,9 +4,9 @@ import json
 from flask import Flask, request, jsonify, g
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
-from backdrop.core.bucket import Bucket
-from backdrop.core.flaskutils import BucketConverter
-from backdrop.core.repository import (BucketConfigRepository,
+from backdrop.core.data_set import DataSet
+from backdrop.core.flaskutils import DataSetConverter
+from backdrop.core.repository import (DataSetConfigRepository,
                                       UserConfigRepository)
 
 from ..core.errors import ParseError, ValidationError
@@ -31,7 +31,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketConfigRepository(
+data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
@@ -39,7 +39,7 @@ user_repository = UserConfigRepository(db)
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
-app.url_map.converters["bucket"] = BucketConverter
+app.url_map.converters["data_set"] = DataSetConverter
 
 
 @app.errorhandler(500)
@@ -48,8 +48,8 @@ app.url_map.converters["bucket"] = BucketConverter
 def exception_handler(e):
     app.logger.exception(e)
 
-    bucket_name = getattr(g, 'bucket_name', request.path)
-    statsd.incr("write.error", bucket=bucket_name)
+    data_set_name = getattr(g, 'data_set_name', request.path)
+    statsd.incr("write.error", data_set=data_set_name)
 
     code = getattr(e, 'code', 500)
     name = getattr(e, 'name', "Internal Error")
@@ -74,17 +74,17 @@ def write_by_group(data_group, data_type):
     Write by group/type
     e.g. POST https://BACKDROP/data/my-transaction-name/volumetrics
     """
-    bucket_config = bucket_repository.get_bucket_for_query(
+    data_set_config = data_set_repository.get_data_set_for_query(
         data_group,
         data_type)
-    return _write_to_bucket(bucket_config)
+    return _write_to_data_set(data_set_config)
 
 
-@app.route('/<bucket:bucket_name>', methods=['POST'])
+@app.route('/<data_set:data_set_name>', methods=['POST'])
 @cache_control.nocache
-def post_to_bucket(bucket_name):
-    bucket_config = bucket_repository.retrieve(name=bucket_name)
-    return _write_to_bucket(bucket_config)
+def post_to_data_set(data_set_name):
+    data_set_config = data_set_repository.retrieve(name=data_set_name)
+    return _write_to_data_set(data_set_config)
 
 
 @app.route('/data-sets/<dataset_name>', methods=['POST'])
@@ -127,12 +127,12 @@ def _allow_create_collection(auth_header):
     return False
 
 
-def _write_to_bucket(bucket_config):
-    if bucket_config is None:
+def _write_to_data_set(data_set_config):
+    if data_set_config is None:
         return jsonify(status="error",
-                       message='Could not find bucket_config'), 404
+                       message='Could not find data_set_config'), 404
 
-    g.bucket_name = bucket_config.name
+    g.data_set_name = data_set_config.name
 
     try:
         auth_header = request.headers['Authorization']
@@ -140,15 +140,15 @@ def _write_to_bucket(bucket_config):
         return jsonify(status='error',
                        message='Authorization header missing.'), 403
 
-    if not auth_header_is_valid(bucket_config, auth_header):
-        statsd.incr("write_api.bad_token", bucket=g.bucket_name)
+    if not auth_header_is_valid(data_set_config, auth_header):
+        statsd.incr("write_api.bad_token", data_set=g.data_set_name)
         return jsonify(status='error', message='Forbidden'), 403
 
     try:
         data = listify_json(request.json)
 
-        bucket = Bucket(db, bucket_config)
-        bucket.parse_and_store(data)
+        data_set = DataSet(db, data_set_config)
+        data_set.parse_and_store(data)
 
         return jsonify(status='ok')
     except (ParseError, ValidationError) as e:

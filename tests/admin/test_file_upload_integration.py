@@ -3,11 +3,11 @@ import os
 import datetime
 from hamcrest import assert_that, has_entry, is_, has_entries
 from pymongo import MongoClient
-from tests.support.bucket import fake_bucket_exists, stub_user_retrieve_by_email
+from tests.support.data_set import fake_data_set_exists, stub_user_retrieve_by_email
 from tests.support.test_helpers import has_status
 from tests.admin.support.clamscan import stub_clamscan
 from tests.admin.support.oauth_test_case import OauthTestCase
-from tests.support.bucket import fake_bucket_exists
+from tests.support.data_set import fake_data_set_exists
 
 
 class TestFileUploadIntegration(OauthTestCase):
@@ -20,8 +20,8 @@ class TestFileUploadIntegration(OauthTestCase):
             name="test",
             email=email)
 
-    @fake_bucket_exists("test", upload_format="csv")
-    @stub_user_retrieve_by_email("test@example.com", buckets=["test"])
+    @fake_data_set_exists("test", upload_format="csv")
+    @stub_user_retrieve_by_email("test@example.com", data_sets=["test"])
     @stub_clamscan(is_virus=False)
     def test_accepts_content_type_for_csv(self):
         self._sign_in("test@example.com")
@@ -34,8 +34,8 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
 
-    @fake_bucket_exists("test", upload_format="csv")
-    @stub_user_retrieve_by_email("test@example.com", buckets=["test"])
+    @fake_data_set_exists("test", upload_format="csv")
+    @stub_user_retrieve_by_email("test@example.com", data_sets=["test"])
     @stub_clamscan(is_virus=True)
     def test_rejects_content_type_for_exe(self):
         self._sign_in("test@example.com")
@@ -49,8 +49,8 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(400))
 
-    @fake_bucket_exists("test_upload_integration", upload_format="csv")
-    @stub_user_retrieve_by_email("test@example.com", buckets=["test_upload_integration"])
+    @fake_data_set_exists("test_upload_integration", upload_format="csv")
+    @stub_user_retrieve_by_email("test@example.com", data_sets=["test_upload_integration"])
     @stub_clamscan(is_virus=False)
     def test_data_hits_the_database_when_uploading_csv(self):
         self._sign_in("test@example.com")
@@ -70,15 +70,15 @@ class TestFileUploadIntegration(OauthTestCase):
         assert_that(record, has_entry('_id', 'hello'))
         assert_that(record, has_entry('value', 'some_value'))
 
-    @fake_bucket_exists("integration_test_excel_bucket", upload_format="excel")
-    @stub_user_retrieve_by_email("test@example.com", buckets=["integration_test_excel_bucket"])
+    @fake_data_set_exists("integration_test_excel_data_set", upload_format="excel")
+    @stub_user_retrieve_by_email("test@example.com", data_sets=["integration_test_excel_data_set"])
     @stub_clamscan(is_virus=False)
     def test_data_hits_the_database_when_uploading_xlsx(self):
-        self._drop_collection('integration_test_excel_bucket')
+        self._drop_collection('integration_test_excel_data_set')
         self._sign_in("test@example.com")
         fixture_path = os.path.join('features', 'fixtures', 'data.xlsx')
         response = self.client.post(
-            'integration_test_excel_bucket/upload',
+            'integration_test_excel_data_set/upload',
             data = {
                 'file': open(fixture_path)
             }
@@ -86,14 +86,14 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
         db = MongoClient('localhost', 27017).backdrop_test
-        record = list(db.integration_test_excel_bucket.find(
+        record = list(db.integration_test_excel_data_set.find(
             {'name': 'Pawel'}))[0]
 
         assert_that(record, has_entry('age', 27))
         assert_that(record, has_entry('nationality', 'Polish'))
 
-    @fake_bucket_exists("evl_ceg_data", data_group="group", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
-    @stub_user_retrieve_by_email("test@example.com", buckets=["evl_ceg_data"])
+    @fake_data_set_exists("evl_ceg_data", data_group="group", data_type="type", upload_format="excel", upload_filters=["backdrop.core.upload.filters.first_sheet_filter", "backdrop.contrib.evl_upload_filters.ceg_volumes"])
+    @stub_user_retrieve_by_email("test@example.com", data_sets=["evl_ceg_data"])
     @stub_clamscan(is_virus=False)
     def test_upload_applies_filters(self):
         self._drop_collection("evl_ceg_data")
@@ -119,17 +119,17 @@ class TestFileUploadIntegration(OauthTestCase):
             "_timestamp": datetime.datetime(2007, 7, 1, 0, 0),
         }))
 
-    @fake_bucket_exists("bucket_with_timestamp_auto_id", data_group="group", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
-    @stub_user_retrieve_by_email("test@example.com", buckets=["bucket_with_timestamp_auto_id"])
+    @fake_data_set_exists("data_set_with_timestamp_auto_id", data_group="group", data_type="type", upload_format="excel", auto_ids=["_timestamp", "key"])
+    @stub_user_retrieve_by_email("test@example.com", data_sets=["data_set_with_timestamp_auto_id"])
     @stub_clamscan(is_virus=False)
     def test_upload_auto_generate_ids(self):
-        self._drop_collection("bucket_with_timestamp_auto_id")
+        self._drop_collection("data_set_with_timestamp_auto_id")
         self._sign_in("test@example.com")
 
         fixture_path = os.path.join('features', 'fixtures',
                                     'LPA_MI_EXAMPLE.xls')
         response = self.client.post(
-            'bucket_with_timestamp_auto_id/upload',
+            'data_set_with_timestamp_auto_id/upload',
             data={
                 'file': open(fixture_path)
             }
@@ -137,7 +137,7 @@ class TestFileUploadIntegration(OauthTestCase):
 
         assert_that(response, has_status(200))
         db = MongoClient('localhost', 27017).backdrop_test
-        results = list(db.bucket_with_timestamp_auto_id.find())
+        results = list(db.data_set_with_timestamp_auto_id.find())
 
         assert_that(len(results), is_(18))
         assert_that(results[0], has_entries({

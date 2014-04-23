@@ -8,12 +8,12 @@
 
 Backdrop is a datastore built with Python and MongoDB. It is made up of two separately deployable APIs for reading and writing data over HTTP. The plan is to be able to gather data from a variety of sources and then aggregate and compare this data in useful ways.
 
-- Data is grouped into buckets.
+- Data is grouped into data_sets.
 - Data is stored by posting json to the write api.
 - Certain types of data are identified by reserved keys. ie events are objects containing a timestamp.
 - Reserved keys start with an underscore. eg `{ "_timestamp": "2013-01-01T00:00:00Z }"`
 - Data is retrieved using http query strings on the read api.
-- Data can be retrieved in a few useful ways. eg `/<name_of_my_bucket>?period=month` for monthly grouped data.
+- Data can be retrieved in a few useful ways. eg `/<name_of_my_data_set>?period=month` for monthly grouped data.
 - Backdrop is in constant development, the best place to find examples and features are [the feature tests](https://github.com/alphagov/backdrop/tree/master/features)
 
 ## Getting set up
@@ -64,14 +64,14 @@ This is the OAuth flow we are using to authenticate users with Signonotron2
 
 Requests return a JSON object containing a `data` array.
 
-`GET /bucket_name` will return an array of data. Each element is an object.
+`GET /data_set_name` will return an array of data. Each element is an object.
 
-`GET /bucket_name?collect=score&group_by=name` will return an array. In this
+`GET /data_set_name?collect=score&group_by=name` will return an array. In this
 case, each element of the array is an object containing a `name` value, a
 `score` array with the scores for that name and a `_count` value with the
 number of scores.
 
-`GET /bucket_name?filter_by=name:Foo` returns all elements with `name` equal to "Foo".
+`GET /data_set_name?filter_by=name:Foo` returns all elements with `name` equal to "Foo".
 
 Other parameters:
 

@@ -19,12 +19,12 @@ def extract_bearer_token(auth_header):
     return token if len(token) else None
 
 
-def auth_header_is_valid(bucket, auth_header):
+def auth_header_is_valid(data_set, auth_header):
 
     request_token = extract_bearer_token(auth_header)
 
-    if request_token != bucket.bearer_token:
+    if request_token != data_set.bearer_token:
         log.error("expected <%s> but was <%s>" % (
-            bucket.bearer_token, request_token))
+            data_set.bearer_token, request_token))
         return False
     return True

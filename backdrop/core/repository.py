@@ -4,7 +4,7 @@ import logging
 
 import requests
 
-from backdrop.core.bucket import BucketConfig
+from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class _Repository(object):
         return self._create_model(doc)
 
     def get_all(self):
-        # Return a list of all bucket config instances
+        # Return a list of all data_set config instances
         return [self._create_model(doc) for doc in self.collection.find()]
 
     def _create_model(self, doc):
@@ -48,7 +48,7 @@ class _Repository(object):
         return self.model_cls(**doc)
 
 
-class BucketConfigRepository(object):
+class DataSetConfigRepository(object):
 
     def __init__(self, stagecraft_url, stagecraft_token):
         self._stagecraft_url = stagecraft_url
@@ -61,7 +61,7 @@ class BucketConfigRepository(object):
         json_response = _get_json_url(data_set_url, self._stagecraft_token)
         data_sets = _decode_json(json_response)
 
-        return [_make_bucket_config(data_set) for data_set in data_sets]
+        return [_make_data_set_config(data_set) for data_set in data_sets]
 
     def retrieve(self, name):
         if len(name) == 0:
@@ -78,9 +78,9 @@ class BucketConfigRepository(object):
             else:
                 raise
 
-        return _make_bucket_config(_decode_json(json_response))
+        return _make_data_set_config(_decode_json(json_response))
 
-    def get_bucket_for_query(self, data_group, data_type):
+    def get_data_set_for_query(self, data_group, data_type):
         empty_vars = []
         if len(data_group) == 0:
             empty_vars += ['Data Group']
@@ -99,15 +99,15 @@ class BucketConfigRepository(object):
 
         data_sets = _decode_json(json_response)
         if len(data_sets) > 0:
-            return _make_bucket_config(data_sets[0])
+            return _make_data_set_config(data_sets[0])
 
         return None
 
 
-def _make_bucket_config(stagecraft_dict):
+def _make_data_set_config(stagecraft_dict):
     if stagecraft_dict is None:
         return None
-    return BucketConfig(**stagecraft_dict)
+    return DataSetConfig(**stagecraft_dict)
 
 
 def _decode_json(string):
