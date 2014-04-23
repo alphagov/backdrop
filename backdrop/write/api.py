@@ -118,6 +118,24 @@ def create_collection_for_dataset(dataset_name):
     return jsonify(status='ok', message='Created "{}"'.format(dataset_name))
 
 
+@app.route('/data-sets/<dataset_name>', methods=['DELETE'])
+@cache_control.nocache
+def delete_collection_by_dataset_name(dataset_name):
+    if not _allow_create_collection(request.headers.get('Authorization')):
+        return jsonify(status='error',
+                       message="Forbidden: invalid or no token given."), 403
+
+    if not db.collection_exists(dataset_name):
+        return jsonify(
+            status='error',
+            message='No collection exists with name "{}"'.format(dataset_name)
+        ), 400
+
+    db.delete_collection(dataset_name)
+
+    return jsonify(status='ok', message='Deleted "{}"'.format(dataset_name))
+
+
 def _allow_create_collection(auth_header):
     token = extract_bearer_token(auth_header)
     if token == app.config['CREATE_COLLECTION_ENDPOINT_TOKEN']:
