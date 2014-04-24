@@ -82,11 +82,13 @@ Feature: the performance platform write api
 
     @delete_things
     Scenario: deleting a data-set
-        Given I have a data_set named "my-data-set"
-          and I have the bearer token "fake stagecraft token"
-         when I send a delete request to "/data-sets/my-data-set"
+        Given I have a data_set named "some-dataset"
+          and I have JSON data '{"capped_size": 4096}'
+          and I have the bearer token "dev-create-endpoint-token"
+         when I post the data to "/data-sets/some-dataset"
+          and I send a delete request to "/data-sets/some-dataset"
          then I should get back a status of "200"
-          and the collection called "my-data-set" should not exist
+          and the collection called "some-dataset" should exist
 
     Scenario: not creating a collection if it already exists
         Given I have JSON data '{"capped_size": 4096}'
