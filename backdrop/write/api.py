@@ -129,7 +129,7 @@ def delete_collection_by_dataset_name(dataset_name):
         return jsonify(
             status='error',
             message='No collection exists with name "{}"'.format(dataset_name)
-	), 404
+        ), 404
 
     db.delete_collection(dataset_name)
 
