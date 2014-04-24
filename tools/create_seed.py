@@ -1,4 +1,4 @@
-"""Generate a BucketConfig seed file for a given environment.
+"""Generate a DataSetConfig seed file for a given environment.
 """
 import argparse
 import os
@@ -30,29 +30,29 @@ def nginx_parse_value(value):
         return json.loads(value.replace("'", '"'))
 
 
-def nginx_extract_buckets(lines):
-    bucket = None
+def nginx_extract_data_sets(lines):
+    data_set = None
     for line in lines:
         if "{" in line:
             pass
         elif "}" in line:
-            if bucket is None:
-                raise Exception("No bucket to yield")
+            if data_set is None:
+                raise Exception("No data_set to yield")
             else:
-                yield bucket
-                bucket = None
+                yield data_set
+                data_set = None
         else:
-            if bucket is None:
-                bucket = dict()
-            bucket.update([nginx_extract_line(line)])
+            if data_set is None:
+                data_set = dict()
+            data_set.update([nginx_extract_line(line)])
 
 
-def nginx_unroll_path(bucket):
-    match = NGINX_PATH_PATTERN.match(bucket['path'])
-    bucket['data_group'] = match.group(1)
-    bucket['data_type'] = match.group(2)
+def nginx_unroll_path(data_set):
+    match = NGINX_PATH_PATTERN.match(data_set['path'])
+    data_set['data_group'] = match.group(1)
+    data_set['data_type'] = match.group(2)
 
-    return bucket
+    return data_set
 
 
 def slice_by_matches(lines, start, end):
@@ -69,11 +69,11 @@ def slice_by_matches(lines, start, end):
 
 def load_nginx_config(path):
     with open(path) as f:
-        lines = slice_by_matches(f.readlines(), "$backdrop_buckets", "  ]")
-        buckets = nginx_extract_buckets(lines)
-        buckets = map(nginx_unroll_path, buckets)
+        lines = slice_by_matches(f.readlines(), "$backdrop_data_sets", "  ]")
+        data_sets = nginx_extract_data_sets(lines)
+        data_sets = map(nginx_unroll_path, data_sets)
         return dict(
-            (b['name'], b) for b in buckets
+            (b['name'], b) for b in data_sets
         )
 
 
@@ -106,51 +106,51 @@ def move_config_into_place(environment):
     )
 
 
-def create_test_url(environment, bucket):
+def create_test_url(environment, data_set):
     if is_production(environment):
         host = "www.gov.uk"
     else:
         host = "www.preview.alphagov.co.uk"
 
     return "https://%s/performance/%s/api/%s" % (
-        host, bucket['data_group'], bucket['data_type'])
+        host, data_set['data_group'], data_set['data_type'])
 
 
-def disable_buckets(predicate, buckets):
-    def func(bucket):
-        if predicate(bucket['name']):
-            bucket['queryable'] = False
-        return bucket
-    return map(func, buckets)
+def disable_data_sets(predicate, data_sets):
+    def func(data_set):
+        if predicate(data_set['name']):
+            data_set['queryable'] = False
+        return data_set
+    return map(func, data_sets)
 
 
-def disable_buckets_by_prefix(prefix, buckets):
-    return disable_buckets(lambda name: name.startswith(prefix), buckets)
+def disable_data_sets_by_prefix(prefix, data_sets):
+    return disable_data_sets(lambda name: name.startswith(prefix), data_sets)
 
 
-def disable_buckets_by_match(match, buckets):
-    return disable_buckets(lambda name: name == match, buckets)
+def disable_data_sets_by_match(match, data_sets):
+    return disable_data_sets(lambda name: name == match, data_sets)
 
 
-def test_bucket(environment, bucket):
-    url = create_test_url(environment, bucket)
+def test_data_set(environment, data_set):
+    url = create_test_url(environment, data_set)
     if "AUTH" in os.environ:
         result = requests.get(url, auth=tuple(os.environ['AUTH'].split(":")))
     else:
         result = requests.get(url)
 
-    if bucket['queryable'] and bucket['raw_queries_allowed']:
+    if data_set['queryable'] and data_set['raw_queries_allowed']:
         return url, 200, result.status_code
-    elif bucket['queryable'] and not bucket['raw_queries_allowed']:
+    elif data_set['queryable'] and not data_set['raw_queries_allowed']:
         return url, 400, result.status_code
     else:
         return url, 404, result.status_code
 
 
-def run_tests(environment, buckets):
+def run_tests(environment, data_sets):
     passed = True
-    for bucket in buckets:
-        url, expected, actual = test_bucket(environment, bucket)
+    for data_set in data_sets:
+        url, expected, actual = test_data_set(environment, data_set)
         if expected != actual:
             print(url, expected, actual)
             passed = False
@@ -182,45 +182,46 @@ def load_config(environment):
 
 def extract_users(environment, read_config, write_config, nginx_config):
     return [
-        {"email": email, "buckets": buckets}
-        for email, buckets in write_config.PERMISSIONS.items()]
+        {"email": email, "data_sets": data_sets}
+        for email, data_sets in write_config.PERMISSIONS.items()]
 
 
-def extract_bucket(read_config, write_config, nginx_config, name):
-    bucket = {
+def extract_data_set(read_config, write_config, nginx_config, name):
+    data_set = {
         "name": name,
         "data_group": nginx_config.get(name)['data_group'],
         "data_type": nginx_config.get(name)['data_type'],
         "raw_queries_allowed": read_config.RAW_QUERIES_ALLOWED.get(name,
                                                                    False),
         "bearer_token": write_config.TOKENS.get(name),
-        "upload_format": write_config.BUCKET_UPLOAD_FORMAT.get(name, "csv"),
-        "upload_filters": write_config.BUCKET_UPLOAD_FILTERS.get(name),
-        "auto_ids": write_config.BUCKET_AUTO_ID_KEYS.get(name),
+        "upload_format": write_config.DATA_SET_UPLOAD_FORMAT.get(name, "csv"),
+        "upload_filters": write_config.DATA_SET_UPLOAD_FILTERS.get(name),
+        "auto_ids": write_config.DATA_SET_AUTO_ID_KEYS.get(name),
         "queryable": nginx_config.get(name).get('enabled', True),
         "realtime": nginx_config.get(name).get('realtime', False),
         "capped_size": None
     }
-    if bucket['realtime']:
-        bucket['capped_size'] = 5040
-    return bucket
+    if data_set['realtime']:
+        data_set['capped_size'] = 5040
+    return data_set
 
 
-def extract_buckets(environment, read_config, write_config, nginx_config):
-    buckets = [
-        extract_bucket(read_config, write_config, nginx_config, name)
+def extract_data_sets(environment, read_config, write_config, nginx_config):
+    data_sets = [
+        extract_data_set(read_config, write_config, nginx_config, name)
         for name in nginx_config.keys()
     ]
 
     if is_production(environment):
-        buckets = disable_buckets_by_prefix("lpa_", buckets)
-        buckets = disable_buckets_by_match("test", buckets)
-        buckets = disable_buckets_by_match("hmrc_preview", buckets)
+        data_sets = disable_data_sets_by_prefix("lpa_", data_sets)
+        data_sets = disable_data_sets_by_match("test", data_sets)
+        data_sets = disable_data_sets_by_match("hmrc_preview", data_sets)
 
-    if is_production_like(environment) and not run_tests(environment, buckets):
+    if is_production_like(environment) and not run_tests(environment,
+                                                         data_sets):
         sys.exit(1)
 
-    return buckets
+    return data_sets
 
 
 def main(model, environment):
@@ -228,7 +229,7 @@ def main(model, environment):
 
     extract_models = {
         "users": extract_users,
-        "buckets": extract_buckets,
+        "data_sets": extract_data_sets,
     }[model]
 
     models = extract_models(environment,
@@ -240,7 +241,7 @@ def main(model, environment):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("model",
-                        choices=["buckets", "users"],
+                        choices=["data_sets", "users"],
                         help="The model to generate a seed file for")
     parser.add_argument("environment",
                         choices=["development", "preview", "production"],

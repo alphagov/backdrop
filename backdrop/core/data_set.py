@@ -3,7 +3,7 @@ from collections import namedtuple
 from flask import logging
 from backdrop.core import records
 from backdrop.core.errors import ValidationError
-from backdrop.core.validation import bucket_is_valid
+from backdrop.core.validation import data_set_is_valid
 
 import timeutils
 import datetime
@@ -11,7 +11,7 @@ import datetime
 log = logging.getLogger(__name__)
 
 
-class Bucket(object):
+class DataSet(object):
 
     def __init__(self, db, config):
         self.name = config.name
@@ -75,34 +75,34 @@ class Bucket(object):
         return b64encode(".".join([datum[key] for key in self.auto_id_keys]))
 
 
-_BucketConfig = namedtuple(
-    "_BucketConfig",
+_DataSetConfig = namedtuple(
+    "_DataSetConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
     "upload_filters auto_ids queryable realtime capped_size max_age_expected")
 
 
-class BucketConfig(_BucketConfig):
+class DataSetConfig(_DataSetConfig):
 
     def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400):
-        if not bucket_is_valid(name):
-            raise ValueError("Bucket name is not valid: '{}'".format(name))
+        if not data_set_is_valid(name):
+            raise ValueError("DataSet name is not valid: '{}'".format(name))
 
         if upload_filters is None:
             upload_filters = [
                 "backdrop.core.upload.filters.first_sheet_filter"]
 
-        return super(BucketConfig, cls).__new__(cls, name, data_group,
-                                                data_type,
-                                                raw_queries_allowed,
-                                                bearer_token, upload_format,
-                                                upload_filters, auto_ids,
-                                                queryable, realtime,
-                                                capped_size, max_age_expected)
+        return super(DataSetConfig, cls).__new__(cls, name, data_group,
+                                                 data_type,
+                                                 raw_queries_allowed,
+                                                 bearer_token, upload_format,
+                                                 upload_filters, auto_ids,
+                                                 queryable, realtime,
+                                                 capped_size, max_age_expected)
 
     @property
     def max_age(self):
-        """ Set cache-control header length based on type of bucket. """
+        """ Set cache-control header length based on type of data_set. """
         return 120 if self.realtime else 1800

@@ -18,14 +18,14 @@ def step(context):
     context.client.set_config_parameter('PREVENT_RAW_QUERIES', True)
 
 
-def ensure_bucket_exists(context, bucket_name, settings={}):
-    # these should mostly match the default BucketConfig.__new__() kwargs
+def ensure_data_set_exists(context, data_set_name, settings={}):
+    # these should mostly match the default DataSetConfig.__new__() kwargs
     response = {
-        'name': bucket_name,
-        'data_group': bucket_name,
-        'data_type': bucket_name,
+        'name': data_set_name,
+        'data_group': data_set_name,
+        'data_type': data_set_name,
         'raw_queries_allowed': False,
-        'bearer_token': '%s-bearer-token' % bucket_name,
+        'bearer_token': '%s-bearer-token' % data_set_name,
         'upload_format': 'csv',
         'upload_filters': ['backdrop.core.upload.filters.first_sheet_filter'],
         'auto_ids': None,
@@ -38,7 +38,7 @@ def ensure_bucket_exists(context, bucket_name, settings={}):
     response.update(settings)
 
     url_response_dict = {
-        ('GET', u'data-sets/{}'.format(bucket_name)): response,
+        ('GET', u'data-sets/{}'.format(data_set_name)): response,
         ('GET', u'data-sets'): [response],
         ('GET', u'data-sets?data-group={}&data-type={}'.format(
             response['data_group'], response['data_type'])): [response],
@@ -50,30 +50,30 @@ def ensure_bucket_exists(context, bucket_name, settings={}):
         TEST_STAGECRAFT_PORT, url_response_dict)
     context.mock_stagecraft_server.start()
 
-    context.bucket = bucket_name
-    bucket_data = {
-        '_id': bucket_name,
-        'name': bucket_name,
-        'data_group': bucket_name,
-        'data_type': bucket_name,
-        'bearer_token': "%s-bearer-token" % bucket_name
+    context.data_set = data_set_name
+    data_set_data = {
+        '_id': data_set_name,
+        'name': data_set_name,
+        'data_group': data_set_name,
+        'data_type': data_set_name,
+        'bearer_token': "%s-bearer-token" % data_set_name
     }
-    context.client.storage()["buckets"].save(bucket_data)
+    context.client.storage()["data_sets"].save(data_set_data)
 
 
-@given('"{fixture_name}" is in "{bucket_name}" bucket')
-def step(context, fixture_name, bucket_name):
-    ensure_bucket_exists(context, bucket_name)
+@given('"{fixture_name}" is in "{data_set_name}" data_set')
+def step(context, fixture_name, data_set_name):
+    ensure_data_set_exists(context, data_set_name)
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
             for key in ['_timestamp', '_day_start_at', '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
-            context.client.storage()[bucket_name].save(obj)
+            context.client.storage()[data_set_name].save(obj)
 
 
-def get_bucket_settings_from_context_table(table):
+def get_data_set_settings_from_context_table(table):
     def to_py(string_in):
         if string_in == "None":
             return None
@@ -82,22 +82,22 @@ def get_bucket_settings_from_context_table(table):
     return {row['key']: to_py(row['value']) for row in table}
 
 
-@given('"{fixture_name}" is in "{bucket_name}" bucket with settings')
-def step(context, fixture_name, bucket_name):
-    settings = get_bucket_settings_from_context_table(context.table)
+@given('"{fixture_name}" is in "{data_set_name}" data_set with settings')
+def step(context, fixture_name, data_set_name):
+    settings = get_data_set_settings_from_context_table(context.table)
 
-    ensure_bucket_exists(context, bucket_name, settings)
+    ensure_data_set_exists(context, data_set_name, settings)
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
             for key in ['_timestamp', '_day_start_at', '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
-            context.client.storage()[bucket_name].save(obj)
+            context.client.storage()[data_set_name].save(obj)
 
 
-@given('I have a record updated "{timespan}" ago in the "{bucket_name}" bucket')
-def step(context, timespan, bucket_name):
+@given('I have a record updated "{timespan}" ago in the "{data_set_name}" data_set')
+def step(context, timespan, data_set_name):
     now = datetime.datetime.now()
     number_of_seconds = int(re.match(r'^(\d+) seconds?', timespan).group(1))
     timedelta = datetime.timedelta(seconds=number_of_seconds)
@@ -105,18 +105,18 @@ def step(context, timespan, bucket_name):
     record = {
         "_updated_at": updated
     }
-    context.client.storage()[bucket_name].save(record)
+    context.client.storage()[data_set_name].save(record)
 
 
-@given('I have a bucket named "{bucket_name}" with settings')
-def step(context, bucket_name):
-    settings = get_bucket_settings_from_context_table(context.table)
-    ensure_bucket_exists(context, bucket_name, settings)
+@given('I have a data_set named "{data_set_name}" with settings')
+def step(context, data_set_name):
+    settings = get_data_set_settings_from_context_table(context.table)
+    ensure_data_set_exists(context, data_set_name, settings)
 
 
-@given('I have a bucket named "{bucket_name}"')
-def step(context, bucket_name):
-    ensure_bucket_exists(context, bucket_name)
+@given('I have a data_set named "{data_set_name}"')
+def step(context, data_set_name):
+    ensure_data_set_exists(context, data_set_name)
 
 
 @given('Stagecraft is running')

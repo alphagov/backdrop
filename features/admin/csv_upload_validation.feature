@@ -8,7 +8,7 @@ Feature: csv upload validation
           Pawel,27,Polish,male
           Max,35,Italian,male
           """
-    And   I have a bucket named "foo" with settings
+    And   I have a data_set named "foo" with settings
         | key           | value |
         | upload_format | "csv" |
     And   I am logged in
@@ -26,7 +26,7 @@ Feature: csv upload validation
           Pawel,27,Polish,male
           Max,35,Italian
           """
-    And   I have a bucket named "foo" with settings
+    And   I have a data_set named "foo" with settings
         | key           | value |
         | upload_format | "csv" |
     And   I am logged in
@@ -39,7 +39,7 @@ Feature: csv upload validation
 
   Scenario: file too large
     Given a file named "data.csv" of size "1000000" bytes
-    And   I have a bucket named "foo" with settings
+    And   I have a data_set named "foo" with settings
         | key           | value |
         | upload_format | "csv" |
     And   I am logged in
@@ -52,7 +52,7 @@ Feature: csv upload validation
 
   Scenario: non UTF8 characters
     Given a file named "data.csv" with fixture "bad-characters.csv"
-    And   I have a bucket named "foo" with settings
+    And   I have a data_set named "foo" with settings
         | key           | value |
         | upload_format | "csv" |
     And   I am logged in
@@ -65,7 +65,7 @@ Feature: csv upload validation
 
   Scenario: no file is provided
     Given I am logged in
-    And   I have a bucket named "foo"
+    And   I have a data_set named "foo"
     And   I can upload to "foo"
     When  I go to "/foo/upload"
     And   I click "Upload"

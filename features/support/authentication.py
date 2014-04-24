@@ -1,10 +1,10 @@
 
 
-def ensure_user_has_permissions(context, email, buckets):
+def ensure_user_has_permissions(context, email, data_sets):
     user_data = {
         "_id": email,
         "email": email,
-        "buckets": buckets
+        "data_sets": data_sets
     }
     context.client.storage()["users"].save(user_data)
 
@@ -13,6 +13,6 @@ def ensure_user_exists(context, email):
     user_data = {
         "_id": email,
         "email": email,
-        "buckets": [],
+        "data_sets": [],
     }
     context.client.storage()["users"].save(user_data)

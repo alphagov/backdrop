@@ -45,8 +45,8 @@ class Database(object):
     def alive(self):
         return self._mongo.alive()
 
-    def get_repository(self, bucket_name):
-        return Repository(self.get_collection(bucket_name))
+    def get_repository(self, data_set_name):
+        return Repository(self.get_collection(data_set_name))
 
     def get_collection(self, collection_name):
         return MongoDriver(self._mongo[self.name][collection_name])
@@ -149,7 +149,7 @@ class MongoDriver(object):
             self._collection.save(obj)
         except AutoReconnect:
             logging.warning("AutoReconnect on save")
-            statsd.incr("db.AutoReconnect", bucket=self._collection.name)
+            statsd.incr("db.AutoReconnect", data_set=self._collection.name)
             if tries > 1:
                 self.save(obj, tries - 1)
             else:

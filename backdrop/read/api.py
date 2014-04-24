@@ -9,9 +9,9 @@ from backdrop.read.query import Query
 
 from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
-from ..core.bucket import Bucket
+from ..core.data_set import DataSet
 from ..core.database import InvalidOperationError
-from ..core.repository import BucketConfigRepository
+from ..core.repository import DataSetConfigRepository
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -30,7 +30,7 @@ db = database.Database(
     app.config['DATABASE_NAME']
 )
 
-bucket_repository = BucketConfigRepository(
+data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
@@ -70,70 +70,73 @@ def health_check():
     return jsonify(status='ok', message='database is up')
 
 
-@app.route('/_status/buckets', methods=['GET'])
+@app.route('/_status/data-sets', methods=['GET'])
 @cache_control.nocache
-def bucket_health():
+def data_set_health():
 
-    failing_buckets = []
-    okay_buckets = []
-    bucket_configs = bucket_repository.get_all()
+    failing_data_sets = []
+    okay_data_sets = []
+    data_set_configs = data_set_repository.get_all()
 
-    for bucket_config in bucket_configs:
-        bucket = Bucket(db, bucket_config)
-        if not bucket.is_recent_enough():
-            failing_buckets.append({
-                'name': bucket.name,
-                'last_updated': bucket.get_last_updated()
+    for data_set_config in data_set_configs:
+        data_set = DataSet(db, data_set_config)
+        if not data_set.is_recent_enough():
+            failing_data_sets.append({
+                'name': data_set.name,
+                'last_updated': data_set.get_last_updated()
             })
         else:
-            okay_buckets.append(bucket.name)
+            okay_data_sets.append(data_set.name)
 
-    if len(failing_buckets):
-        message = _bucket_message(failing_buckets)
-        buck_string = ((len(failing_buckets) > 1) and 'buckets' or 'bucket')
+    if len(failing_data_sets):
+        message = _data_set_message(failing_data_sets)
+        if len(failing_data_sets) > 1:
+            data_set_string = 'data_sets'
+        else:
+            data_set_string = 'data_set'
 
         return jsonify(status='error',
                        message='%s %s are out of date' %
-                       (message, buck_string)), 500
+                       (message, data_set_string)), 500
 
     else:
         return jsonify(status='ok',
-                       message='(%s)\n All buckets are in date' %
-                       okay_buckets)
+                       message='(%s)\n All data_sets are in date' %
+                       okay_data_sets)
 
 
-def _bucket_message(buckets):
+def _data_set_message(data_sets):
     message = ', '.join(
-        '%s (last updated: %s)' % (bucket['name'],
-                                   bucket['last_updated'])
-        for bucket in buckets)
+        '%s (last updated: %s)' % (data_set['name'],
+                                   data_set['last_updated'])
+        for data_set in data_sets)
     return message
 
 
-def log_error_and_respond(bucket, message, status_code):
-    app.logger.error('%s: %s' % (bucket, message))
+def log_error_and_respond(data_set, message, status_code):
+    app.logger.error('%s: %s' % (data_set, message))
     return jsonify(status='error', message=message), status_code
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
 def data(data_group, data_type):
-    bucket_config = bucket_repository.get_bucket_for_query(data_group,
-                                                           data_type)
-    return fetch(bucket_config)
+    data_set_config = data_set_repository.get_data_set_for_query(data_group,
+                                                                 data_type)
+    return fetch(data_set_config)
 
 
-@app.route('/<bucket_name>', methods=['GET', 'OPTIONS'])
+@app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
 @cache_control.etag
-def query(bucket_name):
-    bucket_config = bucket_repository.retrieve(name=bucket_name)
-    return fetch(bucket_config)
+def query(data_set_name):
+    data_set_config = data_set_repository.retrieve(name=data_set_name)
+    return fetch(data_set_config)
 
 
-def fetch(bucket_config):
-    if bucket_config is None or not bucket_config.queryable:
-        bname = "" if bucket_config is None else bucket_config.name + " "
+def fetch(data_set_config):
+    if data_set_config is None or not data_set_config.queryable:
+        bname = "" if data_set_config is None else data_set_config.name + " "
         return log_error_and_respond(
-            bname, 'bucket not found',
+            bname, 'data_set not found',
             404)
 
     if request.method == 'OPTIONS':
@@ -144,22 +147,22 @@ def fetch(bucket_config):
         response.headers['Access-Control-Allow-Headers'] = 'cache-control'
     else:
         result = validate_request_args(request.args,
-                                       bucket_config.raw_queries_allowed)
+                                       data_set_config.raw_queries_allowed)
 
         if not result.is_valid:
             return log_error_and_respond(
-                bucket_config.name, result.message,
+                data_set_config.name, result.message,
                 400)
 
-        bucket = Bucket(db, bucket_config)
+        data_set = DataSet(db, data_set_config)
 
         try:
             query = Query.parse(request.args)
-            data = bucket.query(query).data()
+            data = data_set.query(query).data()
 
         except InvalidOperationError:
             return log_error_and_respond(
-                bucket.name, 'invalid collect function',
+                data_set.name, 'invalid collect function',
                 400)
 
         response = jsonify(data=data)
@@ -168,7 +171,7 @@ def fetch(bucket_config):
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     response.headers['Cache-Control'] = "max-age=%d, must-revalidate" % \
-                                        bucket_config.max_age
+                                        data_set_config.max_age
 
     return response
 

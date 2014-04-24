@@ -1,5 +1,5 @@
 """
-Convert Google Analytics buckets from Europe/London to UTC
+Convert Google Analytics data_sets from Europe/London to UTC
 """
 import logging
 import copy

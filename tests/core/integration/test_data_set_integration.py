@@ -6,8 +6,8 @@ from pymongo import MongoClient
 from pymongo.database import Database as MongoDatabase
 from hamcrest import *
 
-from backdrop.core import database, bucket
-from backdrop.core.bucket import BucketConfig
+from backdrop.core import database, data_set
+from backdrop.core.data_set import DataSetConfig
 from backdrop.core.records import Record
 from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
@@ -16,16 +16,16 @@ from tests.support.test_helpers import d_tz
 HOST = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
-BUCKET = 'bucket_integration_test'
+DATA_SET = 'data_set_integration_test'
 
 
-class TestBucketIntegration(unittest.TestCase):
+class TestDataSetIntegration(unittest.TestCase):
 
     def setUp(self):
         self.db = database.Database(HOST, PORT, DB_NAME)
-        self.bucket = bucket.Bucket(
-            self.db, BucketConfig(BUCKET, data_group="group", data_type="type", max_age_expected=1000))
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][BUCKET]
+        self.data_set = data_set.DataSet(
+            self.db, DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000))
+        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
 
     def setup__timestamp_data(self):
         self.mongo_collection.save({
@@ -52,7 +52,7 @@ class TestBucketIntegration(unittest.TestCase):
 
     def test_that_records_get_sent_to_mongo_correctly(self):
         my_record = Record({'foo': 'bar'})
-        self.bucket.store(my_record)
+        self.data_set.store(my_record)
 
         collection = self.mongo_collection.find()
         assert_that(list(collection), only_contains(
@@ -66,7 +66,7 @@ class TestBucketIntegration(unittest.TestCase):
             Record({'name': 'Chico'})
         ]
 
-        self.bucket.store(my_records)
+        self.data_set.store(my_records)
 
         collection = self.mongo_collection.find()
         assert_that(list(collection), only_contains(
@@ -78,31 +78,31 @@ class TestBucketIntegration(unittest.TestCase):
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()
         query = Query.create(period=WEEK)
-        result = query.execute(self.bucket.repository)
+        result = query.execute(self.data_set.repository)
         assert_that(result.data(), contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),
             has_entry('_start_at', d_tz(2013, 2, 25))
         ))
 
-    def test_bucket_returns_last_updated(self):
+    def test_data_set_returns_last_updated(self):
         self.setup__timestamp_data()
-        assert_that(self.bucket.get_last_updated(),
+        assert_that(self.data_set.get_last_updated(),
                     equal_to(d_tz(2013, 10, 10)))
 
-    def test_bucket_returns_none_if_there_is_no_last_updated(self):
-        assert_that(self.bucket.get_last_updated(), is_(None))
+    def test_data_set_returns_none_if_there_is_no_last_updated(self):
+        assert_that(self.data_set.get_last_updated(), is_(None))
 
-    def test_bucket_is_recent_enough(self):
+    def test_data_set_is_recent_enough(self):
         self.mongo_collection.save({
             "_id": "first",
             "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=500)
         })
-        assert_that(self.bucket.is_recent_enough())
+        assert_that(self.data_set.is_recent_enough())
 
-    def test_bucket_is_not_recent_enough(self):
+    def test_data_set_is_not_recent_enough(self):
         self.mongo_collection.save({
             "_id": "first",
             "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=50000)
         })
-        assert_that(not self.bucket.is_recent_enough())
+        assert_that(not self.data_set.is_recent_enough())
