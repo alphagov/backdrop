@@ -90,7 +90,7 @@ class DataSetConfig(_DataSetConfig):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 
-        if upload_filters is None:
+        if not upload_filters:
             upload_filters = [
                 "backdrop.core.upload.filters.first_sheet_filter"]
 
