@@ -60,6 +60,12 @@ def step(context, filename, data_set_name):
     )
 
 
+@when('I send a delete request to "{data_set_url}"')
+def step(context, data_set_url):
+    # context.client.storage().drop_collection(data_set_name)
+    context.response = context.client.delete(data_set_url)
+
+
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
     result = context.client.storage()[context.data_set].find({key: value})

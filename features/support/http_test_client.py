@@ -35,6 +35,7 @@ class HTTPTestClient(BaseClient):
             raise Exception("Incorrect message")
         return HTTPTestResponse(response)
 
+    # TODO: Change this to our actual db layer, not just pyMongo
     def storage(self):
         return MongoClient('localhost', 27017)[self.database_name]
 
