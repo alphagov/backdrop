@@ -19,6 +19,7 @@ TEST_STAGECRAFT_PORT = 3204
 def step(context):
     context.client.set_config_parameter('PREVENT_RAW_QUERIES', True)
 
+
 @given('"{fixture_name}" is in "{data_set_name}" data_set')
 def step(context, fixture_name, data_set_name):
     ensure_data_set_exists(context, data_set_name)
