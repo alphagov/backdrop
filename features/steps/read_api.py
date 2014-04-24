@@ -118,6 +118,12 @@ def step(context, header, value):
     assert_that(context.response.headers.get(header), is_(value))
 
 
+@then('I should get back the message "{message}"')
+def step(context, message):
+    data = json.loads(context.response.data)
+    assert_that(data["message"], is_(message))
+
+
 @then('I should get back a message: "{expected_message}"')
 def step(context, expected_message):
     assert_that(
