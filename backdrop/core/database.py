@@ -67,7 +67,7 @@ class Database(object):
                                                      capped=True,
                                                      size=capped_size)
 
-    def delete_colletion(self, collection_name):
+    def delete_collection(self, collection_name):
         return self.mongo_database.drop_collection(collection_name)
 
     @property
