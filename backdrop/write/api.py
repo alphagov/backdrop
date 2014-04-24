@@ -129,11 +129,11 @@ def delete_collection_by_dataset_name(dataset_name):
         return jsonify(
             status='error',
             message='No collection exists with name "{}"'.format(dataset_name)
-        ), 400
+	), 404
 
     db.delete_collection(dataset_name)
 
-    return jsonify(status='ok', message='Deleted "{}"'.format(dataset_name))
+    return jsonify(status='ok', message='Deleted {}'.format(dataset_name))
 
 
 def _allow_create_collection(auth_header):
