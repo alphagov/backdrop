@@ -80,6 +80,13 @@ Feature: the performance platform write api
           and the collection called "new-capped" should exist
           and the collection called "new-capped" should be capped at "5040"
 
+    Scenario: deleting a data-set
+        Given I have a data-set called 'test-data-set'
+          and I have the bearer token "fake stagecraft token"
+         when I send a delete request to "/data-sets/test-data-set"
+         then I should get back a status of "200"
+          and the collection called "test-data-set" should not exist
+
     Scenario: not creating a collection if it already exists
         Given I have JSON data '{"capped_size": 4096}'
           and I have the bearer token "dev-create-endpoint-token"
