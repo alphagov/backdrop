@@ -9,7 +9,7 @@ from backdrop.core.database import Repository, GroupingError, \
 from backdrop.read.query import Query
 from tests.support.test_helpers import d, d_tz
 
-HOST = ['localhost']
+HOSTS = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 DATA_SET = 'test_repository_integration'
@@ -17,9 +17,9 @@ DATA_SET = 'test_repository_integration'
 
 class TestMongoDriver(unittest.TestCase):
     def setUp(self):
-        self.mongo_driver = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][DATA_SET])
+        self.mongo_driver = MongoDriver(MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET])
 
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
+        self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
         self.mongo_collection.drop()
 
     def test_save(self):
@@ -225,10 +225,10 @@ class RepositoryIntegrationTest(unittest.TestCase):
     __metaclass__ = ABCMeta
 
     def setUp(self):
-        mongo = MongoDriver(MongoClient(HOST, PORT)[DB_NAME][DATA_SET])
+        mongo = MongoDriver(MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET])
         self.repo = Repository(mongo)
 
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
+        self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
         self.mongo_collection.drop()
 
 
@@ -762,7 +762,7 @@ class TestRepositoryIntegration_Finding(RepositoryIntegrationTest):
 
 class TestDatabase(unittest.TestCase):
     def setUp(self):
-        self.db = Database(HOST, PORT, DB_NAME)
+        self.db = Database(HOSTS, PORT, DB_NAME)
         self.db.mongo_database["my_capped_collection"].drop()
 
     def test_alive(self):

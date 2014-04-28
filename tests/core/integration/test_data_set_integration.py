@@ -13,7 +13,7 @@ from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
 
-HOST = ['localhost']
+HOSTS = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 DATA_SET = 'data_set_integration_test'
@@ -22,10 +22,10 @@ DATA_SET = 'data_set_integration_test'
 class TestDataSetIntegration(unittest.TestCase):
 
     def setUp(self):
-        self.db = database.Database(HOST, PORT, DB_NAME)
+        self.db = database.Database(HOSTS, PORT, DB_NAME)
         self.data_set = data_set.DataSet(
             self.db, DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000))
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
+        self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
 
     def setup__timestamp_data(self):
         self.mongo_collection.save({

@@ -3,14 +3,14 @@ from backdrop.core.database import Database
 from backdrop.core.repository import UserConfigRepository
 from backdrop.core.user import UserConfig
 
-HOST = ['localhost']
+HOSTS = ['localhost']
 PORT = 27017
 DB_NAME = 'performance_platform_test'
 
 
 class TestUserRepositoryIntegration(object):
     def setUp(self):
-        self.db = Database(HOST, PORT, DB_NAME)
+        self.db = Database(HOSTS, PORT, DB_NAME)
         self.db._mongo.drop_database(DB_NAME)
         self.mongo_collection = self.db.get_collection("users")._collection
         self.mongo_collection.drop()
