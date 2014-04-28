@@ -6,7 +6,7 @@ from backdrop.core import database, data_set
 from backdrop.core.data_set import DataSetConfig
 from migrations.lib.change_buckets_to_data_sets import up
 
-HOST = ['localhost']
+HOSTS = ['localhost']
 PORT = 27017
 DB_NAME = 'backdrop'
 DATA_SET = 'users'
@@ -14,10 +14,10 @@ DATA_SET = 'users'
 
 class ChangeBucketsToDataSetTestCase(unittest.TestCase):
     def setUp(self):
-        self.db = database.Database(HOST, PORT, DB_NAME)
+        self.db = database.Database(HOSTS, PORT, DB_NAME)
         self.data_set = data_set.DataSet(
             self.db, DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000))
-        self.mongo_collection = MongoClient(HOST, PORT)[DB_NAME][DATA_SET]
+        self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
         self.mongo_collection.drop()
         self.data_sets = [
             "carers_allowance_weekly_claims",
