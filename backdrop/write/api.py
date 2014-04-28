@@ -1,7 +1,7 @@
 from os import getenv
 import json
 
-from flask import Flask, request, jsonify, g
+from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
 from backdrop.core.data_set import DataSet
@@ -42,9 +42,11 @@ log_handler.set_up_logging(app, GOVUK_ENV)
 app.url_map.converters["data_set"] = DataSetConverter
 
 
-@app.errorhandler(500)
-@app.errorhandler(405)
+@app.errorhandler(400)
+@app.errorhandler(403)
 @app.errorhandler(404)
+@app.errorhandler(405)
+@app.errorhandler(500)
 def exception_handler(e):
     app.logger.exception(e)
 
@@ -155,20 +157,18 @@ def _allow_create_collection(auth_header):
 
 def _write_to_data_set(data_set_config):
     if data_set_config is None:
-        return jsonify(status="error",
-                       message='Could not find data_set_config'), 404
+        abort(404, 'Could not find data_set_config')
 
     g.data_set_name = data_set_config.name
 
     try:
         auth_header = request.headers['Authorization']
     except KeyError:
-        return jsonify(status='error',
-                       message='Authorization header missing.'), 403
+        abort(403, 'Authorization header missing.')
 
     if not auth_header_is_valid(data_set_config, auth_header):
         statsd.incr("write_api.bad_token", data_set=g.data_set_name)
-        return jsonify(status='error', message='Forbidden'), 403
+        abort(403, 'Forbidden')
 
     try:
         data = listify_json(request.json)
@@ -178,7 +178,7 @@ def _write_to_data_set(data_set_config):
 
         return jsonify(status='ok')
     except (ParseError, ValidationError) as e:
-        return jsonify(status="error", message=str(e)), 400
+        abort(400, str(e))
 
 
 def listify_json(data):
