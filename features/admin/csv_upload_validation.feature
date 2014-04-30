@@ -65,7 +65,9 @@ Feature: csv upload validation
 
   Scenario: no file is provided
     Given I am logged in
-    And   I have a data_set named "foo"
+    And   I have a data_set named "foo" with settings
+        | key           | value |
+        | upload_format | "csv" |
     And   I can upload to "foo"
     When  I go to "/foo/upload"
     And   I click "Upload"

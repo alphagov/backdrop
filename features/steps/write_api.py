@@ -28,28 +28,15 @@ def step(context, token):
     context.bearer_token = token
 
 
-@when('I {http_method} the data to "{data_set_name}"')
-def step(context, http_method, data_set_name):
+@when('I {http_method} to the specific path "{path}"')
+def step(context, http_method, path):
     assert http_method in ('POST', 'PUT'), "Only support POST, PUT"
-    if not (context and 'data_set' in context):
-        context.data_set = data_set_name.replace('/', '')
-
     http_function = {
         'POST': context.client.post,
         'PUT': context.client.put
     }[http_method]
 
     context.response = http_function(
-        data_set_name,
-        data=context.data_to_post,
-        content_type="application/json",
-        headers=_make_headers_from_context(context),
-    )
-
-
-@when('I POST to the specific path "{path}"')
-def step(context, path):
-    context.response = context.client.post(
         path,
         data=context.data_to_post,
         content_type="application/json",
