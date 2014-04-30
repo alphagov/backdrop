@@ -126,3 +126,25 @@ Feature: the performance platform write api
          when I POST the data to "/data-sets/new-dataset"
          then I should get back a status of "400"
           and the collection called "new-dataset" should not exist
+
+    @empty_data_set
+    Scenario: emptying a data-set by PUTing an empty JSON list
+        Given I have the data in "dinosaur.json"
+          and I have a data_set named "some_data_set"
+          and I use the bearer token for the data_set
+         when I POST the data to "/some_data_set"
+        given I have JSON data '[]'
+         when I PUT the data to "/some_data_set"
+         then I should get back a status of "200"
+          and the collection called "some_data_set" should exist
+          and the collection called "some_data_set" should contain 0 records
+          and I should get back the message "some_data_set now contains 0 records"
+
+    @empty_data_set
+    Scenario: PUT is only implemented for an empty JSON list
+          and I have a data_set named "some_data_set"
+          and I use the bearer token for the data_set
+        given I have JSON data '[{"a": 1}]'
+         when I PUT the data to "/some_data_set"
+         then I should get back a status of "400"
+          and I should get back the message "Not implemented: you can only pass an empty JSON list."

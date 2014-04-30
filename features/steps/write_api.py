@@ -28,11 +28,18 @@ def step(context, token):
     context.bearer_token = token
 
 
-@when('I POST the data to "{data_set_name}"')
-def step(context, data_set_name):
+@when('I {http_method} the data to "{data_set_name}"')
+def step(context, http_method, data_set_name):
+    assert http_method in ('POST', 'PUT'), "Only support POST, PUT"
     if not (context and 'data_set' in context):
         context.data_set = data_set_name.replace('/', '')
-    context.response = context.client.post(
+
+    http_function = {
+        'POST': context.client.post,
+        'PUT': context.client.put
+    }[http_method]
+
+    context.response = http_function(
         data_set_name,
         data=context.data_to_post,
         content_type="application/json",
@@ -79,6 +86,12 @@ def step(context, amount, key, time):
     time_query = parser.parse(time)
     result = context.client.storage()[context.data_set].find({key: time_query})
     assert_that(list(result), has_length(int(amount)))
+
+
+@then(u'the collection called "{collection}" should contain {count} records')
+def step(context, collection, count):
+    result = context.client.storage()[collection].find({})
+    assert_that(list(result), has_length(int(count)))
 
 
 @then('the collection called "{collection}" should exist')
