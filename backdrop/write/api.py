@@ -78,7 +78,16 @@ def write_by_group(data_group, data_type):
     data_set_config = data_set_repository.get_data_set_for_query(
         data_group,
         data_type)
-    return _write_to_data_set(data_set_config)
+
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = listify_json(request.json)
+        return _append_to_data_set(data_set_config, data)
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
 
 
 @app.route('/<data_set:data_set_name>', methods=['POST'])
@@ -87,10 +96,20 @@ def post_to_data_set(data_set_name):
     app.logger.warning("Deprecated use of write API by name: {}".format(
         data_set_name))
     data_set_config = data_set_repository.retrieve(name=data_set_name)
-    return _write_to_data_set(
-        data_set_config,
-        ok_message="Deprecation Warning: accessing by data-set name is "
-                   "deprecated, Please use the /data-group/data-type form.")
+
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = listify_json(request.json)
+        return _append_to_data_set(
+            data_set_config,
+            data,
+            ok_message="Deprecation Warning: accessing by data-set name is "
+                       "deprecated, Please use the /data-group/data-type form")
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
 
 
 @app.route('/data-sets/<dataset_name>', methods=['POST'])
@@ -151,12 +170,14 @@ def _allow_create_collection(auth_header):
     return _allow_modify_collection(auth_header)
 
 
-def _write_to_data_set(data_set_config, ok_message=None):
+def _validate_config(data_set_config):
     if data_set_config is None:
         abort(404, 'Could not find data_set_config')
 
     g.data_set_name = data_set_config.name
 
+
+def _validate_auth(data_set_config):
     try:
         auth_header = request.headers['Authorization']
     except KeyError:
@@ -166,18 +187,15 @@ def _write_to_data_set(data_set_config, ok_message=None):
         statsd.incr("write_api.bad_token", data_set=g.data_set_name)
         abort(403, 'Forbidden')
 
-    try:
-        data = listify_json(request.json)
 
-        data_set = DataSet(db, data_set_config)
-        data_set.parse_and_store(data)
-        if ok_message:
-            return jsonify(status='ok', message=ok_message)
-        else:
-            return jsonify(status='ok')
+def _append_to_data_set(data_set_config, data, ok_message=None):
+    data_set = DataSet(db, data_set_config)
+    data_set.parse_and_store(data)
 
-    except (ParseError, ValidationError) as e:
-        abort(400, str(e))
+    if ok_message:
+        return jsonify(status='ok', message=ok_message)
+    else:
+        return jsonify(status='ok')
 
 
 def listify_json(data):
