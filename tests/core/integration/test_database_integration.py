@@ -782,6 +782,15 @@ class TestDatabase(unittest.TestCase):
         assert_that(self.db.mongo_database["my_capped_collection"].options(),
                     is_({"capped": True, "size": 1234}))
 
+    def test_delete_collection(self):
+        self.db.create_capped_collection("you_cant_touch_this", 100)
+
+        assert_that("you_cant_touch_this" in self.db.collection_names())
+
+        self.db.delete_collection("you_cant_touch_this")
+
+        assert_that("you_cant_touch_this" not in self.db.collection_names())
+
     def test_get_collection_names(self):
         self.db.create_capped_collection("foo", 1234)
 

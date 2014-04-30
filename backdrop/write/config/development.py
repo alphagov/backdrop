@@ -6,7 +6,7 @@ DATA_SET_AUTO_ID_KEYS = {
     "lpa_volumes": ("key", "start_at", "end_at")
 }
 
-CREATE_COLLECTION_ENDPOINT_TOKEN = 'dev-create-endpoint-token'
+STAGECRAFT_COLLECTION_ENDPOINT_TOKEN = 'dev-create-endpoint-token'
 
 try:
     from development_environment import *

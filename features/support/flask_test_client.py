@@ -13,6 +13,9 @@ class FlaskTestClient(BaseClient):
     def post(self, url, **message):
         return self._client.post(url, **message)
 
+    def delete(self, url, **message):
+        return self._client.delete(url, **message)
+
     def storage(self):
         return self._storage
 

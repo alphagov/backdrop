@@ -591,9 +591,9 @@ class TestDataSet(unittest.TestCase):
 
 class TestDataSetConfig(object):
 
-    def test_creating_a_data_set_with_raw_queries_allowed(self):
-        data_set = DataSetConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
-        assert_that(data_set.raw_queries_allowed, is_(True))
+    def test_creating_a_data_set_config_with_raw_queries_allowed(self):
+        data_set_config = DataSetConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
+        assert_that(data_set_config.raw_queries_allowed, is_(True))
 
     def test_default_values(self):
         data_set = DataSetConfig("default", data_group="with_defaults", data_type="def_type")
