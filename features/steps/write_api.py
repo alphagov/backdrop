@@ -28,7 +28,7 @@ def step(context, token):
     context.bearer_token = token
 
 
-@when('I post the data to "{data_set_name}"')
+@when('I POST the data to "{data_set_name}"')
 def step(context, data_set_name):
     if not (context and 'data_set' in context):
         context.data_set = data_set_name.replace('/', '')
@@ -40,7 +40,7 @@ def step(context, data_set_name):
     )
 
 
-@when('I post to the specific path "{path}"')
+@when('I POST to the specific path "{path}"')
 def step(context, path):
     context.response = context.client.post(
         path,
@@ -50,7 +50,7 @@ def step(context, path):
     )
 
 
-@when('I post the file "{filename}" to "/{data_set_name}/upload"')
+@when('I POST the file "{filename}" to "/{data_set_name}/upload"')
 def step(context, filename, data_set_name):
     context.data_set = data_set_name.replace('/', '')
     context.response = context.client.post(
@@ -60,7 +60,7 @@ def step(context, filename, data_set_name):
     )
 
 
-@when('I send a delete request to "{data_set_url}"')
+@when('I send a DELETE request to "{data_set_url}"')
 def step(context, data_set_url):
     context.response = context.client.delete(
         data_set_url,
