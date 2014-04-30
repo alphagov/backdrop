@@ -119,6 +119,9 @@ class MongoDriver(object):
             reduce=self._build_reducer_function(collect_fields)
         )
 
+    def remove(self, *args, **kwargs):
+        return self._collection.remove(*args, **kwargs)
+
     def _build_collector_code(self, collect_fields):
         template = "if (current['{c}'] !== undefined) " \
                    "{{ previous['{c}'].push(current['{c}']); }}"

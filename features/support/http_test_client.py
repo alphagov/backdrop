@@ -15,17 +15,30 @@ class HTTPTestClient(BaseClient):
         return HTTPTestResponse(response)
 
     def post(self, url, **message):
+        return self.post_or_put('POST', url, **message)
+
+    def put(self, url, **message):
+        return self.post_or_put('PUT', url, **message)
+
+    def post_or_put(self, method, url, **message):
+        assert method in ('POST', 'PUT'), 'Only support POST, PUT'
+        http_function = {
+            'POST': requests.post,
+            'PUT': requests.put
+        }[method]
+
         headers = dict(message.get("headers", []))
+
         if "data" in message:
             headers.update({"Content-type": message['content_type']})
-            response = requests.post(
+            response = http_function(
                 self._write_api.url(url),
                 data=message['data'],
                 headers=headers,
                 timeout=60,
             )
         elif "files" in message:
-            response = requests.post(
+            response = http_function(
                 self._write_api.url(url),
                 files=message['files'],
                 headers=headers,
