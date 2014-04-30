@@ -126,3 +126,13 @@ Feature: the performance platform write api
          when I post the data to "/data-sets/new-dataset"
          then I should get back a status of "400"
           and the collection called "new-dataset" should not exist
+
+    @empty_data_set
+    Scenario: emptying a collection
+        Given I have a data-set named "some-data-set" with the data from "dinosaur.json"
+          and I have the bearer token "dev-create-endpoint-token"
+         when I post to the specific path "/data-sets/some-data-set/empty"
+         then I should get back a status of "200"
+          and I should get back the message "Emptied some-data-set"
+          and the collection called "some-data-set" should be empty
+

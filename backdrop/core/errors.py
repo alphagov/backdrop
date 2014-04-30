@@ -8,3 +8,7 @@ class ParseError(BackdropError):
 
 class ValidationError(BackdropError):
     pass
+
+
+class PutNonEmptyNotImplementedError(BackdropError):
+    pass

@@ -13,6 +13,16 @@ def step(context, fixture_name):
         context.data_to_post = fixture.read()
 
 
+@given('I have a data-set named "{data_set_name}" with the data from "{fixture_name}"')
+def step(context, data_set_name, fixture_name):
+    path_to_fixture = os.path.join(FIXTURE_PATH, fixture_name)
+    with open(path_to_fixture) as fixture:
+        data = listify_json(fixture.read())
+
+        data_set = DataSet(db, data_set_config)
+        data_set.parse_and_store(data)
+
+
 @given("I have JSON data '{json}'")
 def step(context, json):
     context.data_to_post = json

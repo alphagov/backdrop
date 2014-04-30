@@ -9,7 +9,8 @@ from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.repository import (DataSetConfigRepository,
                                       UserConfigRepository)
 
-from ..core.errors import ParseError, ValidationError
+from ..core.errors import (ParseError, ValidationError,
+                           PutNonEmptyNotImplementedError)
 from ..core import database, log_handler, cache_control
 
 from .validation import auth_header_is_valid, extract_bearer_token
@@ -79,14 +80,33 @@ def write_by_group(data_group, data_type):
     data_set_config = data_set_repository.get_data_set_for_query(
         data_group,
         data_type)
-    return _write_to_data_set(data_set_config)
+    data = listify_json(request.json)
+    return _append_to_data_set(data_set_config, data)
+
+
+@app.route('/data/<data_group>/<data_type>', methods=['PUT'])
+@cache_control.nocache
+def put_by_group_and_type(data_group, data_type):
+    """
+    Put by group/type
+    e.g. PUT https://BACKDROP/data/gcloud/sales
+    Note: At the moment this is just being used to empty data-sets.
+          Trying to PUT a non empty list of records will result in a
+          PutNonEmptyNotImplementedError exception.
+    """
+    data_set_config = data_set_repository.get_data_set_for_query(
+        data_group,
+        data_type)
+    data = listify_json(request.json)
+    return _set_data_set(data_set_config, data)
 
 
 @app.route('/<data_set:data_set_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_data_set(data_set_name):
     data_set_config = data_set_repository.retrieve(name=data_set_name)
-    return _write_to_data_set(data_set_config)
+    data = listify_json(request.json)
+    return _append_to_data_set(data_set_config, data)
 
 
 @app.route('/data-sets/<dataset_name>', methods=['POST'])
@@ -155,12 +175,17 @@ def _allow_create_collection(auth_header):
     return _allow_modify_collection(auth_header)
 
 
-def _write_to_data_set(data_set_config):
+def _config_okay(data_set_config):
     if data_set_config is None:
         abort(404, 'Could not find data_set_config')
 
     g.data_set_name = data_set_config.name
 
+    # if we got this far, the data-set config's okay
+    return True
+
+
+def _auth_okay(data_set_config):
     try:
         auth_header = request.headers['Authorization']
     except KeyError:
@@ -170,15 +195,41 @@ def _write_to_data_set(data_set_config):
         statsd.incr("write_api.bad_token", data_set=g.data_set_name)
         abort(403, 'Forbidden')
 
-    try:
-        data = listify_json(request.json)
+    # if we got this far, the header's okay
+    return True
 
+
+def _append_to_data_set(data_set_config, data):
+    if _config_okay(data_set_config) and _auth_okay(data_set_config):
+        try:
+            data_set = DataSet(db, data_set_config)
+            data_set.parse_and_store(data)
+
+            return jsonify(status='ok')
+        except (ParseError, ValidationError) as e:
+            abort(400, str(e))
+
+
+def _set_data_set(data_set_config, data):
+    if _config_okay(data_set_config) and _auth_okay(data_set_config):
+        if len(data) == 0:
+            raise PutNonEmptyNotImplementedError
+
+
+        try:
+            data_set = DataSet(db, data_set_config)
+            data_set.parse_and_store(data)
+
+            return jsonify(status='ok')
+        except (ParseError, ValidationError) as e:
+            abort(400, str(e))
+
+
+def _empty_data_set(data_set_config):
+    if _config_okay(data_set_config) and _auth_okay(data_set_config):
         data_set = DataSet(db, data_set_config)
-        data_set.parse_and_store(data)
-
+        data_set.empty()
         return jsonify(status='ok')
-    except (ParseError, ValidationError) as e:
-        abort(400, str(e))
 
 
 def listify_json(data):
