@@ -156,7 +156,7 @@ Feature: the performance platform write api
 
     @empty_data_set
     Scenario: PUT is only implemented for an empty JSON list
-          and I have a data_set named "some_data_set" with settings
+        Given I have a data_set named "some_data_set" with settings
             | key        | value         |
             | data_group | "group"       |
             | data_type  | "type"        |
@@ -164,4 +164,4 @@ Feature: the performance platform write api
         given I have JSON data '[{"a": 1}]'
          when I PUT to the specific path "/data/group/type"
          then I should get back a status of "400"
-          and I should get back the message "Not implemented: you can only pass an empty JSON list."
+          and I should get back the message "Not implemented: you can only pass an empty JSON list"
