@@ -12,6 +12,7 @@ from ..core import database, log_handler, cache_control
 from ..core.data_set import DataSet
 from ..core.database import InvalidOperationError
 from ..core.repository import DataSetConfigRepository
+from ..core.timeutils import as_utc
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -43,7 +44,7 @@ class JsonEncoder(json.JSONEncoder):
         if isinstance(obj, ObjectId):
             return str(obj)
         if isinstance(obj, datetime.datetime):
-            return obj.isoformat()
+            return as_utc(obj).isoformat()
         return json.JSONEncoder.default(self, obj)
 app.json_encoder = JsonEncoder
 
