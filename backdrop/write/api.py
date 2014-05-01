@@ -90,6 +90,34 @@ def write_by_group(data_group, data_type):
         abort(400, repr(e))
 
 
+@app.route('/data/<data_group>/<data_type>', methods=['PUT'])
+@cache_control.nocache
+def put_by_group_and_type(data_group, data_type):
+    """
+    Put by group/type
+    e.g. PUT https://BACKDROP/data/gcloud/sales
+    Note: At the moment this is just being used to empty data-sets.
+          Trying to PUT a non empty list of records will result in a
+          PutNonEmptyNotImplementedError exception.
+    """
+    data_set_config = data_set_repository.get_data_set_for_query(
+        data_group,
+        data_type)
+
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = listify_json(request.json)
+        if len(data) > 0:
+            abort(400, 'Not implemented: you can only pass an empty JSON list')
+
+        return _empty_data_set(data_set_config)
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
+
+
 @app.route('/<data_set:data_set_name>', methods=['POST'])
 @cache_control.nocache
 def post_to_data_set(data_set_name):
@@ -196,6 +224,14 @@ def _append_to_data_set(data_set_config, data, ok_message=None):
         return jsonify(status='ok', message=ok_message)
     else:
         return jsonify(status='ok')
+
+
+def _empty_data_set(data_set_config):
+    data_set = DataSet(db, data_set_config)
+    data_set.empty()
+    return jsonify(
+        status='ok',
+        message='{} now contains 0 records'.format(data_set_config.name))
 
 
 def listify_json(data):

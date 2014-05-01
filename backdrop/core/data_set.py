@@ -61,6 +61,10 @@ class DataSet(object):
 
         return result
 
+    def empty(self):
+        collection = self.db.get_collection(self.config.name)
+        collection.remove({})
+
     def _add_id(self, datum):
         self._validate_presence_of_auto_id_keys(datum)
         return dict(datum.items() + [("_id", self._generate_id(datum))])

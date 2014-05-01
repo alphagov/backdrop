@@ -73,11 +73,6 @@ def step(context, data_set_name):
     ensure_data_set_exists(context, data_set_name, settings)
 
 
-@given('I have a data_set named "{data_set_name}"')
-def step(context, data_set_name):
-    ensure_data_set_exists(context, data_set_name)
-
-
 @given('Stagecraft is running')
 def step(context):
     if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:

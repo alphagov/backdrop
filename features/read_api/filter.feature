@@ -30,8 +30,11 @@ Feature: filtering queries for read api
           and the JSON should have "2" results
 
     Scenario: invalid start_at parameter
-        Given I have a data_set named "foo"
-         When I go to "/foo?start_at=not+a+date"
+        Given I have a data_set named "foo" with settings
+            | key        | value   |
+            | data_group | "group" |
+            | data_type  | "type"  |
+         When I go to "/data/group/type?start_at=not+a+date"
          then I should get back a status of "400"
 
     Scenario: filtering by a field name starting with "$" is not allowed because of security reasons
