@@ -96,7 +96,8 @@ Feature: the performance platform write api
           and I have JSON data '{"capped_size": 4096}'
           and I have the bearer token "dev-create-endpoint-token"
          when I POST to the specific path "/data-sets/some-dataset"
-          and I send a DELETE request to "/data-sets/some-dataset"
+         then the collection called "some-dataset" should exist
+         when I send a DELETE request to "/data-sets/some-dataset"
          then I should get back a status of "200"
           and I should get back the message "Deleted some-dataset"
           and the collection called "some-dataset" should not exist
