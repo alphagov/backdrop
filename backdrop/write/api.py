@@ -1,7 +1,7 @@
 from os import getenv
 import json
 
-from flask import Flask, request, jsonify, g
+from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
 from backdrop.core.data_set import DataSet
@@ -42,9 +42,11 @@ log_handler.set_up_logging(app, GOVUK_ENV)
 app.url_map.converters["data_set"] = DataSetConverter
 
 
-@app.errorhandler(500)
-@app.errorhandler(405)
+@app.errorhandler(400)
+@app.errorhandler(403)
 @app.errorhandler(404)
+@app.errorhandler(405)
+@app.errorhandler(500)
 def exception_handler(e):
     app.logger.exception(e)
 
@@ -52,9 +54,9 @@ def exception_handler(e):
     statsd.incr("write.error", data_set=data_set_name)
 
     code = getattr(e, 'code', 500)
-    name = getattr(e, 'name', "Internal Error")
+    description = getattr(e, 'description', "Unknown Error")
 
-    return jsonify(status='error', message=name), code
+    return jsonify(status='error', message=description), code
 
 
 @app.route('/_status', methods=['GET'])
@@ -63,8 +65,7 @@ def health_check():
     if db.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
-        return jsonify(status='error',
-                       message='cannot connect to database'), 500
+        abort(500, 'cannot connect to database')
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['POST'])
@@ -77,7 +78,16 @@ def write_by_group(data_group, data_type):
     data_set_config = data_set_repository.get_data_set_for_query(
         data_group,
         data_type)
-    return _write_to_data_set(data_set_config)
+
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = listify_json(request.json)
+        return _append_to_data_set(data_set_config, data)
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
 
 
 @app.route('/<data_set:data_set_name>', methods=['POST'])
@@ -86,34 +96,40 @@ def post_to_data_set(data_set_name):
     app.logger.warning("Deprecated use of write API by name: {}".format(
         data_set_name))
     data_set_config = data_set_repository.retrieve(name=data_set_name)
-    return _write_to_data_set(
-        data_set_config,
-        ok_message="Deprecation Warning: accessing by data-set name is "
-                   "deprecated, Please use the /data-group/data-type form.")
+
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = listify_json(request.json)
+        return _append_to_data_set(
+            data_set_config,
+            data,
+            ok_message="Deprecation Warning: accessing by data-set name is "
+                       "deprecated, Please use the /data-group/data-type form")
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
 
 
 @app.route('/data-sets/<dataset_name>', methods=['POST'])
 @cache_control.nocache
 def create_collection_for_dataset(dataset_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
-        return jsonify(status='error',
-                       message="Forbidden: invalid or no token given."), 403
+        abort(403, 'Forbidden: invalid or no token given.')
 
     if db.collection_exists(dataset_name):
-        return jsonify(status='error',
-                       message='Collection exists with that name.'), 400
+        abort(400, 'Collection exists with that name.')
 
     try:
         data = json.loads(request.data)
     except ValueError as e:
-        return jsonify(status='error', message=repr(e)), 400
+        abort(400, repr(e))
     else:
         capped_size = data.get('capped_size', None)
 
     if capped_size is None or not isinstance(capped_size, int):
-        return jsonify(
-            status='error',
-            message="You must specify an int capped_size of 0 or more"), 400
+        abort(400, 'You must specify an int capped_size of 0 or more')
 
     if capped_size == 0:
         db.create_uncapped_collection(dataset_name)
@@ -127,14 +143,10 @@ def create_collection_for_dataset(dataset_name):
 @cache_control.nocache
 def delete_collection_by_dataset_name(dataset_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
-        return jsonify(status='error',
-                       message="Forbidden: invalid or no token given."), 403
+        abort(403, 'Forbidden: invalid or no token given.')
 
     if not db.collection_exists(dataset_name):
-        return jsonify(
-            status='error',
-            message='No collection exists with name "{}"'.format(dataset_name)
-        ), 404
+        abort(404, 'No collection exists with name "{}"'.format(dataset_name))
 
     db.delete_collection(dataset_name)
 
@@ -158,35 +170,32 @@ def _allow_create_collection(auth_header):
     return _allow_modify_collection(auth_header)
 
 
-def _write_to_data_set(data_set_config, ok_message=None):
+def _validate_config(data_set_config):
     if data_set_config is None:
-        return jsonify(status="error",
-                       message='Could not find data_set_config'), 404
+        abort(404, 'Could not find data_set_config')
 
     g.data_set_name = data_set_config.name
 
+
+def _validate_auth(data_set_config):
     try:
         auth_header = request.headers['Authorization']
     except KeyError:
-        return jsonify(status='error',
-                       message='Authorization header missing.'), 403
+        abort(403, 'Authorization header missing.')
 
     if not auth_header_is_valid(data_set_config, auth_header):
         statsd.incr("write_api.bad_token", data_set=g.data_set_name)
-        return jsonify(status='error', message='Forbidden'), 403
+        abort(403, 'Forbidden')
 
-    try:
-        data = listify_json(request.json)
 
-        data_set = DataSet(db, data_set_config)
-        data_set.parse_and_store(data)
-        if ok_message:
-            return jsonify(status='ok', message=ok_message)
-        else:
-            return jsonify(status='ok')
+def _append_to_data_set(data_set_config, data, ok_message=None):
+    data_set = DataSet(db, data_set_config)
+    data_set.parse_and_store(data)
 
-    except (ParseError, ValidationError) as e:
-        return jsonify(status="error", message=str(e)), 400
+    if ok_message:
+        return jsonify(status='ok', message=ok_message)
+    else:
+        return jsonify(status='ok')
 
 
 def listify_json(data):
