@@ -59,6 +59,23 @@ def exception_handler(e):
     return jsonify(status='error', message=description), code
 
 
+@app.errorhandler(401)
+def unauthorised(e):
+    app.logger.exception(e)
+
+    data_set_name = getattr(g, 'data_set_name', request.path)
+
+    statsd.incr("write.error", data_set=data_set_name)
+    statsd.incr("write_api.bad_token", data_set=data_set_name)
+
+    description = getattr(e, 'description',
+                          "Bad or missing Authorization header")
+
+    return (jsonify(status='error',
+                    message=description), 401,
+            [('WWW-Authenticate', 'bearer')])
+
+
 @app.route('/_status', methods=['GET'])
 @cache_control.nocache
 def health_check():
@@ -144,7 +161,7 @@ def post_to_data_set(data_set_name):
 @cache_control.nocache
 def create_collection_for_dataset(dataset_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
-        abort(403, 'Forbidden: invalid or no token given.')
+        abort(401, 'Unauthorized: invalid or no token given.')
 
     if db.collection_exists(dataset_name):
         abort(400, 'Collection exists with that name.')
@@ -171,7 +188,7 @@ def create_collection_for_dataset(dataset_name):
 @cache_control.nocache
 def delete_collection_by_dataset_name(dataset_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
-        abort(403, 'Forbidden: invalid or no token given.')
+        abort(401, 'Unauthorized: invalid or no token given.')
 
     if not db.collection_exists(dataset_name):
         abort(404, 'No collection exists with name "{}"'.format(dataset_name))
@@ -209,11 +226,11 @@ def _validate_auth(data_set_config):
     try:
         auth_header = request.headers['Authorization']
     except KeyError:
-        abort(403, 'Authorization header missing.')
+        abort(401, 'Authorization header missing.')
 
     if not auth_header_is_valid(data_set_config, auth_header):
         statsd.incr("write_api.bad_token", data_set=g.data_set_name)
-        abort(403, 'Forbidden')
+        abort(401, 'Unauthorized')
 
 
 def _append_to_data_set(data_set_config, data, ok_message=None):

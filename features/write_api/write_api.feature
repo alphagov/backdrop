@@ -65,13 +65,15 @@ Feature: the performance platform write api
     Scenario: denying create collection with missing bearer token
         Given I have JSON data '{"capped_size": 0}'
          when I POST to the specific path "/data-sets/new-dataset"
-         then I should get back a status of "403"
+         then I should get back a status of "401"
+          and I should get a "WWW-Authenticate" header of "bearer"
 
     Scenario: denying create collection with incorrect bearer token
         Given I have JSON data '{"capped_size": 0}'
           and I have the bearer token "invalid-bearer-token"
          when I POST to the specific path "/data-sets/new-dataset"
-         then I should get back a status of "403"
+         then I should get back a status of "401"
+          and I should get a "WWW-Authenticate" header of "bearer"
 
     Scenario: creating an uncapped collection
         Given I have JSON data '{"capped_size": 0}'
