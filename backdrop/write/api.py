@@ -253,7 +253,8 @@ def _empty_data_set(data_set_config):
 
 def listify_json(data):
     if data is None:
-        raise ValidationError("Request must be JSON")
+        raise ValidationError(
+            "Expected header: Content-type: application/json")
 
     if isinstance(data, list):
         return data

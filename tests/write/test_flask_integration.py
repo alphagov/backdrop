@@ -69,7 +69,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that( response, is_bad_request())
-        assert_that( response, is_error_response())
+        assert_that( response, is_error_response("ValidationError('Expected header: Content-type: application/json',)"))
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
     @patch("backdrop.core.data_set.DataSet.store")
