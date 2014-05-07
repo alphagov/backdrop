@@ -26,7 +26,7 @@ def is_bad_request():
 
 
 def is_unauthorized():
-    return has_status(403)
+    return has_status(401) and has_header('WWW-Authenticate', 'bearer')
 
 
 def is_not_found():
