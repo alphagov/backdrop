@@ -1,8 +1,8 @@
-
 import json
 import logging
 
 import requests
+import os
 
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
@@ -155,7 +155,11 @@ class UserConfigRepository(object):
 
     def __init__(self, db):
         self._db = db
-        self._repository = _Repository(db, UserConfig, "users", "email")
+        if 'USERS_USE_HTTP_REPO' in os.environ \
+           and os.environ['USERS_USE_HTTP_REPO']:
+            self._repository = HttpRepository(db, UserConfig, "users", "email")
+        else:
+            self._repository = _Repository(db, UserConfig, "users", "email")
 
     def save(self, user_config):
         self._repository.save(user_config)
