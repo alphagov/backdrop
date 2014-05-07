@@ -10,6 +10,48 @@ from backdrop.core.user import UserConfig
 logger = logging.getLogger(__name__)
 
 
+class HttpRepository(object):
+    def __init__(self, stagecraft_url, stagecraft_token, model_name, model_cls):
+        self._stagecraft_url = stagecraft_url
+        self._stagecraft_token = stagecraft_token
+        self._model_name = model_name
+        self._model_cls = model_cls
+
+    def get_all(self):
+        url = '{base_url}/{model_name}s'.format(
+            base_url=self._stagecraft_url,
+            model_name=self._model_name)
+
+        # Note: Don't catch HTTP 404 - that should never happen on this URL.
+        json_response = _get_json_url(url, self._stagecraft_token)
+        items = _decode_json(json_response)
+
+        return [self.create_model(item) for item in items]
+
+    def retrieve(self, value):
+        if len(value) == 0:
+            raise ValueError('Name must not be empty')
+        url = ('{base_url}/{model_name}s/{instance_name}'.format(
+            base_url=self._stagecraft_url,
+            model_name=self._model_name,
+            instance_name=value))
+
+        try:
+            json_response = _get_json_url(url, self._stagecraft_token)
+        except requests.HTTPError as e:
+            if e.response.status_code == 404:
+                return None
+            else:
+                raise
+
+        return self.create_model(_decode_json(json_response))
+
+    def create_model(self, stagecraft_dict):
+        if stagecraft_dict is None:
+            return None
+        return self._model_cls(**stagecraft_dict)
+
+
 class _Repository(object):
 
     def __init__(self, db, model_cls, collection_name, id_field):
@@ -53,32 +95,17 @@ class DataSetConfigRepository(object):
     def __init__(self, stagecraft_url, stagecraft_token):
         self._stagecraft_url = stagecraft_url
         self._stagecraft_token = stagecraft_token
+        self._repository_proxy = HttpRepository(
+            stagecraft_url,
+            stagecraft_token,
+            'data-set',
+            DataSetConfig)
 
     def get_all(self):
-        data_set_url = '{url}/data-sets'.format(url=self._stagecraft_url)
-
-        # Note: Don't catch HTTP 404 - that should never happen on this URL.
-        json_response = _get_json_url(data_set_url, self._stagecraft_token)
-        data_sets = _decode_json(json_response)
-
-        return [_make_data_set_config(data_set) for data_set in data_sets]
+        return self._repository_proxy.get_all()
 
     def retrieve(self, name):
-        if len(name) == 0:
-            raise ValueError('Name must not be empty')
-        data_set_url = ('{url}/data-sets/{data_set_name}'.format(
-                        url=self._stagecraft_url,
-                        data_set_name=name))
-
-        try:
-            json_response = _get_json_url(data_set_url, self._stagecraft_token)
-        except requests.HTTPError as e:
-            if e.response.status_code == 404:
-                return None
-            else:
-                raise
-
-        return _make_data_set_config(_decode_json(json_response))
+        return self._repository_proxy.retrieve(name)
 
     def get_data_set_for_query(self, data_group, data_type):
         empty_vars = []
@@ -99,15 +126,9 @@ class DataSetConfigRepository(object):
 
         data_sets = _decode_json(json_response)
         if len(data_sets) > 0:
-            return _make_data_set_config(data_sets[0])
+            return self._repository_proxy.create_model(data_sets[0])
 
         return None
-
-
-def _make_data_set_config(stagecraft_dict):
-    if stagecraft_dict is None:
-        return None
-    return DataSetConfig(**stagecraft_dict)
 
 
 def _decode_json(string):
