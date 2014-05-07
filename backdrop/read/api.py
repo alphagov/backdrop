@@ -50,14 +50,28 @@ app.json_encoder = JsonEncoder
 
 
 @app.errorhandler(500)
-@app.errorhandler(405)
-@app.errorhandler(404)
-def exception_handler(e):
+def uncaught_error_handler(e):
+    """
+    This shouldn't happen. If we get here an unspecified uncaught exception
+    *or* an explicit 500 was raised.
+    WARNING: Don't assume the exception will be a subclass of HTTPError:
+    'a handler for internal server errors will be passed other exception
+    instances as well if they are uncaught'
+    -- http://flask.pocoo.org/docs/patterns/errorpages/#error-handlers
+    """
+
     app.logger.exception(e)
-    return jsonify(
-        status='error',
-        message=getattr(e, 'name', 'Internal error')
-    ), getattr(e, 'code', 500)
+    error_message = 'Internal Server Error: {}'.format(repr(e))
+    return (jsonify(status='error', message=error_message), 500)
+
+
+@app.errorhandler(404)
+@app.errorhandler(405)
+def http_error_handler(e):
+    app.logger.exception(e)
+    return (jsonify(status='error',
+                    message=getattr(e, 'name', 'Internal error')),
+            getattr(e, 'code', 500))
 
 
 @app.route('/_status', methods=['GET'])

@@ -42,38 +42,50 @@ log_handler.set_up_logging(app, GOVUK_ENV)
 app.url_map.converters["data_set"] = DataSetConverter
 
 
+def _record_write_error(e):
+    app.logger.exception(e)
+
+    name_or_path = getattr(g, 'data_set_name', request.path)
+
+    statsd.incr("write.error", data_set=name_or_path)
+    if getattr(e, 'code', None) == 401:
+        statsd.incr("write_api.bad_token", data_set=name_or_path)
+
+
+@app.errorhandler(500)
+def uncaught_error_handler(e):
+    """
+    This shouldn't happen. If we get here an unspecified uncaught exception
+    *or* an explicit 500 was raised.
+    WARNING: Don't assume the exception will be a subclass of HTTPError:
+    'a handler for internal server errors will be passed other exception
+    instances as well if they are uncaught'
+    -- http://flask.pocoo.org/docs/patterns/errorpages/#error-handlers
+    """
+    _record_write_error(e)
+
+    error_message = 'Internal Server Error: {}'.format(repr(e))
+    return (jsonify(status='error', message=error_message), 500)
+
+
 @app.errorhandler(400)
+@app.errorhandler(401)
 @app.errorhandler(403)
 @app.errorhandler(404)
 @app.errorhandler(405)
-@app.errorhandler(500)
-def exception_handler(e):
-    app.logger.exception(e)
+def http_error_handler(e):
+    _record_write_error(e)
 
-    data_set_name = getattr(g, 'data_set_name', request.path)
-    statsd.incr("write.error", data_set=data_set_name)
+    if e.code == 401:
+        description = getattr(e, 'description',
+                              'Bad or missing Authorization header')
+        return (jsonify(status='error', message=description),
+                401,
+                [('WWW-Authenticate', 'bearer')])
+    else:
+        description = getattr(e, 'description', "Unknown Error")
 
-    code = getattr(e, 'code', 500)
-    description = getattr(e, 'description', "Unknown Error")
-
-    return jsonify(status='error', message=description), code
-
-
-@app.errorhandler(401)
-def unauthorised(e):
-    app.logger.exception(e)
-
-    data_set_name = getattr(g, 'data_set_name', request.path)
-
-    statsd.incr("write.error", data_set=data_set_name)
-    statsd.incr("write_api.bad_token", data_set=data_set_name)
-
-    description = getattr(e, 'description',
-                          "Bad or missing Authorization header")
-
-    return (jsonify(status='error',
-                    message=description), 401,
-            [('WWW-Authenticate', 'bearer')])
+        return (jsonify(status='error', message=description), e.code)
 
 
 @app.route('/_status', methods=['GET'])
@@ -229,7 +241,6 @@ def _validate_auth(data_set_config):
         abort(401, 'Authorization header missing.')
 
     if not auth_header_is_valid(data_set_config, auth_header):
-        statsd.incr("write_api.bad_token", data_set=g.data_set_name)
         abort(401, 'Unauthorized')
 
 
