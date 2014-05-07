@@ -62,11 +62,24 @@ Feature: the performance platform write api
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"
           and the stored data should contain "2" "_week_start_at" on "2013-03-18"
 
+    Scenario: unauthorized when posting with an incorrect token
+        Given I have JSON data '[]'
+          and I have a data_set named "some_data_set" with settings
+            | key        | value   |
+            | data_group | "group" |
+            | data_type  | "type"  |
+          and I have the bearer token "invalid-bearer-token"
+         when I POST to the specific path "/data/group/type"
+         then I should get back a status of "401"
+          and I should get a "WWW-Authenticate" header of "bearer"
+          and I should get back the message "Unauthorized: Invalid bearer token "invalid-bearer-token""
+
     Scenario: denying create collection with missing bearer token
         Given I have JSON data '{"capped_size": 0}'
          when I POST to the specific path "/data-sets/new-dataset"
          then I should get back a status of "401"
           and I should get a "WWW-Authenticate" header of "bearer"
+          and I should get back the message "Unauthorized: invalid or no token given."
 
     Scenario: denying create collection with incorrect bearer token
         Given I have JSON data '{"capped_size": 0}'
@@ -74,6 +87,7 @@ Feature: the performance platform write api
          when I POST to the specific path "/data-sets/new-dataset"
          then I should get back a status of "401"
           and I should get a "WWW-Authenticate" header of "bearer"
+          and I should get back the message "Unauthorized: invalid or no token given."
 
     Scenario: creating an uncapped collection
         Given I have JSON data '{"capped_size": 0}'
