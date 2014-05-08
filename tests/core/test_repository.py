@@ -4,6 +4,7 @@ import unittest
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.repository import (DataSetConfigRepository,
                                       UserConfigRepository,
+                                      UserConfigHttpRepository,
                                       _get_json_url)
 from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
 from mock import Mock, patch
@@ -20,7 +21,31 @@ def fixture(name):
     with open(filename, 'r') as f:
         yield f.read()
 
+
+def _mock_raise_http_404(*args, **kwargs):
+    mock_error_response = Mock()
+    mock_error_response.status_code = 404
+    exception = requests.HTTPError()
+    exception.response = mock_error_response
+
+    raise exception
+
+
+def _mock_raise_http_503(*args, **kwargs):
+    mock_error_response = Mock()
+    mock_error_response.status_code = 503
+    exception = requests.HTTPError()
+    exception.response = mock_error_response
+
+    raise exception
+
+
 _GET_JSON_URL_FUNC = 'backdrop.core.repository._get_json_url'
+
+
+class TestGetUserRepository(unittest.TestCase):
+    def test_returns_correct_user_config_http_repository_when_turned_on(self):
+        pass
 
 
 class TestGetJsonUrl(unittest.TestCase):
@@ -37,6 +62,9 @@ class TestGetJsonUrl(unittest.TestCase):
             headers={'content-type': 'application/json',
                      'Authorization': 'Bearer some_token'})
         assert_that(response_content, equal_to('[]'))
+
+    def test_get_json_url_correct_encodes_emails(self):
+        assert_that(False, equal_to(True))
 
 
 class TestDataSetRepository(unittest.TestCase):
@@ -114,14 +142,6 @@ class TestDataSetRepository(unittest.TestCase):
             assert_that(data_set, equal_to(expected_data_set))
 
     def test_retrieve_for_non_existent_data_set_returns_none(self):
-        def _mock_raise_http_404(*args, **kwargs):
-            mock_error_response = Mock()
-            mock_error_response.status_code = 404
-            exception = requests.HTTPError()
-            exception.response = mock_error_response
-
-            raise exception
-
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.side_effect = _mock_raise_http_404
             data_set = self.data_set_repo.retrieve(name="non_existent")
@@ -129,14 +149,6 @@ class TestDataSetRepository(unittest.TestCase):
         assert_that(data_set, is_(None))
 
     def test_retrieve_doesnt_catch_http_errors_other_than_404(self):
-        def _mock_raise_http_503(*args, **kwargs):
-            mock_error_response = Mock()
-            mock_error_response.status_code = 503
-            exception = requests.HTTPError()
-            exception.response = mock_error_response
-
-            raise exception
-
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.side_effect = _mock_raise_http_503
 
@@ -222,3 +234,42 @@ class TestUserConfigRepository(object):
         user_config = self.repository.retrieve(email="test@example.com")
 
         assert_that(user_config, is_(None))
+
+
+class TestUserConfigHttpRepository(object):
+    def setUp(self):
+        self.user_repo = UserConfigHttpRepository(
+            'fake_stagecraft_url', 'fake_stagecraft_token')
+
+    def test_saving_fails_with_not_implemented_error(self):
+        user_config = {"foo": "bar"}
+
+        assert_raises(NotImplementedError, self.user_repo.save, user_config)
+
+    def test_retrieving_a_user_config(self):
+        with fixture('stagecraft_user_config.json') as content:
+            with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+                _get_json_url.return_value = content
+
+                user_config = self.user_repo.retrieve(email="test@example.com")
+
+            expected_user_config = UserConfig(
+                "test@example.com",
+                ["foo", "bar"])
+
+            assert_that(user_config, equal_to(expected_user_config))
+
+    def test_retrieve_for_non_existent_user_config_returns_none(self):
+        with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+            _get_json_url.side_effect = _mock_raise_http_404
+            user = self.user_repo.retrieve(email="non_existent")
+
+        assert_that(user, is_(None))
+
+    def test_retrieve_doesnt_catch_http_errors_other_than_404(self):
+        with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
+            _get_json_url.side_effect = _mock_raise_http_503
+
+            assert_raises(
+                requests.HTTPError,
+                lambda: self.user_repo.retrieve(email="non_existent"))
