@@ -3,6 +3,7 @@ import re
 from behave import *
 from flask import json
 from hamcrest import *
+from hamcrest import matches_regexp
 from dateutil import parser
 import datetime
 import re
@@ -117,7 +118,7 @@ def step(context, header, value):
 @then('I should get back the message "{message}"')
 def step(context, message):
     data = json.loads(context.response.data)
-    assert_that(data["message"], is_(message))
+    assert_that(data["message"], matches_regexp(message))
 
 
 @then('I should get back a message: "{expected_message}"')

@@ -112,7 +112,7 @@ def write_by_group(data_group, data_type):
     _validate_auth(data_set_config)
 
     try:
-        data = listify_json(request.json)
+        data = listify_json(get_json_from_request(request))
         return _append_to_data_set(data_set_config, data)
 
     except (ParseError, ValidationError) as e:
@@ -137,7 +137,7 @@ def put_by_group_and_type(data_group, data_type):
     _validate_auth(data_set_config)
 
     try:
-        data = listify_json(request.json)
+        data = listify_json(get_json_from_request(request))
         if len(data) > 0:
             abort(400, 'Not implemented: you can only pass an empty JSON list')
 
@@ -158,7 +158,7 @@ def post_to_data_set(data_set_name):
     _validate_auth(data_set_config)
 
     try:
-        data = listify_json(request.json)
+        data = listify_json(get_json_from_request(request))
         return _append_to_data_set(
             data_set_config,
             data,
@@ -261,6 +261,15 @@ def _empty_data_set(data_set_config):
     return jsonify(
         status='ok',
         message='{} now contains 0 records'.format(data_set_config.name))
+
+
+def get_json_from_request(request):
+    def json_error_handler(e):
+        app.logger.exception(e)
+        abort(400, 'Error parsing JSON: "{}"'.format(str(e)))
+
+    request.on_json_loading_failed = json_error_handler
+    return request.get_json()
 
 
 def listify_json(data):
