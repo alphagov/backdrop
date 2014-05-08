@@ -61,3 +61,14 @@ Feature: the performance platform write api
          then I should get back a status of "200"
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"
           and the stored data should contain "2" "_week_start_at" on "2013-03-18"
+
+    Scenario: posting invalid JSON to a data-set
+        Given I have JSON data '{borked!}'
+          and I have a data_set named "data_with_times" with settings
+            | key        | value   |
+            | data_group | "group" |
+            | data_type  | "type"  |
+          and I use the bearer token for the data_set
+         when I POST to the specific path "/data/group/type"
+         then I should get back a status of "400"
+         and I should get back the message "Error parsing JSON: .*""
