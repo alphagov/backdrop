@@ -104,14 +104,11 @@ class TestGetJsonUrl(unittest.TestCase):
                      'Authorization': 'Bearer some_token'})
         assert_that(response_content, equal_to('[]'))
 
-    def test_get_json_url_correct_encodes_emails(self):
-        assert_that(False, equal_to(True))
-
 
 class TestDataSetRepository(unittest.TestCase):
     def setUp(self):
         self.data_set_repo = DataSetConfigRepository(
-            'fake_stagecraft_url', 'fake_stagecraft_token')
+            'https://fake_stagecraft_url', 'fake_stagecraft_token')
 
     def test_retrieve_correctly_decodes_stagecraft_response(self):
         with fixture('stagecraft_get_single_data_set.json') as content:
@@ -159,7 +156,8 @@ class TestDataSetRepository(unittest.TestCase):
             assert_that(len(data_sets), equal_to(5))
             assert_that(data_sets[0], equal_to(expected_data_set_one))
 
-    def test_get_data_set_for_query_correctly_decodes_stagecraft_response(self):
+    def test_get_data_set_for_query_correctly_decodes_stagecraft_response(
+            self):
         with fixture('stagecraft_query_data_group_type.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
@@ -197,7 +195,8 @@ class TestDataSetRepository(unittest.TestCase):
                 requests.HTTPError,
                 lambda: self.data_set_repo.retrieve(name="non_existent"))
 
-    def test_get_data_set_for_query_for_non_existent_data_set_returns_none(self):
+    def test_get_data_set_for_query_for_non_existent_data_set_returns_none(
+            self):
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.return_value = '[]'
             data_set = self.data_set_repo.get_data_set_for_query(
@@ -211,7 +210,7 @@ class TestDataSetRepository(unittest.TestCase):
                 _get_json_url.return_value = content
                 self.data_set_repo.retrieve(name="govuk_visitors")
                 _get_json_url.assert_called_once_with(
-                    'fake_stagecraft_url/data-sets/govuk_visitors',
+                    'https://fake_stagecraft_url/data-sets/govuk_visitors',
                     "fake_stagecraft_token")
 
     def test_get_data_set_for_query_calls_correct_url(self):
@@ -221,7 +220,7 @@ class TestDataSetRepository(unittest.TestCase):
                 self.data_set_repo.get_data_set_for_query(
                     data_group="govuk", data_type="realtime")
                 _get_json_url.assert_called_once_with(
-                    'fake_stagecraft_url/data-sets?'
+                    'https://fake_stagecraft_url/data-sets?'
                     'data-group=govuk&data-type=realtime',
                     "fake_stagecraft_token")
 
@@ -231,7 +230,8 @@ class TestDataSetRepository(unittest.TestCase):
                 _get_json_url.return_value = content
                 self.data_set_repo.get_all()
                 _get_json_url.assert_called_once_with(
-                    'fake_stagecraft_url/data-sets', "fake_stagecraft_token")
+                    'https://fake_stagecraft_url/data-sets',
+                    "fake_stagecraft_token")
 
 
 class TestUserConfigRepository(object):
@@ -280,7 +280,7 @@ class TestUserConfigRepository(object):
 class TestUserConfigHttpRepository(object):
     def setUp(self):
         self.user_repo = UserConfigHttpRepository(
-            'fake_stagecraft_url', 'fake_stagecraft_token')
+            'https://fake_stagecraft_url', 'fake_stagecraft_token')
 
     def test_saving_fails_with_not_implemented_error(self):
         user_config = {"foo": "bar"}
@@ -299,6 +299,9 @@ class TestUserConfigHttpRepository(object):
                 ["foo", "bar"])
 
             assert_that(user_config, equal_to(expected_user_config))
+            _get_json_url.assert_called_once_with(
+                'https://fake_stagecraft_url/users/test%40example.com',
+                'fake_stagecraft_token')
 
     def test_retrieve_for_non_existent_user_config_returns_none(self):
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
