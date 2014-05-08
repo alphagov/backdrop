@@ -5,6 +5,7 @@ from backdrop.core.data_set import DataSetConfig
 from backdrop.core.repository import (DataSetConfigRepository,
                                       UserConfigRepository,
                                       UserConfigHttpRepository,
+                                      get_user_repository,
                                       _get_json_url)
 from hamcrest import assert_that, equal_to, is_, has_entries, match_equality
 from mock import Mock, patch
@@ -44,8 +45,48 @@ _GET_JSON_URL_FUNC = 'backdrop.core.repository._get_json_url'
 
 
 class TestGetUserRepository(unittest.TestCase):
-    def test_returns_correct_user_config_http_repository_when_turned_on(self):
-        pass
+
+    def build_app(self, config, http_on):
+        if http_on:
+            config['USE_USER_CONFIG_HTTP_REPOSITORY'] = '1'
+        app = Mock()
+        app.config = config
+        return app
+
+    @patch('backdrop.core.repository.UserConfigHttpRepository', spec=True)
+    def test_returns_correct_user_http_repository_when_turned_on(
+            self,
+            MockUserConfigHttpRepository):
+        config = {
+            'STAGECRAFT_URL': "some_url",
+            'STAGECRAFT_DATA_SET_QUERY_TOKEN': "wibble",
+        }
+        get_user_repository(self.build_app(config, http_on=True))
+        MockUserConfigHttpRepository.assert_called_once_with(
+            'some_url',
+            'wibble')
+
+    @patch('backdrop.core.repository.UserConfigRepository', spec=True)
+    @patch('backdrop.core.database.Database', spec=True)
+    def test_returns_correct_user_repository_when_http_turned_off(
+            self,
+            Database,
+            MockUserConfigRepository):
+        config = {
+            'MONGO_HOSTS': "blargh",
+            'MONGO_PORT': "9000",
+            'DATABASE_NAME': "foo"
+        }
+        mock_database = Mock()
+        Database.return_value = mock_database
+
+        get_user_repository(self.build_app(config, http_on=False))
+        Database.assert_called_once_with(
+            'blargh',
+            '9000',
+            'foo')
+        MockUserConfigRepository.assert_called_once_with(
+            mock_database)
 
 
 class TestGetJsonUrl(unittest.TestCase):
