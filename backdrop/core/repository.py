@@ -2,7 +2,7 @@ import json
 import logging
 
 import requests
-import os
+from backdrop.core import database
 
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
@@ -10,8 +10,29 @@ from backdrop.core.user import UserConfig
 logger = logging.getLogger(__name__)
 
 
+def get_user_repository(app):
+    if 'USE_USER_CONFIG_HTTP_REPOSITORY' in app.config \
+       and app.config['USE_USER_CONFIG_HTTP_REPOSITORY']:
+        from backdrop.core.repository import UserConfigHttpRepository
+        return UserConfigHttpRepository(
+            app.config['STAGECRAFT_URL'],
+            app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
+    else:
+        from backdrop.core.repository import UserConfigRepository
+        db = database.Database(
+            app.config['MONGO_HOSTS'],
+            app.config['MONGO_PORT'],
+            app.config['DATABASE_NAME']
+        )
+        return UserConfigRepository(db)
+
+
 class HttpRepository(object):
-    def __init__(self, stagecraft_url, stagecraft_token, model_name, model_cls):
+    def __init__(self,
+                 stagecraft_url,
+                 stagecraft_token,
+                 model_name,
+                 model_cls):
         self._stagecraft_url = stagecraft_url
         self._stagecraft_token = stagecraft_token
         self._model_name = model_name
@@ -155,14 +176,28 @@ class UserConfigRepository(object):
 
     def __init__(self, db):
         self._db = db
-        if 'USERS_USE_HTTP_REPO' in os.environ \
-           and os.environ['USERS_USE_HTTP_REPO']:
-            self._repository = HttpRepository(db, UserConfig, "users", "email")
-        else:
-            self._repository = _Repository(db, UserConfig, "users", "email")
+        self._repository = _Repository(db, UserConfig, "users", "email")
 
     def save(self, user_config):
         self._repository.save(user_config)
+
+    def retrieve(self, email):
+        return self._repository.retrieve(email)
+
+
+class UserConfigHttpRepository(object):
+
+    def __init__(self, stagecraft_url, stagecraft_token):
+        self._stagecraft_url = stagecraft_url
+        self._stagecraft_token = stagecraft_token
+        self._repository = HttpRepository(
+            stagecraft_url,
+            stagecraft_token,
+            'user',
+            UserConfig)
+
+    def save(self, user_config):
+        raise NotImplementedError
 
     def retrieve(self, email):
         return self._repository.retrieve(email)
