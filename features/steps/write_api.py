@@ -44,6 +44,22 @@ def step(context, http_method, path):
     )
 
 
+@when('I {http_method} to "{path}" with a malformed authorization header')
+def step(context, http_method, path):
+    assert http_method in ('POST', 'PUT'), "Only support POST, PUT"
+    http_function = {
+	'POST': context.client.post,
+	'PUT': context.client.put
+    }[http_method]
+
+    context.response = http_function(
+	path,
+	data=context.data_to_post,
+	content_type="application/json",
+	headers=_make_malformed_header_from_context(context),
+    )
+
+
 @when('I POST the file "{filename}" to "/{data_set_name}/upload"')
 def step(context, filename, data_set_name):
     context.data_set = data_set_name.replace('/', '')
@@ -108,4 +124,10 @@ def step(context, collection, size):
 def _make_headers_from_context(context):
     if context and 'bearer_token' in context:
         return [('Authorization', "Bearer %s" % context.bearer_token)]
+    return []
+
+
+def _make_malformed_header_from_context(context):
+    if context and 'bearer_token' in context:
+	return [('Orthoriszation', "Bearer %s" % context.bearer_token)]
     return []
