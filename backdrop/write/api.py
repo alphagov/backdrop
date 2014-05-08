@@ -238,7 +238,7 @@ def _validate_auth(data_set_config):
     try:
         auth_header = request.headers['Authorization']
     except KeyError:
-        abort(401, 'Authorization header missing.')
+        abort(401, 'Expected header of form: Authorization: Bearer <token>')
 
     if not auth_header_is_valid(data_set_config, auth_header):
         token = extract_bearer_token(auth_header)
