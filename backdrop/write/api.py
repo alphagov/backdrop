@@ -268,6 +268,9 @@ def get_json_from_request(request):
         app.logger.exception(e)
         abort(400, 'Error parsing JSON: "{}"'.format(str(e)))
 
+    if len(request.data) == 0:
+        abort(400, 'Expected JSON request body but received zero bytes.')
+
     request.on_json_loading_failed = json_error_handler
     return request.get_json()
 
