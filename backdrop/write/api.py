@@ -140,7 +140,7 @@ def put_by_group_and_type(data_group, data_type):
 def post_to_data_set(data_set_name):
     app.logger.warning("Deprecated use of write API by name: {}".format(
         data_set_name))
-    data_set_config = data_set_repository.retrieve(name=data_set_name)
+    data_set_config = data_set_repository.retrieve(data_set_name)
 
     _validate_config(data_set_config)
     _validate_auth(data_set_config)

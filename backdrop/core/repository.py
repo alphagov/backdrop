@@ -11,6 +11,7 @@ from backdrop.core.user import UserConfig
 logger = logging.getLogger(__name__)
 
 
+#TODO: the if and the section marked will be deleted soon
 def get_user_repository(app):
     if 'USE_USER_CONFIG_HTTP_REPOSITORY' in app.config \
        and app.config['USE_USER_CONFIG_HTTP_REPOSITORY']:
@@ -18,6 +19,8 @@ def get_user_repository(app):
         return UserConfigHttpRepository(
             app.config['STAGECRAFT_URL'],
             app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
+    #TODO: Delete this when USE_USER_CONFIG_HTTP_REPOSITORY
+    #is on by default
     else:
         from backdrop.core.repository import UserConfigRepository
         db = database.Database(
@@ -26,6 +29,8 @@ def get_user_repository(app):
             app.config['DATABASE_NAME']
         )
         return UserConfigRepository(db)
+    #TODO: Delete this when USE_USER_CONFIG_HTTP_REPOSITORY
+    #is on by default
 
 
 class HttpRepository(object):
@@ -50,12 +55,12 @@ class HttpRepository(object):
 
         return [self.create_model(item) for item in items]
 
-    def retrieve(self, value):
-        if len(value) == 0:
-            raise ValueError('Name must not be empty')
-        path = quote('{model_name}s/{instance_name}'.format(
+    def retrieve(self, identifier):
+        if len(identifier) == 0:
+            raise ValueError('the identifier must not be empty')
+        path = quote('{model_name}s/{instance_identifier}'.format(
             model_name=self._model_name,
-            instance_name=value))
+            instance_identifier=identifier))
         url = ('{base_url}/{path}'.format(
             base_url=self._stagecraft_url,
             path=path))
@@ -96,8 +101,8 @@ class _Repository(object):
 
         self.collection.save(doc)
 
-    def retrieve(self, value):
-        return self.find_first_instance_of({self.id_field: value})
+    def retrieve(self, identifier):
+        return self.find_first_instance_of({self.id_field: identifier})
 
     def find_first_instance_of(self, params):
         doc = self.collection.find_one(params)
@@ -128,8 +133,8 @@ class DataSetConfigRepository(object):
     def get_all(self):
         return self._repository_proxy.get_all()
 
-    def retrieve(self, name):
-        return self._repository_proxy.retrieve(name)
+    def retrieve(self, data_set_name):
+        return self._repository_proxy.retrieve(data_set_name)
 
     def get_data_set_for_query(self, data_group, data_type):
         empty_vars = []

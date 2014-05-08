@@ -41,6 +41,13 @@ def _mock_raise_http_503(*args, **kwargs):
     raise exception
 
 
+def _raises_value_error_when_identifier_empty(repo):
+    with assert_raises(ValueError) as e:
+        repo.retrieve("")
+
+    assert_that(str(e.exception), is_('the identifier must not be empty'))
+
+
 _GET_JSON_URL_FUNC = 'backdrop.core.repository._get_json_url'
 
 
@@ -115,7 +122,8 @@ class TestDataSetRepository(unittest.TestCase):
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
 
-                data_set = self.data_set_repo.retrieve(name="data_set_name")
+                data_set = self.data_set_repo.retrieve(
+                    data_set_name="data_set_name")
 
             expected_data_set = DataSetConfig("govuk_visitors",
                                               data_group="govuk",
@@ -183,7 +191,8 @@ class TestDataSetRepository(unittest.TestCase):
     def test_retrieve_for_non_existent_data_set_returns_none(self):
         with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
             _get_json_url.side_effect = _mock_raise_http_404
-            data_set = self.data_set_repo.retrieve(name="non_existent")
+            data_set = self.data_set_repo.retrieve(
+                data_set_name="non_existent")
 
         assert_that(data_set, is_(None))
 
@@ -193,7 +202,8 @@ class TestDataSetRepository(unittest.TestCase):
 
             assert_raises(
                 requests.HTTPError,
-                lambda: self.data_set_repo.retrieve(name="non_existent"))
+                lambda: self.data_set_repo.retrieve(
+                    data_set_name="non_existent"))
 
     def test_get_data_set_for_query_for_non_existent_data_set_returns_none(
             self):
@@ -208,7 +218,7 @@ class TestDataSetRepository(unittest.TestCase):
         with fixture('stagecraft_get_single_data_set.json') as content:
             with mock.patch(_GET_JSON_URL_FUNC) as _get_json_url:
                 _get_json_url.return_value = content
-                self.data_set_repo.retrieve(name="govuk_visitors")
+                self.data_set_repo.retrieve(data_set_name="govuk_visitors")
                 _get_json_url.assert_called_once_with(
                     'https://fake_stagecraft_url/data-sets/govuk_visitors',
                     "fake_stagecraft_token")
@@ -232,6 +242,9 @@ class TestDataSetRepository(unittest.TestCase):
                 _get_json_url.assert_called_once_with(
                     'https://fake_stagecraft_url/data-sets',
                     "fake_stagecraft_token")
+
+    def test_retrieve_throws_value_error_if_email_is_empty(self):
+        _raises_value_error_when_identifier_empty(self.data_set_repo)
 
 
 class TestUserConfigRepository(object):
@@ -317,3 +330,6 @@ class TestUserConfigHttpRepository(object):
             assert_raises(
                 requests.HTTPError,
                 lambda: self.user_repo.retrieve(email="non_existent"))
+
+    def test_retrieve_throws_value_error_if_email_is_empty(self):
+        _raises_value_error_when_identifier_empty(self.user_repo)
