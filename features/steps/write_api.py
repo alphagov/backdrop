@@ -48,15 +48,15 @@ def step(context, http_method, path):
 def step(context, http_method, path):
     assert http_method in ('POST', 'PUT'), "Only support POST, PUT"
     http_function = {
-	'POST': context.client.post,
-	'PUT': context.client.put
+        'POST': context.client.post,
+        'PUT': context.client.put
     }[http_method]
 
     context.response = http_function(
-	path,
-	data=context.data_to_post,
-	content_type="application/json",
-	headers=_make_malformed_header_from_context(context),
+        path,
+        data=context.data_to_post,
+        content_type="application/json",
+        headers=_make_malformed_header_from_context(context),
     )
 
 
@@ -129,5 +129,5 @@ def _make_headers_from_context(context):
 
 def _make_malformed_header_from_context(context):
     if context and 'bearer_token' in context:
-	return [('Orthoriszation', "Bearer %s" % context.bearer_token)]
+        return [('Orthoriszation', "Bearer %s" % context.bearer_token)]
     return []
