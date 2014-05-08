@@ -2,6 +2,7 @@ import json
 import logging
 
 import requests
+from urllib import quote
 from backdrop.core import database
 
 from backdrop.core.data_set import DataSetConfig
@@ -52,10 +53,12 @@ class HttpRepository(object):
     def retrieve(self, value):
         if len(value) == 0:
             raise ValueError('Name must not be empty')
-        url = ('{base_url}/{model_name}s/{instance_name}'.format(
-            base_url=self._stagecraft_url,
+        path = quote('{model_name}s/{instance_name}'.format(
             model_name=self._model_name,
             instance_name=value))
+        url = ('{base_url}/{path}'.format(
+            base_url=self._stagecraft_url,
+            path=path))
 
         try:
             json_response = _get_json_url(url, self._stagecraft_token)
