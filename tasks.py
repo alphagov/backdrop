@@ -1,3 +1,5 @@
+#TODO: Remove these tasks when users moved to stagecraft
+#and data-sets and users collections are deleted
 import json
 import os
 from invoke import task

@@ -7,7 +7,7 @@ from backdrop import statsd
 from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.repository import (DataSetConfigRepository,
-                                      UserConfigRepository)
+                                      get_user_repository)
 
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
@@ -35,7 +35,7 @@ data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
-user_repository = UserConfigRepository(db)
+user_repository = get_user_repository(app)
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
@@ -152,7 +152,7 @@ def put_by_group_and_type(data_group, data_type):
 def post_to_data_set(data_set_name):
     app.logger.warning("Deprecated use of write API by name: {}".format(
         data_set_name))
-    data_set_config = data_set_repository.retrieve(name=data_set_name)
+    data_set_config = data_set_repository.retrieve(data_set_name)
 
     _validate_config(data_set_config)
     _validate_auth(data_set_config)

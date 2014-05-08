@@ -143,7 +143,7 @@ def data(data_group, data_type):
 @app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
 @cache_control.etag
 def query(data_set_name):
-    data_set_config = data_set_repository.retrieve(name=data_set_name)
+    data_set_config = data_set_repository.retrieve(data_set_name)
     return fetch(data_set_config)
 
 
