@@ -5,13 +5,14 @@ from flask import Flask, jsonify, url_for, request, \
     session, render_template, flash, redirect, abort
 
 from .. import statsd
-from ..core import cache_control, log_handler, database
-from ..core.data_set import DataSet
-from ..core.errors import ParseError, ValidationError
-from ..core.repository \
-    import DataSetConfigRepository, UserConfigRepository
-from ..core.flaskutils import DataSetConverter
-from ..core.upload import create_parser
+from backdrop.core import cache_control, log_handler, database
+from backdrop.core.data_set import DataSet
+from backdrop.core.errors import ParseError, ValidationError
+from backdrop.core.repository import (
+    DataSetConfigRepository,
+    get_user_repository)
+from backdrop.core.flaskutils import DataSetConverter
+from backdrop.core.upload import create_parser
 from .signonotron2 import Signonotron2
 from .uploaded_file import UploadedFile, FileUploadError
 
@@ -37,7 +38,7 @@ data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
-user_repository = UserConfigRepository(db)
+user_repository = get_user_repository(app)
 
 
 # TODO: move this out into a helper
