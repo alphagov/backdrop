@@ -50,6 +50,7 @@ Feature: the performance platform write api
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"
           and the stored data should contain "2" "_week_start_at" on "2013-03-18"
 
+    @posting_things
     Scenario: posting to a data_set with data group and data type
         Given I have the data in "timestamps.json"
           and I have a data_set named "data_with_times" with settings
@@ -62,6 +63,7 @@ Feature: the performance platform write api
           and the stored data should contain "3" "_week_start_at" on "2013-03-11"
           and the stored data should contain "2" "_week_start_at" on "2013-03-18"
 
+    @posting_things
     Scenario: unauthorized when posting with an incorrect token
         Given I have JSON data '[]'
           and I have a data_set named "some_data_set" with settings
@@ -73,6 +75,19 @@ Feature: the performance platform write api
          then I should get back a status of "401"
           and I should get a "WWW-Authenticate" header of "bearer"
           and I should get back the message "Unauthorized: Invalid bearer token "invalid-bearer-token""
+
+    @posting_things
+    Scenario: unauthorized when posting with a badly formed authorization header
+	Given I have JSON data '[]'
+	  and I have a data_set named "some_data_set" with settings
+	    | key        | value   |
+	    | data_group | "group" |
+	    | data_type  | "type"  |
+	  and I use the bearer token for the data_set
+	 when I POST to "/data/group/type" with a malformed authorization header
+	 then I should get back a status of "401"
+	  and I should get a "WWW-Authenticate" header of "bearer"
+	  and I should get back the message "Expected header of form: Authorization: Bearer <token>"
 
     Scenario: denying create collection with missing bearer token
         Given I have JSON data '{"capped_size": 0}'
