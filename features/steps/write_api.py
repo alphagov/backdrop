@@ -18,6 +18,11 @@ def step(context, json):
     context.data_to_post = json
 
 
+@given("I have an empty request body")
+def step(context):
+    context.data_to_post = ''
+
+
 @given('I use the bearer token for the data_set')
 def step(context):
     context.bearer_token = "%s-bearer-token" % context.data_set
