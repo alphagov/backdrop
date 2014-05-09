@@ -231,8 +231,6 @@ def _validate_config(data_set_config):
     if data_set_config is None:
         abort(404, 'Could not find data_set_config')
 
-    g.data_set_name = data_set_config.name
-
 
 def _validate_auth(data_set_config):
     try:
