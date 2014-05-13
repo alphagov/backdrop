@@ -4,10 +4,8 @@ Clean up capped collections:
 - Update realtime buckets to be capped at 4mb (4194304b), which gives us
   about 2 weeks worth of query depth with a few days tolerance.
 - Copy any non realtime collections that are capped into uncapped collections
-- Set the metadata for all non realtime collections to be uncapped
 
 """
-from backdrop.core import timeutils
 import logging
 log = logging.getLogger(__name__)
 
@@ -46,33 +44,6 @@ def copy_collection(mongo_db, collection_name_from, collection_name_to):
     log.info("Copying items from {0}...".format(collection_name_from))
     for item in mongo_db[collection_name_from].find():
         mongo_db[collection_name_to].insert(item)
-
-
-def set_bucket_metadata_capped(mongo_db, collection_name):
-    """Update the metadata for a collection to the new cap size"""
-    mongo_db['buckets'].update(
-        {"name": collection_name},
-        {
-            "$set": {
-                "capped_size": CAP_SIZE,
-                "realtime": True,
-            }
-        },
-        upsert=False,
-        multi=False)
-
-
-def set_bucket_metadata_uncapped(mongo_db, collection_name):
-    mongo_db['buckets'].update(
-        {"name": collection_name},
-        {
-            "$set": {
-                "capped_size": None,
-                "realtime": False,
-            }
-        },
-        upsert=False,
-        multi=False)
 
 
 def rename_collection(mongo_db, collection_name_from, collection_name_to):
@@ -155,8 +126,6 @@ def up(db):
 
         mongo_db[temp_names['old']].drop()
 
-        set_bucket_metadata_capped(mongo_db, collection_name)
-
         print("Finished capping {}".format(collection_name))
 
     # Uncap all capped non-realtime collections
@@ -172,13 +141,6 @@ def up(db):
 
         mongo_db[temp_names['old']].drop()
 
-        set_bucket_metadata_uncapped(mongo_db, collection_name)
-
         print("Finished uncapping {}".format(collection_name))
-
-    # Update metadata for all non-realtime collections to be uncapped
-    for collection_name in mongo_db.collection_names():
-        if not collection_name.endswith("realtime"):
-            set_bucket_metadata_uncapped(mongo_db, collection_name)
 
     print("All done <3")
