@@ -22,7 +22,7 @@ class Period(object):
 
     def end(self, timestamp):
         if self._is_boundary(timestamp):
-                return timestamp
+            return timestamp
         return self.start(timestamp + self._delta)
 
     def range(self, start, end):
