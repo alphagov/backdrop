@@ -135,7 +135,7 @@ def timeseries(start, end, period, data, default):
             return data_by_start_at[time_index]
         else:
             return _merge(default, _period_limits(start, end))
-    return [entry(start, end) for start, end in period.range(start, end)]
+    return [entry(s, e) for s, e in period.range(start, end)]
 
 
 def _period_limits(start, end):
