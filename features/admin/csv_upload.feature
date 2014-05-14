@@ -18,8 +18,8 @@ Feature: CSV Upload
     And   I click "Upload"
     Then  the "my_data_set" data_set should contain in any order:
           """
-          {"name": "Pawel", "age": "27", "nationality": "Polish"}
-          {"name": "Max", "age": "35", "nationality": "Italian"}
+          {"name": "Pawel", "age": 27, "nationality": "Polish"}
+          {"name": "Max", "age": 35, "nationality": "Italian"}
           """
 
   Scenario: UTF8 characters

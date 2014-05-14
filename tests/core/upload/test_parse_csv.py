@@ -126,6 +126,19 @@ class ParseCsvTestCase(unittest.TestCase):
             ["value", "value\nwith newline"],
         )))
 
+    def test_parsing_numbers_in_cells(self):
+        csv = u"int,float,string\n12,12.1,a string"
+
+        csv_stream = _string_io(csv, "utf-8")
+
+        data = parse_csv(csv_stream)
+
+        print(list(data[0]))
+        assert_that(data, only_contains(only_contains(
+            ["int", "float", "string"],
+            [12, 12.1, "a string"],
+        )))
+
 
 class LinesGeneratorTest(unittest.TestCase):
     def test_handles_CR_LF_and_CRLF(self):
