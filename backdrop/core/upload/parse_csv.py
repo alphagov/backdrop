@@ -4,15 +4,12 @@ from ..errors import ParseError
 
 
 def parse_csv(incoming_data):
+    reader = unicode_csv_reader(
+        ignore_comment_lines(lines(incoming_data)), "utf-8")
     return [
-        ignore_empty_rows(
-            ignore_comment_column(
-                unicode_csv_reader(
-                    ignore_comment_lines(lines(incoming_data)), "utf-8"
-                )
-            )
-        )
-    ]
+        parse_cells_as_numbers(
+            ignore_empty_rows(
+                ignore_comment_column(reader)))]
 
 
 def lines(stream):
@@ -26,7 +23,37 @@ def ignore_empty_rows(rows):
 
 
 def is_empty_row(row):
-    return all(not v for v in row)
+    """Returns True if all cells in a row evaluate to False
+
+    >>> is_empty_row(['', False, ''])
+    True
+    >>> is_empty_row(['', 'a', ''])
+    False
+    """
+    return not any(row)
+
+
+def parse_cells_as_numbers(rows):
+    return [[parse_as_number(cell) for cell in row] for row in rows]
+
+
+def parse_as_number(cell):
+    """Convert a string to an int or a float if it can be
+
+    >>> parse_as_number("1")
+    1
+    >>> parse_as_number("1.1")
+    1.1
+    >>> parse_as_number("foo")
+    'foo'
+    """
+    try:
+        return int(cell)
+    except ValueError:
+        try:
+            return float(cell)
+        except ValueError:
+            return cell
 
 
 def ignore_comment_lines(reader):
