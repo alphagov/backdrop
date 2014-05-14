@@ -31,7 +31,7 @@ class Period(object):
     def range(self, start, end):
         _start = self.start(start).replace(tzinfo=pytz.UTC)
         _end = self.end(end).replace(tzinfo=pytz.UTC)
-        while (_start < _end):
+        while _start < _end:
             yield (_start, _start + self._delta)
             _start += self._delta
 
