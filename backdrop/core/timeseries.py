@@ -22,15 +22,21 @@ class Period(object):
 
     def end(self, timestamp):
         if self._is_boundary(timestamp):
-                return timestamp
+            return timestamp
         return self.start(timestamp + self._delta)
+
+    def start(self, timestamp):
+        raise NotImplementedError()
 
     def range(self, start, end):
         _start = self.start(start).replace(tzinfo=pytz.UTC)
         _end = self.end(end).replace(tzinfo=pytz.UTC)
-        while (_start < _end):
+        while _start < _end:
             yield (_start, _start + self._delta)
             _start += self._delta
+
+    def valid_start_at(self, timestamp):
+        raise NotImplementedError()
 
 
 class Hour(Period):
@@ -129,7 +135,7 @@ def timeseries(start, end, period, data, default):
             return data_by_start_at[time_index]
         else:
             return _merge(default, _period_limits(start, end))
-    return [entry(start, end) for start, end in period.range(start, end)]
+    return [entry(s, e) for s, e in period.range(start, end)]
 
 
 def _period_limits(start, end):
