@@ -12,7 +12,7 @@ from backdrop.core.timeutils import utc
 
 log = logging.getLogger(__name__)
 
-GA_BUCKETS_TO_MIGRATE = [
+GA_DATA_SETS_TO_MIGRATE = [
     "carers_allowance_journey",
     "deposit_foreign_marriage_journey",
     "pay_foreign_marriage_certificates_journey",
@@ -75,7 +75,7 @@ def fix_id(document):
 
 
 def up(db):
-    for name in GA_BUCKETS_TO_MIGRATE:
+    for name in GA_DATA_SETS_TO_MIGRATE:
         collection = db.get_repository(name)
 
         documents = collection.find({})
