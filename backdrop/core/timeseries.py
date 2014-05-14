@@ -25,12 +25,18 @@ class Period(object):
             return timestamp
         return self.start(timestamp + self._delta)
 
+    def start(self, timestamp):
+        raise NotImplementedError()
+
     def range(self, start, end):
         _start = self.start(start).replace(tzinfo=pytz.UTC)
         _end = self.end(end).replace(tzinfo=pytz.UTC)
         while (_start < _end):
             yield (_start, _start + self._delta)
             _start += self._delta
+
+    def valid_start_at(self, timestamp):
+        raise NotImplementedError()
 
 
 class Hour(Period):
