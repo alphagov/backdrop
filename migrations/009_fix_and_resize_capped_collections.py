@@ -1,7 +1,7 @@
 """
 Clean up capped collections:
 
-- Update realtime buckets to be capped at 4mb (4194304b), which gives us
+- Update realtime data-sets to be capped at 4mb (4194304b), which gives us
   about 2 weeks worth of query depth with a few days tolerance.
 - Copy any non realtime collections that are capped into uncapped collections
 
@@ -98,7 +98,7 @@ def remove_temporary_collections(mongo_db):
         mongo_db[collection_name].drop()
 
 
-def realtime_bucket_is_correctly_capped(mongo_db, collection_name):
+def realtime_data_set_is_correctly_capped(mongo_db, collection_name):
     stats = mongo_db[collection_name].options()
     return stats.get('capped') is True and stats['size'] == CAP_SIZE
 
@@ -110,7 +110,7 @@ def up(db):
 
     # Correctly cap all realtime collections
     for collection_name in get_realtime_collection_names(mongo_db):
-        if realtime_bucket_is_correctly_capped(mongo_db, collection_name):
+        if realtime_data_set_is_correctly_capped(mongo_db, collection_name):
             log.info("Skipping {0}, already correctly capped".format(
                 collection_name))
             continue
