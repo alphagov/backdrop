@@ -29,6 +29,15 @@ class TestStagecraftService(object):
         service.stop()
         assert_raises(ConnectionError, requests.get, ('http://localhost:8089/example'))
 
+    def test_calls_succeed_after_service_is_restarted(self):
+        service = self.create_service()
+        service.restart()
+
+        response = requests.get('http://localhost:8089/example')
+
+        service.stop()
+        assert_that(response.status_code, is_(200))
+
     def test_running_returns_true_if_the_service_is_running(self):
         service = self.create_service()
         assert_that(service.running(), is_(False))
@@ -45,3 +54,23 @@ class TestStagecraftService(object):
         service.stop()
         assert_that(service.stopped(), is_(True))
 
+    def test_new_routes_can_be_added_to_a_running_service(self):
+        service = self.create_service()
+        service.start()
+        service.add_routes({
+            ('GET', u'foobar'): {u'bar': u'foo'}})
+        
+        response = requests.get('http://localhost:8089/foobar')
+
+        service.stop()
+        
+        assert_that(response.json(), is_({u'bar': u'foo'}))
+
+    def test_all_routes_can_be_removed_from_a_running_service(self):
+        service = self.create_service()
+        service.start()
+        service.reset()
+        response = requests.get('http://localhost:8089/example')
+        service.stop()
+
+        assert_that(response.status_code, is_(404))

@@ -6,9 +6,9 @@ from features.support.support import wait_until
 
 
 class StagecraftService(object):
-    def __init__(self, port, url_response_dict):
+    def __init__(self, port, routes):
         self.__port = port
-        self.__url_response_dict = url_response_dict
+        self.__routes = routes
         self.__app = Flask('fake_stagecraft')
         self.__proc = None
 
@@ -24,16 +24,35 @@ class StagecraftService(object):
 
             key = (request.method, path_and_query)
 
-            resp_item = self.__url_response_dict.get(key, None)
+            resp_item = self.__routes.get(key, None)
             if resp_item is None:
                 abort(404)
             return Response(json.dumps(resp_item), mimetype='application/json')
+
+    def add_routes(self, routes):
+        self.__routes.update(routes)
+        self.restart()
+
+    def reset(self):
+        self.__routes = dict()
+        self.restart()
 
     def start(self):
         if self.stopped():
             self.__proc = Process(target=self._run)
             self.__proc.start()
             wait_until(self.running)
+
+    def stop(self):
+        if self.running():
+            self.__proc.terminate()
+            self.__proc.join()
+            self.__proc = None
+        wait_until(self.stopped)
+
+    def restart(self):
+        self.stop()
+        self.start()
 
     def running(self):
         if self.__proc is None:
@@ -46,13 +65,6 @@ class StagecraftService(object):
 
     def stopped(self):
         return not self.running()
-
-    def stop(self):
-        if self.running():
-            self.__proc.terminate()
-            self.__proc.join()
-            self.__proc = None
-        wait_until(self.stopped)
 
     def _run(self):
         # reloading is disabled to stop the Flask webserver starting up twice
