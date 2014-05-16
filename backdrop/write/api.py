@@ -6,8 +6,7 @@ from flask_featureflags import FeatureFlag
 from backdrop import statsd
 from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
-from backdrop.core.repository import (DataSetConfigRepository,
-                                      get_user_repository)
+from backdrop.core.repository import DataSetConfigRepository
 
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
@@ -34,8 +33,6 @@ db = database.Database(
 data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
     app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
-
-user_repository = get_user_repository(app)
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
