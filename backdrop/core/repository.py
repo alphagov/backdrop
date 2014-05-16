@@ -3,7 +3,6 @@ import logging
 
 import requests
 from urllib import quote
-from backdrop.core import database
 
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
@@ -11,26 +10,10 @@ from backdrop.core.user import UserConfig
 logger = logging.getLogger(__name__)
 
 
-#TODO: the if and the section marked will be deleted soon
 def get_user_repository(app):
-    if 'USE_USER_CONFIG_HTTP_REPOSITORY' in app.config \
-       and app.config['USE_USER_CONFIG_HTTP_REPOSITORY']:
-        from backdrop.core.repository import UserConfigHttpRepository
-        return UserConfigHttpRepository(
-            app.config['STAGECRAFT_URL'],
-            app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
-    #TODO: Delete this when USE_USER_CONFIG_HTTP_REPOSITORY
-    #is on by default
-    else:
-        from backdrop.core.repository import UserConfigRepository
-        db = database.Database(
-            app.config['MONGO_HOSTS'],
-            app.config['MONGO_PORT'],
-            app.config['DATABASE_NAME']
-        )
-        return UserConfigRepository(db)
-    #TODO: Delete this when USE_USER_CONFIG_HTTP_REPOSITORY
-    #is on by default
+    return UserConfigHttpRepository(
+        app.config['STAGECRAFT_URL'],
+        app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
 
 
 class HttpRepository(object):
@@ -178,19 +161,6 @@ def _get_json_url(url, token):
         logger.error('Stagecraft said: {}'.format(response.content))
         raise
     return response.content
-
-
-class UserConfigRepository(object):
-
-    def __init__(self, db):
-        self._db = db
-        self._repository = _Repository(db, UserConfig, "users", "email")
-
-    def save(self, user_config):
-        self._repository.save(user_config)
-
-    def retrieve(self, email):
-        return self._repository.retrieve(email)
 
 
 class UserConfigHttpRepository(object):
