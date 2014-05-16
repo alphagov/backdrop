@@ -79,7 +79,7 @@ def stub_user_retrieve_by_email(email, data_sets=None):
     def decorator(func):
         @wraps(func)
         def wrapped_stub_user_retrieve_by_name(*args, **kwargs):
-            namespace = 'backdrop.core.repository.UserConfigRepository'
+            namespace = 'backdrop.core.repository.UserConfigHttpRepository'
             with patch(namespace + '.retrieve') as retrieve:
                 def side_effect(email):
                     if email == setup_user_email:

@@ -7,7 +7,6 @@ from tests.support.data_set import fake_data_set_exists, stub_user_retrieve_by_e
 from tests.support.test_helpers import has_status
 from tests.admin.support.clamscan import stub_clamscan
 from tests.admin.support.oauth_test_case import OauthTestCase
-from tests.support.data_set import fake_data_set_exists
 
 
 class TestFileUploadIntegration(OauthTestCase):
