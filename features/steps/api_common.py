@@ -29,7 +29,6 @@ def ensure_data_set_exists(context, data_set_name, settings={}):
             response['data_group'], response['data_type'])): [response],
     }
 
-    create_or_update_stagecraft_service(
-            context, TEST_STAGECRAFT_PORT, routes)
+    create_or_update_stagecraft_service(context, TEST_STAGECRAFT_PORT, routes)
 
     context.data_set = data_set_name

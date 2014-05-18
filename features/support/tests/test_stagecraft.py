@@ -3,7 +3,8 @@ from requests.exceptions import ConnectionError
 from nose.tools import assert_raises
 from hamcrest import assert_that, is_
 
-from ..stagecraft import StagecraftService, create_or_update_stagecraft_service, stop_stagecraft_service_if_running
+from ..stagecraft import StagecraftService, \
+    create_or_update_stagecraft_service, stop_stagecraft_service_if_running
 
 
 class StubContext(object):
@@ -21,6 +22,7 @@ class StubContext(object):
 
     def __contains__(self, key):
         return key in self._params
+
 
 def test_create_stagecraft_service():
     context = StubContext()
@@ -40,7 +42,8 @@ def test_update_stagecraft_service():
     response = requests.get('http://localhost:8089/example')
     assert_that(response.status_code, is_(404))
 
-    service2 = create_or_update_stagecraft_service(context, 8089,
+    service2 = create_or_update_stagecraft_service(
+        context, 8089,
         {('GET', u'example'): {u'foo': u'bar'}})
     response = requests.get('http://localhost:8089/example')
     assert_that(response.status_code, is_(200))
@@ -58,6 +61,7 @@ def test_stop_stagecraft_if_running():
     stop_stagecraft_service_if_running(context)
 
     assert_that(service.running(), is_(False))
+
 
 class TestStagecraftService(object):
     def create_service(self):

@@ -3,7 +3,7 @@ import re
 from behave import given, when, then, step_matcher
 from flask import json
 from hamcrest import assert_that, is_, matches_regexp, has_length, equal_to, \
-        has_item, has_entries, has_entry
+    has_item, has_entries, has_entry
 from dateutil import parser
 import datetime
 import pytz
