@@ -1,9 +1,10 @@
 import logging
 import os
 import sys
-from features.support.splinter_client import SplinterClient
 
-from features.support.stagecraft import stop_stagecraft_service_if_running
+from .support.splinter_client import SplinterClient
+from .support.stagecraft import stop_stagecraft_service_if_running
+
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')

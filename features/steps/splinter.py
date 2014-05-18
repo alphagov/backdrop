@@ -1,6 +1,9 @@
-import json
 import datetime
-from hamcrest import *
+import json
+
+from behave import when, when
+from hamcrest import contains_inanyorder, has_items, has_entries, \
+    assert_that, is_
 
 from backdrop.core.timeutils import utc
 

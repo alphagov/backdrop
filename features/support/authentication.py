@@ -1,4 +1,4 @@
-from stagecraft import create_or_update_stagecraft_service
+from .stagecraft import create_or_update_stagecraft_service
 
 
 TEST_STAGECRAFT_PORT = 3204

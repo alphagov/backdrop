@@ -1,10 +1,10 @@
 import os
+from multiprocessing import Process
 
 from flask import Flask, Response, abort, json, request
-from multiprocessing import Process
 import requests
 
-from features.support.support import wait_until
+from .support import wait_until
 
 
 def create_or_update_stagecraft_service(context, port, routes):

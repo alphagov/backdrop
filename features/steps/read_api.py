@@ -1,13 +1,16 @@
+import datetime
 import os
 import re
+
 from behave import given, when, then, step_matcher
+from dateutil import parser
 from flask import json
 from hamcrest import assert_that, is_, matches_regexp, has_length, equal_to, \
     has_item, has_entries, has_entry
-from dateutil import parser
-import datetime
 import pytz
-from api_common import ensure_data_set_exists
+
+from features.support.api_common import ensure_data_set_exists
+from features.support.stagecraft import create_or_update_stagecraft_service
 
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')

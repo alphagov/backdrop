@@ -1,6 +1,7 @@
-from behave import given
 import os
 import shutil
+
+from behave import given
 
 
 @given(u'a file named "{filename}" with fixture "{fixturename}"')

@@ -1,5 +1,6 @@
-from behave import *
-from ..support.authentication import \
+from behave import given
+
+from features.support.authentication import \
     ensure_user_has_permissions, ensure_user_exists
 
 
