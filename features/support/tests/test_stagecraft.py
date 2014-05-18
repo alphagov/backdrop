@@ -3,7 +3,61 @@ from requests.exceptions import ConnectionError
 from nose.tools import assert_raises
 from hamcrest import assert_that, is_
 
-from ..stagecraft import StagecraftService
+from ..stagecraft import StagecraftService, create_or_update_stagecraft_service, stop_stagecraft_service_if_running
+
+
+class StubContext(object):
+    def __init__(self):
+        self._params = {}
+
+    def __getattr__(self, key):
+        return self._params[key]
+
+    def __setattr__(self, key, value):
+        if key.startswith('_'):
+            self.__dict__[key] = value
+        else:
+            self._params[key] = value
+
+    def __contains__(self, key):
+        return key in self._params
+
+def test_create_stagecraft_service():
+    context = StubContext()
+    service = create_or_update_stagecraft_service(context, 2012, {})
+
+    assert_that(context.mock_stagecraft_service.running(), is_(True))
+
+    service.stop()
+
+    assert_that(context.mock_stagecraft_service.stopped(), is_(True))
+
+
+def test_update_stagecraft_service():
+    context = StubContext()
+
+    service1 = create_or_update_stagecraft_service(context, 8089, {})
+    response = requests.get('http://localhost:8089/example')
+    assert_that(response.status_code, is_(404))
+
+    service2 = create_or_update_stagecraft_service(context, 8089,
+        {('GET', u'example'): {u'foo': u'bar'}})
+    response = requests.get('http://localhost:8089/example')
+    assert_that(response.status_code, is_(200))
+
+    assert_that(service1, is_(service2))
+
+    service1.stop()
+
+
+def test_stop_stagecraft_if_running():
+    context = StubContext()
+
+    service = create_or_update_stagecraft_service(context, 8089, {})
+
+    stop_stagecraft_service_if_running(context)
+
+    assert_that(service.running(), is_(False))
 
 class TestStagecraftService(object):
     def create_service(self):
@@ -16,7 +70,7 @@ class TestStagecraftService(object):
         service.start()
         response = requests.get('http://localhost:8089/example')
         service.stop()
-       
+
         assert_that(response.json(), is_({u'foo': u'bar'}))
 
     def test_calls_fail_if_service_is_not_started(self):
@@ -59,11 +113,11 @@ class TestStagecraftService(object):
         service.start()
         service.add_routes({
             ('GET', u'foobar'): {u'bar': u'foo'}})
-        
+
         response = requests.get('http://localhost:8089/foobar')
 
         service.stop()
-        
+
         assert_that(response.json(), is_({u'bar': u'foo'}))
 
     def test_all_routes_can_be_removed_from_a_running_service(self):

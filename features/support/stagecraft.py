@@ -1,8 +1,25 @@
+import os
+
 from flask import Flask, Response, abort, json, request
 from multiprocessing import Process
 import requests
 
 from features.support.support import wait_until
+
+
+def create_or_update_stagecraft_service(context, port, routes):
+    if 'mock_stagecraft_service' not in context or not context.mock_stagecraft_service:
+        context.mock_stagecraft_service = StagecraftService(port, routes)
+        context.mock_stagecraft_service.start()
+    else:
+        context.mock_stagecraft_service.add_routes(routes)
+    return context.mock_stagecraft_service
+
+
+def stop_stagecraft_service_if_running(context):
+    if 'mock_stagecraft_service' in context and context.mock_stagecraft_service:
+        context.mock_stagecraft_service.stop()
+        context.mock_stagecraft_service = None
 
 
 class StagecraftService(object):
@@ -15,8 +32,8 @@ class StagecraftService(object):
         @self.__app.route('/', defaults={'path': ''})
         @self.__app.route('/<path:path>')
         def catch_all(path):
-            if path == "_is_fake_server_up":
-                return Response('Yes', 200)
+            if path == '_is_fake_server_up':
+                return Response('Yes: {}'.format(os.getpid()), 200)
 
             path_and_query = path
             if len(request.query_string) > 0:
@@ -26,7 +43,8 @@ class StagecraftService(object):
 
             resp_item = self.__routes.get(key, None)
             if resp_item is None:
-                abort(404)
+                abort(404, 'Known routes: {}'.format(
+                    ', '.join([path for _, path in self.__routes.keys()])))
             return Response(json.dumps(resp_item), mimetype='application/json')
 
     def add_routes(self, routes):
