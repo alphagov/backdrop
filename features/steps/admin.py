@@ -1,6 +1,6 @@
-from behave import *
-from ..support.authentication import \
-    ensure_user_has_permissions, ensure_user_exists
+from behave import given
+import os
+import shutil
 
 
 @given(u'a file named "{filename}" with fixture "{fixturename}"')

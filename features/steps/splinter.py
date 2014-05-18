@@ -1,6 +1,4 @@
 import json
-import os
-import shutil
 import datetime
 from hamcrest import *
 
