@@ -1,15 +1,13 @@
 import os
 import re
-from behave import *
+from behave import given, when, then, step_matcher
 from flask import json
-from hamcrest import *
-from hamcrest import matches_regexp
+from hamcrest import assert_that, is_, matches_regexp, has_length, equal_to, \
+        has_item, has_entries, has_entry
 from dateutil import parser
 import datetime
-import re
 import pytz
 from api_common import ensure_data_set_exists
-from features.support.stagecraft import StagecraftService
 
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
@@ -76,11 +74,7 @@ def step(context, data_set_name):
 
 @given('Stagecraft is running')
 def step(context):
-    if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
-        context.mock_stagecraft_server.stop()
-    context.mock_stagecraft_server = StagecraftService(
-        TEST_STAGECRAFT_PORT, {})
-    context.mock_stagecraft_server.start()
+    create_or_update_stagecraft_service(context, TEST_STAGECRAFT_PORT, {})
 
 
 @when('I go to "{query}"')

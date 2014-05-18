@@ -1,6 +1,4 @@
-from behave import *
-from hamcrest import *
-from features.support.stagecraft import StagecraftService
+from features.support.stagecraft import create_or_update_stagecraft_service
 
 TEST_STAGECRAFT_PORT = 3204
 
@@ -24,25 +22,14 @@ def ensure_data_set_exists(context, data_set_name, settings={}):
 
     response.update(settings)
 
-    url_response_dict = {
+    routes = {
         ('GET', u'data-sets/{}'.format(data_set_name)): response,
         ('GET', u'data-sets'): [response],
         ('GET', u'data-sets?data-group={}&data-type={}'.format(
             response['data_group'], response['data_type'])): [response],
     }
 
-    if 'mock_stagecraft_server' in context and context.mock_stagecraft_server:
-        context.mock_stagecraft_server.stop()
-    context.mock_stagecraft_server = StagecraftService(
-        TEST_STAGECRAFT_PORT, url_response_dict)
-    context.mock_stagecraft_server.start()
+    create_or_update_stagecraft_service(
+            context, TEST_STAGECRAFT_PORT, routes)
 
     context.data_set = data_set_name
-    data_set_data = {
-        '_id': data_set_name,
-        'name': data_set_name,
-        'data_group': data_set_name,
-        'data_type': data_set_name,
-        'bearer_token': "%s-bearer-token" % data_set_name
-    }
-    context.client.storage()["data_sets"].save(data_set_data)
