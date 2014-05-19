@@ -22,4 +22,5 @@ class StatsClient(object):
             return getattr(self._statsd, item)
 
 statsd = StatsClient(
-    _statsd.StatsClient(prefix=os.getenv("GOVUK_STATSD_PREFIX")))
+    _statsd.StatsClient(prefix=os.getenv(
+        "GOVUK_STATSD_PREFIX", "pp.apps.backdrop")))
