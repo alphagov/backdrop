@@ -47,7 +47,7 @@ This is the OAuth flow we are using to authenticate users with Signonotron2
 
 ### Quickstart
 
-1. `./quick-start.sh` will start backdrop read and write on ports 3038 and 3039 respectively
+1. `./run_development.sh` will start backdrop read and write on ports 3038 and 3039 respectively
 2. Confirm you're up and running with e.g. http://www.development.performance.service.gov.uk/_status
 
 ### Start the app (read OR write)
