@@ -45,6 +45,11 @@ This is the OAuth flow we are using to authenticate users with Signonotron2
     - **GET** (to signonotron) `/user.json` uses access token to get user data and see if they have permissions to sign in to backdrop
 4. User is now signed in
 
+### Quickstart
+
+1. `./run_development.sh` will start backdrop read and write on ports 3038 and 3039 respectively
+2. Confirm you're up and running with e.g. http://www.development.performance.service.gov.uk/_status
+
 ### Start the app (read OR write)
 
 1. `./start-app.sh` takes two arguments: app (read or write) and port
