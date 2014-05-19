@@ -1,7 +1,9 @@
 import os
+
 from behave import given, when, then
 from dateutil import parser
 from hamcrest import assert_that, has_length, equal_to
+
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 

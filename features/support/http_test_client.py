@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import requests
-from features.support.support import FlaskApp, BaseClient
+
+from .support import FlaskApp, BaseClient
 
 
 class HTTPTestClient(BaseClient):

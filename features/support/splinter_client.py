@@ -1,12 +1,13 @@
 from datetime import datetime
 import logging
+
 from pymongo import MongoClient
 from splinter import Browser
 
-from features.support.support import FlaskApp, BaseClient
+from .support import FlaskApp, BaseClient
 
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class SplinterClient(BaseClient):
@@ -41,11 +42,11 @@ class SplinterClient(BaseClient):
         try:
             success = self.browser.driver.save_screenshot(filename)
             if not success:
-                logger.warn(
+                log.warn(
                     "Unable to save screenshot %s: IO error" % filename)
         except Exception as e:
-            logger.warn("Unable to save screenshot %s: Exception" % filename)
-            logger.warn(e)
+            log.warn("Unable to save screenshot %s: Exception" % filename)
+            log.warn(e)
 
 
 class SplinterResponse:

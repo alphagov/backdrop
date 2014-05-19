@@ -1,4 +1,4 @@
-from features.support.support import BaseClient
+from .support import BaseClient
 
 
 class FlaskTestClient(BaseClient):

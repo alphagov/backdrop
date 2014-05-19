@@ -763,7 +763,7 @@ class TestRepositoryIntegration_Finding(RepositoryIntegrationTest):
 class TestDatabase(unittest.TestCase):
     def setUp(self):
         self.db = Database(HOSTS, PORT, DB_NAME)
-        self.db.mongo_database["my_capped_collection"].drop()
+        self.db.mongo_database.connection.drop_database(self.db.mongo_database.name)
 
     def test_alive(self):
         assert_that(self.db.alive(), is_(True))

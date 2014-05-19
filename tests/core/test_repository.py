@@ -3,7 +3,6 @@ import unittest
 
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.repository import (DataSetConfigRepository,
-                                      UserConfigRepository,
                                       UserConfigHttpRepository,
                                       get_user_repository,
                                       _get_json_url)
@@ -53,9 +52,7 @@ _GET_JSON_URL_FUNC = 'backdrop.core.repository._get_json_url'
 
 class TestGetUserRepository(unittest.TestCase):
 
-    def build_app(self, config, http_on):
-        if http_on:
-            config['USE_USER_CONFIG_HTTP_REPOSITORY'] = '1'
+    def build_app(self, config):
         app = Mock()
         app.config = config
         return app
@@ -68,32 +65,10 @@ class TestGetUserRepository(unittest.TestCase):
             'STAGECRAFT_URL': "some_url",
             'STAGECRAFT_DATA_SET_QUERY_TOKEN': "wibble",
         }
-        get_user_repository(self.build_app(config, http_on=True))
+        get_user_repository(self.build_app(config))
         MockUserConfigHttpRepository.assert_called_once_with(
             'some_url',
             'wibble')
-
-    @patch('backdrop.core.repository.UserConfigRepository', spec=True)
-    @patch('backdrop.core.database.Database', spec=True)
-    def test_returns_correct_user_repository_when_http_turned_off(
-            self,
-            Database,
-            MockUserConfigRepository):
-        config = {
-            'MONGO_HOSTS': "blargh",
-            'MONGO_PORT': "9000",
-            'DATABASE_NAME': "foo"
-        }
-        mock_database = Mock()
-        Database.return_value = mock_database
-
-        get_user_repository(self.build_app(config, http_on=False))
-        Database.assert_called_once_with(
-            'blargh',
-            '9000',
-            'foo')
-        MockUserConfigRepository.assert_called_once_with(
-            mock_database)
 
 
 class TestGetJsonUrl(unittest.TestCase):
@@ -245,49 +220,6 @@ class TestDataSetRepository(unittest.TestCase):
 
     def test_retrieve_throws_value_error_if_email_is_empty(self):
         _raises_value_error_when_identifier_empty(self.data_set_repo)
-
-
-class TestUserConfigRepository(object):
-    def setUp(self):
-        self.db = Mock()
-        self.mongo_collection = Mock()
-        self.db.get_collection.return_value = self.mongo_collection
-        self.repository = UserConfigRepository(self.db)
-
-    def test_saving_a_user_config(self):
-        user = UserConfig("test@example.com",
-                          data_sets=["data_set_one", "data_set_two"])
-
-        self.repository.save(user)
-        self.mongo_collection.save.assert_called_with(
-            match_equality(has_entries({
-                "_id": "test@example.com",
-                "data_sets": ["data_set_one", "data_set_two"]
-            }))
-        )
-
-    def test_saving_fails_with_non_user_config_object(self):
-        not_user = {"foo": "bar"}
-
-        assert_raises(ValueError, self.repository.save, not_user)
-
-    def test_retrieving_a_user_config(self):
-        self.mongo_collection.find_one.return_value = {
-            "_id": "test@example.com",
-            "email": "test@example.com",
-            "data_sets": ["foo", "bar"],
-        }
-
-        user_config = self.repository.retrieve(email="test@example.com")
-        expected_user_config = UserConfig("test@example.com", ["foo", "bar"])
-
-        assert_that(user_config, equal_to(expected_user_config))
-
-    def test_retrieving_non_existent_user_config_returns_none(self):
-        self.mongo_collection.find_one.return_value = None
-        user_config = self.repository.retrieve(email="test@example.com")
-
-        assert_that(user_config, is_(None))
 
 
 class TestUserConfigHttpRepository(object):
