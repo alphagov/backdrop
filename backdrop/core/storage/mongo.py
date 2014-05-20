@@ -40,6 +40,16 @@ class MongoStorageEngine(object):
 
     def __init__(self, mongo, database):
         self._mongo = mongo
+        self._db = mongo[database]
 
     def alive(self):
         return self._mongo.alive()
+
+    def dataset_exists(self, dataset_id):
+        return dataset_id in self._db.collection_names()
+
+    def create_dataset(self, dataset_id, size):
+        if size > 0:
+            self._db.create_collection(dataset_id, capped=True, size=size)
+        else:
+            self._db.create_collection(dataset_id, capped=False)
