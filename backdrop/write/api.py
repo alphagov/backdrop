@@ -11,6 +11,8 @@ from backdrop.core.repository import DataSetConfigRepository
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
 
+from ..core.storage.mongo import MongoStorageEngine
+
 from .validation import auth_header_is_valid, extract_bearer_token
 
 
@@ -29,6 +31,10 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+storage = MongoStorageEngine.create(
+    app.config['MONGO_HOSTS'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME'])
 
 data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
@@ -88,7 +94,7 @@ def http_error_handler(e):
 @app.route('/_status', methods=['GET'])
 @cache_control.nocache
 def health_check():
-    if db.alive():
+    if storage.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
         abort(500, 'cannot connect to database')

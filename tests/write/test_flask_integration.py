@@ -191,9 +191,9 @@ class ApiHealthCheckTestCase(unittest.TestCase):
         assert_that(entity["status"], is_("ok"))
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.write.api.db")
-    def test_exception_handling(self, db, statsd):
-        db.alive.side_effect = ValueError("BOOM")
+    @patch("backdrop.write.api.storage")
+    def test_exception_handling(self, storage, statsd):
+        storage.alive.side_effect = ValueError("BOOM")
 
         response = self.app.get("/_status")
 
