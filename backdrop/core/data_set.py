@@ -11,14 +11,14 @@ import datetime
 log = logging.getLogger(__name__)
 
 
-class DataSet(object):
-
-    def __init__(self, db, config):
-        self.name = config.name
-        self.repository = db.get_repository(config.name)
-        self.auto_id_keys = config.auto_ids
+class NewDataSet(object):
+    def __init__(self, storage, config):
+        self.storage = storage
         self.config = config
-        self.db = db
+
+    @property
+    def name(self):
+        return self.config.name
 
     def is_recent_enough(self):
         if self.config.max_age_expected is None:
@@ -36,11 +36,17 @@ class DataSet(object):
         return (now - last_updated) < max_age_expected
 
     def get_last_updated(self):
-        last_updated = self.db.get_collection(self.config.name).find_one(
-            sort=['_updated_at', 'descending'], limit=1) or {}
+        return self.storage.get_last_updated(self.config.name)
 
-        if last_updated.get('_updated_at') is not None:
-            return timeutils.utc(last_updated.get('_updated_at'))
+
+class DataSet(object):
+
+    def __init__(self, db, config):
+        self.name = config.name
+        self.repository = db.get_repository(config.name)
+        self.auto_id_keys = config.auto_ids
+        self.config = config
+        self.db = db
 
     def parse_and_store(self, data):
         log.info("received %s documents" % len(data))

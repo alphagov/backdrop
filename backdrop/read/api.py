@@ -9,7 +9,7 @@ from backdrop.read.query import Query
 
 from .validation import validate_request_args
 from ..core import database, log_handler, cache_control
-from ..core.data_set import DataSet
+from ..core.data_set import DataSet, NewDataSet
 from ..core.database import InvalidOperationError
 from ..core.repository import DataSetConfigRepository
 from ..core.timeutils import as_utc
@@ -100,14 +100,14 @@ def data_set_health():
     data_set_configs = data_set_repository.get_all()
 
     for data_set_config in data_set_configs:
-        data_set = DataSet(db, data_set_config)
-        if not data_set.is_recent_enough():
+        new_data_set = NewDataSet(storage, data_set_config)
+        if not new_data_set.is_recent_enough():
             failing_data_sets.append({
-                'name': data_set.name,
-                'last_updated': data_set.get_last_updated()
+                'name': new_data_set.name,
+                'last_updated': new_data_set.get_last_updated()
             })
         else:
-            okay_data_sets.append(data_set.name)
+            okay_data_sets.append(new_data_set.name)
 
     if len(failing_data_sets):
         message = _data_set_message(failing_data_sets)

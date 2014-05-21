@@ -1,14 +1,13 @@
 import unittest
-from mock import patch, call
 import datetime
 
 from pymongo import MongoClient
-from pymongo.database import Database as MongoDatabase
 from hamcrest import *
 
 from backdrop.core import database, data_set
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.records import Record
+from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
 from tests.support.test_helpers import d_tz
@@ -23,8 +22,13 @@ class TestDataSetIntegration(unittest.TestCase):
 
     def setUp(self):
         self.db = database.Database(HOSTS, PORT, DB_NAME)
-        self.data_set = data_set.DataSet(
-            self.db, DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000))
+        self.storage = MongoStorageEngine.create(HOSTS, PORT, DB_NAME)
+
+        self.config = DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000)
+
+        self.data_set = data_set.DataSet(self.db, self.config)
+        self.new_data_set = data_set.NewDataSet(self.storage, self.config)
+
         self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
 
     def setup__timestamp_data(self):
@@ -85,24 +89,16 @@ class TestDataSetIntegration(unittest.TestCase):
             has_entry('_start_at', d_tz(2013, 2, 25))
         ))
 
-    def test_data_set_returns_last_updated(self):
-        self.setup__timestamp_data()
-        assert_that(self.data_set.get_last_updated(),
-                    equal_to(d_tz(2013, 10, 10)))
-
-    def test_data_set_returns_none_if_there_is_no_last_updated(self):
-        assert_that(self.data_set.get_last_updated(), is_(None))
-
     def test_data_set_is_recent_enough(self):
         self.mongo_collection.save({
             "_id": "first",
             "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=500)
         })
-        assert_that(self.data_set.is_recent_enough())
+        assert_that(self.new_data_set.is_recent_enough())
 
     def test_data_set_is_not_recent_enough(self):
         self.mongo_collection.save({
             "_id": "first",
             "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=50000)
         })
-        assert_that(not self.data_set.is_recent_enough())
+        assert_that(not self.new_data_set.is_recent_enough())
