@@ -42,6 +42,9 @@ class MongoStorageEngine(object):
         self._mongo = mongo
         self._db = mongo[database]
 
+    def _coll(self, data_set_id):
+        return self._db[data_set_id]
+
     def alive(self):
         return self._mongo.alive()
 
@@ -53,3 +56,9 @@ class MongoStorageEngine(object):
             self._db.create_collection(dataset_id, capped=True, size=size)
         else:
             self._db.create_collection(dataset_id, capped=False)
+
+    def get_last_updated(self, data_set_id):
+        last_updated = self._coll(data_set_id).find_one(
+            sort=[("_updated_at", pymongo.DESCENDING)])
+        if last_updated and last_updated.get('_updated_at') is not None:
+            return timeutils.utc(last_updated['_updated_at'])
