@@ -36,8 +36,7 @@ def before_feature(context, feature):
 
 def before_scenario(context, _):
     context.client.before_scenario()
-    storage = context.client.storage()
-    storage.connection.drop_database(storage.name)
+    context.client.clean_mongo()
     context.after_handlers = []
 
 

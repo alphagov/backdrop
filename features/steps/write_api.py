@@ -87,42 +87,42 @@ def step(context, data_set_url):
 
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
-    result = context.client.storage()[context.data_set].find({key: value})
+    result = context.client.mongo()[context.data_set].find({key: value})
     assert_that(list(result), has_length(int(amount)))
 
 
 @then('the stored data should contain "{amount}" "{key}" on "{time}"')
 def step(context, amount, key, time):
     time_query = parser.parse(time)
-    result = context.client.storage()[context.data_set].find({key: time_query})
+    result = context.client.mongo()[context.data_set].find({key: time_query})
     assert_that(list(result), has_length(int(amount)))
 
 
 @then(u'the collection called "{collection}" should contain {count} records')
 def step(context, collection, count):
-    result = context.client.storage()[collection].find({})
+    result = context.client.mongo()[collection].find({})
     assert_that(list(result), has_length(int(count)))
 
 
 @then('the collection called "{collection}" should exist')
 def step(context, collection):
-    assert collection in context.client.storage().collection_names()
+    assert collection in context.client.mongo().collection_names()
 
 
 @then('the collection called "{collection}" should not exist')
 def step(context, collection):
-    assert collection not in context.client.storage().collection_names()
+    assert collection not in context.client.mongo().collection_names()
 
 
 @then('the collection called "{collection}" should be uncapped')
 def step(context, collection):
-    options = context.client.storage()[collection].options()
+    options = context.client.mongo()[collection].options()
     assert options['capped'] is False
 
 
 @then('the collection called "{collection}" should be capped at "{size}"')
 def step(context, collection, size):
-    options = context.client.storage()[collection].options()
+    options = context.client.mongo()[collection].options()
     assert options['capped'] is True
 
     assert_that(int(options['size']), equal_to(int(size)))

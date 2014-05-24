@@ -9,6 +9,7 @@ class HTTPTestClient(BaseClient):
         self.database_name = database_name
         self._read_api = FlaskApp("read", "5000")
         self._write_api = FlaskApp("write", "5001")
+        self._mongo_db = MongoClient('localhost', 27017)[self.database_name]
         self._start()
 
     def get(self, url, headers=None):
@@ -48,10 +49,6 @@ class HTTPTestClient(BaseClient):
         else:
             raise Exception("Incorrect message")
         return HTTPTestResponse(response)
-
-    # TODO: Change this to our actual db layer, not just pyMongo
-    def storage(self):
-        return MongoClient('localhost', 27017)[self.database_name]
 
     def spin_down(self):
         self._read_api.stop()

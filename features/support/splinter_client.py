@@ -15,9 +15,7 @@ class SplinterClient(BaseClient):
     def __init__(self, database_name, app_name, port):
         self.database_name = database_name
         self._flask_app = FlaskApp.start_app(app_name, port)
-
-    def storage(self):
-        return MongoClient('localhost', 27017)[self.database_name]
+        self._mongo_db = MongoClient('localhost', 27017)[self.database_name]
 
     def before_scenario(self):
         self.browser = Browser('phantomjs', wait_time=3)

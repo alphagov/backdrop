@@ -4,7 +4,7 @@ from .support import BaseClient
 class FlaskTestClient(BaseClient):
     def __init__(self, flask_app):
         self._client = flask_app.app.test_client()
-        self._storage = flask_app.db.mongo_database
+        self._mongo_db = flask_app.storage._db
         self._config = flask_app.app.config
 
     def get(self, url, headers=None):
@@ -18,9 +18,6 @@ class FlaskTestClient(BaseClient):
 
     def delete(self, url, **message):
         return self._client.delete(url, **message)
-
-    def storage(self):
-        return self._storage
 
     def spin_down(self):
         self._config.from_object("backdrop.read.config.test")
