@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 import unittest
 
-from hamcrest import *
+from hamcrest import assert_that, is_
 import pytz
 from mock import patch
 from backdrop.core.records import Record
@@ -72,7 +72,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response("ValidationError('Expected header: Content-type: application/json',)"))
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
-    @patch("backdrop.core.data_set.DataSet.store")
+    @patch("backdrop.core.data_set.NewDataSet.store")
     def test_empty_list_gets_accepted(self, store):
         self.app.post(
             '/foo_data_set',
@@ -86,7 +86,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
-    @patch("backdrop.core.data_set.DataSet.store")
+    @patch("backdrop.core.data_set.NewDataSet.store")
     def test_data_gets_stored(self, store):
         self.app.post(
             '/foo_data_set',
@@ -96,25 +96,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         store.assert_called_with(
-            [Record({"foo": "bar"})]
-        )
-
-    @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.data_set.DataSet.store")
-    def test__timestamps_get_stored_as_utc_datetimes(self, store):
-        expected_event_with_time = {
-            u'_timestamp': datetime(2014, 1, 2, 3, 49, 0, tzinfo=pytz.utc)
-        }
-
-        self.app.post(
-            '/foo',
-            data = '{"_timestamp": "2014-01-02T03:49:00+00:00"}',
-            content_type = "application/json",
-            headers=[('Authorization', 'Bearer foo-bearer-token')],
-        )
-
-        store.assert_called_with(
-            [Record(expected_event_with_time)]
+            [{"foo": "bar"}]
         )
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
@@ -130,7 +112,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.data_set.DataSet.store")
+    @patch("backdrop.core.data_set.NewDataSet.store")
     def test__id_gets_stored(self, store):
         response = self.app.post(
             '/foo',
@@ -141,7 +123,7 @@ class PostDataTestCase(unittest.TestCase):
 
         assert_that(response, is_ok())
         store.assert_called_with(
-            [Record({"_id": "foo"})]
+            [{"_id": "foo"}]
         )
 
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
@@ -157,10 +139,10 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.core.data_set.DataSet.parse_and_store")
+    @patch("backdrop.core.data_set.NewDataSet.store")
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
-    def test_exception_handling(self, parse_and_store, statsd):
-        parse_and_store.side_effect = RuntimeError("BOOM")
+    def test_exception_handling(self, store, statsd):
+        store.side_effect = RuntimeError("BOOM")
 
         response = self.app.post(
             "/foo",

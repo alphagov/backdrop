@@ -1,14 +1,14 @@
-import unittest
-from hamcrest import *
-from hamcrest import assert_that, is_
-from nose.tools import *
+from hamcrest import assert_that, is_, has_item, has_entries, equal_to, \
+    has_length, contains, has_entry
+from nose.tools import assert_raises
 from mock import Mock, call
+
 from backdrop.core import data_set
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.records import Record
 from backdrop.read.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
-from tests.support.test_helpers import d, d_tz
+from tests.support.test_helpers import d, d_tz, match
 
 
 def mock_database(mock_repository):
@@ -24,7 +24,49 @@ def mock_repository():
     return mock_repository
 
 
-class TestDataSet(unittest.TestCase):
+class TestNewDataSet_store(object):
+    def setUp(self):
+        self.setup_config()
+
+    def setup_config(self, **kwargs):
+        self.mock_storage = Mock()
+        self.data_set_config = DataSetConfig(
+            'test_data_set', data_group='group', data_type='type', **kwargs)
+        self.data_set = data_set.NewDataSet(
+            self.mock_storage, self.data_set_config)
+
+    def test_storing_a_simple_record(self):
+        self.data_set.store([{'foo': 'bar'}])
+        self.mock_storage.save.assert_called_with(
+            'test_data_set', {'foo': 'bar'})
+
+    def test_id_gets_automatically_generated_if_auto_ids_are_set(self):
+        self.setup_config(auto_ids=['foo'])
+        self.data_set.store([{'foo': 'bar'}])
+        self.mock_storage.save.assert_called_with(
+            'test_data_set', match(has_entry('_id', 'YmFy')))
+
+    def test_timestamp_gets_parsed(self):
+        """Test that timestamps get parsed
+        For unit tests on timestamp parsing, including failure modes,
+        see the backdrop.core.records module
+        """
+        self.data_set.store([{'_timestamp': '2012-12-12T00:00:00+00:00'}])
+        self.mock_storage.save.assert_called_with(
+            'test_data_set',
+            match(has_entry('_timestamp',  d_tz(2012, 12, 12))))
+
+    def test_record_gets_validated(self):
+        assert_raises(data_set.ValidationError, self.data_set.store, [{'_foo': 'bar'}])
+
+    def test_period_keys_are_added(self):
+        self.data_set.store([{'_timestamp': '2012-12-12T00:00:00+00:00'}])
+        self.mock_storage.save.assert_called_with(
+            'test_data_set',
+            match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
+
+
+class TestDataSet(object):
 
     def setUp(self):
         self.mock_repository = mock_repository()
@@ -204,7 +246,7 @@ class TestDataSet(unittest.TestCase):
             {"_week_start_at": d(2013, 1, 8, 0, 0, 0), "_count": 1},
         ]
 
-        self.assertRaises(
+        assert_raises(
             ValueError,
             self.data_set.query,
             Query.create(period=WEEK)
@@ -216,7 +258,7 @@ class TestDataSet(unittest.TestCase):
             {"_month_start_at": d(2013, 2, 8, 0, 0, 0), "_count": 1},
         ]
 
-        self.assertRaises(
+        assert_raises(
             ValueError,
             self.data_set.query,
             Query.create(period=MONTH)

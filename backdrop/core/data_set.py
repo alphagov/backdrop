@@ -1,9 +1,11 @@
 from base64 import b64encode
 from collections import namedtuple
 from flask import logging
-from backdrop.core import records
-from backdrop.core.errors import ValidationError
-from backdrop.core.validation import data_set_is_valid
+from .records import add_auto_ids, parse_timestamp, validate_record, \
+    add_period_keys
+from . import records
+from .errors import ValidationError
+from .validation import data_set_is_valid
 
 import timeutils
 import datetime
@@ -40,6 +42,20 @@ class NewDataSet(object):
 
     def empty(self):
         return self.storage.empty(self.config.name)
+
+    def store(self, records):
+        log.info('received {} records'.format(len(records)))
+
+        # add auto-id keys
+        records = add_auto_ids(records, self.config.auto_ids)
+        # parse _timestamp
+        records = map(parse_timestamp, records)
+        # validate
+        records = map(validate_record, records)
+        # add period data
+        records = map(add_period_keys, records)
+
+        [self.storage.save(self.config.name, record) for record in records]
 
 
 class DataSet(object):

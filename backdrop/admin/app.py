@@ -6,11 +6,12 @@ from flask import Flask, jsonify, url_for, request, \
 
 from .. import statsd
 from backdrop.core import cache_control, log_handler, database
-from backdrop.core.data_set import DataSet
+from backdrop.core.data_set import DataSet, NewDataSet
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.repository import (
     DataSetConfigRepository,
     get_user_repository)
+from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.upload import create_parser
 from .signonotron2 import Signonotron2
@@ -33,6 +34,10 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+storage = MongoStorageEngine.create(
+    app.config['MONGO_HOSTS'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME'])
 
 data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
@@ -205,13 +210,13 @@ def upload(data_set_name):
 
 def _store_data(data_set_config):
     parse_file = create_parser(data_set_config)
-    data_set = DataSet(db, data_set_config)
+    data_set = NewDataSet(storage, data_set_config)
     expected_errors = (FileUploadError, ParseError, ValidationError)
 
     try:
         with UploadedFile(request.files['file']) as uploaded_file:
             raw_data = parse_file(uploaded_file.file_stream())
-            data_set.parse_and_store(raw_data)
+            data_set.store(raw_data)
     except expected_errors as e:
         app.logger.error('Upload error: {}'.format(e.message))
         return render_template('upload_error.html',

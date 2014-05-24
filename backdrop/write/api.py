@@ -246,8 +246,8 @@ def _validate_auth(data_set_config):
 
 
 def _append_to_data_set(data_set_config, data, ok_message=None):
-    data_set = DataSet(db, data_set_config)
-    data_set.parse_and_store(data)
+    data_set = NewDataSet(storage, data_set_config)
+    data_set.store(data)
 
     if ok_message:
         return jsonify(status='ok', message=ok_message)
