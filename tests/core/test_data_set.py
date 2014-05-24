@@ -1,13 +1,13 @@
 from hamcrest import assert_that, is_, has_item, has_entries, equal_to, \
     has_length, contains, has_entry
 from nose.tools import assert_raises
-from mock import Mock, call
+from mock import Mock
 
 from backdrop.core import data_set
 from backdrop.core.data_set import DataSetConfig
-from backdrop.core.records import Record
 from backdrop.read.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
+from backdrop.core.errors import ValidationError
 from tests.support.test_helpers import d, d_tz, match
 
 
@@ -57,7 +57,7 @@ class TestNewDataSet_store(object):
             match(has_entry('_timestamp',  d_tz(2012, 12, 12))))
 
     def test_record_gets_validated(self):
-        assert_raises(data_set.ValidationError, self.data_set.store, [{'_foo': 'bar'}])
+        assert_raises(ValidationError, self.data_set.store, [{'_foo': 'bar'}])
 
     def test_period_keys_are_added(self):
         self.data_set.store([{'_timestamp': '2012-12-12T00:00:00+00:00'}])
@@ -74,30 +74,6 @@ class TestDataSet(object):
         self.data_set = data_set.DataSet(self.mock_database, DataSetConfig('test_data_set',
                                                                            data_group="group",
                                                                            data_type="type"))
-
-    def test_that_a_single_object_gets_stored(self):
-        obj = Record({"name": "Gummo"})
-
-        self.data_set.store(obj)
-
-        self.mock_repository.save.assert_called_once_with({"name": "Gummo"})
-
-    def test_that_a_list_of_objects_get_stored(self):
-        my_objects = [
-            {"name": "Groucho"},
-            {"name": "Harpo"},
-            {"name": "Chico"}
-        ]
-
-        my_records = [Record(obj) for obj in my_objects]
-
-        self.data_set.store(my_records)
-
-        self.mock_repository.save.assert_has_calls([
-            call({'name': "Groucho"}),
-            call({"name": "Harpo"}),
-            call({"name": "Chico"})
-        ])
 
     def test_filter_by_query(self):
         self.data_set.query(Query.create(filter_by=[['name', 'Chico']]))

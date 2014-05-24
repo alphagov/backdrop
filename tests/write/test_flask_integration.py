@@ -1,11 +1,8 @@
-from datetime import datetime
 import json
 import unittest
 
 from hamcrest import assert_that, is_
-import pytz
 from mock import patch
-from backdrop.core.records import Record
 from tests.support.data_set import fake_data_set_exists
 
 from tests.support.test_helpers import is_bad_request, is_ok, \
