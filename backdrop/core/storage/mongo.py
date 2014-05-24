@@ -62,3 +62,6 @@ class MongoStorageEngine(object):
             sort=[("_updated_at", pymongo.DESCENDING)])
         if last_updated and last_updated.get('_updated_at') is not None:
             return timeutils.utc(last_updated['_updated_at'])
+
+    def empty(self, data_set_id):
+        self._coll(data_set_id).remove({})
