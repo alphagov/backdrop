@@ -5,7 +5,7 @@ This module includes integration tests and unit tests that require a significant
 amount of setup and mocking. Small unit tests are in doctest format in the
 module itself.
 """
-from hamcrest import assert_that, is_, has_item, has_entries
+from hamcrest import assert_that, is_, has_item, has_entries, is_not
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -53,6 +53,14 @@ class TestMongoStorageEngine(object):
         assert_that(self.db.collection_names(), has_item('foo_bar'))
         assert_that(self.db['foo_bar'].options(), has_entries(
             {'capped': True, 'size': 100}))
+
+    # DELETE
+    def test_delete_a_dataset(self):
+        self.engine.create_dataset('foo_bar', 0)
+
+        self.engine.delete_dataset('foo_bar')
+
+        assert_that(self.db.collection_names(), is_not(has_item('foo_bar')))
 
     def test_create_fails_if_collection_already_exists(self):
         # TODO: reraise a backdrop exception
