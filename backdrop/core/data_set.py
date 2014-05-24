@@ -38,6 +38,9 @@ class NewDataSet(object):
     def get_last_updated(self):
         return self.storage.get_last_updated(self.config.name)
 
+    def empty(self):
+        return self.storage.empty(self.config.name)
+
 
 class DataSet(object):
 
