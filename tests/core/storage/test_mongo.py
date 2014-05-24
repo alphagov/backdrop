@@ -244,8 +244,41 @@ class TestMongoStorageEngine(object):
 
         assert_that(results,
                     contains_inanyorder(
-                        has_entries({'_day_start_at': d_tz(2012, 12, 12), '_count': 2}),
-                        has_entries({'_day_start_at': d_tz(2012, 12, 13), '_count': 1})))
+                        has_entries(
+                            {'_day_start_at': d_tz(2012, 12, 12), '_count': 2}),
+                        has_entries(
+                            {'_day_start_at': d_tz(2012, 12, 13), '_count': 1})))
+
+    def test_group_by_field_and_period(self):
+        self._save_all_with_periods(
+            'foo_bar',
+            {'_timestamp': d_tz(2012, 12, 12), 'foo': 'foo'},
+            {'_timestamp': d_tz(2012, 12, 13), 'foo': 'foo'},
+            {'_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'},
+            {'_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'})
+
+        results = self.engine.query('foo_bar', Query.create(
+            group_by='foo', period=DAY))
+
+        assert_that(results,
+                    contains_inanyorder(
+                        has_entries({'_day_start_at': d_tz(2012, 12, 12), 'foo': 'foo', '_count': 1}),
+                        has_entries({'_day_start_at': d_tz(2012, 12, 12), 'foo': 'bar', '_count': 2}),
+                        has_entries({'_day_start_at': d_tz(2012, 12, 13), 'foo': 'foo', '_count': 1})))
+
+    def test_group_query_with_collect_fields(self):
+        self._save_all('foo_bar',
+                       {'foo': 'foo', 'c': 1}, {'foo': 'foo', 'c': 3},
+                       {'foo': 'bar', 'c': 2})
+
+        results = self.engine.query('foo_bar', Query.create(
+            group_by='foo', collect=[('c', 'sum')]))
+
+        assert_that(results,
+                    contains_inanyorder(
+                        has_entries({'foo': 'bar', 'c': [2]}),
+                        has_entries({'foo': 'foo', 'c': [1, 3]})))
+
 
 
 class TestReconnectingSave(object):

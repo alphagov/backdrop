@@ -98,12 +98,13 @@ class MongoStorageEngine(object):
     def _group_query(self, data_set_id, query):
         keys = get_group_keys(query)
         spec = get_mongo_spec(query)
+        collect_fields = get_unique_collect_fields(query)
 
         return self._coll(data_set_id).group(
             key=keys,
             condition=build_group_condition(keys, spec),
-            initial=build_group_initial_state(),
-            reduce=Code(build_group_reducer()))
+            initial=build_group_initial_state(collect_fields),
+            reduce=Code(build_group_reducer(collect_fields)))
 
     def _basic_query(self, data_set_id, query):
         spec = get_mongo_spec(query)
@@ -240,6 +241,15 @@ def get_group_keys(query):
     return keys
 
 
+def get_unique_collect_fields(query):
+    """
+    >>> from ...read.query import Query
+    >>> get_unique_collect_fields(Query.create(collect=[["foo", "sum"]]))
+    ['foo']
+    """
+    return list(set([field for field, _ in query.collect]))
+
+
 def build_group_condition(keys, spec):
     """
     >>> build_group_condition(["foo"], {"bar": "doo"})
@@ -251,16 +261,38 @@ def build_group_condition(keys, spec):
     return dict(spec.items() + key_filter)
 
 
-def build_group_initial_state():
+def build_group_initial_state(collect_fields):
     """
-    >>> build_group_initial_state()
+    >>> build_group_initial_state([])
     {'_count': 0}
+    >>> build_group_initial_state(["foo"])
+    {'_count': 0, 'foo': []}
     """
     initial = {'_count': 0}
+    for field in collect_fields:
+        initial[field] = []
     return initial
 
 
-def build_group_reducer():
+def build_group_reducer(collect_fields):
     template = "function (current, previous)" \
-               "{{ previous._count++; }}"
-    return template
+               "{{ previous._count++; {collectors} }}"
+    return template.format(
+        collectors="\n".join(map(_build_collector_code, collect_fields)))
+
+
+def _build_collector_code(collect_field):
+    template = "if (current['{c}'] !== undefined) " \
+               "{{ previous['{c}'].push(current['{c}']); }}"
+    return template.format(c=clean_collect_field(collect_field))
+
+
+def clean_collect_field(collect_field):
+    """
+    WTF python escaping!?
+    >>> clean_collect_field('foo\\\\bar')
+    'foo\\\\\\\\bar'
+    >>> clean_collect_field("foo'bar")
+    "foo\\\\\'bar"
+    """
+    return collect_field.replace('\\', '\\\\').replace("'", "\\'")
