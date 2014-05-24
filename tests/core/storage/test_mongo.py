@@ -8,7 +8,7 @@ module itself.
 import datetime
 
 from hamcrest import assert_that, is_, has_item, has_entries, is_not, \
-    has_entry, instance_of, contains
+    has_entry, instance_of, contains, only_contains
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -135,6 +135,47 @@ class TestMongoStorageEngine(object):
 
         assert_that(results,
                     contains(
+                        has_entry('_timestamp', d_tz(2012, 12, 12))))
+
+    def test_basic_query_with_filter(self):
+        self._save_all('foo_bar', {'foo': 'bar'}, {'bar': 'foo'})
+
+        results = self.engine.query('foo_bar', Query.create(
+            filter_by=[('foo', 'bar')]))
+
+        assert_that(results,
+                    only_contains(
+                        has_entry('foo', 'bar')))
+
+    def test_basic_query_with_time_limits(self):
+        self._save_all('foo_bar',
+            {'_timestamp': d_tz(2012, 12, 12)},
+            {'_timestamp': d_tz(2012, 12, 14)},
+            {'_timestamp': d_tz(2012, 12, 11)})
+
+        # start at
+        results = self.engine.query('foo_bar', Query.create(
+            start_at=d_tz(2012, 12, 12, 13)))
+
+        assert_that(results,
+                    only_contains(
+                        has_entry('_timestamp', d_tz(2012, 12, 14))))
+
+        # end at
+        results = self.engine.query('foo_bar', Query.create(
+            end_at=d_tz(2012, 12, 11, 13)))
+
+        assert_that(results,
+                    only_contains(
+                        has_entry('_timestamp', d_tz(2012, 12, 11))))
+
+        # both
+        results = self.engine.query('foo_bar', Query.create(
+            start_at=d_tz(2012, 12, 11, 12),
+            end_at=d_tz(2012, 12, 12, 12)))
+
+        assert_that(results,
+                    only_contains(
                         has_entry('_timestamp', d_tz(2012, 12, 12))))
 
 

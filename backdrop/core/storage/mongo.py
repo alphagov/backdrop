@@ -86,7 +86,13 @@ class MongoStorageEngine(object):
         self._coll(data_set_id).save(record)
 
     def query(self, data_set_id, query):
-        return map(convert_datetimes_to_utc, self._coll(data_set_id).find())
+        return map(convert_datetimes_to_utc,
+            self._execute_query(data_set_id, query))
+
+    def _execute_query(self, data_set_id, query):
+        spec = get_mongo_spec(query)
+
+        return self._coll(data_set_id).find(spec)
 
 
 def convert_datetimes_to_utc(result):
@@ -107,3 +113,40 @@ def convert_datetimes_to_utc(result):
         return value
 
     return dict((key, time_as_utc(value)) for key, value in result.items())
+
+def get_mongo_spec(query):
+    """Convert a Query into a mongo find spec
+    >>> from ...read.query import Query
+    >>> from datetime import datetime as dt
+    >>> get_mongo_spec(Query.create())
+    {}
+    >>> get_mongo_spec(Query.create(filter_by=[('foo', 'bar')]))
+    {'foo': 'bar'}
+    >>> get_mongo_spec(Query.create(start_at=dt(2012, 12, 12)))
+    {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 0, 0)}}
+    """
+    time_range = time_range_to_mongo_query(query.start_at, query.end_at)
+
+    return dict(query.filter_by + time_range.items())
+
+
+def time_range_to_mongo_query(start_at, end_at):
+    """
+    >>> from datetime import datetime as dt
+    >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), None)
+    {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 12, 0)}}
+    >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), dt(2012, 12, 13, 13))
+    {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 12, 0), '$lt': datetime.datetime(2012, 12, 13, 13, 0)}}
+    >>> time_range_to_mongo_query(None, None)
+    {}
+    """
+    mongo = {}
+    if start_at or end_at:
+        mongo['_timestamp'] = {}
+
+        if start_at:
+            mongo['_timestamp']['$gte'] = start_at
+        if end_at:
+            mongo['_timestamp']['$lt'] = end_at
+
+    return mongo
