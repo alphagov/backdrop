@@ -91,8 +91,10 @@ class MongoStorageEngine(object):
 
     def _execute_query(self, data_set_id, query):
         spec = get_mongo_spec(query)
+        sort = get_mongo_sort(query)
+        limit = get_mongo_limit(query)
 
-        return self._coll(data_set_id).find(spec)
+        return self._coll(data_set_id).find(spec, sort=sort, limit=limit)
 
 
 def convert_datetimes_to_utc(result):
@@ -150,3 +152,40 @@ def time_range_to_mongo_query(start_at, end_at):
             mongo['_timestamp']['$lt'] = end_at
 
     return mongo
+
+
+def get_mongo_sort(query):
+    """
+    >>> from ...read.query import Query
+    >>> get_mongo_sort(Query.create())
+    >>> get_mongo_sort(Query.create(sort_by=['foo', 'ascending']))
+    [('foo', 1)]
+    """
+    if query.sort_by:
+        direction = get_mongo_sort_direction(query.sort_by[1])
+        return [(query.sort_by[0], direction)]
+
+
+def get_mongo_sort_direction(direction):
+    """
+    >>> get_mongo_sort_direction("invalid")
+    >>> get_mongo_sort_direction("ascending")
+    1
+    >>> get_mongo_sort_direction("descending")
+    -1
+    """
+    return {
+        "ascending": pymongo.ASCENDING,
+        "descending": pymongo.DESCENDING,
+    }.get(direction)
+
+
+def get_mongo_limit(query):
+    """
+    >>> from ...read.query import Query
+    >>> get_mongo_limit(Query.create())
+    0
+    >>> get_mongo_limit(Query.create(limit=100))
+    100
+    """
+    return query.limit or 0

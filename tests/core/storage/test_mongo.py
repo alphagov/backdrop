@@ -178,6 +178,36 @@ class TestMongoStorageEngine(object):
                     only_contains(
                         has_entry('_timestamp', d_tz(2012, 12, 12))))
 
+    def test_basic_query_with_sort(self):
+        self._save_all('foo_bar',
+                       {'foo': 'mug'},
+                       {'foo': 'book'})
+
+        # ascending
+        results = self.engine.query('foo_bar', Query.create(
+            sort_by=('foo', 'ascending')))
+
+        assert_that(results,
+                    contains(
+                        has_entry('foo', 'book'),
+                        has_entry('foo', 'mug')))
+
+        # descending
+        results = self.engine.query('foo_bar', Query.create(
+            sort_by=('foo', 'descending')))
+
+        assert_that(results,
+                    contains(
+                        has_entry('foo', 'mug'),
+                        has_entry('foo', 'book')))
+
+    def test_basic_query_with_limit(self):
+        self._save_all('foo_bar', {'foo': 'bar'}, {'foo': 'foo'})
+
+        results = self.engine.query('foo_bar', Query.create(limit=1))
+
+        assert_that(len(list(results)), is_(1))
+
 
 class TestReconnectingSave(object):
     def test_reconnecting_save_retries(self):
