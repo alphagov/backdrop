@@ -5,8 +5,8 @@ from flask import Flask, jsonify, url_for, request, \
     session, render_template, flash, redirect, abort
 
 from .. import statsd
-from backdrop.core import cache_control, log_handler, database
-from backdrop.core.data_set import DataSet, NewDataSet
+from backdrop.core import cache_control, log_handler
+from backdrop.core.data_set import NewDataSet
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.repository import (
     DataSetConfigRepository,
@@ -29,11 +29,6 @@ log_handler.set_up_logging(app, GOVUK_ENV)
 
 app.url_map.converters["data_set"] = DataSetConverter
 
-db = database.Database(
-    app.config['MONGO_HOSTS'],
-    app.config['MONGO_PORT'],
-    app.config['DATABASE_NAME']
-)
 storage = MongoStorageEngine.create(
     app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],
