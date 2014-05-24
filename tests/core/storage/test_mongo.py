@@ -5,16 +5,21 @@ This module includes integration tests and unit tests that require a significant
 amount of setup and mocking. Small unit tests are in doctest format in the
 module itself.
 """
+# TODO: add periods into get_group_keys
+# TODO: add collect fields into initial state
+# TODO: add collect fields into reducer
 import datetime
 
 from hamcrest import assert_that, is_, has_item, has_entries, is_not, \
-    has_entry, instance_of, contains, only_contains
+    has_entry, instance_of, contains, only_contains, contains_inanyorder
 from nose.tools import assert_raises
 from mock import Mock
 
 from pymongo.errors import CollectionInvalid, AutoReconnect
 
 from backdrop.core.storage.mongo import MongoStorageEngine, reconnecting_save
+from backdrop.core.records import add_period_keys
+from backdrop.core.timeseries import DAY
 from backdrop.read.query import Query
 
 from tests.support.test_helpers import d_tz
@@ -36,6 +41,11 @@ class TestMongoStorageEngine(object):
     def _save_all(self, dataset_id, *records):
         for record in records:
             self._save(dataset_id, **record)
+
+    def _save_all_with_periods(self, dataset_id, *records):
+        records = map(add_period_keys, records)
+
+        self._save_all(dataset_id, *records)
 
     # ALIVE
     def test_alive_returns_true_if_mongo_is_up(self):
@@ -207,6 +217,35 @@ class TestMongoStorageEngine(object):
         results = self.engine.query('foo_bar', Query.create(limit=1))
 
         assert_that(len(list(results)), is_(1))
+
+    # !GROUPED!
+    def test_query_grouped_by_field(self):
+        self._save_all('foo_bar',
+                       {'foo': 'foo'}, {'foo': 'foo'},
+                       {'foo': 'bar'})
+
+        results = self.engine.query('foo_bar', Query.create(
+            group_by='foo'))
+
+        assert_that(results,
+                    contains_inanyorder(
+                        has_entries({'foo': 'bar', '_count': 1}),
+                        has_entries({'foo': 'foo', '_count': 2})))
+
+    def test_query_grouped_by_period(self):
+        self._save_all_with_periods(
+            'foo_bar',
+            {'_timestamp': d_tz(2012, 12, 12, 12)},
+            {'_timestamp': d_tz(2012, 12, 12, 15)},
+            {'_timestamp': d_tz(2012, 12, 13, 12)})
+
+        results = self.engine.query('foo_bar', Query.create(
+            period=DAY))
+
+        assert_that(results,
+                    contains_inanyorder(
+                        has_entries({'_day_start_at': d_tz(2012, 12, 12), '_count': 2}),
+                        has_entries({'_day_start_at': d_tz(2012, 12, 13), '_count': 1})))
 
 
 class TestReconnectingSave(object):

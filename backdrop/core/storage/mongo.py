@@ -90,11 +90,28 @@ class MongoStorageEngine(object):
             self._execute_query(data_set_id, query))
 
     def _execute_query(self, data_set_id, query):
+        if is_group_query(query):
+            return self._group_query(data_set_id, query)
+        else:
+            return self._basic_query(data_set_id, query)
+
+    def _group_query(self, data_set_id, query):
+        keys = get_group_keys(query)
+        spec = get_mongo_spec(query)
+
+        return self._coll(data_set_id).group(
+            key=keys,
+            condition=build_group_condition(keys, spec),
+            initial=build_group_initial_state(),
+            reduce=Code(build_group_reducer()))
+
+    def _basic_query(self, data_set_id, query):
         spec = get_mongo_spec(query)
         sort = get_mongo_sort(query)
         limit = get_mongo_limit(query)
 
         return self._coll(data_set_id).find(spec, sort=sort, limit=limit)
+
 
 
 def convert_datetimes_to_utc(result):
@@ -189,3 +206,61 @@ def get_mongo_limit(query):
     100
     """
     return query.limit or 0
+
+
+def is_group_query(query):
+    """
+    >>> from ...read.query import Query
+    >>> is_group_query(Query.create(group_by="foo"))
+    True
+    >>> is_group_query(Query.create(period="week"))
+    True
+    >>> is_group_query(Query.create())
+    False
+    """
+    return bool(query.group_by) or bool(query.period)
+
+
+def get_group_keys(query):
+    """
+    >>> from ..timeseries import WEEK
+    >>> from ...read.query import Query
+    >>> get_group_keys(Query.create(group_by="foo"))
+    ['foo']
+    >>> get_group_keys(Query.create(period=WEEK))
+    ['_week_start_at']
+    >>> get_group_keys(Query.create(group_by="foo", period=WEEK))
+    ['foo', '_week_start_at']
+    """
+    keys = []
+    if query.group_by:
+        keys.append(query.group_by)
+    if query.period:
+        keys.append(query.period.start_at_key)
+    return keys
+
+
+def build_group_condition(keys, spec):
+    """
+    >>> build_group_condition(["foo"], {"bar": "doo"})
+    {'foo': {'$ne': None}, 'bar': 'doo'}
+    >>> build_group_condition(["foo"], {"foo": "bar"})
+    {'foo': 'bar'}
+    """
+    key_filter = [(key, {'$ne': None}) for key in keys if key not in spec]
+    return dict(spec.items() + key_filter)
+
+
+def build_group_initial_state():
+    """
+    >>> build_group_initial_state()
+    {'_count': 0}
+    """
+    initial = {'_count': 0}
+    return initial
+
+
+def build_group_reducer():
+    template = "function (current, previous)" \
+               "{{ previous._count++; }}"
+    return template
