@@ -84,3 +84,26 @@ class MongoStorageEngine(object):
     def save(self, data_set_id, record):
         record['_updated_at'] = timeutils.now()
         self._coll(data_set_id).save(record)
+
+    def query(self, data_set_id, query):
+        return map(convert_datetimes_to_utc, self._coll(data_set_id).find())
+
+
+def convert_datetimes_to_utc(result):
+    """Convert datatime values in a result to UTC
+
+    MongoDB ignores offsets, we don't.
+
+    >>> convert_datetimes_to_utc({})
+    {}
+    >>> convert_datetimes_to_utc({'foo': 'bar'})
+    {'foo': 'bar'}
+    >>> convert_datetimes_to_utc({'foo': datetime.datetime(2012, 12, 12)})
+    {'foo': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}
+    """
+    def time_as_utc(value):
+        if isinstance(value, datetime.datetime):
+            return timeutils.as_utc(value)
+        return value
+
+    return dict((key, time_as_utc(value)) for key, value in result.items())

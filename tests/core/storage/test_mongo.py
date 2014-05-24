@@ -8,13 +8,14 @@ module itself.
 import datetime
 
 from hamcrest import assert_that, is_, has_item, has_entries, is_not, \
-    has_entry, instance_of
+    has_entry, instance_of, contains
 from nose.tools import assert_raises
 from mock import Mock
 
 from pymongo.errors import CollectionInvalid, AutoReconnect
 
 from backdrop.core.storage.mongo import MongoStorageEngine, reconnecting_save
+from backdrop.read.query import Query
 
 from tests.support.test_helpers import d_tz
 
@@ -31,6 +32,10 @@ class TestMongoStorageEngine(object):
 
     def _save(self, dataset_id, **kwargs):
         self.db[dataset_id].save(kwargs)
+
+    def _save_all(self, dataset_id, *records):
+        for record in records:
+            self._save(dataset_id, **record)
 
     # ALIVE
     def test_alive_returns_true_if_mongo_is_up(self):
@@ -109,6 +114,28 @@ class TestMongoStorageEngine(object):
 
         assert_that(self.db['foo_bar'].find_one(),
                     has_entry('_updated_at', instance_of(datetime.datetime)))
+
+    # QUERY
+    def test_basic_query(self):
+        self._save_all('foo_bar',
+                       {'foo': 'bar'},
+                       {'bar': 'foo'})
+
+        results = self.engine.query('foo_bar', Query.create())
+
+        assert_that(results,
+                    contains(
+                        has_entries({'foo': 'bar'}),
+                        has_entries({'bar': 'foo'})))
+
+    def test_datetimes_are_converted_to_utc(self):
+        self._save('foo_bar', _timestamp=datetime.datetime(2012, 12, 12))
+
+        results = self.engine.query('foo_bar', Query.create())
+
+        assert_that(results,
+                    contains(
+                        has_entry('_timestamp', d_tz(2012, 12, 12))))
 
 
 class TestReconnectingSave(object):
