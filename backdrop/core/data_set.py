@@ -3,6 +3,11 @@ from flask import logging
 from .records import add_auto_ids, parse_timestamp, validate_record, \
     add_period_keys
 from .validation import data_set_is_valid
+from .nested_merge import nested_merge
+from .errors import InvalidSortError
+from backdrop.read.response import PeriodGroupedData, PeriodData, \
+    GroupedData, SimpleData
+from backdrop.read.query import Query
 
 import timeutils
 import datetime
@@ -53,6 +58,68 @@ class NewDataSet(object):
         records = map(add_period_keys, records)
 
         [self.storage.save(self.config.name, record) for record in records]
+
+    def query(self, query):
+        results = self.storage.query(self.config.name, query)
+
+        data = build_data(results, query)
+
+        if query.delta:
+            shift = data.amount_to_shift(query.delta)
+            if shift != 0:
+                return self.query(query.get_shifted_query(shift))
+
+        return data.data()
+
+
+def build_data(results, query):
+    if not query.is_grouped:
+        # TODO: strip internal fields
+        return SimpleData(results)
+
+    results = nested_merge(query.group_keys, query.collect, results)
+    results = _sort_grouped_results(results, query.sort_by)
+    results = _limit_grouped_results(results, query.limit)
+
+    if query.group_by and query.period:
+        data = PeriodGroupedData(results, period=query.period)
+        if query.start_at and query.end_at:
+            data.fill_missing_periods(
+                query.start_at, query.end_at, collect=query.collect)
+        return data
+    elif query.group_by:
+        return GroupedData(results)
+    elif query.period:
+        data = PeriodData(results, period=query.period)
+        if query.start_at and query.end_at:
+            data.fill_missing_periods(
+                query.start_at, query.end_at, collect=query.collect)
+        return data
+    else:
+        raise AssertionError("A query claiming to be a grouped query was not.")
+
+
+def _sort_grouped_results(results, sort):
+    """Sort a grouped set of results
+    """
+    if not sort:
+        return results
+    sorters = {
+        "ascending": lambda a, b: cmp(a, b),
+        "descending": lambda a, b: cmp(b, a)
+    }
+    sorter = sorters[sort[1]]
+    try:
+        results.sort(cmp=sorter, key=lambda a: a[sort[0]])
+        return results
+    except KeyError:
+        raise InvalidSortError('Invalid sort key {0}'.format(sort[0]))
+
+
+def _limit_grouped_results(results, limit):
+    """Limit a grouped set of results
+    """
+    return results[:limit] if limit else results
 
 
 class DataSet(object):

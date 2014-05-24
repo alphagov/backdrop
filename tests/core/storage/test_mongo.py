@@ -5,9 +5,6 @@ This module includes integration tests and unit tests that require a significant
 amount of setup and mocking. Small unit tests are in doctest format in the
 module itself.
 """
-# TODO: add periods into get_group_keys
-# TODO: add collect fields into initial state
-# TODO: add collect fields into reducer
 import datetime
 
 from hamcrest import assert_that, is_, has_item, has_entries, is_not, \
@@ -159,9 +156,9 @@ class TestMongoStorageEngine(object):
 
     def test_basic_query_with_time_limits(self):
         self._save_all('foo_bar',
-            {'_timestamp': d_tz(2012, 12, 12)},
-            {'_timestamp': d_tz(2012, 12, 14)},
-            {'_timestamp': d_tz(2012, 12, 11)})
+                       {'_timestamp': d_tz(2012, 12, 12)},
+                       {'_timestamp': d_tz(2012, 12, 14)},
+                       {'_timestamp': d_tz(2012, 12, 11)})
 
         # start at
         results = self.engine.query('foo_bar', Query.create(
@@ -278,7 +275,6 @@ class TestMongoStorageEngine(object):
                     contains_inanyorder(
                         has_entries({'foo': 'bar', 'c': [2]}),
                         has_entries({'foo': 'foo', 'c': [1, 3]})))
-
 
 
 class TestReconnectingSave(object):

@@ -175,11 +175,11 @@ def fetch(data_set_config):
                 data_set_config.name, result.message,
                 400)
 
-        data_set = DataSet(db, data_set_config)
+        data_set = NewDataSet(storage, data_set_config)
 
         try:
             query = Query.parse(request.args)
-            data = data_set.query(query).data()
+            data = data_set.query(query)
 
         except InvalidOperationError:
             return log_error_and_respond(

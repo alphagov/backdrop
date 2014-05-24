@@ -1,7 +1,6 @@
 import os
 import logging
 import datetime
-from itertools import imap
 
 import pymongo
 from pymongo.errors import AutoReconnect
@@ -87,18 +86,18 @@ class MongoStorageEngine(object):
 
     def query(self, data_set_id, query):
         return map(convert_datetimes_to_utc,
-            self._execute_query(data_set_id, query))
+                   self._execute_query(data_set_id, query))
 
     def _execute_query(self, data_set_id, query):
-        if is_group_query(query):
+        if query.is_grouped:
             return self._group_query(data_set_id, query)
         else:
             return self._basic_query(data_set_id, query)
 
     def _group_query(self, data_set_id, query):
-        keys = get_group_keys(query)
+        keys = query.group_keys
         spec = get_mongo_spec(query)
-        collect_fields = get_unique_collect_fields(query)
+        collect_fields = query.collect_fields
 
         return self._coll(data_set_id).group(
             key=keys,
@@ -112,7 +111,6 @@ class MongoStorageEngine(object):
         limit = get_mongo_limit(query)
 
         return self._coll(data_set_id).find(spec, sort=sort, limit=limit)
-
 
 
 def convert_datetimes_to_utc(result):
@@ -133,6 +131,7 @@ def convert_datetimes_to_utc(result):
         return value
 
     return dict((key, time_as_utc(value)) for key, value in result.items())
+
 
 def get_mongo_spec(query):
     """Convert a Query into a mongo find spec
@@ -155,8 +154,9 @@ def time_range_to_mongo_query(start_at, end_at):
     >>> from datetime import datetime as dt
     >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), None)
     {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 12, 0)}}
+    >>> expected = {'_timestamp': {'$gte': dt(2012, 12, 12, 12, 0),
+    ...  '$lt': dt(2012, 12, 13, 13, 0)}}
     >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), dt(2012, 12, 13, 13))
-    {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 12, 0), '$lt': datetime.datetime(2012, 12, 13, 13, 0)}}
     >>> time_range_to_mongo_query(None, None)
     {}
     """
@@ -207,47 +207,6 @@ def get_mongo_limit(query):
     100
     """
     return query.limit or 0
-
-
-def is_group_query(query):
-    """
-    >>> from ...read.query import Query
-    >>> is_group_query(Query.create(group_by="foo"))
-    True
-    >>> is_group_query(Query.create(period="week"))
-    True
-    >>> is_group_query(Query.create())
-    False
-    """
-    return bool(query.group_by) or bool(query.period)
-
-
-def get_group_keys(query):
-    """
-    >>> from ..timeseries import WEEK
-    >>> from ...read.query import Query
-    >>> get_group_keys(Query.create(group_by="foo"))
-    ['foo']
-    >>> get_group_keys(Query.create(period=WEEK))
-    ['_week_start_at']
-    >>> get_group_keys(Query.create(group_by="foo", period=WEEK))
-    ['foo', '_week_start_at']
-    """
-    keys = []
-    if query.group_by:
-        keys.append(query.group_by)
-    if query.period:
-        keys.append(query.period.start_at_key)
-    return keys
-
-
-def get_unique_collect_fields(query):
-    """
-    >>> from ...read.query import Query
-    >>> get_unique_collect_fields(Query.create(collect=[["foo", "sum"]]))
-    ['foo']
-    """
-    return list(set([field for field, _ in query.collect]))
 
 
 def build_group_condition(keys, spec):

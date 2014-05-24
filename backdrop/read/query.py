@@ -96,6 +96,50 @@ class Query(_Query):
 
         return start_at, end_at
 
+    @property
+    def collect_fields(self):
+        """Return a unique list of collect field names
+        >>> query = Query.create(collect=[('foo', 'sum'), ('foo', 'set')])
+        >>> query.collect_fields
+        ['foo']
+        """
+        return list(set([field for field, _ in self.collect]))
+
+    @property
+    def group_keys(self):
+        """Return a list of fields that are being grouped on
+
+        This is kinda coupled to how we group with Mongo but these keys
+        are in the returned results and are used in the nested merge to
+        create the hierarchical response.
+
+        >>> from ..core.timeseries import WEEK
+        >>> Query.create(group_by="foo").group_keys
+        ['foo']
+        >>> Query.create(period=WEEK).group_keys
+        ['_week_start_at']
+        >>> Query.create(group_by="foo", period=WEEK).group_keys
+        ['foo', '_week_start_at']
+        """
+        keys = []
+        if self.group_by:
+            keys.append(self.group_by)
+        if self.period:
+            keys.append(self.period.start_at_key)
+        return keys
+
+    @property
+    def is_grouped(self):
+        """
+        >>> Query.create(group_by="foo").is_grouped
+        True
+        >>> Query.create(period="week").is_grouped
+        True
+        >>> Query.create().is_grouped
+        False
+        """
+        return bool(self.group_by) or bool(self.period)
+
     def __skip_blank_periods(self, results, repository):
         amount_to_shift = results.amount_to_shift(self.delta)
         if amount_to_shift != 0:
