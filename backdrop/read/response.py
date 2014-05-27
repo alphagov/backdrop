@@ -1,8 +1,6 @@
-import datetime
 import pytz
 from backdrop.core.nested_merge import collect_key
 from backdrop.core.timeseries import timeseries, PERIODS
-from dateutil.relativedelta import relativedelta
 
 
 def create_period_group(doc, period):

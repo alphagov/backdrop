@@ -1,9 +1,7 @@
 from collections import namedtuple
 
-import pytz
 from backdrop.core.timeseries import parse_period
 from backdrop.core.timeutils import now, parse_time_as_utc
-from backdrop.read.response import *
 
 
 def if_present(func, value):
@@ -140,14 +138,6 @@ class Query(_Query):
         """
         return bool(self.group_by) or bool(self.period)
 
-    def __skip_blank_periods(self, results, repository):
-        amount_to_shift = results.amount_to_shift(self.delta)
-        if amount_to_shift != 0:
-            query = self.get_shifted_query(shift=amount_to_shift)
-            results = query.execute(repository)
-
-        return results
-
     def get_shifted_query(self, shift):
         """Return a new Query where the date is shifted by n periods"""
         args = self._asdict()
@@ -156,80 +146,3 @@ class Query(_Query):
         args['end_at'] = args['end_at'] + (self.period.delta * shift)
 
         return Query.create(**args)
-
-    def to_mongo_query(self):
-        mongo_query = {}
-        if self.start_at or self.end_at:
-            mongo_query["_timestamp"] = {}
-            if self.end_at:
-                mongo_query["_timestamp"]["$lt"] = self.end_at
-            if self.start_at:
-                mongo_query["_timestamp"]["$gte"] = self.start_at
-        if self.filter_by:
-            mongo_query.update(self.filter_by)
-        return mongo_query
-
-    def execute(self, repository):
-        if self.group_by and self.period:
-            result = self.__execute_period_group_query(repository)
-        elif self.group_by:
-            result = self.__execute_grouped_query(repository)
-        elif self.period:
-            result = self.__execute_period_query(repository)
-        else:
-            result = self.__execute_query(repository)
-
-        if self.delta:
-            result = self.__skip_blank_periods(result, repository)
-
-        return result
-
-    def __get_period_key(self):
-        return self.period.start_at_key
-
-    def __execute_period_group_query(self, repository):
-        period_key = self.__get_period_key()
-
-        cursor = repository.multi_group(
-            self.group_by, period_key, self,
-            sort=self.sort_by, limit=self.limit,
-            collect=self.collect
-        )
-
-        results = PeriodGroupedData(cursor, period=self.period)
-
-        if self.start_at and self.end_at:
-            results.fill_missing_periods(
-                self.start_at, self.end_at, collect=self.collect)
-
-        return results
-
-    def __execute_grouped_query(self, repository):
-        cursor = repository.group(self.group_by, self, self.sort_by,
-                                  self.limit, self.collect)
-
-        results = GroupedData(cursor)
-        return results
-
-    def __execute_period_query(self, repository):
-        period_key = self.__get_period_key()
-        sort = [period_key, "ascending"]
-        cursor = repository.group(
-            period_key, self,
-            sort=sort, limit=self.limit, collect=self.collect
-        )
-
-        results = PeriodData(cursor, period=self.period)
-
-        if self.start_at and self.end_at:
-            results.fill_missing_periods(
-                self.start_at, self.end_at, collect=self.collect)
-
-        return results
-
-    def __execute_query(self, repository):
-        cursor = repository.find(
-            self, sort=self.sort_by, limit=self.limit)
-
-        results = SimpleData(cursor)
-        return results

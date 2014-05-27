@@ -1,3 +1,5 @@
+from .errors import InvalidOperationError
+
 from operator import itemgetter, add
 import itertools
 
@@ -205,7 +207,3 @@ def sort_all(data, keys):
         for i, group in enumerate(data):
             data[i]['_subgroup'] = sort_all(group['_subgroup'], keys[1:])
     return sorted(data, key=itemgetter(keys[0]))
-
-
-class InvalidOperationError(TypeError):
-    pass

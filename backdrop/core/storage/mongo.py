@@ -3,10 +3,11 @@ import logging
 import datetime
 
 import pymongo
-from pymongo.errors import AutoReconnect
+from pymongo.errors import AutoReconnect, CollectionInvalid
 from bson import Code
 
 from .. import timeutils
+from ..errors import DataSetCreationError
 
 
 logger = logging.getLogger(__name__)
@@ -63,10 +64,13 @@ class MongoStorageEngine(object):
         return dataset_id in self._db.collection_names()
 
     def create_dataset(self, dataset_id, size):
-        if size > 0:
-            self._db.create_collection(dataset_id, capped=True, size=size)
-        else:
-            self._db.create_collection(dataset_id, capped=False)
+        try:
+            if size > 0:
+                self._db.create_collection(dataset_id, capped=True, size=size)
+            else:
+                self._db.create_collection(dataset_id, capped=False)
+        except CollectionInvalid as e:
+            raise DataSetCreationError(e.message)
 
     def delete_dataset(self, dataset_id):
         self._db.drop_collection(dataset_id)

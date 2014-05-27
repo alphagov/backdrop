@@ -112,7 +112,7 @@ class QueryingApiTestCase(unittest.TestCase):
 class PreflightChecksApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = api.app.test_client()
-        api.db._mongo.drop_database(api.app.config['DATABASE_NAME'])
+        api.storage._mongo.drop_database(api.app.config['DATABASE_NAME'])
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type")
     def test_cors_preflight_requests_have_empty_body(self):

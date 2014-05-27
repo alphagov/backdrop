@@ -4,8 +4,7 @@ import datetime
 from pymongo import MongoClient
 from hamcrest import assert_that, contains, has_entry
 
-from backdrop.core import database, data_set
-from backdrop.core.data_set import DataSetConfig
+from backdrop.core.data_set import DataSetConfig, NewDataSet
 from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
@@ -20,13 +19,11 @@ DATA_SET = 'data_set_integration_test'
 class TestDataSetIntegration(unittest.TestCase):
 
     def setUp(self):
-        self.db = database.Database(HOSTS, PORT, DB_NAME)
         self.storage = MongoStorageEngine.create(HOSTS, PORT, DB_NAME)
 
         self.config = DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000)
 
-        self.data_set = data_set.DataSet(self.db, self.config)
-        self.new_data_set = data_set.NewDataSet(self.storage, self.config)
+        self.new_data_set = NewDataSet(self.storage, self.config)
 
         self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
 
@@ -56,8 +53,8 @@ class TestDataSetIntegration(unittest.TestCase):
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()
         query = Query.create(period=WEEK)
-        result = query.execute(self.data_set.repository)
-        assert_that(result.data(), contains(
+        result = self.new_data_set.query(query)
+        assert_that(result, contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),
             has_entry('_start_at', d_tz(2013, 2, 25))

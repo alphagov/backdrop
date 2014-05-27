@@ -7,7 +7,6 @@ from .nested_merge import nested_merge
 from .errors import InvalidSortError
 from backdrop.read.response import PeriodGroupedData, PeriodData, \
     GroupedData, SimpleData
-from backdrop.read.query import Query
 
 import timeutils
 import datetime
@@ -120,21 +119,6 @@ def _limit_grouped_results(results, limit):
     """Limit a grouped set of results
     """
     return results[:limit] if limit else results
-
-
-class DataSet(object):
-
-    def __init__(self, db, config):
-        self.name = config.name
-        self.repository = db.get_repository(config.name)
-        self.auto_id_keys = config.auto_ids
-        self.config = config
-        self.db = db
-
-    def query(self, query):
-        result = query.execute(self.repository)
-
-        return result
 
 
 _DataSetConfig = namedtuple(
