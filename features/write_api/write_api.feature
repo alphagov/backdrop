@@ -83,3 +83,13 @@ Feature: the performance platform write api
          when I POST to the specific path "/data/group/type"
          then I should get back a status of "400"
           and I should get back the message "Expected JSON request body but received zero bytes."
+
+    Scenario: posting large compressed JSON payload to a data-set
+        Given I have the data in "large.json"
+          and I have a data_set named "data_with_times" with settings
+            | key        | value   |
+            | data_group | "group" |
+            | data_type  | "type"  |
+          and I use the bearer token for the data_set
+         when I "POST" the compressed request body to the path "/data/group/type"
+         then I should get back a status of "200"

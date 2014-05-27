@@ -1,8 +1,10 @@
+import gzip
 import os
 
 from behave import given, when, then
 from dateutil import parser
 from hamcrest import assert_that, has_length, equal_to
+from io import BytesIO
 
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
@@ -33,6 +35,32 @@ def step(context):
 @given(u'I have the bearer token "{token}"')
 def step(context, token):
     context.bearer_token = token
+
+
+@when('I "{http_method}" the compressed request body to the path "{path}"')
+def step(context, http_method, path):
+    assert http_method in ('POST', 'PUT'), "Only support POST, PUT"
+    http_function = {
+        'POST': context.client.post,
+        'PUT': context.client.put
+    }[http_method]
+
+    def compress_data(io):
+        bio = BytesIO()
+        f = gzip.GzipFile(filename='', mode='wb', fileobj=bio)
+        f.write(io)
+        f.close()
+        return bio.getvalue()
+
+    headers = _make_headers_from_context(context)
+    headers.append(('Content-Encoding', u'gzip'))
+
+    context.response = http_function(
+        path,
+        data=compress_data(context.data_to_post),
+        content_type="application/json",
+        headers=headers,
+    )
 
 
 @when('I {http_method} to the specific path "{path}"')

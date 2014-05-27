@@ -7,6 +7,7 @@ from backdrop import statsd
 from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.repository import DataSetConfigRepository
+from backdrop.write.decompressing_request import DecompressingRequest
 
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
@@ -17,6 +18,9 @@ from .validation import auth_header_is_valid, extract_bearer_token
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
 app = Flask("backdrop.write.api")
+
+# We want to allow clients to compress large JSON documents.
+app.request_class = DecompressingRequest
 
 feature_flags = FeatureFlag(app)
 
