@@ -10,6 +10,8 @@ log = logging.getLogger(__name__)
 
 
 def up(db):
+    # THIS MIGRATION IS NOT COMPATIBLE WITH STORAGE ENGINES
+    return None
     for name in db.collection_names():
         log.info("Migrating collection: {0}".format(name))
         collection = db.get_repository(name)

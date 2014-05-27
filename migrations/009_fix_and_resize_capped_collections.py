@@ -104,6 +104,8 @@ def realtime_data_set_is_correctly_capped(mongo_db, collection_name):
 
 
 def up(db):
+    # Depracated with the introducetion of MongoStorageEngine
+    return None
     mongo_db = db._mongo['backdrop']
 
     remove_temporary_collections(mongo_db)

@@ -1,4 +1,4 @@
-"""
+"""OK
 Change user buckets in users collection to data_sets
 We have this as separate module to the migration
 due to problems with naming python modules starting with digits

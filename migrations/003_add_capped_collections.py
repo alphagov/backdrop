@@ -7,6 +7,8 @@ log = logging.getLogger(__name__)
 
 
 def up(db):
+    # Depracated with the introducetion of MongoStorageEngine
+    return None
     capped_collections = [
         "fco_pay_legalisation_post_realtime",
         "fco_pay_legalisation_drop_off_realtime",

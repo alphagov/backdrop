@@ -15,7 +15,7 @@ import os
 import sys
 from os.path import join
 import logging
-from backdrop.core.database import Database
+from backdrop.core.storage.mongo import MongoStorageEngine
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -37,8 +37,8 @@ def load_config(env):
             fp.close()
 
 
-def get_database(config):
-    return Database(
+def get_storage(config):
+    return MongoStorageEngine(
         config.MONGO_HOSTS, config.MONGO_PORT, config.DATABASE_NAME)
 
 
@@ -56,10 +56,10 @@ def get_migrations(migration_files):
 if __name__ == '__main__':
 
     config = load_config(os.getenv('GOVUK_ENV', 'development'))
-    database = get_database(config)
+    storage = get_storage(config)
 
     migration_files = sys.argv[1:] or None
 
     for migration in get_migrations(migration_files):
         log.info("Running migration %s" % migration)
-        migration.up(database)
+        migration.up(storage)

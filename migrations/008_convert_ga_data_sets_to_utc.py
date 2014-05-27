@@ -75,6 +75,8 @@ def fix_id(document):
 
 
 def up(db):
+    # Depracated with the introducetion of MongoStorageEngine
+    return None
     for name in GA_DATA_SETS_TO_MIGRATE:
         collection = db.get_repository(name)
 

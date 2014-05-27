@@ -7,4 +7,6 @@ from migrations.lib import change_buckets_to_data_sets
 
 
 def up(db):
+    # Depracated with the introducetion of MongoStorageEngine
+    return None
     change_buckets_to_data_sets.up(db)

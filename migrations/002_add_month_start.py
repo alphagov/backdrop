@@ -10,6 +10,8 @@ log = logging.getLogger(__name__)
 
 
 def up(db):
+    # Depracated with the introducetion of MongoStorageEngine
+    return None
     for name in db.collection_names():
         log.info("Migrating collection: {0}".format(name))
         collection = db.get_repository(name)
