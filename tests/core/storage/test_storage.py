@@ -86,14 +86,14 @@ class BaseStorageTest(object):
 
     def test_get_last_updated_returns_none_if_there_is_none(self):
         assert_that(self.engine.get_last_updated('foo_bar'), is_(None))
-   
+
     def test_saving_a_record_with_an_id_updates_it(self):
-        self._save_all('foo_bar', 
+        self._save_all('foo_bar',
                        {'_id': 'first', 'foo': 'bar'},
                        {'_id': 'first', 'foo': 'foo'})
 
         results = self.engine.query('foo_bar', Query.create())
-        
+
         assert_that(len(results), is_(1))
         assert_that(results, contains(has_entries({'foo': 'foo'})))
 
@@ -102,7 +102,7 @@ class BaseStorageTest(object):
 
         for i in range(100):
             self.engine.save('foo_bar', {'foo': i})
-        
+
         assert_that(
             len(self.engine.query('foo_bar', Query.create())),
             less_than(70))
@@ -137,7 +137,7 @@ class BaseStorageTest(object):
         assert_that(results,
                     contains(
                         has_entry('foo', 'bar')))
-    
+
     def test_basic_query_with_time_limits(self):
         self._save_all('foo_bar',
                        {'_timestamp': d_tz(2012, 12, 12)},

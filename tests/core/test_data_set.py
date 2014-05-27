@@ -1,4 +1,4 @@
-from hamcrest import assert_that, is_, has_item, has_entries, equal_to, \
+from hamcrest import assert_that, is_, has_item, has_entries, \
     has_length, contains, has_entry
 from nose.tools import assert_raises
 from mock import Mock
@@ -22,6 +22,7 @@ def mock_repository():
     mock_repository.find.return_value = []
     mock_repository.group.return_value = []
     return mock_repository
+
 
 class BaseNewDataSetTest(object):
     def setup_config(self, **kwargs):
@@ -65,6 +66,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
         self.mock_storage.save.assert_called_with(
             'test_data_set',
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
+
 
 class TestNewDataSet_query(BaseNewDataSetTest):
 
@@ -123,7 +125,6 @@ class TestNewDataSet_query(BaseNewDataSetTest):
         ]
         data = self.data_set.query(
             Query.create(period=WEEK, group_by="some_group"))
-
 
         assert_that(data, has_length(2))
         assert_that(data, has_item(has_entries({
