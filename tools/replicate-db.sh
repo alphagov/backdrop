@@ -6,8 +6,8 @@
 # one.
 #
 
-if [ "$(hostname)" == "vm" ]; then
-    echo "This script should be run on the host machine!"
+if [ "$(hostname)" == "development-1" ]; then
+    echo "This script should be run on the host machine, not your virtual machine!"
     exit 1
 fi
 
@@ -54,7 +54,7 @@ ssh $SOURCE_HOST "tar czvf ${FILENAME} ${DUMPDIR}"
 # scp tar
 scp $SOURCE_HOST:~/$FILENAME .
 
-# cleanup preview machine
+# clean up remote machine
 ssh $SOURCE_HOST "rm -Rf ${FILENAME} ${DUMPDIR}"
 
 # mongorestore
