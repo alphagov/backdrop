@@ -29,38 +29,38 @@ class BaseStorageTest(object):
         raise NotImplemented()
 
     def _save_all(self, data_set, *records):
-        self.engine.create_dataset(data_set, 0)
+        self.engine.create_data_set(data_set, 0)
         for record in records:
             self.engine.save(data_set, record)
 
-    def _save_all_with_periods(self, dataset_id, *records):
+    def _save_all_with_periods(self, data_set_id, *records):
         records = map(add_period_keys, records)
 
-        self._save_all(dataset_id, *records)
+        self._save_all(data_set_id, *records)
 
     def test_is_alive(self):
         assert_that(self.engine.alive(), is_(True))
 
     def test_does_not_exist(self):
-        assert_that(self.engine.dataset_exists('foo_bar'), is_(False))
+        assert_that(self.engine.data_set_exists('foo_bar'), is_(False))
 
     def test_create(self):
-        self.engine.create_dataset('foo_bar', 0)
+        self.engine.create_data_set('foo_bar', 0)
 
-        assert_that(self.engine.dataset_exists('foo_bar'), is_(True))
+        assert_that(self.engine.data_set_exists('foo_bar'), is_(True))
 
     def test_create_fails_if_it_already_exists(self):
-        self.engine.create_dataset('foo_bar', 0)
+        self.engine.create_data_set('foo_bar', 0)
 
         assert_raises(
             DataSetCreationError,
-            self.engine.create_dataset, 'foo_bar', 0)
+            self.engine.create_data_set, 'foo_bar', 0)
 
     def test_create_and_delete(self):
-        self.engine.create_dataset('foo_bar', 0)
-        self.engine.delete_dataset('foo_bar')
+        self.engine.create_data_set('foo_bar', 0)
+        self.engine.delete_data_set('foo_bar')
 
-        assert_that(self.engine.dataset_exists('foo_bar'), is_(False))
+        assert_that(self.engine.data_set_exists('foo_bar'), is_(False))
 
     def test_simple_saving_and_finding(self):
         self._save_all('foo_bar', {'foo': 'bar'})
@@ -75,7 +75,7 @@ class BaseStorageTest(object):
                     contains(has_entries({'_updated_at': instance_of(datetime.datetime)})))
 
     def test_get_last_updated(self):
-        self.engine.create_dataset('foo_bar', 0)
+        self.engine.create_data_set('foo_bar', 0)
         with freeze_time('2012-12-12'):
             self.engine.save('foo_bar', {'foo': 'first'})
         with freeze_time('2012-11-12'):
@@ -97,8 +97,8 @@ class BaseStorageTest(object):
         assert_that(len(results), is_(1))
         assert_that(results, contains(has_entries({'foo': 'foo'})))
 
-    def test_capped_dataset_is_capped(self):
-        self.engine.create_dataset('foo_bar', 1)
+    def test_capped_data_set_is_capped(self):
+        self.engine.create_data_set('foo_bar', 1)
 
         for i in range(100):
             self.engine.save('foo_bar', {'foo': i})
@@ -107,7 +107,7 @@ class BaseStorageTest(object):
             len(self.engine.query('foo_bar', Query.create())),
             less_than(70))
 
-    def test_empty_a_dataset(self):
+    def test_empty_a_data_set(self):
         self._save_all('foo_bar',
                        {'foo': 'bar'}, {'bar': 'foo'})
 

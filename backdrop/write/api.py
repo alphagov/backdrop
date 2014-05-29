@@ -167,13 +167,13 @@ def post_to_data_set(data_set_name):
         abort(400, repr(e))
 
 
-@app.route('/data-sets/<dataset_name>', methods=['POST'])
+@app.route('/data-sets/<data_set_name>', methods=['POST'])
 @cache_control.nocache
-def create_collection_for_dataset(dataset_name):
+def create_collection_for_data_set(data_set_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
         abort(401, 'Unauthorized: invalid or no token given.')
 
-    if storage.dataset_exists(dataset_name):
+    if storage.data_set_exists(data_set_name):
         abort(400, 'Collection exists with that name.')
 
     try:
@@ -186,23 +186,23 @@ def create_collection_for_dataset(dataset_name):
     if capped_size is None or not isinstance(capped_size, int):
         abort(400, 'You must specify an int capped_size of 0 or more')
 
-    storage.create_dataset(dataset_name, capped_size)
+    storage.create_data_set(data_set_name, capped_size)
 
-    return jsonify(status='ok', message='Created "{}"'.format(dataset_name))
+    return jsonify(status='ok', message='Created "{}"'.format(data_set_name))
 
 
-@app.route('/data-sets/<dataset_name>', methods=['DELETE'])
+@app.route('/data-sets/<data_set_name>', methods=['DELETE'])
 @cache_control.nocache
-def delete_collection_by_dataset_name(dataset_name):
+def delete_collection_by_data_set_name(data_set_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
         abort(401, 'Unauthorized: invalid or no token given.')
 
-    if not storage.dataset_exists(dataset_name):
-        abort(404, 'No collection exists with name "{}"'.format(dataset_name))
+    if not storage.data_set_exists(data_set_name):
+        abort(404, 'No collection exists with name "{}"'.format(data_set_name))
 
-    storage.delete_dataset(dataset_name)
+    storage.delete_data_set(data_set_name)
 
-    return jsonify(status='ok', message='Deleted {}'.format(dataset_name))
+    return jsonify(status='ok', message='Deleted {}'.format(data_set_name))
 
 
 def _allow_modify_collection(auth_header):

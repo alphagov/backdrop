@@ -60,20 +60,20 @@ class MongoStorageEngine(object):
     def alive(self):
         return self._mongo.alive()
 
-    def dataset_exists(self, dataset_id):
-        return dataset_id in self._db.collection_names()
+    def data_set_exists(self, data_set_id):
+        return data_set_id in self._db.collection_names()
 
-    def create_dataset(self, dataset_id, size):
+    def create_data_set(self, data_set_id, size):
         try:
             if size > 0:
-                self._db.create_collection(dataset_id, capped=True, size=size)
+                self._db.create_collection(data_set_id, capped=True, size=size)
             else:
-                self._db.create_collection(dataset_id, capped=False)
+                self._db.create_collection(data_set_id, capped=False)
         except CollectionInvalid as e:
             raise DataSetCreationError(e.message)
 
-    def delete_dataset(self, dataset_id):
-        self._db.drop_collection(dataset_id)
+    def delete_data_set(self, data_set_id):
+        self._db.drop_collection(data_set_id)
 
     def get_last_updated(self, data_set_id):
         last_updated = self._coll(data_set_id).find_one(
