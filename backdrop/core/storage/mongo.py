@@ -81,10 +81,10 @@ class MongoStorageEngine(object):
         if last_updated and last_updated.get('_updated_at') is not None:
             return timeutils.utc(last_updated['_updated_at'])
 
-    def empty(self, data_set_id):
+    def empty_data_set(self, data_set_id):
         self._coll(data_set_id).remove({})
 
-    def save(self, data_set_id, record):
+    def save_record(self, data_set_id, record):
         record['_updated_at'] = timeutils.now()
         self._coll(data_set_id).save(record)
 

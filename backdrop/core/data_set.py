@@ -42,7 +42,7 @@ class NewDataSet(object):
         return self.storage.get_last_updated(self.config.name)
 
     def empty(self):
-        return self.storage.empty(self.config.name)
+        return self.storage.empty_data_set(self.config.name)
 
     def store(self, records):
         log.info('received {} records'.format(len(records)))
@@ -56,7 +56,8 @@ class NewDataSet(object):
         # add period data
         records = map(add_period_keys, records)
 
-        [self.storage.save(self.config.name, record) for record in records]
+        for record in records:
+            self.storage.save_record(self.config.name, record)
 
     def query(self, query):
         results = self.storage.query(self.config.name, query)

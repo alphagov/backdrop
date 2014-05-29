@@ -39,13 +39,13 @@ class BaseNewDataSetTest(object):
 class TestNewDataSet_store(BaseNewDataSetTest):
     def test_storing_a_simple_record(self):
         self.data_set.store([{'foo': 'bar'}])
-        self.mock_storage.save.assert_called_with(
+        self.mock_storage.save_record.assert_called_with(
             'test_data_set', {'foo': 'bar'})
 
     def test_id_gets_automatically_generated_if_auto_ids_are_set(self):
         self.setup_config(auto_ids=['foo'])
         self.data_set.store([{'foo': 'bar'}])
-        self.mock_storage.save.assert_called_with(
+        self.mock_storage.save_record.assert_called_with(
             'test_data_set', match(has_entry('_id', 'YmFy')))
 
     def test_timestamp_gets_parsed(self):
@@ -54,7 +54,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
         see the backdrop.core.records module
         """
         self.data_set.store([{'_timestamp': '2012-12-12T00:00:00+00:00'}])
-        self.mock_storage.save.assert_called_with(
+        self.mock_storage.save_record.assert_called_with(
             'test_data_set',
             match(has_entry('_timestamp',  d_tz(2012, 12, 12))))
 
@@ -63,7 +63,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
 
     def test_period_keys_are_added(self):
         self.data_set.store([{'_timestamp': '2012-12-12T00:00:00+00:00'}])
-        self.mock_storage.save.assert_called_with(
+        self.mock_storage.save_record.assert_called_with(
             'test_data_set',
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
 

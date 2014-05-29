@@ -31,7 +31,7 @@ class BaseStorageTest(object):
     def _save_all(self, data_set, *records):
         self.engine.create_data_set(data_set, 0)
         for record in records:
-            self.engine.save(data_set, record)
+            self.engine.save_record(data_set, record)
 
     def _save_all_with_periods(self, data_set_id, *records):
         records = map(add_period_keys, records)
@@ -77,9 +77,9 @@ class BaseStorageTest(object):
     def test_get_last_updated(self):
         self.engine.create_data_set('foo_bar', 0)
         with freeze_time('2012-12-12'):
-            self.engine.save('foo_bar', {'foo': 'first'})
+            self.engine.save_record('foo_bar', {'foo': 'first'})
         with freeze_time('2012-11-12'):
-            self.engine.save('foo_bar', {'foo': 'second'})
+            self.engine.save_record('foo_bar', {'foo': 'second'})
 
         assert_that(self.engine.get_last_updated('foo_bar'),
                     is_(d_tz(2012, 12, 12)))
@@ -101,7 +101,7 @@ class BaseStorageTest(object):
         self.engine.create_data_set('foo_bar', 1)
 
         for i in range(100):
-            self.engine.save('foo_bar', {'foo': i})
+            self.engine.save_record('foo_bar', {'foo': i})
 
         assert_that(
             len(self.engine.query('foo_bar', Query.create())),
@@ -114,7 +114,7 @@ class BaseStorageTest(object):
         assert_that(len(self.engine.query('foo_bar', Query.create())), is_(2))
 
         # TODO: fix inconsistency
-        self.engine.empty('foo_bar')
+        self.engine.empty_data_set('foo_bar')
 
         assert_that(len(self.engine.query('foo_bar', Query.create())), is_(0))
 
