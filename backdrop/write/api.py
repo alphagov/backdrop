@@ -11,6 +11,8 @@ from backdrop.core.repository import DataSetConfigRepository
 from ..core.errors import ParseError, ValidationError
 from ..core import database, log_handler, cache_control
 
+from ..core.storage.mongo import MongoStorageEngine
+
 from .validation import auth_header_is_valid, extract_bearer_token
 
 
@@ -29,6 +31,10 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+storage = MongoStorageEngine.create(
+    app.config['MONGO_HOSTS'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME'])
 
 data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
@@ -88,7 +94,7 @@ def http_error_handler(e):
 @app.route('/_status', methods=['GET'])
 @cache_control.nocache
 def health_check():
-    if db.alive():
+    if storage.alive():
         return jsonify(status='ok', message='database seems fine')
     else:
         abort(500, 'cannot connect to database')
@@ -172,7 +178,7 @@ def create_collection_for_dataset(dataset_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
         abort(401, 'Unauthorized: invalid or no token given.')
 
-    if db.collection_exists(dataset_name):
+    if storage.dataset_exists(dataset_name):
         abort(400, 'Collection exists with that name.')
 
     try:
@@ -185,10 +191,7 @@ def create_collection_for_dataset(dataset_name):
     if capped_size is None or not isinstance(capped_size, int):
         abort(400, 'You must specify an int capped_size of 0 or more')
 
-    if capped_size == 0:
-        db.create_uncapped_collection(dataset_name)
-    else:
-        db.create_capped_collection(dataset_name, capped_size)
+    storage.create_dataset(dataset_name, capped_size)
 
     return jsonify(status='ok', message='Created "{}"'.format(dataset_name))
 

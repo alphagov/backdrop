@@ -14,6 +14,8 @@ from ..core.database import InvalidOperationError
 from ..core.repository import DataSetConfigRepository
 from ..core.timeutils import as_utc
 
+from ..core.storage.mongo import MongoStorageEngine
+
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -30,6 +32,10 @@ db = database.Database(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME']
 )
+storage = MongoStorageEngine.create(
+    app.config['MONGO_HOSTS'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME'])
 
 data_set_repository = DataSetConfigRepository(
     app.config['STAGECRAFT_URL'],
@@ -78,7 +84,7 @@ def http_error_handler(e):
 @cache_control.nocache
 def health_check():
 
-    if not db.alive():
+    if not storage.alive():
         return jsonify(status='error',
                        message='cannot connect to database'), 500
 
