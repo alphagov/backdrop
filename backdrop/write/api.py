@@ -4,7 +4,7 @@ import json
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
-from backdrop.core.data_set import DataSet
+from backdrop.core.data_set import DataSet, NewDataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.repository import DataSetConfigRepository
 
@@ -256,7 +256,7 @@ def _append_to_data_set(data_set_config, data, ok_message=None):
 
 
 def _empty_data_set(data_set_config):
-    data_set = DataSet(db, data_set_config)
+    data_set = NewDataSet(storage, data_set_config)
     data_set.empty()
     return jsonify(
         status='ok',

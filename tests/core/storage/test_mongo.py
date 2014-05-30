@@ -9,6 +9,8 @@ from pymongo.errors import CollectionInvalid
 
 from backdrop.core.storage.mongo import MongoStorageEngine
 
+from tests.support.test_helpers import d_tz
+
 
 class TestMongoStorageEngine(object):
     def setup(self):
@@ -54,3 +56,29 @@ class TestMongoStorageEngine(object):
 
         assert_raises(CollectionInvalid,
                       self.engine.create_dataset, 'foo_bar', 0)
+
+    def _save(self, dataset_id, **kwargs):
+        self.db[dataset_id].save(kwargs)
+
+    # GET LAST UPDATED
+    def test_get_last_udpated(self):
+        self._save('foo_bar', _id='first', _updated_at=d_tz(2013, 3, 1))
+        self._save('foo_bar', _id='second', _updated_at=d_tz(2013, 9, 1))
+        self._save('foo_bar', _id='third', _updated_at=d_tz(2013, 3, 1))
+
+        assert_that(self.engine.get_last_updated('foo_bar'),
+                    is_(d_tz(2013, 9, 1)))
+
+    def test_returns_none_if_there_is_no_last_updated(self):
+        assert_that(self.engine.get_last_updated('foo_bar'), is_(None))
+
+    # EMPTY
+    def test_empty_a_dataset(self):
+        self._save('foo_bar', _id='first')
+        self._save('foo_bar', _id='second')
+
+        assert_that(self.db['foo_bar'].count(), is_(2))
+
+        self.engine.empty('foo_bar')
+
+        assert_that(self.db['foo_bar'].count(), is_(0))
