@@ -139,6 +139,10 @@ def convert_datetimes_to_utc(result):
 
 def get_mongo_spec(query):
     """Convert a Query into a mongo find spec
+
+    PyMongo refers to the query as a spec, this function uses the language
+    of the storage engine.
+
     >>> from ...read.query import Query
     >>> from datetime import datetime as dt
     >>> get_mongo_spec(Query.create())
