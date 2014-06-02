@@ -1,9 +1,8 @@
-from base64 import b64encode
 from collections import namedtuple
 from flask import logging
-from backdrop.core import records
-from backdrop.core.errors import ValidationError
-from backdrop.core.validation import data_set_is_valid
+from .records import add_auto_ids, parse_timestamp, validate_record, \
+    add_period_keys
+from .validation import data_set_is_valid
 
 import timeutils
 import datetime
@@ -41,6 +40,20 @@ class NewDataSet(object):
     def empty(self):
         return self.storage.empty(self.config.name)
 
+    def store(self, records):
+        log.info('received {} records'.format(len(records)))
+
+        # add auto-id keys
+        records = add_auto_ids(records, self.config.auto_ids)
+        # parse _timestamp
+        records = map(parse_timestamp, records)
+        # validate
+        records = map(validate_record, records)
+        # add period data
+        records = map(add_period_keys, records)
+
+        [self.storage.save(self.config.name, record) for record in records]
+
 
 class DataSet(object):
 
@@ -51,41 +64,10 @@ class DataSet(object):
         self.config = config
         self.db = db
 
-    def parse_and_store(self, data):
-        log.info("received %s documents" % len(data))
-
-        if self.auto_id_keys:
-            data = [self._add_id(d) for d in data]
-
-        self.store(records.parse_all(data))
-
-    def store(self, records):
-        if isinstance(records, list):
-            [self.repository.save(record.to_mongo()) for record in records]
-        else:
-            self.repository.save(records.to_mongo())
-
     def query(self, query):
         result = query.execute(self.repository)
 
         return result
-
-    def empty(self):
-        collection = self.db.get_collection(self.config.name)
-        collection.remove({})
-
-    def _add_id(self, datum):
-        self._validate_presence_of_auto_id_keys(datum)
-        return dict(datum.items() + [("_id", self._generate_id(datum))])
-
-    def _validate_presence_of_auto_id_keys(self, datum):
-        if not set(self.auto_id_keys).issubset(set(datum.keys())):
-            raise ValidationError(
-                "One or more of the following required values is missing: "
-                "%s" % ", ".join(self.auto_id_keys))
-
-    def _generate_id(self, datum):
-        return b64encode(".".join([datum[key] for key in self.auto_id_keys]))
 
 
 _DataSetConfig = namedtuple(

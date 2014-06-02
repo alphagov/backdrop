@@ -33,6 +33,19 @@ def get_mongo_client(hosts, port):
             client_list, replicaSet=replica_set)
 
 
+def reconnecting_save(collection, record, tries=3):
+    """Save to mongo, retrying if necesarry
+    """
+    try:
+        collection.save(record)
+    except AutoReconnect:
+        logger.warning('AutoReconnect on save : {}'.format(tries))
+        if tries > 1:
+            return reconnecting_save(collection, record, tries - 1)
+        else:
+            raise
+
+
 class MongoStorageEngine(object):
     @classmethod
     def create(cls, hosts, port, database):
@@ -57,6 +70,9 @@ class MongoStorageEngine(object):
         else:
             self._db.create_collection(dataset_id, capped=False)
 
+    def delete_dataset(self, dataset_id):
+        self._db.drop_collection(dataset_id)
+
     def get_last_updated(self, data_set_id):
         last_updated = self._coll(data_set_id).find_one(
             sort=[("_updated_at", pymongo.DESCENDING)])
@@ -65,3 +81,6 @@ class MongoStorageEngine(object):
 
     def empty(self, data_set_id):
         self._coll(data_set_id).remove({})
+
+    def save(self, data_set_id, record):
+        self._coll(data_set_id).save(record)

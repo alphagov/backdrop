@@ -2,11 +2,10 @@ import unittest
 import datetime
 
 from pymongo import MongoClient
-from hamcrest import *
+from hamcrest import assert_that, contains, has_entry
 
 from backdrop.core import database, data_set
 from backdrop.core.data_set import DataSetConfig
-from backdrop.core.records import Record
 from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.timeseries import WEEK
 from backdrop.read.query import Query
@@ -53,31 +52,6 @@ class TestDataSetIntegration(unittest.TestCase):
 
     def tearDown(self):
         self.mongo_collection.drop()
-
-    def test_that_records_get_sent_to_mongo_correctly(self):
-        my_record = Record({'foo': 'bar'})
-        self.data_set.store(my_record)
-
-        collection = self.mongo_collection.find()
-        assert_that(list(collection), only_contains(
-            has_entries({"foo": "bar"})
-        ))
-
-    def test_that_a_list_of_records_get_sent_to_mongo_correctly(self):
-        my_records = [
-            Record({'name': 'Groucho'}),
-            Record({'name': 'Harpo'}),
-            Record({'name': 'Chico'})
-        ]
-
-        self.data_set.store(my_records)
-
-        collection = self.mongo_collection.find()
-        assert_that(list(collection), only_contains(
-            has_entries({'name': 'Groucho'}),
-            has_entries({'name': 'Harpo'}),
-            has_entries({'name': 'Chico'})
-        ))
 
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()

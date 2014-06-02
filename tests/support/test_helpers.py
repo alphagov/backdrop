@@ -102,3 +102,18 @@ def d(year, month, day, hour=0, minute=0, second=0):
 
 def fixture_path(name):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'features', 'fixtures', name))
+
+
+class match(object):
+    """Wraps a hamcrest matcher with __eq__
+
+    This allows it to be easily used with mock's assert_called_with family
+    of methods.
+
+    See: https://code.google.com/p/mock/issues/detail?id=86#c4
+    """
+    def __init__(self, matcher):
+        self.matcher = matcher
+
+    def __eq__(self, other):
+        return self.matcher.matches(other)

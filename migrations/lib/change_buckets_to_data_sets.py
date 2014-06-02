@@ -5,8 +5,6 @@ due to problems with naming python modules starting with digits
 """
 import logging
 
-from backdrop.core.records import Record
-from backdrop.core.timeutils import utc
 
 log = logging.getLogger(__name__)
 

@@ -202,10 +202,10 @@ def delete_collection_by_dataset_name(dataset_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
         abort(401, 'Unauthorized: invalid or no token given.')
 
-    if not db.collection_exists(dataset_name):
+    if not storage.dataset_exists(dataset_name):
         abort(404, 'No collection exists with name "{}"'.format(dataset_name))
 
-    db.delete_collection(dataset_name)
+    storage.delete_dataset(dataset_name)
 
     return jsonify(status='ok', message='Deleted {}'.format(dataset_name))
 
@@ -246,8 +246,8 @@ def _validate_auth(data_set_config):
 
 
 def _append_to_data_set(data_set_config, data, ok_message=None):
-    data_set = DataSet(db, data_set_config)
-    data_set.parse_and_store(data)
+    data_set = NewDataSet(storage, data_set_config)
+    data_set.store(data)
 
     if ok_message:
         return jsonify(status='ok', message=ok_message)
