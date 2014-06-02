@@ -34,7 +34,7 @@ rm -f coverage.xml .coverage nosetests.xml
 find . -name '*.pyc' -delete
 
 # run doctests -- breaks if run with main tests
-nosetests -v --with-xunit --with-coverage --cover-package --with-doctest backdrop
+nosetests -v --with-xunit --with-coverage --cover-package=backdrop --with-doctest backdrop
 
 # run unit tests
 nosetests -v --with-xunit --with-coverage --cover-package=backdrop
