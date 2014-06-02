@@ -60,7 +60,7 @@ class NewDataSet(object):
             self.storage.save_record(self.config.name, record)
 
     def execute_query(self, query):
-        results = self.storage.query(self.config.name, query)
+        results = self.storage.execute_query(self.config.name, query)
 
         data = build_data(results, query)
 

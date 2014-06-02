@@ -88,7 +88,7 @@ class MongoStorageEngine(object):
         record['_updated_at'] = timeutils.now()
         self._coll(data_set_id).save(record)
 
-    def query(self, data_set_id, query):
+    def execute_query(self, data_set_id, query):
         return map(convert_datetimes_to_utc,
                    self._execute_query(data_set_id, query))
 

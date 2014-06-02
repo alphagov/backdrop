@@ -71,7 +71,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
 class TestNewDataSet_execute_query(BaseNewDataSetTest):
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {"_week_start_at": d(2013, 1, 7, 0, 0, 0), "_count": 3},
             {"_week_start_at": d(2013, 1, 8, 0, 0, 0), "_count": 1},
         ]
@@ -83,7 +83,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         )
 
     def test_period_query_fails_when_months_do_not_start_on_the_1st(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {"_month_start_at": d(2013, 1, 7, 0, 0, 0), "_count": 3},
             {"_month_start_at": d(2013, 2, 8, 0, 0, 0), "_count": 1},
         ]
@@ -95,7 +95,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         )
 
     def test_period_query_adds_missing_periods_in_correct_order(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {"_week_start_at": d(2013, 1, 14, 0, 0, 0), "_count": 32},
             {"_week_start_at": d(2013, 1, 21, 0, 0, 0), "_count": 45},
             {"_week_start_at": d(2013, 2, 4, 0, 0, 0), "_count": 17},
@@ -118,7 +118,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         ))
 
     def test_week_and_group_query(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {"some_group": "val1", "_week_start_at": d(2013, 1, 7), "_count": 1},
             {"some_group": "val1", "_week_start_at": d(2013, 1, 14), "_count": 5},
             {"some_group": "val2", "_week_start_at": d(2013, 1, 7), "_count": 2},
@@ -162,7 +162,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         })))
 
     def test_month_and_group_query(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {'some_group': 'val1', '_month_start_at': d(2013, 1, 1), '_count': 1},
             {'some_group': 'val1', '_month_start_at': d(2013, 2, 1), '_count': 5},
             {'some_group': 'val2', '_month_start_at': d(2013, 3, 1), '_count': 2},
@@ -178,7 +178,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
                     has_item(has_entries({"values": has_length(3)})))
 
     def test_month_and_group_query_with_start_and_end_at(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {'some_group': 'val1', '_month_start_at': d(2013, 1, 1), '_count': 1},
             {'some_group': 'val1', '_month_start_at': d(2013, 2, 1), '_count': 5},
             {'some_group': 'val2', '_month_start_at': d(2013, 3, 1), '_count': 2},
@@ -208,7 +208,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
             "_start_at": d_tz(2013, 2, 1)})))
 
     def test_period_group_query_adds_missing_periods_in_correct_order(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {'some_group': 'val1', '_week_start_at': d(2013, 1, 14), '_count': 23},
             {'some_group': 'val1', '_week_start_at': d(2013, 1, 21), '_count': 41},
             {'some_group': 'val2', '_week_start_at': d(2013, 1, 14), '_count': 31},
@@ -241,7 +241,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         })))
 
     def test_sorted_week_and_group_query(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {'some_group': 'val1', '_week_start_at': d(2013, 1, 7), '_count': 1},
             {'some_group': 'val1', '_week_start_at': d(2013, 1, 14), '_count': 5},
             {'some_group': 'val2', '_week_start_at': d(2013, 1, 7), '_count': 2},
@@ -258,7 +258,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         ))
 
     def test_sorted_week_and_group_query_with_limit(self):
-        self.mock_storage.query.return_value = [
+        self.mock_storage.execute_query.return_value = [
             {'some_group': 'val1', '_week_start_at': d(2013, 1, 7), '_count': 1},
             {'some_group': 'val2', '_week_start_at': d(2013, 1, 14), '_count': 5},
         ]
