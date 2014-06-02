@@ -13,7 +13,7 @@ class DecompressingRequest(Request):
     See http://tools.ietf.org/html/rfc2616#section-14.11
     """
 
-    def get_data(self, cache=True, as_text=False, parse_form_data=False):
+    def get_data(self, *args, **kwargs):
         """
         Override the get_data method to check whether the request entity
         was compressed. If it was, transparently decompress it and carry on.
@@ -27,9 +27,7 @@ class DecompressingRequest(Request):
                 and 'gzip' in content_encoding):
 
             # Decompress the stream
-            bytes = super(DecompressingRequest, self).get_data(cache,
-                                                               as_text,
-                                                               parse_form_data)
+            bytes = super(DecompressingRequest, self).get_data(*args, **kwargs)
 
             current_app.logger.debug("Got gzipped stream of length <%d>" %
                                      len(bytes))
@@ -48,6 +46,4 @@ class DecompressingRequest(Request):
 
             g._has_decompressed_entity = True
 
-        return super(DecompressingRequest, self).get_data(cache,
-                                                          as_text,
-                                                          parse_form_data)
+        return super(DecompressingRequest, self).get_data(*args, **kwargs)
