@@ -59,7 +59,7 @@ class NewDataSet(object):
         for record in records:
             self.storage.save_record(self.config.name, record)
 
-    def query(self, query):
+    def execute_query(self, query):
         results = self.storage.query(self.config.name, query)
 
         data = build_data(results, query)
@@ -67,7 +67,7 @@ class NewDataSet(object):
         if query.delta:
             shift = data.amount_to_shift(query.delta)
             if shift != 0:
-                return self.query(query.get_shifted_query(shift))
+                return self.execute_query(query.get_shifted_query(shift))
 
         return data.data()
 

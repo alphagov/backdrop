@@ -68,7 +68,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
 
 
-class TestNewDataSet_query(BaseNewDataSetTest):
+class TestNewDataSet_execute_query(BaseNewDataSetTest):
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
         self.mock_storage.query.return_value = [
@@ -78,7 +78,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
 
         assert_raises(
             ValueError,
-            self.data_set.query,
+            self.data_set.execute_query,
             Query.create(period=WEEK)
         )
 
@@ -90,7 +90,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
 
         assert_raises(
             ValueError,
-            self.data_set.query,
+            self.data_set.execute_query,
             Query.create(period=MONTH)
         )
 
@@ -101,11 +101,12 @@ class TestNewDataSet_query(BaseNewDataSetTest):
             {"_week_start_at": d(2013, 2, 4, 0, 0, 0), "_count": 17},
         ]
 
-        result = self.data_set.query(Query.create(period=WEEK,
-                                                  start_at=d_tz(2013, 1, 7, 0, 0,
-                                                                0),
-                                                  end_at=d_tz(2013, 2, 18, 0, 0,
-                                                              0)))
+        result = self.data_set.execute_query(
+            Query.create(period=WEEK,
+                         start_at=d_tz(2013, 1, 7, 0, 0,
+                                       0),
+                         end_at=d_tz(2013, 2, 18, 0, 0,
+                                     0)))
 
         assert_that(result, contains(
             has_entries({"_start_at": d_tz(2013, 1, 7), "_count": 0}),
@@ -123,7 +124,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
             {"some_group": "val2", "_week_start_at": d(2013, 1, 7), "_count": 2},
             {"some_group": "val2", "_week_start_at": d(2013, 1, 14), "_count": 6},
         ]
-        data = self.data_set.query(
+        data = self.data_set.execute_query(
             Query.create(period=WEEK, group_by="some_group"))
 
         assert_that(data, has_length(2))
@@ -169,7 +170,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
             {'some_group': 'val2', '_month_start_at': d(2013, 7, 1), '_count': 6},
         ]
 
-        data = self.data_set.query(Query.create(period=MONTH,
+        data = self.data_set.execute_query(Query.create(period=MONTH,
                                                 group_by="some_group"))
         assert_that(data,
                     has_item(has_entries({"values": has_length(2)})))
@@ -185,7 +186,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
             {'some_group': 'val2', '_month_start_at': d(2013, 7, 1), '_count': 6},
         ]
 
-        data = self.data_set.query(Query.create(period=MONTH,
+        data = self.data_set.execute_query(Query.create(period=MONTH,
                                                 group_by="some_group",
                                                 start_at=d(2013, 1, 1),
                                                 end_at=d(2013, 4, 2)))
@@ -214,7 +215,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
             {'some_group': 'val2', '_week_start_at': d(2013, 1, 28), '_count': 12},
         ]
 
-        data = self.data_set.query(
+        data = self.data_set.execute_query(
             Query.create(period=WEEK, group_by="some_group",
                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
                          end_at=d_tz(2013, 2, 4, 0, 0, 0)))
@@ -249,7 +250,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
 
         query = Query.create(period=WEEK, group_by="some_group",
                              sort_by=["_count", "descending"])
-        data = self.data_set.query(query)
+        data = self.data_set.execute_query(query)
 
         assert_that(data, contains(
             has_entries({'some_group': 'val2'}),
@@ -265,7 +266,7 @@ class TestNewDataSet_query(BaseNewDataSetTest):
         query = Query.create(period=WEEK, group_by="some_group",
                              sort_by=["_count", "descending"], limit=1,
                              collect=[])
-        data = self.data_set.query(query)
+        data = self.data_set.execute_query(query)
 
         assert_that(data, contains(
             has_entries({'some_group': 'val2'})

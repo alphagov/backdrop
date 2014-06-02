@@ -53,7 +53,7 @@ class TestDataSetIntegration(unittest.TestCase):
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()
         query = Query.create(period=WEEK)
-        result = self.new_data_set.query(query)
+        result = self.new_data_set.execute_query(query)
         assert_that(result, contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),
