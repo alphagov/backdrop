@@ -54,7 +54,7 @@ class MongoStorageEngine(object):
         self._mongo = mongo
         self._db = mongo[database]
 
-    def _coll(self, data_set_id):
+    def _collection(self, data_set_id):
         return self._db[data_set_id]
 
     def alive(self):
@@ -76,17 +76,17 @@ class MongoStorageEngine(object):
         self._db.drop_collection(data_set_id)
 
     def get_last_updated(self, data_set_id):
-        last_updated = self._coll(data_set_id).find_one(
+        last_updated = self._collection(data_set_id).find_one(
             sort=[("_updated_at", pymongo.DESCENDING)])
         if last_updated and last_updated.get('_updated_at') is not None:
             return timeutils.utc(last_updated['_updated_at'])
 
     def empty_data_set(self, data_set_id):
-        self._coll(data_set_id).remove({})
+        self._collection(data_set_id).remove({})
 
     def save_record(self, data_set_id, record):
         record['_updated_at'] = timeutils.now()
-        self._coll(data_set_id).save(record)
+        self._collection(data_set_id).save(record)
 
     def execute_query(self, data_set_id, query):
         return map(convert_datetimes_to_utc,
@@ -103,7 +103,7 @@ class MongoStorageEngine(object):
         spec = get_mongo_spec(query)
         collect_fields = query.collect_fields
 
-        return self._coll(data_set_id).group(
+        return self._collection(data_set_id).group(
             key=keys,
             condition=build_group_condition(keys, spec),
             initial=build_group_initial_state(collect_fields),
@@ -114,7 +114,7 @@ class MongoStorageEngine(object):
         sort = get_mongo_sort(query)
         limit = get_mongo_limit(query)
 
-        return self._coll(data_set_id).find(spec, sort=sort, limit=limit)
+        return self._collection(data_set_id).find(spec, sort=sort, limit=limit)
 
 
 def convert_datetimes_to_utc(result):
