@@ -171,7 +171,7 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         ]
 
         data = self.data_set.execute_query(Query.create(period=MONTH,
-                                                group_by="some_group"))
+                                                        group_by="some_group"))
         assert_that(data,
                     has_item(has_entries({"values": has_length(2)})))
         assert_that(data,
@@ -186,10 +186,11 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
             {'some_group': 'val2', '_month_start_at': d(2013, 7, 1), '_count': 6},
         ]
 
-        data = self.data_set.execute_query(Query.create(period=MONTH,
-                                                group_by="some_group",
-                                                start_at=d(2013, 1, 1),
-                                                end_at=d(2013, 4, 2)))
+        data = self.data_set.execute_query(
+            Query.create(period=MONTH,
+                         group_by="some_group",
+                         start_at=d(2013, 1, 1),
+                         end_at=d(2013, 4, 2)))
         assert_that(data,
                     has_item(has_entries({"values": has_length(4)})))
         assert_that(data,
