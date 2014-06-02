@@ -4,12 +4,12 @@ import json
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
-from backdrop.core.data_set import DataSet, NewDataSet
+from backdrop.core.data_set import NewDataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.repository import DataSetConfigRepository
 
 from ..core.errors import ParseError, ValidationError
-from ..core import database, log_handler, cache_control
+from ..core import log_handler, cache_control
 
 from ..core.storage.mongo import MongoStorageEngine
 
@@ -26,11 +26,6 @@ feature_flags = FeatureFlag(app)
 app.config.from_object(
     "backdrop.write.config.{}".format(GOVUK_ENV))
 
-db = database.Database(
-    app.config['MONGO_HOSTS'],
-    app.config['MONGO_PORT'],
-    app.config['DATABASE_NAME']
-)
 storage = MongoStorageEngine.create(
     app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],

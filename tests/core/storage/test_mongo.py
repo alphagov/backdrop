@@ -5,7 +5,10 @@ This module includes integration tests and unit tests that require a significant
 amount of setup and mocking. Small unit tests are in doctest format in the
 module itself.
 """
-from hamcrest import assert_that, is_, has_item, has_entries, is_not
+import datetime
+
+from hamcrest import assert_that, is_, has_item, has_entries, is_not, \
+    has_entry, instance_of
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -25,6 +28,9 @@ class TestMongoStorageEngine(object):
 
     def teardown(self):
         self.mongo.drop_database('backdrop_test')
+
+    def _save(self, dataset_id, **kwargs):
+        self.db[dataset_id].save(kwargs)
 
     # ALIVE
     def test_alive_returns_true_if_mongo_is_up(self):
@@ -69,9 +75,6 @@ class TestMongoStorageEngine(object):
         assert_raises(CollectionInvalid,
                       self.engine.create_dataset, 'foo_bar', 0)
 
-    def _save(self, dataset_id, **kwargs):
-        self.db[dataset_id].save(kwargs)
-
     # GET LAST UPDATED
     def test_get_last_udpated(self):
         self._save('foo_bar', _id='first', _updated_at=d_tz(2013, 3, 1))
@@ -100,6 +103,12 @@ class TestMongoStorageEngine(object):
         self.engine.save('foo_bar', {'_id': 'first'})
 
         assert_that(self.db['foo_bar'].count(), is_(1))
+
+    def test_save_a_record_adds_an_updated_at(self):
+        self.engine.save('foo_bar', {'_id': 'first'})
+
+        assert_that(self.db['foo_bar'].find_one(),
+                    has_entry('_updated_at', instance_of(datetime.datetime)))
 
 
 class TestReconnectingSave(object):

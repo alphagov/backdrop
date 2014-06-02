@@ -8,7 +8,6 @@ from pymongo.errors import AutoReconnect
 from bson import Code
 
 from .. import timeutils
-from ... import statsd
 
 
 logger = logging.getLogger(__name__)
@@ -83,4 +82,5 @@ class MongoStorageEngine(object):
         self._coll(data_set_id).remove({})
 
     def save(self, data_set_id, record):
+        record['_updated_at'] = timeutils.now()
         self._coll(data_set_id).save(record)

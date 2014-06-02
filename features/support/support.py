@@ -14,6 +14,13 @@ def wait_until(condition, timeout=15, interval=0.1):
 
 
 class BaseClient(object):
+    def mongo(self):
+        return self._mongo_db
+
+    def clean_mongo(self):
+        self._mongo_db.connection.drop_database(
+            self._mongo_db.name)
+
     def before_scenario(self):
         pass
 
