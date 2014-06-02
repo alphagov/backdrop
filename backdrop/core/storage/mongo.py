@@ -158,9 +158,12 @@ def time_range_to_mongo_query(start_at, end_at):
     >>> from datetime import datetime as dt
     >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), None)
     {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 12, 0)}}
-    >>> expected = {'_timestamp': {'$gte': dt(2012, 12, 12, 12, 0),
+    >>> expected = {'_timestamp': {
+    ...  '$gte': dt(2012, 12, 12, 12, 0),
     ...  '$lt': dt(2012, 12, 13, 13, 0)}}
-    >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), dt(2012, 12, 13, 13))
+    >>> time_range_to_mongo_query(
+    ...   dt(2012, 12, 12, 12), dt(2012, 12, 13, 13)) == expected
+    True
     >>> time_range_to_mongo_query(None, None)
     {}
     """
