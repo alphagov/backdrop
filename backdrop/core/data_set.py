@@ -3,6 +3,10 @@ from flask import logging
 from .records import add_auto_ids, parse_timestamp, validate_record, \
     add_period_keys
 from .validation import data_set_is_valid
+from .nested_merge import nested_merge
+from .errors import InvalidSortError
+from backdrop.read.response import PeriodGroupedData, PeriodData, \
+    GroupedData, SimpleData
 
 import timeutils
 import datetime
@@ -38,7 +42,7 @@ class NewDataSet(object):
         return self.storage.get_last_updated(self.config.name)
 
     def empty(self):
-        return self.storage.empty(self.config.name)
+        return self.storage.empty_data_set(self.config.name)
 
     def store(self, records):
         log.info('received {} records'.format(len(records)))
@@ -52,22 +56,70 @@ class NewDataSet(object):
         # add period data
         records = map(add_period_keys, records)
 
-        [self.storage.save(self.config.name, record) for record in records]
+        for record in records:
+            self.storage.save_record(self.config.name, record)
+
+    def execute_query(self, query):
+        results = self.storage.execute_query(self.config.name, query)
+
+        data = build_data(results, query)
+
+        if query.delta:
+            shift = data.amount_to_shift(query.delta)
+            if shift != 0:
+                return self.execute_query(query.get_shifted_query(shift))
+
+        return data.data()
 
 
-class DataSet(object):
+def build_data(results, query):
+    if not query.is_grouped:
+        # TODO: strip internal fields
+        return SimpleData(results)
 
-    def __init__(self, db, config):
-        self.name = config.name
-        self.repository = db.get_repository(config.name)
-        self.auto_id_keys = config.auto_ids
-        self.config = config
-        self.db = db
+    results = nested_merge(query.group_keys, query.collect, results)
+    results = _sort_grouped_results(results, query.sort_by)
+    results = _limit_grouped_results(results, query.limit)
 
-    def query(self, query):
-        result = query.execute(self.repository)
+    if query.group_by and query.period:
+        data = PeriodGroupedData(results, period=query.period)
+        if query.start_at and query.end_at:
+            data.fill_missing_periods(
+                query.start_at, query.end_at, collect=query.collect)
+        return data
+    elif query.group_by:
+        return GroupedData(results)
+    elif query.period:
+        data = PeriodData(results, period=query.period)
+        if query.start_at and query.end_at:
+            data.fill_missing_periods(
+                query.start_at, query.end_at, collect=query.collect)
+        return data
+    else:
+        raise AssertionError("A query claiming to be a grouped query was not.")
 
-        return result
+
+def _sort_grouped_results(results, sort):
+    """Sort a grouped set of results
+    """
+    if not sort:
+        return results
+    sorters = {
+        "ascending": lambda a, b: cmp(a, b),
+        "descending": lambda a, b: cmp(b, a)
+    }
+    sorter = sorters[sort[1]]
+    try:
+        results.sort(cmp=sorter, key=lambda a: a[sort[0]])
+        return results
+    except KeyError:
+        raise InvalidSortError('Invalid sort key {0}'.format(sort[0]))
+
+
+def _limit_grouped_results(results, limit):
+    """Limit a grouped set of results
+    """
+    return results[:limit] if limit else results
 
 
 _DataSetConfig = namedtuple(

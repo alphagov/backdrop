@@ -8,9 +8,9 @@ from flask_featureflags import FeatureFlag
 from backdrop.read.query import Query
 
 from .validation import validate_request_args
-from ..core import database, log_handler, cache_control
-from ..core.data_set import DataSet, NewDataSet
-from ..core.database import InvalidOperationError
+from ..core import log_handler, cache_control
+from ..core.data_set import NewDataSet
+from ..core.errors import InvalidOperationError
 from ..core.repository import DataSetConfigRepository
 from ..core.timeutils import as_utc
 
@@ -27,11 +27,6 @@ feature_flags = FeatureFlag(app)
 app.config.from_object(
     "backdrop.read.config.{}".format(GOVUK_ENV))
 
-db = database.Database(
-    app.config['MONGO_HOSTS'],
-    app.config['MONGO_PORT'],
-    app.config['DATABASE_NAME']
-)
 storage = MongoStorageEngine.create(
     app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],
@@ -175,11 +170,11 @@ def fetch(data_set_config):
                 data_set_config.name, result.message,
                 400)
 
-        data_set = DataSet(db, data_set_config)
+        data_set = NewDataSet(storage, data_set_config)
 
         try:
             query = Query.parse(request.args)
-            data = data_set.query(query).data()
+            data = data_set.execute_query(query)
 
         except InvalidOperationError:
             return log_error_and_respond(
