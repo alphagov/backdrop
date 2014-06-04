@@ -1,6 +1,6 @@
 argh==0.24.1
 Flask==0.10.1
-Flask-FeatureFlags==0.3
+Flask-FeatureFlags==0.4
 gunicorn==18.0
 invoke
 pip==1.4.1
