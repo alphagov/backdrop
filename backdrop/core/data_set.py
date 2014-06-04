@@ -133,7 +133,8 @@ class DataSetConfig(_DataSetConfig):
     def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
-                capped_size=5040, max_age_expected=2678400):
+                capped_size=5040, max_age_expected=2678400,
+                published=True):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 
