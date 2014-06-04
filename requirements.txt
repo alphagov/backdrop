@@ -7,7 +7,7 @@ pip==1.5.6
 pymongo==2.7.1
 python-dateutil==2.2
 pytz==2013b
-rauth==0.5.5
+rauth==0.7.0
 requests==1.2.3
 statsd==2.0.3
 xlrd==0.9.2
