@@ -125,7 +125,8 @@ def _limit_grouped_results(results, limit):
 _DataSetConfig = namedtuple(
     "_DataSetConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
-    "upload_filters auto_ids queryable realtime capped_size max_age_expected")
+    "upload_filters auto_ids queryable realtime capped_size max_age_expected "
+    "published")
 
 
 class DataSetConfig(_DataSetConfig):
@@ -133,7 +134,8 @@ class DataSetConfig(_DataSetConfig):
     def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
-                capped_size=5040, max_age_expected=2678400):
+                capped_size=5040, max_age_expected=2678400,
+                published=True):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 
@@ -147,7 +149,8 @@ class DataSetConfig(_DataSetConfig):
                                                  bearer_token, upload_format,
                                                  upload_filters, auto_ids,
                                                  queryable, realtime,
-                                                 capped_size, max_age_expected)
+                                                 capped_size, max_age_expected,
+                                                 published)
 
     @property
     def max_age(self):

@@ -181,7 +181,12 @@ def fetch(data_set_config):
                 data_set.name, 'invalid collect function',
                 400)
 
-        response = jsonify(data=data)
+        if data_set_config.published is False:
+            warning = ("Warning: This data-set is unpublished. "
+                       "Data may be subject to change or be inaccurate.")
+            response = jsonify(data=data, warning=warning)
+        else:
+            response = jsonify(data=data)
 
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'

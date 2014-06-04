@@ -28,7 +28,8 @@ def step(context, fixture_name, data_set_name):
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
-            for key in ['_timestamp', '_day_start_at', '_week_start_at', '_month_start_at']:
+            for key in ['_timestamp', '_day_start_at',
+                        '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
             context.client.mongo()[data_set_name].save(obj)
@@ -51,7 +52,8 @@ def step(context, fixture_name, data_set_name):
     fixture_path = os.path.join(FIXTURE_PATH, fixture_name)
     with open(fixture_path) as fixture:
         for obj in json.load(fixture):
-            for key in ['_timestamp', '_day_start_at', '_week_start_at', '_month_start_at']:
+            for key in ['_timestamp', '_day_start_at',
+                        '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
             context.client.mongo()[data_set_name].save(obj)
@@ -124,6 +126,15 @@ def step(context, expected_message):
         json.loads(context.response.data),
         is_(json.loads(expected_message)))
 
+
+@then(u'I should get back a warning of "{expected_warning}"')
+def step(context, expected_warning):
+    response_object = json.loads(context.response.data)
+
+    assert_that(
+        response_object['warning'],
+        is_(expected_warning)
+    )
 
 step_matcher("re")
 

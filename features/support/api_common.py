@@ -19,6 +19,7 @@ def ensure_data_set_exists(context, data_set_name, settings={}):
         'realtime': False,
         'capped_size': 5040,
         'max_age_expected': 2678400,
+        'published': True,
     }
 
     response.update(settings)
