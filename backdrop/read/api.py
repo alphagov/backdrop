@@ -185,14 +185,19 @@ def fetch(data_set_config):
             warning = ("Warning: This data-set is unpublished. "
                        "Data may be subject to change or be inaccurate.")
             response = jsonify(data=data, warning=warning)
+            # Do not cache unpublished data-sets
+            response.headers['Cache-Control'] = "no-cache"
         else:
             response = jsonify(data=data)
+            # Set cache control based on data-set max_age
+            response.headers['Cache-Control'] = (
+                "max-age=%d, "
+                "must-revalidate" % data_set_config.max_age
+            )
 
+    # Headers
     # allow requests from any origin
     response.headers['Access-Control-Allow-Origin'] = '*'
-
-    response.headers['Cache-Control'] = "max-age=%d, must-revalidate" % \
-                                        data_set_config.max_age
 
     return response
 
