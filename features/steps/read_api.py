@@ -124,6 +124,14 @@ def step(context, expected_message):
         json.loads(context.response.data),
         is_(json.loads(expected_message)))
 
+@then(u'I should get back a warning of "{expected_warning}"')
+def step(context, expected_warning):
+    response_object = json.loads(context.response.data)
+
+    assert_that(
+        response_object['warning'],
+        is_(expected_warning)
+    )
 
 step_matcher("re")
 
