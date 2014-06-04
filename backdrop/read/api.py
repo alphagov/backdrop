@@ -182,7 +182,7 @@ def fetch(data_set_config):
                 400)
 
         if data_set_config.published is False:
-            warning = ("Warning: This data-set is unpublishsed. "
+            warning = ("Warning: This data-set is unpublished. "
                        "Data may be subject to change or be inaccurate.")
             response = jsonify(data=data, warning=warning)
         else:

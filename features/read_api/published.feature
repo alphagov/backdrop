@@ -17,4 +17,4 @@ Feature: published status in responses
             | raw_queries_allowed | true  |
          when I go to "/unpublished_data_set"
          then I should get back a status of "200"
-          and I should get back a warning of "Warning: This data-set is unpublishsed. Data may be subject to change or be inaccurate."
+          and I should get back a warning of "Warning: This data-set is unpublished. Data may be subject to change or be inaccurate."
