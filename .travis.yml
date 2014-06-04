@@ -16,5 +16,6 @@ after_script:
 branches:
   except:
     - release
+    - /^release_[0-9]+$/
 notifications:
   email: false
