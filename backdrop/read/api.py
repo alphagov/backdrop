@@ -16,6 +16,8 @@ from ..core.timeutils import as_utc
 
 from ..core.storage.mongo import MongoStorageEngine
 
+from backdrop import statsd
+
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -77,6 +79,7 @@ def http_error_handler(e):
 
 @app.route('/_status', methods=['GET'])
 @cache_control.nocache
+@statsd.timer('read.route.heath_check.status')
 def health_check():
 
     if not storage.alive():
@@ -88,6 +91,7 @@ def health_check():
 
 @app.route('/_status/data-sets', methods=['GET'])
 @cache_control.nocache
+@statsd.timer('read.route.heath_check.data_set')
 def data_set_health():
 
     failing_data_sets = []
@@ -136,16 +140,22 @@ def log_error_and_respond(data_set, message, status_code):
 
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
 def data(data_group, data_type):
-    data_set_config = data_set_repository.get_data_set_for_query(data_group,
-                                                                 data_type)
-    return fetch(data_set_config)
+    with statsd.timer('read.route.data.{data_group}.{data_type}'.format(
+            data_group=data_group,
+            data_type=data_type)):
+        data_set_config = data_set_repository.get_data_set_for_query(
+            data_group,
+            data_type)
+        return fetch(data_set_config)
 
 
 @app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
 @cache_control.etag
 def query(data_set_name):
-    data_set_config = data_set_repository.retrieve(data_set_name)
-    return fetch(data_set_config)
+    with statsd.timer('read.route.{data_set_name}'.format(
+            data_set_name=data_set_name)):
+        data_set_config = data_set_repository.retrieve(data_set_name)
+        return fetch(data_set_config)
 
 
 def fetch(data_set_config):
