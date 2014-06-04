@@ -4,7 +4,7 @@ Flask-FeatureFlags==0.4
 gunicorn==18.0
 invoke
 pip==1.5.6
-pymongo==2.6.3
+pymongo==2.7.1
 python-dateutil==2.1
 pytz==2013b
 rauth==0.5.5
