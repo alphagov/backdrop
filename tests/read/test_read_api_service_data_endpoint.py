@@ -150,4 +150,4 @@ class PreflightChecksApiTestCase(unittest.TestCase):
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type", raw_queries_allowed=True, published=False)
     def test_cache_control_is_set_to_no_cache_for_unpublished_data_sets(self):
         response = self.app.get('/data/some-group/some-type')
-        assert_that(response, has_header('Cache-Control', 'no-cache, must-revalidate'))
+        assert_that(response, has_header('Cache-Control', 'no-cache'))

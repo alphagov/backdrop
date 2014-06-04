@@ -186,7 +186,7 @@ def fetch(data_set_config):
                        "Data may be subject to change or be inaccurate.")
             response = jsonify(data=data, warning=warning)
             # Do not cache unpublished data-sets
-            response.headers['Cache-Control'] = "no-cache, must-revalidate"
+            response.headers['Cache-Control'] = "no-cache"
         else:
             response = jsonify(data=data)
             # Set cache control based on data-set max_age
