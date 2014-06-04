@@ -125,7 +125,8 @@ def _limit_grouped_results(results, limit):
 _DataSetConfig = namedtuple(
     "_DataSetConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
-    "upload_filters auto_ids queryable realtime capped_size max_age_expected")
+    "upload_filters auto_ids queryable realtime capped_size max_age_expected "
+    "published")
 
 
 class DataSetConfig(_DataSetConfig):
@@ -148,7 +149,8 @@ class DataSetConfig(_DataSetConfig):
                                                  bearer_token, upload_format,
                                                  upload_filters, auto_ids,
                                                  queryable, realtime,
-                                                 capped_size, max_age_expected)
+                                                 capped_size, max_age_expected,
+                                                 published)
 
     @property
     def max_age(self):
