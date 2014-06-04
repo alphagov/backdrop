@@ -22,7 +22,7 @@ def _is_real_date(value):
     try:
         parser.parse(value).astimezone(pytz.UTC)
         return True
-    except ValueError:
+    except (TypeError, ValueError):
         return False
 
 

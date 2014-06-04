@@ -64,7 +64,7 @@ def parse_timestamp(record):
     if '_timestamp' in record:
         try:
             record['_timestamp'] = parse_time_as_utc(record['_timestamp'])
-        except ValueError:
+        except (TypeError, ValueError):
             raise ParseError(
                 '_timestamp is not a valid timestamp, it must be ISO8601')
 
