@@ -157,7 +157,7 @@ def customer_satisfaction(rows):
     def date_or_none(string):
         try:
             return parse_time_as_utc(string)
-        except ValueError:
+        except (TypeError, ValueError):
             return None
 
     for row_number in itertools.count(4):
