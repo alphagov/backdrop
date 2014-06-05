@@ -7,6 +7,8 @@ from urllib import quote
 from backdrop.core.data_set import DataSetConfig
 from backdrop.core.user import UserConfig
 
+from backdrop import statsd
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,36 +30,44 @@ class HttpRepository(object):
         self._model_cls = model_cls
 
     def get_all(self):
-        url = '{base_url}/{model_name}s'.format(
-            base_url=self._stagecraft_url,
-            model_name=self._model_name)
+        with statsd.timer('repository.http.get_all.{model_name}'.format(
+                model_name=self._model_name)):
+            url = '{base_url}/{model_name}s'.format(
+                base_url=self._stagecraft_url,
+                model_name=self._model_name)
 
-        # Note: Don't catch HTTP 404 - that should never happen on this URL.
-        json_response = _get_json_url(url, self._stagecraft_token)
-        items = _decode_json(json_response)
+            # Note: Don't catch HTTP 404 - should never happen on this URL.
+            json_response = _get_json_url(url, self._stagecraft_token)
+            items = _decode_json(json_response)
 
-        return [self.create_model(item) for item in items]
+            return [self.create_model(item) for item in items]
 
     def retrieve(self, identifier):
         if len(identifier) == 0:
             raise ValueError('the identifier must not be empty')
-        path = quote('{model_name}s/{instance_identifier}'.format(
-            model_name=self._model_name,
-            instance_identifier=identifier))
-        url = ('{base_url}/{path}'.format(
-            base_url=self._stagecraft_url,
-            path=path))
 
-        try:
-            json_response = _get_json_url(url, self._stagecraft_token)
-        except requests.HTTPError as e:
-            if e.response.status_code == 404:
-                return None
-            else:
-                raise
+        with statsd.timer(
+            'repository.http.retrieve.{model_name}s.{identifier}'.format(
+                model_name=self._model_name,
+                identifier=identifier)):
+            path = quote('{model_name}s/{instance_identifier}'.format(
+                model_name=self._model_name,
+                instance_identifier=identifier))
+            url = ('{base_url}/{path}'.format(
+                base_url=self._stagecraft_url,
+                path=path))
 
-        return self.create_model(_decode_json(json_response))
+            try:
+                json_response = _get_json_url(url, self._stagecraft_token)
+            except requests.HTTPError as e:
+                if e.response.status_code == 404:
+                    return None
+                else:
+                    raise
 
+            return self.create_model(_decode_json(json_response))
+
+    @statsd.timer('repository.http.create_model')
     def create_model(self, stagecraft_dict):
         if stagecraft_dict is None:
             return None
@@ -113,12 +123,15 @@ class DataSetConfigRepository(object):
             'data-set',
             DataSetConfig)
 
+    @statsd.timer('repository.data_set_config.get_all')
     def get_all(self):
         return self._repository_proxy.get_all()
 
+    @statsd.timer('repository.data_set_config.retrieve')
     def retrieve(self, data_set_name):
         return self._repository_proxy.retrieve(data_set_name)
 
+    @statsd.timer('repository.data_set_config.get_data_set_for_query')
     def get_data_set_for_query(self, data_group, data_type):
         empty_vars = []
         if len(data_group) == 0:
@@ -127,20 +140,26 @@ class DataSetConfigRepository(object):
             empty_vars += ['Data Type']
         if len(empty_vars) > 0:
             raise ValueError(' and '.join(empty_vars) + 'must not be empty')
-        data_set_url = ('{url}/data-sets?data-group={data_group_name}'
-                        '&data-type={data_type_name}'.format(
-                            url=self._stagecraft_url,
-                            data_group_name=data_group,
-                            data_type_name=data_type))
 
-        json_response = _get_json_url(
-            data_set_url, self._stagecraft_token)
+        with statsd.timer(
+            'repository.data_set_config.get_data_set_for_query.'
+            + '{data_group}.{data_type}'.format(
+                data_group=data_group,
+                data_type=data_type)):
+            data_set_url = ('{url}/data-sets?data-group={data_group_name}'
+                            '&data-type={data_type_name}'.format(
+                                url=self._stagecraft_url,
+                                data_group_name=data_group,
+                                data_type_name=data_type))
 
-        data_sets = _decode_json(json_response)
-        if len(data_sets) > 0:
-            return self._repository_proxy.create_model(data_sets[0])
+            json_response = _get_json_url(
+                data_set_url, self._stagecraft_token)
 
-        return None
+            data_sets = _decode_json(json_response)
+            if len(data_sets) > 0:
+                return self._repository_proxy.create_model(data_sets[0])
+
+            return None
 
 
 def _decode_json(string):

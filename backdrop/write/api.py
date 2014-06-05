@@ -92,6 +92,7 @@ def http_error_handler(e):
 
 @app.route('/_status', methods=['GET'])
 @cache_control.nocache
+@statsd.timer('write.route.health_check.status')
 def health_check():
     if storage.alive():
         return jsonify(status='ok', message='database seems fine')
@@ -106,23 +107,27 @@ def write_by_group(data_group, data_type):
     Write by group/type
     e.g. POST https://BACKDROP/data/my-transaction-name/volumetrics
     """
-    data_set_config = data_set_repository.get_data_set_for_query(
-        data_group,
-        data_type)
+    with statsd.timer('write.route.data.{data_group}.{data_type}'.format(
+            data_group=data_group,
+            data_type=data_type)):
+        data_set_config = data_set_repository.get_data_set_for_query(
+            data_group,
+            data_type)
 
-    _validate_config(data_set_config)
-    _validate_auth(data_set_config)
+        _validate_config(data_set_config)
+        _validate_auth(data_set_config)
 
-    try:
-        data = listify_json(get_json_from_request(request))
-        return _append_to_data_set(data_set_config, data)
+        try:
+            data = listify_json(get_json_from_request(request))
+            return _append_to_data_set(data_set_config, data)
 
-    except (ParseError, ValidationError) as e:
-        abort(400, repr(e))
+        except (ParseError, ValidationError) as e:
+            abort(400, repr(e))
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['PUT'])
 @cache_control.nocache
+@statsd.timer('write.route.data.empty.data_set')
 def put_by_group_and_type(data_group, data_type):
     """
     Put by group/type
@@ -173,6 +178,7 @@ def post_to_data_set(data_set_name):
 
 @app.route('/data-sets/<data_set_name>', methods=['POST'])
 @cache_control.nocache
+@statsd.timer('write.route.create_data_set')
 def create_collection_for_data_set(data_set_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
         abort(401, 'Unauthorized: invalid or no token given.')
@@ -197,6 +203,7 @@ def create_collection_for_data_set(data_set_name):
 
 @app.route('/data-sets/<data_set_name>', methods=['DELETE'])
 @cache_control.nocache
+@statsd.timer('write.route.delete_data_set')
 def delete_collection_by_data_set_name(data_set_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
         abort(401, 'Unauthorized: invalid or no token given.')
