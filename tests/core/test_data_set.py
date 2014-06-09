@@ -5,7 +5,7 @@ from mock import Mock
 
 from backdrop.core import data_set
 from backdrop.core.data_set import DataSetConfig
-from backdrop.read.query import Query
+from backdrop.core.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
 from backdrop.core.errors import ValidationError
 from tests.support.test_helpers import d, d_tz, match

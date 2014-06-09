@@ -1,11 +1,11 @@
 import unittest
 import urllib
 import datetime
-from hamcrest import *
+from hamcrest import assert_that, is_
 from mock import patch
 import pytz
 from backdrop.read import api
-from backdrop.read.query import Query
+from backdrop.core.query import Query
 from tests.support.data_set import fake_data_set_exists
 from tests.support.test_helpers import has_status
 

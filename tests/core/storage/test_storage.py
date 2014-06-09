@@ -5,7 +5,7 @@ from hamcrest import assert_that, is_, less_than, contains, has_entries, \
 from nose.tools import assert_raises
 from freezegun import freeze_time
 
-from backdrop.read.query import Query
+from backdrop.core.query import Query
 from backdrop.core.errors import DataSetCreationError
 from backdrop.core.records import add_period_keys
 from backdrop.core.timeseries import DAY
