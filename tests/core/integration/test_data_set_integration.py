@@ -7,7 +7,7 @@ from hamcrest import assert_that, contains, has_entry
 from backdrop.core.data_set import DataSetConfig, NewDataSet
 from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.timeseries import WEEK
-from backdrop.read.query import Query
+from backdrop.core.query import Query
 from tests.support.test_helpers import d_tz
 
 HOSTS = ['localhost']
