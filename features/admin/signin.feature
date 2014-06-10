@@ -5,7 +5,7 @@ Feature: Sign in
     Given I am logged in as "Max" with email "test@example.com"
     When I go to "/"
     Then I should get a "cache-control" header of "private, must-revalidate"
-    And I should see the text "Signed in as Max"
+    And I should see the signed in user "Max"
 
   Scenario: Show signed in list of actions
     Given I am logged in as "Alex" with email "test@example.com"
