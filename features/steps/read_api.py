@@ -117,7 +117,7 @@ def step(context, header, value):
 @then('I should get back the message "{message}"')
 def step(context, message):
     data = json.loads(context.response.data)
-    assert_that(data["message"], matches_regexp(message))
+    assert_that(data["message"], is_(message))
 
 
 @then('I should get back a message: "{expected_message}"')
