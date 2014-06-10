@@ -22,7 +22,7 @@ Feature: create_collection
          when I POST to the specific path "/data-sets/new-dataset"
          then I should get back a status of "401"
           and I should get a "WWW-Authenticate" header of "bearer"
-          and I should get back the message "Unauthorized: invalid or no token given."
+          and I should get back the message "Unauthorized: invalid or no token given for "new-dataset"."
 
     Scenario: denying create collection with incorrect bearer token
         Given I have JSON data '{"capped_size": 0}'
@@ -30,7 +30,7 @@ Feature: create_collection
          when I POST to the specific path "/data-sets/new-dataset"
          then I should get back a status of "401"
           and I should get a "WWW-Authenticate" header of "bearer"
-          and I should get back the message "Unauthorized: invalid or no token given."
+          and I should get back the message "Unauthorized: invalid or no token given for "new-dataset"."
 
     Scenario: not creating a collection if it already exists
         Given I have JSON data '{"capped_size": 4096}'
