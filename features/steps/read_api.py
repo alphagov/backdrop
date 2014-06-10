@@ -120,6 +120,12 @@ def step(context, message):
     assert_that(data["message"], is_(message))
 
 
+@then('I should get back the parse error "{parse_error}"')
+def step(context, parse_error):
+    data = json.loads(context.response.data)
+    assert_that(data["message"], matches_regexp(parse_error))
+
+
 @then('I should get back a message: "{expected_message}"')
 def step(context, expected_message):
     assert_that(
