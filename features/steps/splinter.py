@@ -24,6 +24,13 @@ def step(context, message):
     assert context.client.browser.is_text_present(message)
 
 
+@then(u'I should see the signed in user "{name}"')
+def step(context, name):
+    signed_in_text = context.client.browser.evaluate_script(
+        'document.querySelector("p.navbar-text").innerText;')
+    assert signed_in_text == "Signed in as {}".format(name)
+
+
 @then(u'the "{data_set_name}" data_set should contain in any order')
 def step(context, data_set_name):
     data_set_contains(context, data_set_name, contains_inanyorder)
