@@ -181,10 +181,12 @@ def post_to_data_set(data_set_name):
 @statsd.timer('write.route.create_data_set')
 def create_collection_for_data_set(data_set_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
-        abort(401, 'Unauthorized: invalid or no token given.')
+        abort(401,
+              'Unauthorized: invalid or '
+              'no token given for "{}".'.format(data_set_name))
 
     if storage.data_set_exists(data_set_name):
-        abort(400, 'Collection exists with that name.')
+        abort(400, 'Collection exists with name "{}".'.format(data_set_name))
 
     try:
         data = json.loads(request.data)
@@ -206,7 +208,11 @@ def create_collection_for_data_set(data_set_name):
 @statsd.timer('write.route.delete_data_set')
 def delete_collection_by_data_set_name(data_set_name):
     if not _allow_create_collection(request.headers.get('Authorization')):
-        abort(401, 'Unauthorized: invalid or no token given.')
+        abort(
+            401, 'Unauthorized: invalid or no token given for "{}".'.format(
+                data_set_name
+            )
+        )
 
     if not storage.data_set_exists(data_set_name):
         abort(404, 'No collection exists with name "{}"'.format(data_set_name))

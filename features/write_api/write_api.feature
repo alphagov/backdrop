@@ -71,7 +71,7 @@ Feature: the performance platform write api
           and I use the bearer token for the data_set
          when I POST to the specific path "/data/group/type"
          then I should get back a status of "400"
-         and I should get back the message "Error parsing JSON: .*""
+         and I should get back the parse error "Error parsing JSON: .*"
 
     Scenario: posting zero an empty JSON payload to a data-set
         Given I have an empty request body
