@@ -39,10 +39,10 @@ class NewDataSet(object):
         return (now - last_updated) < max_age_expected
 
     def get_last_updated(self):
-        return self.storage.get_last_updated(self.config.name)
+        return self.storage.get_last_updated(self.name)
 
     def empty(self):
-        return self.storage.empty_data_set(self.config.name)
+        return self.storage.empty_data_set(self.name)
 
     def store(self, records):
         log.info('received {} records'.format(len(records)))
@@ -57,10 +57,10 @@ class NewDataSet(object):
         records = map(add_period_keys, records)
 
         for record in records:
-            self.storage.save_record(self.config.name, record)
+            self.storage.save_record(self.name, record)
 
     def execute_query(self, query):
-        results = self.storage.execute_query(self.config.name, query)
+        results = self.storage.execute_query(self.name, query)
 
         data = build_data(results, query)
 
