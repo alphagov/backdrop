@@ -1,6 +1,6 @@
 import unittest
 from hamcrest import *
-from backdrop.read.response import SimpleData
+from backdrop.core.response import SimpleData
 from tests.support.test_helpers import d_tz, d
 
 

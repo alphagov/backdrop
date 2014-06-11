@@ -2,7 +2,7 @@ import unittest
 from hamcrest import *
 from nose.tools import *
 from backdrop.core.timeseries import WEEK, MONTH
-from backdrop.read.response import PeriodData
+from backdrop.core.response import PeriodData
 from tests.support.test_helpers import d, d_tz
 
 

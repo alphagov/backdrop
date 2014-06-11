@@ -1,6 +1,6 @@
 import unittest
 from hamcrest import *
-from backdrop.read.response import GroupedData
+from backdrop.core.response import GroupedData
 
 
 class TestGroupedData(unittest.TestCase):
