@@ -5,7 +5,7 @@ from .records import add_auto_ids, parse_timestamp, validate_record, \
 from .validation import data_set_is_valid
 from .nested_merge import nested_merge
 from .errors import InvalidSortError
-from backdrop.read.response import PeriodGroupedData, PeriodData, \
+from backdrop.core.response import PeriodGroupedData, PeriodData, \
     GroupedData, SimpleData
 
 import timeutils
