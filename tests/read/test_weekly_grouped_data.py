@@ -2,11 +2,12 @@ import unittest
 from nose.tools import *
 from hamcrest import *
 from backdrop.core.timeseries import WEEK
-from backdrop.read.response import PeriodGroupedData
+from backdrop.core.response import PeriodGroupedData
 from tests.support.test_helpers import d, d_tz
 
 
 class TestWeeklyGroupedData(unittest.TestCase):
+
     def test_adding_documents(self):
         stub_document = {"_subgroup": []}
         data = PeriodGroupedData([stub_document], WEEK)
@@ -20,10 +21,10 @@ class TestWeeklyGroupedData(unittest.TestCase):
 
     def test_adding_multiple_mongo_documents(self):
         stub_document_1 = {
-            "_subgroup": [ {"_week_start_at": d(2013, 4, 1), "_count": 5} ]
+            "_subgroup": [{"_week_start_at": d(2013, 4, 1), "_count": 5}]
         }
         stub_document_2 = {
-            "_subgroup": [ {"_week_start_at": d(2013, 4, 1), "_count": 5} ]
+            "_subgroup": [{"_week_start_at": d(2013, 4, 1), "_count": 5}]
         }
         data = PeriodGroupedData([stub_document_1, stub_document_2], WEEK)
         assert_that(data.data(), has_length(2))
@@ -48,7 +49,7 @@ class TestWeeklyGroupedData(unittest.TestCase):
         assert_raises(ValueError, PeriodGroupedData, [stub_document], WEEK)
 
     def test_adding_subgroups_of_unrecognized_format_throws_an_error(self):
-        stub_document = {"_subgroup": { "foo": "bar" }}
+        stub_document = {"_subgroup": {"foo": "bar"}}
         assert_raises(ValueError, PeriodGroupedData, [stub_document], WEEK)
 
     def test_adding_additional_fields(self):

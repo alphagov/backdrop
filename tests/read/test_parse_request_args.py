@@ -1,7 +1,7 @@
 from datetime import datetime
 import unittest
 
-from hamcrest import *
+from hamcrest import assert_that, is_, has_item
 import pytz
 from werkzeug.datastructures import MultiDict
 

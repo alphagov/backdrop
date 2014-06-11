@@ -1,11 +1,12 @@
 from datetime import datetime
 from freezegun import freeze_time
-from hamcrest import *
+from hamcrest import assert_that, is_
 import pytz
 from unittest import TestCase
 
 from backdrop.core.timeseries import Day
-from backdrop.read.query import Query
+from backdrop.core.query import Query
+
 from tests.support.test_helpers import d_tz
 
 

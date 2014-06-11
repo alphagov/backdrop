@@ -1,7 +1,7 @@
 import unittest
 from hamcrest import *
 from backdrop.core.timeseries import MONTH
-from backdrop.read.response import create_period_group
+from backdrop.core.response import create_period_group
 from tests.support.test_helpers import d, d_tz
 
 

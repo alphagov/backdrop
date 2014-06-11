@@ -2,7 +2,7 @@ import unittest
 from nose.tools import *
 from hamcrest import *
 from backdrop.core.timeseries import MONTH
-from backdrop.read.response import PeriodGroupedData
+from backdrop.core.response import PeriodGroupedData
 from tests.support.test_helpers import d
 
 

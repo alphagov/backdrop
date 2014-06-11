@@ -5,8 +5,8 @@ from bson import ObjectId
 
 from flask import Flask, jsonify, request
 from flask_featureflags import FeatureFlag
-from backdrop.read.query import Query
 
+from .query import parse_query_from_request
 from .validation import validate_request_args
 from ..core import log_handler, cache_control
 from ..core.data_set import NewDataSet
@@ -183,7 +183,7 @@ def fetch(data_set_config):
         data_set = NewDataSet(storage, data_set_config)
 
         try:
-            query = Query.parse(request.args)
+            query = parse_query_from_request(request)
             data = data_set.execute_query(query)
 
         except InvalidOperationError:
