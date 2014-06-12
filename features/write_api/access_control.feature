@@ -11,7 +11,7 @@ Feature: access_control
          when I POST to the specific path "/data/group/type"
          then I should get back a status of "401"
           and I should get a "WWW-Authenticate" header of "bearer"
-          and I should get back the message "Unauthorized: Invalid bearer token "invalid-bearer-token""
+          and I should get back the message "Unauthorized: Invalid bearer token "invalid-bearer-token" for "some_data_set""
 
     @posting_things
     Scenario: unauthorized when posting with a badly formed authorization header

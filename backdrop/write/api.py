@@ -254,7 +254,8 @@ def _validate_auth(data_set_config):
 
     if not auth_header_is_valid(data_set_config, auth_header):
         token = extract_bearer_token(auth_header)
-        abort(401, 'Unauthorized: Invalid bearer token "{}"'.format(token))
+        abort(401, 'Unauthorized: Invalid bearer token "{0}" for "{1}"'.format(
+            token, data_set_config.name))
 
 
 def _append_to_data_set(data_set_config, data, ok_message=None):
