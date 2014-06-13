@@ -3,7 +3,8 @@ Flask==0.10.1
 Flask-FeatureFlags==0.4
 gunicorn==18.0
 invoke
-jsonschema
+isodate==0.5.0
+jsonschema==2.3.0
 pip==1.5.6
 pymongo==2.7.1
 python-dateutil==2.2
