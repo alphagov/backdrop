@@ -135,7 +135,7 @@ class DataSetConfig(_DataSetConfig):
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400,
-                published=True):
+                published=True, **kwargs):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 

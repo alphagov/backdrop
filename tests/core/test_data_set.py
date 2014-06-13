@@ -280,6 +280,9 @@ class TestDataSetConfig(object):
         data_set_config = DataSetConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
         assert_that(data_set_config.raw_queries_allowed, is_(True))
 
+    def test_unknown_fields_do_not_cause_data_set_config_to_fail(self):
+        DataSetConfig('name', data_group='group', data_type='type', unknown=True)
+
     def test_default_values(self):
         data_set = DataSetConfig("default", data_group="with_defaults", data_type="def_type")
 
