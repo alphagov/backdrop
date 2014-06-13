@@ -1,5 +1,5 @@
 from hamcrest import assert_that, is_, has_item, has_entries, \
-    has_length, contains, has_entry
+    has_length, contains, has_entry, contains_string
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -8,6 +8,7 @@ from backdrop.core.data_set import DataSetConfig
 from backdrop.core.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
 from backdrop.core.errors import ValidationError
+from jsonschema import ValidationError as SchemaValidationError
 from tests.support.test_helpers import d, d_tz, match
 
 
@@ -37,6 +38,20 @@ class BaseNewDataSetTest(object):
 
 
 class TestNewDataSet_store(BaseNewDataSetTest):
+    schema = {
+        "$schema": "http://json-schema.org/schema#",
+        "title": "Timestamps",
+        "type": "object",
+        "properties": {
+            "_timestamp": {
+                "description": "An ISO8601 formatted date time",
+                "type": "string",
+                "format": "date-time"
+            }
+        },
+        "required": ["_timestamp"]
+    }
+
     def test_storing_a_simple_record(self):
         self.data_set.store([{'foo': 'bar'}])
         self.mock_storage.save_record.assert_called_with(
@@ -60,6 +75,17 @@ class TestNewDataSet_store(BaseNewDataSetTest):
 
     def test_record_gets_validated(self):
         assert_raises(ValidationError, self.data_set.store, [{'_foo': 'bar'}])
+
+    def test_each_record_gets_validated_further_when_schema_given(self):
+        self.setup_config(schema=self.schema)
+        #does store only take lists?
+        with assert_raises(SchemaValidationError) as e:
+            self.data_set.store([{"_timestamp": "2014-06-12T00:00:00+0000"},{'foo': 'bar'}])
+
+        assert_that(
+            str(e.exception),
+            contains_string("_timestamp' is a required property")
+        )
 
     def test_period_keys_are_added(self):
         self.data_set.store([{'_timestamp': '2012-12-12T00:00:00+00:00'}])
