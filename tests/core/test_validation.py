@@ -221,31 +221,51 @@ class ValidDateObjectTestCase(unittest.TestCase):
 
 class ValidSchemaTestCase(unittest.TestCase):
 
+    schema = {
+        "$schema": "http://json-schema.org/schema#",
+        "title": "Timestamps",
+        "type": "object",
+        "properties": {
+            "_timestamp": {
+                "description": "An ISO8601 formatted date time",
+                "type": "string",
+                "format": "date-time"
+            }
+        },
+        "required": ["_timestamp"]
+    }
+
     def test_missing_property_returns_error(self):
         invalid_record = {
             "_id": "dbl_boff_0000000000000001",
             "name": "big_boff",
         }
 
-        schema = {
-            "$schema": "http://json-schema.org/schema#",
-            "title": "Timestamps",
-            "type": "object",
-            "properties": {
-                "_timestamp": {
-                    "description": "An ISO8601 formatted date time",
-                    "type": "string",
-                    "format": "date-time"
-                }
-            },
-            "required": ["_timestamp"]
-        }
         with assert_raises(ValidationError) as e:
             validate_record_schema(
                 invalid_record,
-                schema
+                self.schema
             )
 
         assert_that(
             str(e.exception),
-            contains_string("_timestamp' is a required property"))
+            contains_string("_timestamp' is a required property")
+        )
+
+    def test_invalid_property_raises_validation_error(self):
+        invalid_record = {
+            "_id": "dbl_boff_0000000000000001",
+            "name": "big_boff",
+            "_timestamp": "555"
+        }
+
+        with assert_raises(ValidationError) as e:
+            validate_record_schema(
+                invalid_record,
+                self.schema
+            )
+
+        assert_that(
+            str(e.exception),
+            contains_string("Failed validating 'format' in schema")
+        )

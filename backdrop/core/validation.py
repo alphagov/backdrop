@@ -11,6 +11,7 @@ import re
 import bson
 from dateutil import parser
 import pytz
+import isodate
 
 
 RESERVED_KEYWORDS = (
@@ -114,9 +115,9 @@ def validate_record_data(data):
     return valid()
 
 
-def validate_record_schema(records, schema):
+def validate_record_schema(record, schema):
     return jsonschema.validate(
-        records,
+        record,
         schema,
         format_checker=jsonschema.FormatChecker()
     )
