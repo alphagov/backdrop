@@ -2,7 +2,10 @@ import datetime
 import unittest
 import bson
 
+from nose.tools import assert_raises
 from hamcrest import assert_that, is_, contains_string
+
+from jsonschema import ValidationError
 
 from backdrop.core.validation import value_is_valid_id,\
     value_is_valid, key_is_valid, value_is_valid_datetime_string,\
@@ -237,11 +240,12 @@ class ValidSchemaTestCase(unittest.TestCase):
             },
             "required": ["_timestamp"]
         }
-
-        self.assertRaises(
+        with assert_raises(ValidationError) as e:
             validate_record_schema(
                 invalid_record,
                 schema
-            ),
-            contains_string("ValidationError: '_timestamp' is a required property")
-        )
+            )
+
+        assert_that(
+            str(e.exception),
+            contains_string("_timestamp' is a required property"))
