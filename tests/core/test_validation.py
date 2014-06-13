@@ -269,3 +269,15 @@ class ValidSchemaTestCase(unittest.TestCase):
             str(e.exception),
             contains_string("Failed validating 'format' in schema")
         )
+
+    def test_valid_property_does_not_raise_exception(self):
+        valid_record = {
+            "_timestamp": "2014-06-12T00:00:00+0000"
+        }
+
+        assert_that(
+            validate_record_schema(
+                valid_record,
+                self.schema
+            ), is_(None)
+        )
