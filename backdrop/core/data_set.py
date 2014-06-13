@@ -126,7 +126,7 @@ _DataSetConfig = namedtuple(
     "_DataSetConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
     "upload_filters auto_ids queryable realtime capped_size max_age_expected "
-    "published")
+    "published schema")
 
 
 class DataSetConfig(_DataSetConfig):
@@ -135,7 +135,7 @@ class DataSetConfig(_DataSetConfig):
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400,
-                published=True):
+                published=True, schema=None):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 
@@ -150,7 +150,7 @@ class DataSetConfig(_DataSetConfig):
                                                  upload_filters, auto_ids,
                                                  queryable, realtime,
                                                  capped_size, max_age_expected,
-                                                 published)
+                                                 published, schema)
 
     @property
     def max_age(self):
