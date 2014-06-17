@@ -5,11 +5,14 @@ App specific validation functions combine validators and return a
 ValidationResult object.
 """
 from collections import namedtuple
+import jsonschema
 import datetime
 import re
 import bson
 from dateutil import parser
 import pytz
+import isodate
+
 
 RESERVED_KEYWORDS = (
     '_timestamp',
@@ -110,3 +113,11 @@ def validate_record_data(data):
             return invalid('_id is not a valid id')
 
     return valid()
+
+
+def validate_record_schema(record, schema):
+    return jsonschema.validate(
+        record,
+        schema,
+        format_checker=jsonschema.FormatChecker()
+    )

@@ -2,11 +2,14 @@ import datetime
 import unittest
 import bson
 
-from hamcrest import *
-from hamcrest import assert_that, is_
+from nose.tools import assert_raises
+from hamcrest import assert_that, is_, contains_string
+
+from jsonschema import ValidationError
 
 from backdrop.core.validation import value_is_valid_id,\
-    value_is_valid, key_is_valid, value_is_valid_datetime_string, key_is_reserved, validate_record_data
+    value_is_valid, key_is_valid, value_is_valid_datetime_string,\
+    key_is_reserved, validate_record_data, validate_record_schema
 from tests.support.validity_matcher import is_invalid_with_message, is_valid
 
 valid_string = 'validstring'
@@ -14,6 +17,7 @@ valid_timestamp = datetime.datetime(2012, 12, 12, 12, 12, 12)
 
 
 class ValidKeysTestCase(unittest.TestCase):
+
     def test_keys_can_be_case_insensitive(self):
         assert_that(key_is_valid("name"), is_(True))
         assert_that(key_is_valid("NAME"), is_(True))
@@ -45,6 +49,7 @@ class ValidKeysTestCase(unittest.TestCase):
 
 
 class ReservedKeysTestCase(unittest.TestCase):
+
     def test_reserved_keys_are_reserved(self):
         assert_that(key_is_reserved("_timestamp"), is_(True))
         assert_that(key_is_reserved("_id"), is_(True))
@@ -53,6 +58,7 @@ class ReservedKeysTestCase(unittest.TestCase):
 
 
 class ValidValuesTestCase(unittest.TestCase):
+
     def test_values_can_be_integers(self):
         assert_that(value_is_valid(1257), is_(True))
 
@@ -78,6 +84,7 @@ class ValidValuesTestCase(unittest.TestCase):
 
 
 class TimestampValueIsInDateTimeFormat(unittest.TestCase):
+
     def test_value_is_of_valid_format(self):
         # our time format = YYYY-MM-DDTHH:MM:SS+HH:MM
         assert_that(
@@ -117,6 +124,7 @@ class TimestampValueIsInDateTimeFormat(unittest.TestCase):
 
 
 class IdValueIsValidTestCase(unittest.TestCase):
+
     def test_id_value_cannot_be_empty(self):
         assert_that(value_is_valid_id(''), is_(False))
         assert_that(value_is_valid_id('a'), is_(True))
@@ -136,6 +144,7 @@ class IdValueIsValidTestCase(unittest.TestCase):
 
 
 class TestValidateRecordData(unittest.TestCase):
+
     def test_objects_with_invalid_keys_are_disallowed(self):
         validation_result = validate_record_data({
             'foo-bar': 'bar'
@@ -187,8 +196,9 @@ class TestValidateRecordData(unittest.TestCase):
 
 
 class ValidDateObjectTestCase(unittest.TestCase):
+
     def test_validation_happens_until_error_or_finish(self):
-        #see value validation tests, we don't accept arrays
+        # see value validation tests, we don't accept arrays
         my_second_value_is_bad = {
             u'aardvark': u'puppies',
             u'Cthulu': ["R'lyeh"]
@@ -207,3 +217,67 @@ class ValidDateObjectTestCase(unittest.TestCase):
         assert_that(
             validate_record_data(some_good_data).is_valid,
             is_(True))
+
+
+class ValidSchemaTestCase(unittest.TestCase):
+
+    schema = {
+        "$schema": "http://json-schema.org/schema#",
+        "title": "Timestamps",
+        "type": "object",
+        "properties": {
+            "_timestamp": {
+                "description": "An ISO8601 formatted date time",
+                "type": "string",
+                "format": "date-time"
+            }
+        },
+        "required": ["_timestamp"]
+    }
+
+    def test_missing_property_returns_error(self):
+        invalid_record = {
+            "_id": "dbl_boff_0000000000000001",
+            "name": "big_boff",
+        }
+
+        with assert_raises(ValidationError) as e:
+            validate_record_schema(
+                invalid_record,
+                self.schema
+            )
+
+        assert_that(
+            str(e.exception),
+            contains_string("_timestamp' is a required property")
+        )
+
+    def test_invalid_property_raises_validation_error(self):
+        invalid_record = {
+            "_id": "dbl_boff_0000000000000001",
+            "name": "big_boff",
+            "_timestamp": "555"
+        }
+
+        with assert_raises(ValidationError) as e:
+            validate_record_schema(
+                invalid_record,
+                self.schema
+            )
+
+        assert_that(
+            str(e.exception),
+            contains_string("Failed validating 'format' in schema")
+        )
+
+    def test_valid_property_does_not_raise_exception(self):
+        valid_record = {
+            "_timestamp": "2014-06-12T00:00:00+0000"
+        }
+
+        assert_that(
+            validate_record_schema(
+                valid_record,
+                self.schema
+            ), is_(None)
+        )

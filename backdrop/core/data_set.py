@@ -1,8 +1,8 @@
 from collections import namedtuple
 from flask import logging
-from .records import add_auto_ids, parse_timestamp, validate_record, \
+from .records import add_auto_ids, parse_timestamp, validate_record,\
     add_period_keys
-from .validation import data_set_is_valid
+from .validation import data_set_is_valid, validate_record_schema
 from .nested_merge import nested_merge
 from .errors import InvalidSortError
 from backdrop.core.response import PeriodGroupedData, PeriodData, \
@@ -47,6 +47,10 @@ class NewDataSet(object):
     def store(self, records):
         log.info('received {} records'.format(len(records)))
 
+        # Validate schema
+        if self.config.schema:
+            for record in records:
+                validate_record_schema(record, self.config.schema)
         # add auto-id keys
         records = add_auto_ids(records, self.config.auto_ids)
         # parse _timestamp
@@ -126,7 +130,7 @@ _DataSetConfig = namedtuple(
     "_DataSetConfig",
     "name data_group data_type raw_queries_allowed bearer_token upload_format "
     "upload_filters auto_ids queryable realtime capped_size max_age_expected "
-    "published")
+    "published schema")
 
 
 class DataSetConfig(_DataSetConfig):
@@ -135,7 +139,7 @@ class DataSetConfig(_DataSetConfig):
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400,
-                published=True):
+                published=True, schema=None):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 
@@ -150,7 +154,7 @@ class DataSetConfig(_DataSetConfig):
                                                  upload_filters, auto_ids,
                                                  queryable, realtime,
                                                  capped_size, max_age_expected,
-                                                 published)
+                                                 published, schema)
 
     @property
     def max_age(self):
