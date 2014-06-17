@@ -48,8 +48,9 @@ class NewDataSet(object):
         log.info('received {} records'.format(len(records)))
 
         # Validate schema
-        for record in records:
-            validate_record_schema(record, self.config.schema)
+        if self.config.schema:
+            for record in records:
+                validate_record_schema(record, self.config.schema)
         # add auto-id keys
         records = add_auto_ids(records, self.config.auto_ids)
         # parse _timestamp
@@ -138,7 +139,7 @@ class DataSetConfig(_DataSetConfig):
                 bearer_token=None, upload_format="csv", upload_filters=None,
                 auto_ids=None, queryable=True, realtime=False,
                 capped_size=5040, max_age_expected=2678400,
-                published=True, schema={}):
+                published=True, schema=None):
         if not data_set_is_valid(name):
             raise ValueError("DataSet name is not valid: '{}'".format(name))
 
