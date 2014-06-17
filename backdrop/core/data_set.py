@@ -48,8 +48,8 @@ class NewDataSet(object):
         log.info('received {} records'.format(len(records)))
 
         # Validate schema
-        for item in records:
-            validate_record_schema(item, self.config.schema)
+        for record in records:
+            validate_record_schema(record, self.config.schema)
         # add auto-id keys
         records = add_auto_ids(records, self.config.auto_ids)
         # parse _timestamp
