@@ -1,6 +1,6 @@
 import hashlib
-import subprocess
 import os
+from subprocess import Popen, PIPE
 
 
 class VirusSignatureError(StandardError):
@@ -30,7 +30,10 @@ class ScannedFile(object):
                                  self._clamscan(self._file_path))
 
     def _clamscan(self, filename):
-        retcode = subprocess.call(["clamdscan", filename])
+        args = ['clamdscan', filename]
+        proc = Popen(args, stdout=PIPE, stderr=PIPE)
+        _, stderrdata = proc.communicate()
+        retcode = proc.returncode
         # 0 : No virus found.
         # 1 : Virus(es) found.
         # 2 : An error occured.
@@ -39,7 +42,8 @@ class ScannedFile(object):
         elif retcode == 1:
             return True
         elif retcode == 2:
-            raise SystemError('Error running the clamdscan virus scanner')
+            raise SystemError('Error running the clamdscan virus scanner. '
+                              'Stderr was "{}"'.format(stderrdata))
 
     def _clean_up(self):
         # Remove temporary file
