@@ -1,48 +1,6 @@
 @use_admin_client
 Feature: CSV Upload
 
-  Scenario: Upload CSV data
-    Given I have a data_set named "my_data_set" with settings
-        | key           | value |
-        | upload_format | "csv" |
-    And   I am logged in
-    And   I can upload to "my_data_set"
-    And   a file named "data.csv"
-          """
-          name,age,nationality
-          Pawel,27,Polish
-          Max,35,Italian
-          """
-    When  I go to "/my_data_set/upload"
-    And   I enter "data.csv" into the file upload field
-    And   I click "Upload"
-    Then  the "my_data_set" data_set should contain in any order:
-          """
-          {"name": "Pawel", "age": 27, "nationality": "Polish"}
-          {"name": "Max", "age": 35, "nationality": "Italian"}
-          """
-
-  Scenario: UTF8 characters
-    Given a file named "data.csv":
-          """
-          english,italian
-          city,città
-          coffee,caffè
-          """
-    And   I have a data_set named "my_data_set" with settings
-        | key           | value |
-        | upload_format | "csv" |
-    And   I am logged in
-    And   I can upload to "my_data_set"
-    When  I go to "/my_data_set/upload"
-    And   I enter "data.csv" into the file upload field
-    And   I click "Upload"
-    Then  the "my_data_set" data_set should contain in any order:
-          """
-          {"english": "city", "italian": "città"}
-          {"english": "coffee", "italian": "caffè"}
-          """
-
   # If the uploaded CSV does not have an _id column,
   # overwrite records with the same combination of:
   #    start_at, end_at and key

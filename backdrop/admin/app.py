@@ -16,6 +16,8 @@ from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.upload import create_parser
 from .signonotron2 import Signonotron2
 from .uploaded_file import UploadedFile, FileUploadError
+from performanceplatform import client
+from requests.exceptions import RequestException
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -205,18 +207,25 @@ def upload(data_set_name):
 
 def _store_data(data_set_config):
     parse_file = create_parser(data_set_config)
-    data_set = NewDataSet(storage, data_set_config)
+    data_set = client.DataSet.from_group_and_type(
+        app.config['BACKDROP_URL'] + '/data',
+        data_set_config.data_group,
+        data_set_config.data_type,
+        token=data_set_config.bearer_token
+    )
     expected_errors = (FileUploadError, ParseError, ValidationError)
 
     try:
         with UploadedFile(request.files['file']) as uploaded_file:
             raw_data = parse_file(uploaded_file.file_stream())
-            data_set.store(raw_data)
+            data_set.post(raw_data)
     except expected_errors as e:
         app.logger.error('Upload error: {}'.format(e.message))
         return render_template('upload_error.html',
                                message=e.message,
-                               data_set_name=data_set.name), 400
+                               data_set_name=data_set_config.name), 400
+    except RequestException as e:
+        abort(500, 'Error saving to datastore: "{}"'.format(e.message))
 
     return render_template('upload_ok.html')
 
