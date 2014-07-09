@@ -13,4 +13,5 @@ except ImportError:
     from development_environment_sample import *
 
 STAGECRAFT_URL = 'http://localhost:3204'
+BACKDROP_URL = 'http://localhost:3039'
 STAGECRAFT_DATA_SET_QUERY_TOKEN = 'dev-data-set-query-token'

@@ -10,4 +10,5 @@ MONGO_PORT = 27017
 
 from test_environment import *
 
-from development import STAGECRAFT_URL, STAGECRAFT_DATA_SET_QUERY_TOKEN
+from development import (STAGECRAFT_URL, STAGECRAFT_DATA_SET_QUERY_TOKEN,
+                         BACKDROP_URL)
