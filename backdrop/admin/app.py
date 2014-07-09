@@ -6,7 +6,6 @@ from flask import Flask, jsonify, url_for, request, \
 
 from .. import statsd
 from backdrop.core import cache_control, log_handler
-from backdrop.core.data_set import NewDataSet
 from backdrop.core.errors import ParseError, ValidationError
 from backdrop.core.repository import (
     DataSetConfigRepository,
