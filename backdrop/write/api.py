@@ -214,10 +214,8 @@ def delete_collection_by_data_set_name(data_set_name):
             )
         )
 
-    if not storage.data_set_exists(data_set_name):
-        abort(404, 'No collection exists with name "{}"'.format(data_set_name))
-
-    storage.delete_data_set(data_set_name)
+    if storage.data_set_exists(data_set_name):
+        storage.delete_data_set(data_set_name)
 
     return jsonify(status='ok', message='Deleted {}'.format(data_set_name))
 

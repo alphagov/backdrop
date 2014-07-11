@@ -15,8 +15,7 @@ Feature: delete_data_set
           and the collection called "some-dataset" should not exist
 
     @delete_things
-    Scenario: cannot delete a data-set that does not exist
+    Scenario: can delete a data-set that does not exist
         Given I have the bearer token "dev-create-endpoint-token"
          when I send a DELETE request to "/data-sets/some-dataset"
-         then I should get back a status of "404"
-          and I should get back the message "No collection exists with name "some-dataset""
+         then I should get back a status of "200"
