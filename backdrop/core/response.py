@@ -152,6 +152,9 @@ class PeriodGroupedData(object):
     def amount_to_shift(self, delta):
         is_reversed = delta < 0
 
+        if len(self._data) == 0:
+            return 0
+
         return min([
             first_nonempty(i['values'], is_reversed) for i in self._data],
             key=abs)
