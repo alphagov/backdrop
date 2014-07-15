@@ -86,3 +86,7 @@ class TestWeeklyGroupedData(unittest.TestCase):
             has_entry("_start_at", d_tz(2013, 4, 8)),
             has_entry("_start_at", d_tz(2013, 4, 15))
         ))
+
+    def test_with_empty_data(self):
+        data = PeriodGroupedData([], WEEK)
+        assert_that(data.amount_to_shift(7), equal_to(0))
