@@ -219,14 +219,27 @@ def _store_data(data_set_config):
             raw_data = parse_file(uploaded_file.file_stream())
             data_set.post(raw_data)
     except expected_errors as e:
-        app.logger.error('Upload error: {}'.format(e.message))
+        log_upload_error('Upload error', app, e, data_set_config)
         return render_template('upload_error.html',
                                message=e.message,
                                data_set_name=data_set_config.name), 400
     except RequestException as e:
+        log_upload_error('Error writing to backdrop', app, e, data_set_config)
         abort(500, 'Error saving to datastore: "{}"'.format(e.message))
 
     return render_template('upload_ok.html')
+
+
+def log_upload_error(message, app, e, data_set_config):
+        app.logger.error(
+            '{}: {}'.format(message, e.message),
+            extra={
+                'backdrop_upload_error': type(e).__name__,
+                'data_group': data_set_config.data_group,
+                'data_type': data_set_config.data_type,
+            },
+            exc_info=True
+        )
 
 
 def start(port):
