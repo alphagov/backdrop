@@ -7,8 +7,7 @@
     <h2>DataSet: {{ data_set_name }}</h2>
     <p>You can upload data to Performance Platform from your {{ upload_format }} files. For
         each row in a {{ upload_format }} file a document will be added to your data_set. You need
-        to make sure they match our expected format (see example below). </p>
-    <p>Download example {{ upload_format }} file: <a href="{{ url_for('static', filename=example_filename) }}">example.{{ upload_extension }}</a></p>
+        to make sure they match the expected format agreed with the performance platform team. </p>
     <form action="upload" method="post" enctype="multipart/form-data">
         <div class="form-panel">
             <label for="{{ upload_extension }}-file">{{ upload_format }} file to upload</label>
