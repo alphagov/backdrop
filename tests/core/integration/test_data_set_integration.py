@@ -4,7 +4,7 @@ import datetime
 from pymongo import MongoClient
 from hamcrest import assert_that, contains, has_entry
 
-from backdrop.core.data_set import DataSetConfig, NewDataSet
+from backdrop.core.data_set import NewDataSet
 from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.timeseries import WEEK
 from backdrop.core.query import Query
@@ -21,7 +21,12 @@ class TestDataSetIntegration(unittest.TestCase):
     def setUp(self):
         self.storage = MongoStorageEngine.create(HOSTS, PORT, DB_NAME)
 
-        self.config = DataSetConfig(DATA_SET, data_group="group", data_type="type", max_age_expected=1000)
+        self.config = {
+            'name': DATA_SET,
+            'data_group': "group",
+            'data_type': "type",
+            'max_age_expected': 1000,
+        }
 
         self.new_data_set = NewDataSet(self.storage, self.config)
 

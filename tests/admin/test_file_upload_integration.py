@@ -6,7 +6,7 @@ import datetime
 from hamcrest import (assert_that, has_entry, is_, has_entries, has_items,
                       equal_to)
 from pymongo import MongoClient
-from tests.support.data_set import fake_data_set_exists, stub_user_retrieve_by_email
+from tests.support.performanceplatform_client import fake_data_set_exists, stub_user_retrieve_by_email
 from tests.support.test_helpers import has_status
 from tests.admin.support.clamscan import stub_clamscan
 from tests.admin.support.oauth_test_case import OauthTestCase

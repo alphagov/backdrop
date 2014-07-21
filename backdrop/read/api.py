@@ -11,12 +11,13 @@ from .validation import validate_request_args
 from ..core import log_handler, cache_control
 from ..core.data_set import NewDataSet
 from ..core.errors import InvalidOperationError
-from ..core.repository import DataSetConfigRepository
 from ..core.timeutils import as_utc
 
 from ..core.storage.mongo import MongoStorageEngine
 
 from backdrop import statsd
+
+from performanceplatform import client
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -34,9 +35,16 @@ storage = MongoStorageEngine.create(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME'])
 
-data_set_repository = DataSetConfigRepository(
+admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
-    app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
+    app.config['SIGNON_API_USER_TOKEN'],
+    dry_run=False,
+)
+
+DEFAULT_DATA_SET_QUERYABLE = True
+DEFAULT_DATA_SET_RAW_QUERIES = False
+DEFAULT_DATA_SET_PUBLISHED = True
+DEFAULT_DATA_SET_REALTIME = False
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
@@ -96,7 +104,7 @@ def data_set_health():
 
     failing_data_sets = []
     okay_data_sets = []
-    data_set_configs = data_set_repository.get_all()
+    data_set_configs = admin_api.list_data_sets()
 
     for data_set_config in data_set_configs:
         new_data_set = NewDataSet(storage, data_set_config)
@@ -143,9 +151,7 @@ def data(data_group, data_type):
     with statsd.timer('read.route.data.{data_group}.{data_type}'.format(
             data_group=data_group,
             data_type=data_type)):
-        data_set_config = data_set_repository.get_data_set_for_query(
-            data_group,
-            data_type)
+        data_set_config = admin_api.get_data_set(data_group, data_type)
         return fetch(data_set_config)
 
 
@@ -154,16 +160,21 @@ def data(data_group, data_type):
 def query(data_set_name):
     with statsd.timer('read.route.{data_set_name}'.format(
             data_set_name=data_set_name)):
-        data_set_config = data_set_repository.retrieve(data_set_name)
+        data_set_config = admin_api.get_data_set_by_name(data_set_name)
         return fetch(data_set_config)
 
 
 def fetch(data_set_config):
-    if data_set_config is None or not data_set_config.queryable:
-        bname = "" if data_set_config is None else data_set_config.name + " "
-        return log_error_and_respond(
-            bname, 'data_set not found',
-            404)
+    error_text = 'data_set not found'
+
+    if data_set_config is None:
+        return log_error_and_respond('', error_text, 404)
+
+    data_set_queryable = data_set_config.get('queryable',
+                                             DEFAULT_DATA_SET_QUERYABLE)
+
+    if not data_set_queryable:
+        return log_error_and_respond(data_set_config['name'], error_text, 404)
 
     if request.method == 'OPTIONS':
         # OPTIONS requests are made by XHR as part of the CORS spec
@@ -172,12 +183,13 @@ def fetch(data_set_config):
         response.headers['Access-Control-Max-Age'] = '86400'
         response.headers['Access-Control-Allow-Headers'] = 'cache-control'
     else:
-        result = validate_request_args(request.args,
-                                       data_set_config.raw_queries_allowed)
+        raw_queries_allowed = data_set_config.get(
+            'raw_queries_allowed', DEFAULT_DATA_SET_RAW_QUERIES)
+        result = validate_request_args(request.args, raw_queries_allowed)
 
         if not result.is_valid:
             return log_error_and_respond(
-                data_set_config.name, result.message,
+                data_set_config['name'], result.message,
                 400)
 
         data_set = NewDataSet(storage, data_set_config)
@@ -191,7 +203,9 @@ def fetch(data_set_config):
                 data_set.name, 'invalid collect function',
                 400)
 
-        if data_set_config.published is False:
+        data_set_is_published = data_set_config.get('published',
+                                                    DEFAULT_DATA_SET_PUBLISHED)
+        if data_set_is_published is False:
             warning = ("Warning: This data-set is unpublished. "
                        "Data may be subject to change or be inaccurate.")
             response = jsonify(data=data, warning=warning)
@@ -199,10 +213,14 @@ def fetch(data_set_config):
             response.headers['Cache-Control'] = "no-cache"
         else:
             response = jsonify(data=data)
-            # Set cache control based on data-set max_age
+            # Set cache control based on data set type
+            if data_set_config.get('realtime', DEFAULT_DATA_SET_REALTIME):
+                cache_duration = 120
+            else:
+                cache_duration = 1800
             response.headers['Cache-Control'] = (
                 "max-age=%d, "
-                "must-revalidate" % data_set_config.max_age
+                "must-revalidate" % cache_duration
             )
 
     # Headers

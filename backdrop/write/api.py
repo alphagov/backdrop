@@ -6,7 +6,6 @@ from flask_featureflags import FeatureFlag
 from backdrop import statsd
 from backdrop.core.data_set import NewDataSet
 from backdrop.core.flaskutils import DataSetConverter
-from backdrop.core.repository import DataSetConfigRepository
 from backdrop.write.decompressing_request import DecompressingRequest
 
 from ..core.errors import ParseError, ValidationError
@@ -15,6 +14,8 @@ from ..core import log_handler, cache_control
 from ..core.storage.mongo import MongoStorageEngine
 
 from .validation import auth_header_is_valid, extract_bearer_token
+
+from performanceplatform import client
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -35,9 +36,11 @@ storage = MongoStorageEngine.create(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME'])
 
-data_set_repository = DataSetConfigRepository(
+admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
-    app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
+    app.config['SIGNON_API_USER_TOKEN'],
+    dry_run=False,
+)
 
 log_handler.set_up_logging(app, GOVUK_ENV)
 
@@ -110,9 +113,7 @@ def write_by_group(data_group, data_type):
     with statsd.timer('write.route.data.{data_group}.{data_type}'.format(
             data_group=data_group,
             data_type=data_type)):
-        data_set_config = data_set_repository.get_data_set_for_query(
-            data_group,
-            data_type)
+        data_set_config = admin_api.get_data_set(data_group, data_type)
 
         _validate_config(data_set_config)
         _validate_auth(data_set_config)
@@ -136,9 +137,7 @@ def put_by_group_and_type(data_group, data_type):
           Trying to PUT a non empty list of records will result in a
           PutNonEmptyNotImplementedError exception.
     """
-    data_set_config = data_set_repository.get_data_set_for_query(
-        data_group,
-        data_type)
+    data_set_config = admin_api.get_data_set(data_group, data_type)
 
     _validate_config(data_set_config)
     _validate_auth(data_set_config)
@@ -159,7 +158,7 @@ def put_by_group_and_type(data_group, data_type):
 def post_to_data_set(data_set_name):
     app.logger.warning("Deprecated use of write API by name: {}".format(
         data_set_name))
-    data_set_config = data_set_repository.retrieve(data_set_name)
+    data_set_config = admin_api.get_data_set_by_name(data_set_name)
 
     _validate_config(data_set_config)
     _validate_auth(data_set_config)
@@ -243,7 +242,7 @@ def _validate_config(data_set_config):
     if data_set_config is None:
         abort(404, 'Could not find data_set_config')
 
-    g.data_set_name = data_set_config.name
+    g.data_set_name = data_set_config['name']
 
 
 def _validate_auth(data_set_config):
@@ -256,7 +255,7 @@ def _validate_auth(data_set_config):
         token = extract_bearer_token(auth_header)
         abort(401,
               'Unauthorized: Invalid bearer token \'{0}\' for \'{1}\''.format(
-                  token, data_set_config.name))
+                  token, data_set_config['name']))
 
 
 def _append_to_data_set(data_set_config, data, ok_message=None):
@@ -274,7 +273,7 @@ def _empty_data_set(data_set_config):
     data_set.empty()
     return jsonify(
         status='ok',
-        message='{} now contains 0 records'.format(data_set_config.name))
+        message='{} now contains 0 records'.format(data_set_config['name']))
 
 
 def get_json_from_request(request):
