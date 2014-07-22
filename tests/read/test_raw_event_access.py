@@ -7,11 +7,7 @@ from tests.support.data_set import fake_data_set_exists
 
 class TestRawEventAccess(unittest.TestCase):
     def setUp(self):
-        api.app.config['RAW_QUERIES_ALLOWED']['foo'] = False
         self.app = api.app.test_client()
-
-    def tearDown(self):
-        api.app.config['RAW_QUERIES_ALLOWED']['foo'] = True
 
     @fake_data_set_exists("foo")
     def test_that_querying_for_raw_events_is_disabled(self):
