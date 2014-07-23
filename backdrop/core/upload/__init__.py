@@ -3,9 +3,13 @@ from .parse_csv import parse_csv
 from .parse_excel import parse_excel
 
 
+DEFAULT_UPLOAD_FILTERS = ["backdrop.core.upload.filters.first_sheet_filter"]
+
+
 def create_parser(data_set_config):
-    format_parser = load_format_parser(data_set_config.upload_format)
-    upload_filters = map(load_filter, data_set_config.upload_filters)
+    format_parser = load_format_parser(data_set_config['upload_format'])
+    upload_filters = map(load_filter, data_set_config.get('upload_filters',
+                         DEFAULT_UPLOAD_FILTERS))
 
     def parser(file_stream):
         data = format_parser(file_stream)

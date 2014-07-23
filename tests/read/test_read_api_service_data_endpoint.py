@@ -7,7 +7,7 @@ import pytz
 from backdrop.core.timeseries import WEEK
 from backdrop.read import api
 from backdrop.core.query import Query
-from tests.support.data_set import fake_data_set_exists, fake_no_data_sets_exist
+from tests.support.performanceplatform_client import fake_data_set_exists, fake_no_data_sets_exist
 from tests.support.test_helpers import has_status, has_header, d_tz
 
 

@@ -1,8 +1,7 @@
-from collections import namedtuple
 from flask import logging
 from .records import add_auto_ids, parse_timestamp, validate_record,\
     add_period_keys
-from .validation import data_set_is_valid, validate_record_schema
+from .validation import validate_record_schema
 from .nested_merge import nested_merge
 from .errors import InvalidSortError
 from backdrop.core.response import PeriodGroupedData, PeriodData, \
@@ -13,6 +12,8 @@ import datetime
 
 log = logging.getLogger(__name__)
 
+DEFAULT_MAX_AGE_EXPECTED = 2678400
+
 
 class NewDataSet(object):
     def __init__(self, storage, config):
@@ -21,14 +22,15 @@ class NewDataSet(object):
 
     @property
     def name(self):
-        return self.config.name
+        return self.config['name']
 
     def is_recent_enough(self):
-        if self.config.max_age_expected is None:
+        max_age_expected = self.config.get('max_age_expected',
+                                           DEFAULT_MAX_AGE_EXPECTED)
+        if max_age_expected is None:
             return True
 
-        max_age_expected = datetime.timedelta(
-            seconds=self.config.max_age_expected)
+        max_age_expected_delta = datetime.timedelta(seconds=max_age_expected)
 
         now = timeutils.now()
         last_updated = self.get_last_updated()
@@ -36,7 +38,7 @@ class NewDataSet(object):
         if not last_updated:
             return False
 
-        return (now - last_updated) < max_age_expected
+        return (now - last_updated) < max_age_expected_delta
 
     def get_last_updated(self):
         return self.storage.get_last_updated(self.name)
@@ -48,11 +50,12 @@ class NewDataSet(object):
         log.info('received {} records'.format(len(records)))
 
         # Validate schema
-        if self.config.schema:
+
+        if 'schema' in self.config:
             for record in records:
-                validate_record_schema(record, self.config.schema)
+                validate_record_schema(record, self.config['schema'])
         # add auto-id keys
-        records = add_auto_ids(records, self.config.auto_ids)
+        records = add_auto_ids(records, self.config.get('auto_ids', None))
         # parse _timestamp
         records = map(parse_timestamp, records)
         # validate
@@ -124,39 +127,3 @@ def _limit_grouped_results(results, limit):
     """Limit a grouped set of results
     """
     return results[:limit] if limit else results
-
-
-_DataSetConfig = namedtuple(
-    "_DataSetConfig",
-    "name data_group data_type raw_queries_allowed bearer_token upload_format "
-    "upload_filters auto_ids queryable realtime capped_size max_age_expected "
-    "published schema")
-
-
-class DataSetConfig(_DataSetConfig):
-
-    def __new__(cls, name, data_group, data_type, raw_queries_allowed=False,
-                bearer_token=None, upload_format="csv", upload_filters=None,
-                auto_ids=None, queryable=True, realtime=False,
-                capped_size=5040, max_age_expected=2678400,
-                published=True, schema=None):
-        if not data_set_is_valid(name):
-            raise ValueError("DataSet name is not valid: '{}'".format(name))
-
-        if not upload_filters:
-            upload_filters = [
-                "backdrop.core.upload.filters.first_sheet_filter"]
-
-        return super(DataSetConfig, cls).__new__(cls, name, data_group,
-                                                 data_type,
-                                                 raw_queries_allowed,
-                                                 bearer_token, upload_format,
-                                                 upload_filters, auto_ids,
-                                                 queryable, realtime,
-                                                 capped_size, max_age_expected,
-                                                 published, schema)
-
-    @property
-    def max_age(self):
-        """ Set cache-control header length based on type of data_set. """
-        return 120 if self.realtime else 1800

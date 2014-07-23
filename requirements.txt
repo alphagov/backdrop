@@ -5,7 +5,7 @@ gunicorn==18.0
 invoke
 isodate==0.5.0
 jsonschema==2.3.0
-performanceplatform-client==0.0.5
+performanceplatform-client==0.0.6
 pip==1.5.6
 pymongo==2.7.1
 python-dateutil==2.2

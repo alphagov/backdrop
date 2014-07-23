@@ -3,7 +3,7 @@ import unittest
 
 from hamcrest import assert_that, is_
 from mock import patch
-from tests.support.data_set import fake_data_set_exists
+from tests.support.performanceplatform_client import fake_data_set_exists
 
 from tests.support.test_helpers import is_bad_request, is_ok, \
     is_error_response, has_status, is_not_found

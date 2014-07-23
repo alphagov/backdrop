@@ -1,10 +1,9 @@
-from hamcrest import assert_that, is_, has_item, has_entries, \
+from hamcrest import assert_that, has_item, has_entries, \
     has_length, contains, has_entry, contains_string
 from nose.tools import assert_raises
 from mock import Mock
 
 from backdrop.core import data_set
-from backdrop.core.data_set import DataSetConfig
 from backdrop.core.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
 from backdrop.core.errors import ValidationError
@@ -26,10 +25,14 @@ def mock_repository():
 
 
 class BaseNewDataSetTest(object):
-    def setup_config(self, **kwargs):
+    def setup_config(self, additional_config={}):
         self.mock_storage = Mock()
-        self.data_set_config = DataSetConfig(
-            'test_data_set', data_group='group', data_type='type', **kwargs)
+        base_config = {
+            'name': 'test_data_set',
+            'data_group': 'group',
+            'data_type': 'type',
+        }
+        self.data_set_config = dict(base_config.items() + additional_config.items())
         self.data_set = data_set.NewDataSet(
             self.mock_storage, self.data_set_config)
 
@@ -58,7 +61,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
             'test_data_set', {'foo': 'bar'})
 
     def test_id_gets_automatically_generated_if_auto_ids_are_set(self):
-        self.setup_config(auto_ids=['foo'])
+        self.setup_config({'auto_ids': ['foo']})
         self.data_set.store([{'foo': 'bar'}])
         self.mock_storage.save_record.assert_called_with(
             'test_data_set', match(has_entry('_id', 'YmFy')))
@@ -77,7 +80,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
         assert_raises(ValidationError, self.data_set.store, [{'_foo': 'bar'}])
 
     def test_each_record_gets_validated_further_when_schema_given(self):
-        self.setup_config(schema=self.schema)
+        self.setup_config({'schema': self.schema})
         #does store only take lists?
         with assert_raises(SchemaValidationError) as e:
             self.data_set.store([{"_timestamp": "2014-06-12T00:00:00+0000"}, {'foo': 'bar'}])
@@ -298,44 +301,3 @@ class TestNewDataSet_execute_query(BaseNewDataSetTest):
         assert_that(data, contains(
             has_entries({'some_group': 'val2'})
         ))
-
-
-class TestDataSetConfig(object):
-
-    def test_creating_a_data_set_config_with_raw_queries_allowed(self):
-        data_set_config = DataSetConfig("name", data_group="group", data_type="type", raw_queries_allowed=True)
-        assert_that(data_set_config.raw_queries_allowed, is_(True))
-
-    def test_default_values(self):
-        data_set = DataSetConfig("default", data_group="with_defaults", data_type="def_type")
-
-        assert_that(data_set.raw_queries_allowed, is_(False))
-        assert_that(data_set.queryable, is_(True))
-        assert_that(data_set.realtime, is_(False))
-        assert_that(data_set.capped_size, is_(5040))
-        assert_that(data_set.bearer_token, is_(None))
-        assert_that(data_set.upload_format, is_("csv"))
-        assert_that(data_set.upload_filters, is_(["backdrop.core.upload.filters.first_sheet_filter"]))
-        assert_that(data_set.auto_ids, is_(None))
-
-    def test_data_set_name_validation(self):
-        data_set_names = {
-            "": False,
-            "foo": True,
-            "foo_bar": True,
-            "foo-bar": False,
-            "12foo": False,
-            123: False
-        }
-        for (data_set_name, name_is_valid) in data_set_names.items():
-            if name_is_valid:
-                DataSetConfig(data_set_name, data_group="group", data_type="type")
-            else:
-                assert_raises(ValueError, DataSetConfig, data_set_name, "group", "type")
-
-    def test_max_age(self):
-        data_set = DataSetConfig("default", "group", "type", realtime=False)
-        assert_that(data_set.max_age, is_(1800))
-
-        data_set = DataSetConfig("default", "group", "type", realtime=True)
-        assert_that(data_set.max_age, is_(120))

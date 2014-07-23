@@ -3,7 +3,7 @@ from hamcrest import *
 from mock import patch
 from werkzeug.urls import url_decode
 from backdrop.admin import app
-from tests.support.data_set import fake_data_set_exists, stub_user_retrieve_by_email
+from tests.support.performanceplatform_client import fake_data_set_exists, stub_user_retrieve_by_email
 from tests.support.test_helpers import has_status
 from tests.admin.support.oauth_test_case import OauthTestCase
 

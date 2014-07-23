@@ -7,9 +7,6 @@ from flask import Flask, jsonify, url_for, request, \
 from .. import statsd
 from backdrop.core import cache_control, log_handler
 from backdrop.core.errors import ParseError, ValidationError
-from backdrop.core.repository import (
-    DataSetConfigRepository,
-    get_user_repository)
 from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.core.upload import create_parser
@@ -35,11 +32,13 @@ storage = MongoStorageEngine.create(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME'])
 
-data_set_repository = DataSetConfigRepository(
+admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
-    app.config['STAGECRAFT_DATA_SET_QUERY_TOKEN'])
+    app.config['SIGNON_API_USER_TOKEN'],
+    dry_run=False,
+)
 
-user_repository = get_user_repository(app)
+DEFAULT_UPLOAD_FORMAT = 'csv'
 
 
 # TODO: move this out into a helper
@@ -103,7 +102,7 @@ def index():
     """
     user_email = session.get('user', {}).get('email')
     if user_email:
-        user_config = user_repository.retrieve(user_email)
+        user_config = admin_api.get_user(user_email)
     else:
         user_config = None
 
@@ -189,16 +188,18 @@ def oauth_sign_out():
 @protected
 @cache_control.set("private, must-revalidate")
 def upload(data_set_name):
-    data_set_config = data_set_repository.retrieve(data_set_name)
-    user_config = user_repository.retrieve(
-        session.get("user").get("email"))
+    data_set_config = admin_api.get_data_set_by_name(data_set_name)
 
-    if data_set_name not in user_config.data_sets:
+    user_config = admin_api.get_user(session.get("user").get("email"))
+
+    if data_set_name not in user_config['data_sets']:
         return abort(404)
 
     if request.method == 'GET':
+        upload_format = data_set_config.get('upload_format',
+                                            DEFAULT_UPLOAD_FORMAT)
         return render_template(
-            "upload_{}.html".format(data_set_config.upload_format),
+            "upload_{}.html".format(upload_format),
             data_set_name=data_set_name)
 
     return _store_data(data_set_config)
@@ -208,9 +209,9 @@ def _store_data(data_set_config):
     parse_file = create_parser(data_set_config)
     data_set = client.DataSet.from_group_and_type(
         app.config['BACKDROP_URL'] + '/data',
-        data_set_config.data_group,
-        data_set_config.data_type,
-        token=data_set_config.bearer_token
+        data_set_config['data_group'],
+        data_set_config['data_type'],
+        token=data_set_config.get('bearer_token', None)
     )
     expected_errors = (FileUploadError, ParseError, ValidationError)
 
@@ -222,7 +223,7 @@ def _store_data(data_set_config):
         log_upload_error('Upload error', app, e, data_set_config)
         return render_template('upload_error.html',
                                message=e.message,
-                               data_set_name=data_set_config.name), 400
+                               data_set_name=data_set_config['name']), 400
     except RequestException as e:
         log_upload_error('Error writing to backdrop', app, e, data_set_config)
         abort(500, 'Error saving to datastore: "{}"'.format(e.message))
@@ -235,8 +236,8 @@ def log_upload_error(message, app, e, data_set_config):
             '{}: {}'.format(message, e.message),
             extra={
                 'backdrop_upload_error': type(e).__name__,
-                'data_group': data_set_config.data_group,
-                'data_type': data_set_config.data_type,
+                'data_group': data_set_config['data_group'],
+                'data_type': data_set_config['data_type'],
             },
             exc_info=True
         )

@@ -6,7 +6,7 @@ from mock import patch
 import pytz
 from backdrop.read import api
 from backdrop.core.query import Query
-from tests.support.data_set import fake_data_set_exists
+from tests.support.performanceplatform_client import fake_data_set_exists
 from tests.support.test_helpers import has_status
 
 from warnings import warn

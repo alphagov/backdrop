@@ -23,8 +23,8 @@ def auth_header_is_valid(data_set, auth_header):
 
     request_token = extract_bearer_token(auth_header)
 
-    if request_token != data_set.bearer_token:
+    if request_token != data_set.get('bearer_token', None):
         log.error("expected <%s> but was <%s>" % (
-            data_set.bearer_token, request_token))
+            data_set['bearer_token'], request_token))
         return False
     return True

@@ -2,16 +2,12 @@ import unittest
 from hamcrest import assert_that
 from backdrop.read import api
 from tests.support.test_helpers import is_bad_request, is_ok
-from tests.support.data_set import fake_data_set_exists
+from tests.support.performanceplatform_client import fake_data_set_exists
 
 
 class TestRawEventAccess(unittest.TestCase):
     def setUp(self):
-        api.app.config['RAW_QUERIES_ALLOWED']['foo'] = False
         self.app = api.app.test_client()
-
-    def tearDown(self):
-        api.app.config['RAW_QUERIES_ALLOWED']['foo'] = True
 
     @fake_data_set_exists("foo")
     def test_that_querying_for_raw_events_is_disabled(self):
