@@ -16,3 +16,21 @@ Feature: the read api should provide cache control headers
          when I go to "/foo"
           and I send another request to "/foo" with the received etag
          then I should get back a status of "304"
+
+    Scenario: non-realtime data sets have a 30 minute cache header
+        Given "licensing.json" is in "foo" data_set with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
+            | realtime            | false |
+            | published           | true  |
+         when I go to "/foo"
+         then the "Cache-Control" header should be "max-age=1800, must-revalidate"
+
+    Scenario: realtime data sets have a 2 minute cache header
+        Given "licensing.json" is in "foo" data_set with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
+            | realtime            | true  |
+            | published           | true  |
+         when I go to "/foo"
+         then the "Cache-Control" header should be "max-age=120, must-revalidate"
