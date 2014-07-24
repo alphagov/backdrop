@@ -25,8 +25,8 @@ class DataSet(object):
         return self.config['name']
 
     def is_recent_enough(self):
-        max_age_expected = self.config.get('max_age_expected',
-                                           DEFAULT_MAX_AGE_EXPECTED)
+        max_age_expected = self.get_max_age_expected()
+
         if max_age_expected is None:
             return True
 
@@ -39,6 +39,10 @@ class DataSet(object):
             return False
 
         return (now - last_updated) < max_age_expected_delta
+
+    def get_max_age_expected(self):
+        return self.config.get('max_age_expected',
+                               DEFAULT_MAX_AGE_EXPECTED)
 
     def get_last_updated(self):
         return self.storage.get_last_updated(self.name)
