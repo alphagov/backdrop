@@ -47,6 +47,15 @@ class DataSet(object):
     def get_last_updated(self):
         return self.storage.get_last_updated(self.name)
 
+    def get_seconds_out_of_date(self):
+        now = timeutils.now()
+        if not self.get_last_updated():
+            return None
+        else:
+            last_updated = self.get_last_updated()
+
+        return int((now - last_updated).total_seconds())
+
     def empty(self):
         return self.storage.empty_data_set(self.name)
 

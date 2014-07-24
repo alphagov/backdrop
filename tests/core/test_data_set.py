@@ -1,5 +1,6 @@
 from hamcrest import assert_that, has_item, has_entries, \
-    has_length, contains, has_entry, contains_string
+    has_length, contains, has_entry, contains_string, \
+    is_
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -38,6 +39,15 @@ class BaseDataSetTest(object):
 
     def setUp(self):
         self.setup_config()
+
+class TestNewDataSet_attributes(BaseNewDataSetTest):
+
+    def test_seconds_out_of_date_returns_none_or_int(self):
+        self.mock_storage.get_last_updated.return_value = None
+        assert_that(self.data_set.get_seconds_out_of_date(), is_(None))
+
+        self.mock_storage.get_last_updated.return_value = d_tz(2014, 7, 1)
+        assert_that(self.data_set.get_seconds_out_of_date(), is_(int))
 
 
 class TestDataSet_store(BaseDataSetTest):
