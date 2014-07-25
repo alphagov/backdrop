@@ -49,6 +49,9 @@ class TestNewDataSet_attributes(BaseNewDataSetTest):
         self.mock_storage.get_last_updated.return_value = d_tz(2014, 7, 1)
         assert_that(self.data_set.get_seconds_out_of_date(), is_(int))
 
+    def test_seconds_out_of_date_shows_correct_number_of_seconds_out_of_date(self):
+        raise NotImplementedError
+
 
 class TestDataSet_store(BaseDataSetTest):
     schema = {

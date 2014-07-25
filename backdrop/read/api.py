@@ -107,38 +107,37 @@ def data_set_health():
     data_set_configs = admin_api.list_data_sets()
 
     for data_set_config in data_set_configs:
-        data_set = DataSet(storage, data_set_config)
-        if not data_set.is_recent_enough():
-            failing_data_sets.append({
-                'name': data_set.name,
-                'last_updated': data_set.get_last_updated()
-            })
+        data_set = NewDataSet(storage, data_set_config)
+        if not new_data_set.is_recent_enough():
+            failing_data_sets.append(
+                _data_set_object(new_data_set)
+            )
         else:
             okay_data_sets.append(data_set.name)
 
     if len(failing_data_sets):
-        message = _data_set_message(failing_data_sets)
         if len(failing_data_sets) > 1:
-            data_set_string = 'data_sets'
+            data_set_string = 'data-sets are'
         else:
-            data_set_string = 'data_set'
+            data_set_string = 'data-set is'
 
         return jsonify(status='error',
-                       message='%s %s are out of date' %
-                       (message, data_set_string)), 500
+                       data_sets=failing_data_sets,
+                       message='%s %s out of date' %
+                       (len(failing_data_sets), data_set_string)), 500
 
     else:
         return jsonify(status='ok',
-                       message='(%s)\n All data_sets are in date' %
-                       okay_data_sets)
+                       data_sets=okay_data_sets,
+                       message='All data_sets are in date')
 
 
-def _data_set_message(data_sets):
-    message = ', '.join(
-        '%s (last updated: %s)' % (data_set['name'],
-                                   data_set['last_updated'])
-        for data_set in data_sets)
-    return message
+def _data_set_object(data_set):
+    return {
+        "name": data_set.name,
+        "seconds-out-of-date": data_set.get_seconds_out_of_date(),
+        "last-updated": data_set.get_last_updated(),
+    }
 
 
 def log_error_and_respond(data_set, message, status_code):
