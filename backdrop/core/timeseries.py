@@ -108,12 +108,27 @@ class Quarter(Period):
         return timestamp.day == 1 and timestamp.month in self.quarter_starts
 
 
+class Year(Period):
+    def __init__(self):
+        self.name = "year"
+        self._delta = relativedelta(years=1)
+
+    def start(self, timestamp):
+        return timestamp.replace(month=1, day=1, hour=0, minute=0, second=0,
+                                 microsecond=0)
+
+    def valid_start_at(self, timestamp):
+        return (timestamp.month == 1 and timestamp.day == 1
+                and self._is_start_of_day(timestamp))
+
+
 HOUR = Hour()
 DAY = Day()
 WEEK = Week()
 MONTH = Month()
 QUARTER = Quarter()
-PERIODS = [HOUR, DAY, WEEK, MONTH, QUARTER]
+YEAR = Year()
+PERIODS = [HOUR, DAY, WEEK, MONTH, QUARTER, YEAR]
 
 
 def parse_period(period_name):
