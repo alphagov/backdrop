@@ -4,7 +4,7 @@ import datetime
 from pymongo import MongoClient
 from hamcrest import assert_that, contains, has_entry
 
-from backdrop.core.data_set import NewDataSet
+from backdrop.core.data_set import DataSet
 from backdrop.core.storage.mongo import MongoStorageEngine
 from backdrop.core.timeseries import WEEK
 from backdrop.core.query import Query
@@ -28,7 +28,7 @@ class TestDataSetIntegration(unittest.TestCase):
             'max_age_expected': 1000,
         }
 
-        self.new_data_set = NewDataSet(self.storage, self.config)
+        self.data_set = DataSet(self.storage, self.config)
 
         self.mongo_collection = MongoClient(HOSTS, PORT)[DB_NAME][DATA_SET]
 
@@ -58,7 +58,7 @@ class TestDataSetIntegration(unittest.TestCase):
     def test_period_queries_get_sorted_by__week_start_at(self):
         self.setup__timestamp_data()
         query = Query.create(period=WEEK)
-        result = self.new_data_set.execute_query(query)
+        result = self.data_set.execute_query(query)
         assert_that(result, contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),
@@ -70,11 +70,11 @@ class TestDataSetIntegration(unittest.TestCase):
             "_id": "first",
             "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=500)
         })
-        assert_that(self.new_data_set.is_recent_enough())
+        assert_that(self.data_set.is_recent_enough())
 
     def test_data_set_is_not_recent_enough(self):
         self.mongo_collection.save({
             "_id": "first",
             "_updated_at": datetime.datetime.now() - datetime.timedelta(seconds=50000)
         })
-        assert_that(not self.new_data_set.is_recent_enough())
+        assert_that(not self.data_set.is_recent_enough())

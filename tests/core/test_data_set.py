@@ -24,7 +24,7 @@ def mock_repository():
     return mock_repository
 
 
-class BaseNewDataSetTest(object):
+class BaseDataSetTest(object):
     def setup_config(self, additional_config={}):
         self.mock_storage = Mock()
         base_config = {
@@ -33,14 +33,14 @@ class BaseNewDataSetTest(object):
             'data_type': 'type',
         }
         self.data_set_config = dict(base_config.items() + additional_config.items())
-        self.data_set = data_set.NewDataSet(
+        self.data_set = data_set.DataSet(
             self.mock_storage, self.data_set_config)
 
     def setUp(self):
         self.setup_config()
 
 
-class TestNewDataSet_store(BaseNewDataSetTest):
+class TestDataSet_store(BaseDataSetTest):
     schema = {
         "$schema": "http://json-schema.org/schema#",
         "title": "Timestamps",
@@ -97,7 +97,7 @@ class TestNewDataSet_store(BaseNewDataSetTest):
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
 
 
-class TestNewDataSet_execute_query(BaseNewDataSetTest):
+class TestDataSet_execute_query(BaseDataSetTest):
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
         self.mock_storage.execute_query.return_value = [
