@@ -88,6 +88,8 @@ def add_period_keys(record):
     datetime.datetime(2012, 12, 1, 0, 0, tzinfo=<UTC>)
     >>> record['_quarter_start_at']
     datetime.datetime(2012, 10, 1, 0, 0, tzinfo=<UTC>)
+    >>> record['_year_start_at']
+    datetime.datetime(2012, 1, 1, 0, 0, tzinfo=<UTC>)
     """
     if '_timestamp' in record:
         for period in PERIODS:

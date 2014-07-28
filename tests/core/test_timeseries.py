@@ -1,7 +1,7 @@
 from unittest import TestCase
 import datetime
 from hamcrest import assert_that, is_, contains
-from backdrop.core.timeseries import timeseries, WEEK, MONTH, DAY, HOUR, QUARTER
+from backdrop.core.timeseries import timeseries, HOUR, DAY, WEEK, MONTH, QUARTER, YEAR
 from tests.support.test_helpers import d, d_tz
 
 
@@ -357,4 +357,47 @@ class TestQuarter(TestCase):
             (d_tz(2013, 4, 1),  d_tz(2013, 7, 1)),
             (d_tz(2013, 7, 1),  d_tz(2013, 10, 1)),
             (d_tz(2013, 10, 1), d_tz(2014, 1, 1))
+        ))
+
+
+class TestYear(TestCase):
+    def test_year_start_returns_the_beginning_of_the_given_year(self):
+        some_datetime = d(2013, 1, 20, 0, 23, 43)
+
+        assert_that(YEAR.start(some_datetime), is_(d(2013, 1, 1, 0, 0, 0)))
+
+    def test_start_of_year_is_valid(self):
+        assert_that(YEAR.valid_start_at(d(2013, 1, 1, 0, 0, 0)), is_(True))
+
+    def test_start_of_year_plus_second_is_invalid(self):
+        assert_that(YEAR.valid_start_at(d(2013, 1, 1, 0, 0, 1)), is_(False))
+
+    def test_start_of_year_plus_minute_is_invalid(self):
+        assert_that(YEAR.valid_start_at(d(2013, 1, 1, 0, 1, 0)), is_(False))
+
+    def test_start_of_year_plus_hour_is_invalid(self):
+        assert_that(YEAR.valid_start_at(d(2013, 1, 1, 1, 0, 0)), is_(False))
+
+    def test_start_of_year_plus_day_is_invalid(self):
+        assert_that(YEAR.valid_start_at(d(2013, 1, 2, 0, 0, 0)), is_(False))
+
+    def test_start_of_year_plus_month_is_invalid(self):
+        assert_that(YEAR.valid_start_at(d(2013, 2, 1, 0, 0, 0)), is_(False))
+
+    def test_end_of_year_is_beginning_of_next_year(self):
+        some_datetime = d(2013, 10, 4, 10, 23, 43)
+
+        end = YEAR.end(some_datetime)
+
+        assert_that(end, is_(d(2014, 1, 1, 0, 0, 0)))
+
+    def test_that_a_range_of_five_years_gives_us_five_data_points(self):
+        range = YEAR.range(d_tz(2010, 1, 1), d_tz(2015, 1, 1))
+
+        assert_that(list(range), contains(
+            (d_tz(2010, 1, 1), d_tz(2011, 1, 1)),
+            (d_tz(2011, 1, 1), d_tz(2012, 1, 1)),
+            (d_tz(2012, 1, 1), d_tz(2013, 1, 1)),
+            (d_tz(2013, 1, 1), d_tz(2014, 1, 1)),
+            (d_tz(2014, 1, 1), d_tz(2015, 1, 1)),
         ))
