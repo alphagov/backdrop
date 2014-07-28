@@ -4,7 +4,7 @@ import json
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
-from backdrop.core.data_set import NewDataSet
+from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.write.decompressing_request import DecompressingRequest
 
@@ -259,7 +259,7 @@ def _validate_auth(data_set_config):
 
 
 def _append_to_data_set(data_set_config, data, ok_message=None):
-    data_set = NewDataSet(storage, data_set_config)
+    data_set = DataSet(storage, data_set_config)
     data_set.store(data)
 
     if ok_message:
@@ -269,7 +269,7 @@ def _append_to_data_set(data_set_config, data, ok_message=None):
 
 
 def _empty_data_set(data_set_config):
-    data_set = NewDataSet(storage, data_set_config)
+    data_set = DataSet(storage, data_set_config)
     data_set.empty()
     return jsonify(
         status='ok',

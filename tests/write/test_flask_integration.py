@@ -69,7 +69,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response("ValidationError('Expected header: Content-type: application/json',)"))
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
-    @patch("backdrop.core.data_set.NewDataSet.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test_empty_list_gets_accepted(self, store):
         self.app.post(
             '/foo_data_set',
@@ -83,7 +83,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
-    @patch("backdrop.core.data_set.NewDataSet.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test_data_gets_stored(self, store):
         self.app.post(
             '/foo_data_set',
@@ -109,7 +109,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
-    @patch("backdrop.core.data_set.NewDataSet.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     def test__id_gets_stored(self, store):
         response = self.app.post(
             '/foo',
@@ -136,7 +136,7 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_error_response())
 
     @patch("backdrop.write.api.statsd")
-    @patch("backdrop.core.data_set.NewDataSet.store")
+    @patch("backdrop.core.data_set.DataSet.store")
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_exception_handling(self, store, statsd):
         store.side_effect = RuntimeError("BOOM")
