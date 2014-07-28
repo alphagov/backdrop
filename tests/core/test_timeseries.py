@@ -133,6 +133,23 @@ class TestWeek_range(TestCase):
         ))
 
 
+class TestWeek_valid_start_at(TestCase):
+    def test_start_of_week_is_valid(self):
+        assert_that(WEEK.valid_start_at(d(2013, 4, 8, 0, 0, 0)), is_(True))
+
+    def test_start_of_week_plus_second_is_invalid(self):
+        assert_that(WEEK.valid_start_at(d(2013, 4, 8, 0, 0, 1)), is_(False))
+
+    def test_start_of_week_plus_minute_is_invalid(self):
+        assert_that(WEEK.valid_start_at(d(2013, 4, 8, 0, 1, 0)), is_(False))
+
+    def test_start_of_week_plus_hour_is_invalid(self):
+        assert_that(WEEK.valid_start_at(d(2013, 4, 8, 1, 0, 0)), is_(False))
+
+    def test_start_of_week_plus_day_is_invalid(self):
+        assert_that(WEEK.valid_start_at(d(2013, 4, 9, 0, 0, 0)), is_(False))
+
+
 class TestMonth_start(TestCase):
     def test_that_it_returns_first_of_current_month_for_midmonth(self):
         some_datetime = d(2013, 4, 9)
@@ -219,6 +236,23 @@ class TestMonth_range(TestCase):
         ))
 
 
+class TestMonth_valid_start_at(TestCase):
+    def test_start_of_month_is_valid(self):
+        assert_that(MONTH.valid_start_at(d(2013, 4, 1, 0, 0, 0)), is_(True))
+
+    def test_start_of_month_plus_second_is_invalid(self):
+        assert_that(MONTH.valid_start_at(d(2013, 4, 1, 0, 0, 1)), is_(False))
+
+    def test_start_of_month_plus_minute_is_invalid(self):
+        assert_that(MONTH.valid_start_at(d(2013, 4, 1, 0, 1, 0)), is_(False))
+
+    def test_start_of_month_plus_hour_is_invalid(self):
+        assert_that(MONTH.valid_start_at(d(2013, 4, 1, 1, 0, 0)), is_(False))
+
+    def test_start_of_month_plus_day_is_invalid(self):
+        assert_that(MONTH.valid_start_at(d(2013, 4, 2, 0, 0, 0)), is_(False))
+
+
 class TestDay(TestCase):
     def test_that_returns_the_beginning_of_the_current_day(self):
         some_datetime = d(2013, 10, 4, 10, 23, 43)
@@ -232,10 +266,17 @@ class TestDay(TestCase):
 
         assert_that(DAY.valid_start_at(naughty_starttime), is_(False))
 
-    def test_that_beginning_of_the_day_is_a_valid_start_at(self):
-        lovely_starttime = d(2013, 10, 18, 00, 00)
+    def test_start_of_day_is_valid(self):
+        assert_that(DAY.valid_start_at(d(2013, 10, 18, 0, 0, 0)), is_(True))
 
-        assert_that(DAY.valid_start_at(lovely_starttime), is_(True))
+    def test_start_of_day_plus_second_is_invalid(self):
+        assert_that(DAY.valid_start_at(d(2013, 10, 18, 0, 0, 1)), is_(False))
+
+    def test_start_of_day_plus_minute_is_invalid(self):
+        assert_that(DAY.valid_start_at(d(2013, 10, 18, 0, 1, 0)), is_(False))
+
+    def test_start_of_day_plus_hour_is_invalid(self):
+        assert_that(DAY.valid_start_at(d(2013, 10, 18, 1, 0, 0)), is_(False))
 
     def test_that_end_of_the_day_is_the_beginning_of_the_next_day(self):
         late_in_the_day = d(2013, 10, 18, 21, 00)
@@ -269,10 +310,14 @@ class TestHour(TestCase):
 
         assert_that(HOUR.valid_start_at(middle_of_the_hour), is_(False))
 
-    def test_that_beginning_of_the_hour_is_a_valid_start_at(self):
-        beginning_of_the_hour = d(2013, 10, 18, 12, 0)
+    def test_start_of_hour_is_valid(self):
+        assert_that(HOUR.valid_start_at(d(2013, 10, 18, 12, 0, 0)), is_(True))
 
-        assert_that(HOUR.valid_start_at(beginning_of_the_hour), is_(True))
+    def test_start_of_hour_plus_second_is_invalid(self):
+        assert_that(HOUR.valid_start_at(d(2013, 10, 18, 12, 0, 1)), is_(False))
+
+    def test_start_of_hour_plus_minute_is_invalid(self):
+        assert_that(HOUR.valid_start_at(d(2013, 10, 18, 12, 1, 0)), is_(False))
 
     def test_that_returns_the_end_of_the_current_hour(self):
         some_datetime = d(2013, 10, 4, 10, 23, 43)
@@ -314,16 +359,41 @@ class TestQuarter(TestCase):
 
         assert_that(QUARTER.start(some_datetime), is_(d(2013, 10, 1, 0, 0, 0)))
 
-    def test_that_beginning_of_quarters_are_valid(self):
-        first_quarter = d(2013, 1, 1, 0, 0, 0)
-        second_quarter = d(2013, 4, 1, 0, 0, 0)
-        third_quarter = d(2013, 7, 1, 0, 0, 0)
-        fourth_quarter = d(2013, 10, 1, 0, 0, 0)
+    def test_start_of_quarters_are_valid(self):
+        assert_that(QUARTER.valid_start_at(d(2013, 1, 1, 0, 0, 0)), is_(True))
+        assert_that(QUARTER.valid_start_at(d(2013, 4, 1, 0, 0, 0)), is_(True))
+        assert_that(QUARTER.valid_start_at(d(2013, 7, 1, 0, 0, 0)), is_(True))
+        assert_that(QUARTER.valid_start_at(d(2013, 10, 1, 0, 0, 0)), is_(True))
 
-        assert_that(QUARTER.valid_start_at(first_quarter), is_(True))
-        assert_that(QUARTER.valid_start_at(second_quarter), is_(True))
-        assert_that(QUARTER.valid_start_at(third_quarter), is_(True))
-        assert_that(QUARTER.valid_start_at(fourth_quarter), is_(True))
+    def test_start_of_quarters_plus_second_are_invalid(self):
+        assert_that(QUARTER.valid_start_at(d(2013, 1, 1, 0, 0, 1)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 4, 1, 0, 0, 1)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 7, 1, 0, 0, 1)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 10, 1, 0, 0, 1)), is_(False))
+
+    def test_start_of_quarters_plus_minute_are_invalid(self):
+        assert_that(QUARTER.valid_start_at(d(2013, 1, 1, 0, 1, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 4, 1, 0, 1, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 7, 1, 0, 1, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 10, 1, 0, 1, 0)), is_(False))
+
+    def test_start_of_quarters_plus_hour_are_invalid(self):
+        assert_that(QUARTER.valid_start_at(d(2013, 1, 1, 1, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 4, 1, 1, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 7, 1, 1, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 10, 1, 1, 0, 0)), is_(False))
+
+    def test_start_of_quarters_plus_day_are_invalid(self):
+        assert_that(QUARTER.valid_start_at(d(2013, 1, 2, 0, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 4, 2, 0, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 7, 2, 0, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 10, 2, 0, 0, 0)), is_(False))
+
+    def test_start_of_quarters_plus_month_are_invalid(self):
+        assert_that(QUARTER.valid_start_at(d(2013, 2, 1, 0, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 5, 1, 0, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 8, 1, 0, 0, 0)), is_(False))
+        assert_that(QUARTER.valid_start_at(d(2013, 11, 1, 0, 0, 0)), is_(False))
 
     def test_that_middle_of_quarters_are_invalid(self):
         middle_first_quarter = d(2013, 1, 10, 0, 0, 0)
