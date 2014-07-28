@@ -75,7 +75,7 @@ class Week(Period):
         return _truncate_time(timestamp) + relativedelta(weekday=MO(-1))
 
     def valid_start_at(self, timestamp):
-        return timestamp.weekday() is 0
+        return timestamp.weekday() == 0 and self._is_start_of_day(timestamp)
 
 
 class Month(Period):
@@ -88,7 +88,7 @@ class Month(Period):
                                  second=0, microsecond=0)
 
     def valid_start_at(self, timestamp):
-        return timestamp.day == 1
+        return timestamp.day == 1 and self._is_start_of_day(timestamp)
 
 
 class Quarter(Period):
@@ -105,7 +105,8 @@ class Quarter(Period):
                                  second=0, microsecond=0)
 
     def valid_start_at(self, timestamp):
-        return timestamp.day == 1 and timestamp.month in self.quarter_starts
+        return (timestamp.day == 1 and timestamp.month in self.quarter_starts
+                and self._is_start_of_day(timestamp))
 
 
 class Year(Period):
