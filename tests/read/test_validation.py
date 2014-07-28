@@ -276,7 +276,7 @@ class TestRequestValidation(TestCase):
         })
 
         assert_that(validation_result, is_invalid_with_message(
-            "'period' must be one of ['hour', 'day', 'week', 'month', 'quarter']"))
+            "'period' must be one of ['hour', 'day', 'week', 'month', 'quarter', 'year']"))
 
     def test_queries_without_a_colon_in_sort_by_are_disallowed(self):
         validation_result = validate_request_args({
