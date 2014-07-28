@@ -1,9 +1,8 @@
 import unittest
-from hamcrest import assert_that, only_contains, contains
-from backdrop.core.errors import ParseError
+from hamcrest import assert_that, contains, instance_of
 
-from backdrop.core.upload.parse_excel import parse_excel, ExcelError, EXCEL_ERROR
-from tests.support.test_helpers import fixture_path, d_tz
+from backdrop.core.upload.parse_excel import parse_excel, EXCEL_ERROR
+from tests.support.test_helpers import fixture_path
 
 
 class ParseExcelTestCase(unittest.TestCase):
@@ -59,3 +58,8 @@ class ParseExcelTestCase(unittest.TestCase):
                 [None, None, None],
                 ["The above row", "is full", "of nones"]
             )))
+
+    def test_that_numbers_are_converted_to_int_where_possible(self):
+        data = map(list, self._parse_excel("xlsfile.xls"))
+
+        assert_that(data[0][1][2], instance_of(int))
