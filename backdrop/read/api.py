@@ -107,13 +107,15 @@ def data_set_health():
     data_set_configs = admin_api.list_data_sets()
 
     for data_set_config in data_set_configs:
-        data_set = NewDataSet(storage, data_set_config)
+        new_data_set = DataSet(storage, data_set_config)
         if not new_data_set.is_recent_enough():
             failing_data_sets.append(
                 _data_set_object(new_data_set)
             )
         else:
-            okay_data_sets.append(data_set.name)
+            okay_data_sets.append(
+                _data_set_object(new_data_set)
+            )
 
     if len(failing_data_sets):
         if len(failing_data_sets) > 1:
@@ -137,6 +139,7 @@ def _data_set_object(data_set):
         "name": data_set.name,
         "seconds-out-of-date": data_set.get_seconds_out_of_date(),
         "last-updated": data_set.get_last_updated(),
+        "max-age-expected": data_set.get_max_age_expected(),
     }
 
 

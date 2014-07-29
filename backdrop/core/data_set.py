@@ -27,16 +27,22 @@ class DataSet(object):
     def is_recent_enough(self):
         max_age_expected = self.get_max_age_expected()
 
-        if max_age_expected is None:
-            return True
-
-        max_age_expected_delta = datetime.timedelta(seconds=max_age_expected)
-
         now = timeutils.now()
         last_updated = self.get_last_updated()
 
-        if not last_updated:
-            return False
+        """
+        - If `max_age_expected` is None we're saying
+        'hey, we're not going to check this'.
+        - If `last_updated` is a null value,
+        the data-set has never been updated,
+        so it doesn't really give us any value to say
+        'you should update this thing you've never updated before'
+        because we already know that, right?
+        """
+        if max_age_expected is None or not last_updated:
+            return True
+
+        max_age_expected_delta = datetime.timedelta(seconds=max_age_expected)
 
         return (now - last_updated) < max_age_expected_delta
 
