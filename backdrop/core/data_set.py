@@ -59,7 +59,7 @@ class DataSet(object):
             last_updated = self.get_last_updated()
 
         return int((
-            now - (last_updated - max_age_delta)
+            now - last_updated - max_age_delta
         ).total_seconds())
 
     def empty(self):
