@@ -15,7 +15,8 @@ Feature: the read/status api
             | max_age_expected | 1     |
         and I have a record updated "10 seconds" ago in the "recent" data_set
         when I go to "/_status/data-sets"
-        then I should get back a status of "500"
+        then I should get back a status of "200"
+         and I should get back the status of "not okay"
 
     Scenario: checking a data_set with no max age expected
         Given I have a data_set named "recent" with settings

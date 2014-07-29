@@ -123,10 +123,10 @@ def data_set_health():
         else:
             data_set_string = 'data-set is'
 
-        return jsonify(status='error',
+        return jsonify(status='not okay',
                        data_sets=failing_data_sets,
                        message='%s %s out of date' %
-                       (len(failing_data_sets), data_set_string)), 500
+                       (len(failing_data_sets), data_set_string)), 200
 
     else:
         return jsonify(status='ok',
