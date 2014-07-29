@@ -1,11 +1,15 @@
+import os
+
 LOG_LEVEL = "DEBUG"
 SINGLE_SIGN_ON = True
 BACKDROP_ADMIN_UI_HOST = "http://backdrop-admin.dev.gov.uk"
 ALLOW_TEST_SIGNIN = True
 SECRET_KEY = "something unique and secret"
 
+wercker_mongo_host = os.environ.get('WERCKER_MONGODB_HOST')
+
 DATABASE_NAME = "backdrop_test"
-MONGO_HOSTS = ['localhost']
+MONGO_HOSTS = [wercker_mongo_host if wercker_mongo_host else 'localhost']
 MONGO_PORT = 27017
 
 from test_environment import *
