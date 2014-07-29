@@ -41,7 +41,8 @@ class BaseDataSetTest(object):
     def setUp(self):
         self.setup_config()
 
-class TestNewDataSet_attributes(BaseNewDataSetTest):
+
+class TestNewDataSet_attributes(BaseDataSetTest):
 
     def test_seconds_out_of_date_returns_none_or_int(self):
         self.mock_storage.get_last_updated.return_value = None
@@ -66,8 +67,6 @@ class TestNewDataSet_attributes(BaseNewDataSetTest):
             self.mock_storage.get_last_updated.return_value = d_tz(2014, 1, 25)
             # It's three days out, so we should get 2 days past sell by date
             assert_that(self.data_set.get_seconds_out_of_date(), is_(172800))
-
-
 
 
 class TestDataSet_store(BaseDataSetTest):

@@ -55,14 +55,15 @@ class DataSet(object):
 
     def get_seconds_out_of_date(self):
         now = timeutils.now()
-        max_age_delta = datetime.timedelta(
-            seconds=self.get_max_age_expected()
-        )
 
-        if not self.get_last_updated():
+        if not self.get_last_updated() or self.get_max_age_expected() is None:
             return None
         else:
             last_updated = self.get_last_updated()
+
+        max_age_delta = datetime.timedelta(
+            seconds=self.get_max_age_expected()
+        )
 
         return int((
             now - last_updated - max_age_delta
