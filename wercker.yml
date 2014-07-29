@@ -1,0 +1,15 @@
+box: wercker/python
+# Build definition
+services:
+    - wercker/mongodb
+env:
+  - SKIP_VIRUS_SCAN=1 SKIP_SPLINTER_TESTS=1 MONGO_REPLICA_SET=''
+build:
+  # The steps that will be executed on build
+  steps:
+    - script:
+        name: pip install test requirements
+        code: pip install -r requirements_for_tests.txt --use-mirrors | tee $WERCKER_REPORT_MESSAGE_FILE
+    - script:
+        name: Run tests
+        code: ./run_tests.sh
