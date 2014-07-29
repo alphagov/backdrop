@@ -7,9 +7,13 @@ env:
 build:
   # The steps that will be executed on build
   steps:
+    - virtualenv:
+        name: setup virtual environment
+        install_wheel: true # Enable wheel to speed up builds (experimental)
     - script:
         name: pip install test requirements
         code: pip install -r requirements_for_tests.txt --use-mirrors | tee $WERCKER_REPORT_MESSAGE_FILE
     - script:
         name: Run tests
         code: ./run_tests.sh
+
