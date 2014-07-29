@@ -3,6 +3,7 @@ from hamcrest import assert_that, has_item, has_entries, \
     is_
 from nose.tools import assert_raises
 from mock import Mock
+from freezegun import freeze_time
 
 from backdrop.core import data_set
 from backdrop.core.query import Query
@@ -50,7 +51,23 @@ class TestNewDataSet_attributes(BaseNewDataSetTest):
         assert_that(self.data_set.get_seconds_out_of_date(), is_(int))
 
     def test_seconds_out_of_date_shows_correct_number_of_seconds_out_of_date(self):
-        raise NotImplementedError
+        with freeze_time('2014-01-28'):
+            # We expect it to be 0 seconds out of date
+            self.setup_config({'max_age_expected': int(0)})
+
+            # But it's a day out of date, so it should be 1day's worth of seconds out of date
+            self.mock_storage.get_last_updated.return_value = d_tz(2014, 1, 27)
+            assert_that(self.data_set.get_seconds_out_of_date(), is_(86400))
+
+        with freeze_time('2014-01-28'):
+            # We expect it to be a day out of date
+            self.setup_config({'max_age_expected': int(86400)})
+
+            self.mock_storage.get_last_updated.return_value = d_tz(2014, 1, 25)
+            # It's three days out, so we should get 2 days past sell by date
+            assert_that(self.data_set.get_seconds_out_of_date(), is_(172800))
+
+
 
 
 class TestDataSet_store(BaseDataSetTest):
