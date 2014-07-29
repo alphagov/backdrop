@@ -44,7 +44,7 @@ def parse_request_args(request_args):
 
     args['filter_by'] = map(parse_filter_by, request_args.getlist('filter_by'))
 
-    args['group_by'] = request_args.get('group_by')
+    args['group_by'] = request_args.getlist('group_by')
 
     args['sort_by'] = if_present(lambda sort_by: sort_by.split(':', 1),
                                  request_args.get('sort_by'))

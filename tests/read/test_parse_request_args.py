@@ -84,7 +84,7 @@ class Test_parse_request_args(unittest.TestCase):
 
         args = parse_request_args(request_args)
 
-        assert_that(args['group_by'], is_('foobar'))
+        assert_that(args['group_by'], is_(['foobar']))
 
     def test_sort_is_parsed(self):
         request_args = MultiDict([

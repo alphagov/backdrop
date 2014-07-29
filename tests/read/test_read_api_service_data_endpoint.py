@@ -48,7 +48,7 @@ class QueryingApiTestCase(unittest.TestCase):
         mock_query.return_value = NoneData()
         self.app.get('/data/some-group/some-type?group_by=zombies')
         mock_query.assert_called_with(
-            Query.create(group_by=u'zombies'))
+            Query.create(group_by=[u'zombies']))
 
     @fake_data_set_exists("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
     @patch('backdrop.core.data_set.DataSet.execute_query')
@@ -78,7 +78,7 @@ class QueryingApiTestCase(unittest.TestCase):
 
         mock_query.assert_called_with(
             Query.create(period=WEEK,
-                         group_by="stuff",
+                         group_by=['stuff'],
                          start_at=d_tz(2012, 11, 5),
                          end_at=d_tz(2012, 12, 3)))
 

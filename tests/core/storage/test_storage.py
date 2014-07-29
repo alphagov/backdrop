@@ -209,7 +209,7 @@ class BaseStorageTest(object):
                        {'foo': 'bar'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
-            group_by='foo'))
+            group_by=['foo']))
 
         assert_that(results,
                     contains_inanyorder(
@@ -242,7 +242,7 @@ class BaseStorageTest(object):
             {'_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
-            group_by='foo', period=DAY))
+            group_by=['foo'], period=DAY))
 
         assert_that(results,
                     contains_inanyorder(
@@ -256,7 +256,7 @@ class BaseStorageTest(object):
                        {'foo': 'bar', 'c': 2})
 
         results = self.engine.execute_query('foo_bar', Query.create(
-            group_by='foo', collect=[('c', 'sum')]))
+            group_by=['foo'], collect=[('c', 'sum')]))
 
         assert_that(results,
                     contains_inanyorder(
@@ -271,7 +271,7 @@ class BaseStorageTest(object):
                        {'foo': 'one', 'bar': False})
 
         results = self.engine.execute_query('foo_bar', Query.create(
-            group_by='foo', collect=[('bar', 'sum')]))
+            group_by=['foo'], collect=[('bar', 'sum')]))
 
         assert_that(results,
                     contains_inanyorder(
@@ -285,7 +285,7 @@ class BaseStorageTest(object):
                        {'bar': 'one'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
-            group_by='foo'))
+            group_by=['foo']))
 
         assert_that(results,
                     contains_inanyorder(
