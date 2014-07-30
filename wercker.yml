@@ -1,11 +1,8 @@
 box: wercker/python
-# Build definition
 services:
     - wercker/mongodb
-env:
-  - SKIP_VIRUS_SCAN=1 SKIP_SPLINTER_TESTS=1 MONGO_REPLICA_SET=''
+# The steps that will be executed on build
 build:
-  # The steps that will be executed on build
   steps:
     - virtualenv:
         name: setup virtual environment

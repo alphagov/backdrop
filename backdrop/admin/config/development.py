@@ -11,6 +11,12 @@ DATABASE_NAME = "backdrop"
 MONGO_HOSTS = [wercker_mongo_host if wercker_mongo_host else 'localhost']
 MONGO_PORT = 27017
 
+import pprint as pp
+pp.pprint('<<<<<<<<<<<<<<<<< DEVELOPMENT >>>>>>>>>>>>>>>>>>>>>')
+pp.pprint(os.environ.get('WERCKER_MONGODB_HOST'))
+pp.pprint(wercker_mongo_host)
+pp.pprint(MONGO_HOSTS)
+
 try:
     from development_environment import *
 except ImportError:
