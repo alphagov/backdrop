@@ -9,7 +9,12 @@ SECRET_KEY = "something unique and secret"
 wercker_mongo_host = os.environ.get('WERCKER_MONGODB_HOST')
 
 DATABASE_NAME = "backdrop_test"
+
 MONGO_HOSTS = [wercker_mongo_host if wercker_mongo_host else 'localhost']
+import pprint as pp
+pp.pprint(os.environ.get('WERCKER_MONGODB_HOST'))
+pp.pprint(wercker_mongo_host)
+pp.pprint(MONGO_HOSTS)
 MONGO_PORT = 27017
 
 from test_environment import *
