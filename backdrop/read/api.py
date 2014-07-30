@@ -103,17 +103,12 @@ def health_check():
 def data_set_health():
 
     failing_data_sets = []
-    okay_data_sets = []
     data_set_configs = admin_api.list_data_sets()
 
     for data_set_config in data_set_configs:
         new_data_set = DataSet(storage, data_set_config)
         if not new_data_set.is_recent_enough():
             failing_data_sets.append(
-                _data_set_object(new_data_set)
-            )
-        else:
-            okay_data_sets.append(
                 _data_set_object(new_data_set)
             )
 
@@ -130,7 +125,7 @@ def data_set_health():
 
     else:
         return jsonify(status='ok',
-                       data_sets=okay_data_sets,
+                       data_sets=None,
                        message='All data_sets are in date')
 
 
