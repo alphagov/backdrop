@@ -98,7 +98,7 @@ def health_check():
 
 
 @app.route('/_status/data-sets', methods=['GET'])
-@cache_control.set('max-age=300')
+@cache_control.nocache
 @statsd.timer('read.route.heath_check.data_set')
 def data_set_health():
 
