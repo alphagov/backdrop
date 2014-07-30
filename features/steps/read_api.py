@@ -120,6 +120,12 @@ def step(context, message):
     assert_that(data["message"], is_(message))
 
 
+@then('I should get back the status of "{expected_status}"')
+def step(context, expected_status):
+    data = json.loads(context.response.data)
+    assert_that(data["status"], is_(expected_status))
+
+
 @then('I should get back the parse error "{parse_error}"')
 def step(context, parse_error):
     data = json.loads(context.response.data)
