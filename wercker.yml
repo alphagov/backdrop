@@ -15,5 +15,5 @@ build:
         code: pip install -r requirements_for_tests.txt --use-mirrors | tee $WERCKER_REPORT_MESSAGE_FILE
     - script:
         name: Run tests
-        code: ./run_tests.sh
+        code: source ./run_tests.sh
 
