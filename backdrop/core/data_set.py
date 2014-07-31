@@ -69,6 +69,10 @@ class DataSet(object):
             now - last_updated - max_age_delta
         ).total_seconds())
 
+    def create_if_not_exists(self):
+        if not self.storage.data_set_exists(self.name):
+            self.storage.create_data_set(self.name, self.config['capped_size'])
+
     def empty(self):
         return self.storage.empty_data_set(self.name)
 
