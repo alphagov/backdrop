@@ -164,6 +164,7 @@ def query(data_set_name):
         return fetch(data_set_config)
 
 
+@crossdomain(origin='*')
 def fetch(data_set_config):
     error_text = 'data_set not found'
 
@@ -222,10 +223,6 @@ def fetch(data_set_config):
                 "max-age=%d, "
                 "must-revalidate" % cache_duration
             )
-
-    # Headers
-    # allow requests from any origin
-    response.headers['Access-Control-Allow-Origin'] = '*'
 
     return response
 
