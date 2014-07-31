@@ -1,6 +1,7 @@
 import os
 import logging
 import datetime
+import itertools
 
 import pymongo
 from pymongo.errors import AutoReconnect, CollectionInvalid
@@ -99,7 +100,8 @@ class MongoStorageEngine(object):
             return self._basic_query(data_set_id, query)
 
     def _group_query(self, data_set_id, query):
-        keys = query.group_keys
+        # flatten the list of key combos to form a flat list of keys
+        keys = list(itertools.chain.from_iterable(query.group_keys))
         spec = get_mongo_spec(query)
         collect_fields = query.collect_fields
 

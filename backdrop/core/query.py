@@ -50,7 +50,8 @@ class Query(_Query):
 
     @property
     def group_keys(self):
-        """Return a list of fields that are being grouped on
+        """Return a list of lists of combinations of fields that are being
+        grouped on
 
         This is kinda coupled to how we group with Mongo but these keys
         are in the returned results and are used in the nested merge to
@@ -58,17 +59,17 @@ class Query(_Query):
 
         >>> from ..core.timeseries import WEEK
         >>> Query.create(group_by=['foo']).group_keys
-        ['foo']
+        [['foo']]
         >>> Query.create(period=WEEK).group_keys
-        ['_week_start_at']
+        [['_week_start_at']]
         >>> Query.create(group_by=['foo'], period=WEEK).group_keys
-        ['foo', '_week_start_at']
+        [['foo'], ['_week_start_at']]
         """
         keys = []
         if self.group_by:
-            keys += self.group_by
+            keys.append(self.group_by)
         if self.period:
-            keys.append(self.period.start_at_key)
+            keys.append([self.period.start_at_key])
         return keys
 
     @property
