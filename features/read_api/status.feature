@@ -1,4 +1,5 @@
 @use_read_api_client
+@status_api
 Feature: the read/status api
 
     Scenario: checking an in-date data_set
@@ -17,6 +18,7 @@ Feature: the read/status api
         when I go to "/_status/data-sets"
         then I should get back a status of "200"
          and I should get back the status of "not okay"
+         and I should get a "Access-Control-Allow-Origin" header of "*"
 
     Scenario: checking a data_set with no max age expected
         Given I have a data_set named "recent" with settings

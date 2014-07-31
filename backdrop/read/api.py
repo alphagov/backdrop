@@ -12,6 +12,7 @@ from ..core import log_handler, cache_control
 from ..core.data_set import DataSet
 from ..core.errors import InvalidOperationError
 from ..core.timeutils import as_utc
+from ..core.response import crossdomain
 
 from ..core.storage.mongo import MongoStorageEngine
 
@@ -86,6 +87,7 @@ def http_error_handler(e):
 
 
 @app.route('/_status', methods=['GET'])
+@crossdomain(origin='*')
 @cache_control.nocache
 @statsd.timer('read.route.heath_check.status')
 def health_check():
@@ -98,6 +100,7 @@ def health_check():
 
 
 @app.route('/_status/data-sets', methods=['GET'])
+@crossdomain(origin='*')
 @cache_control.nocache
 @statsd.timer('read.route.heath_check.data_set')
 def data_set_health():
