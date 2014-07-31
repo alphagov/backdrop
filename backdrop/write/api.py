@@ -260,6 +260,7 @@ def _validate_auth(data_set_config):
 
 def _append_to_data_set(data_set_config, data, ok_message=None):
     data_set = DataSet(storage, data_set_config)
+    data_set.create_if_not_exists()
     data_set.store(data)
 
     if ok_message:
@@ -270,6 +271,7 @@ def _append_to_data_set(data_set_config, data, ok_message=None):
 
 def _empty_data_set(data_set_config):
     data_set = DataSet(storage, data_set_config)
+    data_set.create_if_not_exists()
     data_set.empty()
     return jsonify(
         status='ok',

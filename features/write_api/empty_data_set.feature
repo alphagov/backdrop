@@ -5,9 +5,10 @@ Feature: empty_data_set
     Scenario: emptying a data-set by PUTing an empty JSON list
         Given I have the data in "dinosaur.json"
           and I have a data_set named "some_data_set" with settings
-            | key        | value         |
-            | data_group | "group"       |
-            | data_type  | "type"        |
+            | key         | value         |
+            | data_group  | "group"       |
+            | data_type   | "type"        |
+            | capped_size | 0             |
           and I use the bearer token for the data_set
          when I POST to the specific path "/data/group/type"
         given I have JSON data '[]'
@@ -20,9 +21,10 @@ Feature: empty_data_set
     @empty_data_set
     Scenario: PUT is only implemented for an empty JSON list
         Given I have a data_set named "some_data_set" with settings
-            | key        | value         |
-            | data_group | "group"       |
-            | data_type  | "type"        |
+            | key         | value         |
+            | data_group  | "group"       |
+            | data_type   | "type"        |
+            | capped_size | 0             |
           and I use the bearer token for the data_set
         given I have JSON data '[{"a": 1}]'
          when I PUT to the specific path "/data/group/type"

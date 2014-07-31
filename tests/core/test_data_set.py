@@ -33,6 +33,7 @@ class BaseDataSetTest(object):
             'name': 'test_data_set',
             'data_group': 'group',
             'data_type': 'type',
+            'capped_size': 0,
         }
         self.data_set_config = dict(base_config.items() + additional_config.items())
         self.data_set = data_set.DataSet(
@@ -110,7 +111,7 @@ class TestDataSet_store(BaseDataSetTest):
 
     def test_each_record_gets_validated_further_when_schema_given(self):
         self.setup_config({'schema': self.schema})
-        #does store only take lists?
+        # does store only take lists?
         with assert_raises(SchemaValidationError) as e:
             self.data_set.store([{"_timestamp": "2014-06-12T00:00:00+0000"}, {'foo': 'bar'}])
 
@@ -330,3 +331,17 @@ class TestDataSet_execute_query(BaseDataSetTest):
         assert_that(data, contains(
             has_entries({'some_group': 'val2'})
         ))
+
+
+class TestDataSet_create(BaseDataSetTest):
+
+    def test_data_set_is_created_if_it_does_not_exist(self):
+        self.mock_storage.data_set_exists.return_value = False
+        self.data_set.create_if_not_exists()
+        self.mock_storage.create_data_set.assert_called_with(
+            'test_data_set', 0)
+
+    def test_data_set_is_not_created_if_it_does_exist(self):
+        self.mock_storage.data_set_exists.return_value = True
+        self.data_set.create_if_not_exists()
+        assert_that(self.mock_storage.create_data_set.called, is_(False))
