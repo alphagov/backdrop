@@ -1,6 +1,8 @@
 import pytz
 from backdrop.core.nested_merge import collect_key
 from backdrop.core.timeseries import timeseries, PERIODS
+from flask import make_response
+from functools import update_wrapper
 
 
 def create_period_group(doc, period):
@@ -158,3 +160,22 @@ class PeriodGroupedData(object):
         return min([
             first_nonempty(i['values'], is_reversed) for i in self._data],
             key=abs)
+
+
+def crossdomain(origin=None):
+    """
+    See: http://flask.pocoo.org/snippets/56/
+    Example usage:
+        @crossdomain(origin='*')
+        def my_service():
+            return jsonify(foo='cross domain ftw')
+    """
+
+    def decorator(f):
+        def wrapped_function(*args, **kwargs):
+            resp = make_response(f(*args, **kwargs))
+            h = resp.headers
+            h['Access-Control-Allow-Origin'] = origin
+            return resp
+        return update_wrapper(wrapped_function, f)
+    return decorator
