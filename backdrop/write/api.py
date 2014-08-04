@@ -175,33 +175,6 @@ def post_to_data_set(data_set_name):
         abort(400, repr(e))
 
 
-@app.route('/data-sets/<data_set_name>', methods=['POST'])
-@cache_control.nocache
-@statsd.timer('write.route.create_data_set')
-def create_collection_for_data_set(data_set_name):
-    if not _allow_create_collection(request.headers.get('Authorization')):
-        abort(401,
-              'Unauthorized: invalid or '
-              'no token given for "{}".'.format(data_set_name))
-
-    if storage.data_set_exists(data_set_name):
-        abort(400, 'Collection exists with name "{}".'.format(data_set_name))
-
-    try:
-        data = json.loads(request.data)
-    except ValueError as e:
-        abort(400, repr(e))
-    else:
-        capped_size = data.get('capped_size', None)
-
-    if capped_size is None or not isinstance(capped_size, int):
-        abort(400, 'You must specify an int capped_size of 0 or more')
-
-    storage.create_data_set(data_set_name, capped_size)
-
-    return jsonify(status='ok', message='Created "{}"'.format(data_set_name))
-
-
 @app.route('/data-sets/<data_set_name>', methods=['DELETE'])
 @cache_control.nocache
 @statsd.timer('write.route.delete_data_set')

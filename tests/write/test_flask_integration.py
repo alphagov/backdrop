@@ -87,14 +87,27 @@ class PostDataTestCase(unittest.TestCase):
     def test_data_gets_stored(self, store):
         self.app.post(
             '/foo_data_set',
-            data = '{"foo": "bar"}',
-            content_type = "application/json",
+            data='{"foo": "bar"}',
+            content_type="application/json",
             headers=[('Authorization', 'Bearer foo_data_set-bearer-token')],
         )
 
         store.assert_called_with(
             [{"foo": "bar"}]
         )
+
+    @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
+    @patch("backdrop.core.data_set.DataSet.create_if_not_exists")
+    @patch("backdrop.core.data_set.DataSet.store")
+    def test_data_set_is_created_on_write(self, store, create_if_not_exists):
+        self.app.post(
+            '/foo_data_set',
+            data='{"foo": "bar"}',
+            content_type="application/json",
+            headers=[("Authorization", "Bearer foo_data_set-bearer-token")],
+        )
+
+        create_if_not_exists.assert_called_once_with()
 
     @fake_data_set_exists("foo_data_set", bearer_token="foo_data_set-bearer-token")
     def test_data_with_empty_keys_400s(self):
