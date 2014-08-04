@@ -1,7 +1,15 @@
 from .errors import InvalidOperationError
 
-from operator import itemgetter, add
+from operator import add
 import itertools
+
+
+def _multi_itemgetter(items):
+    """Like operator.itemgetter, but the callable always returns
+    a sequence of lookup values (regardless of items' length)
+    see https://docs.python.org/2/library/operator.html#operator.itemgetter
+    """
+    return lambda obj: tuple(obj[item] for item in items)
 
 
 def nested_merge(keys, collect, data):
@@ -19,46 +27,48 @@ def group_by(data, keys):
     """Recursively group an array of results by a list of keys
 
     data: a list of dictionaries as returned by MongoDriver.group
-    keys: a list of keys to group by
+    keys: a list of combinations of keys to group by
     """
-    key = keys[0]
-    getter = itemgetter(key)
+    key_combo = keys[0]
+    getter = _multi_itemgetter(key_combo)
     data = sorted(data, key=getter)
+
     if len(keys) > 1:
-        data = [
-            {
-                key: value,
-                "_subgroup": group_by(
-                    remove_key_from_all(subgroups, key),
-                    keys[1:]
-                )
-            }
-            for value, subgroups in itertools.groupby(data, getter)
-        ]
+        grouped_data = []
+        for values, subgroups in itertools.groupby(data, getter):
+            # create a dict containing key value pairs and _subgroup
+            result = dict(zip(key_combo, values))
+            result['_subgroup'] = group_by(
+                remove_keys_from_all(subgroups, key_combo),
+                keys[1:]
+            )
+            grouped_data.append(result)
+        data = grouped_data
+
     return data
 
 
-def remove_key_from_all(groups, key):
-    """Remove a key from each group in a list of groups
+def remove_keys_from_all(groups, keys):
+    """Remove keys from each group in a list of groups
 
     groups: a list of groups (dictionaries)
     key: the key to remove
     """
-    return [remove_key(group, key) for group in groups]
+    return [remove_keys(group, keys) for group in groups]
 
 
-def remove_key(doc, key):
-    """Return a new document with the key removed
+def remove_keys(doc, keys):
+    """Return a new document with keys in keys removed
 
     >>> doc = {'a':1, 'b':2}
-    >>> remove_key(doc, 'a')
+    >>> remove_keys(doc, ['a'])
     {'b': 2}
     >>> # Show that the original document is not affected
     >>> doc['a']
     1
     """
     return dict(
-        (k, v) for k, v in doc.items() if k != key)
+        (k, v) for k, v in doc.items() if k not in keys)
 
 
 def apply_counts(groups):
@@ -104,7 +114,7 @@ def apply_collect_to_group(group, collect):
 
     # remove left over collect keys
     for key, _ in collect:
-        group = remove_key(group, key)
+        group = remove_keys(group, key)
 
     # Hack in the old way
     for key, method in collect:
@@ -203,7 +213,8 @@ def collect_reducer_mean(values):
 
 
 def sort_all(data, keys):
+    key_combo = keys[0]
     if len(keys) > 1:
         for i, group in enumerate(data):
             data[i]['_subgroup'] = sort_all(group['_subgroup'], keys[1:])
-    return sorted(data, key=itemgetter(keys[0]))
+    return sorted(data, key=_multi_itemgetter(key_combo))

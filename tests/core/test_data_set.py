@@ -184,7 +184,7 @@ class TestDataSet_execute_query(BaseDataSetTest):
             {"some_group": "val2", "_week_start_at": d(2013, 1, 14), "_count": 6},
         ]
         data = self.data_set.execute_query(
-            Query.create(period=WEEK, group_by="some_group"))
+            Query.create(period=WEEK, group_by=['some_group']))
 
         assert_that(data, has_length(2))
         assert_that(data, has_item(has_entries({
@@ -230,7 +230,23 @@ class TestDataSet_execute_query(BaseDataSetTest):
         ]
 
         data = self.data_set.execute_query(Query.create(period=MONTH,
-                                                        group_by="some_group"))
+                                                        group_by=['some_group']))
+        assert_that(data,
+                    has_item(has_entries({"values": has_length(2)})))
+        assert_that(data,
+                    has_item(has_entries({"values": has_length(3)})))
+
+    def test_month_and_groups_query(self):
+        self.mock_storage.execute_query.return_value = [
+            {'some_group': 'val1', 'another_group': 'val3', '_month_start_at': d(2013, 1, 1), '_count': 1},
+            {'some_group': 'val1', 'another_group': 'val3', '_month_start_at': d(2013, 2, 1), '_count': 5},
+            {'some_group': 'val2', 'another_group': 'val3', '_month_start_at': d(2013, 3, 1), '_count': 2},
+            {'some_group': 'val2', 'another_group': 'val3', '_month_start_at': d(2013, 4, 1), '_count': 6},
+            {'some_group': 'val2', 'another_group': 'val3', '_month_start_at': d(2013, 7, 1), '_count': 6},
+        ]
+
+        data = self.data_set.execute_query(Query.create(period=MONTH,
+                                                        group_by=['some_group', 'another_group']))
         assert_that(data,
                     has_item(has_entries({"values": has_length(2)})))
         assert_that(data,
@@ -247,7 +263,7 @@ class TestDataSet_execute_query(BaseDataSetTest):
 
         data = self.data_set.execute_query(
             Query.create(period=MONTH,
-                         group_by="some_group",
+                         group_by=['some_group'],
                          start_at=d(2013, 1, 1),
                          end_at=d(2013, 4, 2)))
         assert_that(data,
@@ -276,7 +292,7 @@ class TestDataSet_execute_query(BaseDataSetTest):
         ]
 
         data = self.data_set.execute_query(
-            Query.create(period=WEEK, group_by="some_group",
+            Query.create(period=WEEK, group_by=['some_group'],
                          start_at=d_tz(2013, 1, 7, 0, 0, 0),
                          end_at=d_tz(2013, 2, 4, 0, 0, 0)))
 
@@ -308,7 +324,7 @@ class TestDataSet_execute_query(BaseDataSetTest):
             {'some_group': 'val2', '_week_start_at': d(2013, 1, 14), '_count': 6},
         ]
 
-        query = Query.create(period=WEEK, group_by="some_group",
+        query = Query.create(period=WEEK, group_by=['some_group'],
                              sort_by=["_count", "descending"])
         data = self.data_set.execute_query(query)
 
@@ -323,7 +339,7 @@ class TestDataSet_execute_query(BaseDataSetTest):
             {'some_group': 'val2', '_week_start_at': d(2013, 1, 14), '_count': 5},
         ]
 
-        query = Query.create(period=WEEK, group_by="some_group",
+        query = Query.create(period=WEEK, group_by=['some_group'],
                              sort_by=["_count", "descending"], limit=1,
                              collect=[])
         data = self.data_set.execute_query(query)

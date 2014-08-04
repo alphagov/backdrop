@@ -11,6 +11,17 @@ Feature: grouping queries for read api
           and the "1st" result should be "{"authority": "Camden", "_count": 2}"
           and the "2nd" result should be "{"authority": "Westminster", "_count": 4}"
 
+
+    Scenario: grouping by multiple keys
+        Given "licensing_2.json" is in "foo" data_set
+         when I go to "/foo?group_by=authority&group_by=licence_name"
+         then I should get back a status of "200"
+          and the JSON should have "3" results
+          and the "1st" result should be "{"authority": "Camden", "licence_name": "Temporary events notice", "_count": 1}"
+          and the "2nd" result should be "{"authority": "Westminster", "licence_name": "Cat herding licence", "_count": 1}"
+          and the "3rd" result should be "{"authority": "Westminster", "licence_name": "Temporary events notice", "_count": 3}"
+
+
     Scenario: grouping and filtering by different keys
         Given "licensing_2.json" is in "foo" data_set
          when I go to "/foo?group_by=authority&filter_by=licence_name:Temporary%20events%20notice"

@@ -4,12 +4,14 @@ from backdrop.core.nested_merge import nested_merge, group_by, \
 from backdrop.core.timeseries import WEEK, MONTH
 
 
-def datum(name=None, place=None, age=None, stamp=None, count=1):
+def datum(name=None, version=None, place=None, age=None, stamp=None, count=1):
     result = {
         "_count": count
     }
     if name is not None:
         result['name'] = name
+    if version is not None:
+        result['version'] = version
     if place is not None:
         result['place'] = place
     if age is not None:
@@ -29,7 +31,7 @@ class TestNestedMerge(object):
             datum(name='Jack', age=[34, 34]),
             datum(name='John', age=[56, 65])
         ]
-        results = nested_merge(['name'], [('age', 'mean')], data)
+        results = nested_merge([['name']], [('age', 'mean')], data)
 
         assert_that(results,
                     contains(
@@ -46,7 +48,7 @@ class TestNestedMerge(object):
             datum(name='James', place='Kettering', age=[43, 87], count=2),
             datum(name='Jill', place='Keswick', age=[76, 32], count=2),
         ]
-        results = nested_merge(['name', 'place'], [('age', 'mean')], data)
+        results = nested_merge([['name'], ['place']], [('age', 'mean')], data)
 
         assert_that(results,
                     contains(
@@ -89,6 +91,83 @@ class TestNestedMerge(object):
                         }),
                     ))
 
+    def test_two_level_grouping_combination_of_keys(self):
+        data = [
+            datum(name='IE', version='6', place='England', age=[13, 12], count=2),
+            datum(name='IE', version='6', place='Wales', age=[13, 14], count=2),
+            datum(name='IE', version='7', place='England', age=[8, 7], count=2),
+            datum(name='IE', version='7', place='Wales', age=[8, 9], count=2),
+            datum(name='IE', version='8', place='England', age=[5, 4], count=2),
+            datum(name='IE', version='8', place='Wales', age=[5, 6], count=2),
+            datum(name='Chrome', version='20', place='England', age=[2, 1], count=2),
+            datum(name='Chrome', version='20', place='Wales', age=[2, 3], count=2),
+        ]
+        results = nested_merge([['name', 'version'], ['place']], [('age', 'mean')], data)
+
+        assert_that(results,
+                    contains(
+                        has_entries({
+                            'name': 'Chrome',
+                            'version': '20',
+                            'age:mean': 2,
+                            '_subgroup': contains(
+                                has_entries({
+                                    'place': 'England',
+                                    'age:mean': 1.5
+                                }),
+                                has_entries({
+                                    'place': 'Wales',
+                                    'age:mean': 2.5
+                                })
+                            )
+                        }),
+                        has_entries({
+                            'name': 'IE',
+                            'version': '6',
+                            'age:mean': 13,
+                            '_subgroup': contains(
+                                has_entries({
+                                    'place': 'England',
+                                    'age:mean': 12.5
+                                }),
+                                has_entries({
+                                    'place': 'Wales',
+                                    'age:mean': 13.5
+                                })
+                            )
+                        }),
+                        has_entries({
+                            'name': 'IE',
+                            'version': '7',
+                            'age:mean': 8,
+                            '_subgroup': contains(
+                                has_entries({
+                                    'place': 'England',
+                                    'age:mean': 7.5
+                                }),
+                                has_entries({
+                                    'place': 'Wales',
+                                    'age:mean': 8.5
+                                })
+                            )
+                        }),
+                        has_entries({
+                            'name': 'IE',
+                            'version': '8',
+                            'age:mean': 5,
+                            '_subgroup': contains(
+                                has_entries({
+                                    'place': 'England',
+                                    'age:mean': 4.5
+                                }),
+                                has_entries({
+                                    'place': 'Wales',
+                                    'age:mean': 5.5
+                                })
+                            )
+                        }),
+                    ))
+
 
 class TestGroupBy(object):
     def test_one_level_grouping(self):
@@ -97,7 +176,7 @@ class TestGroupBy(object):
             datum(name='Jack', age=[34, 34]),
             datum(name='John', age=[56, 65])
         ]
-        results = group_by(data, ['name'])
+        results = group_by(data, [['name']])
 
         assert_that(results,
                     contains(
@@ -112,7 +191,7 @@ class TestGroupBy(object):
             datum(name='James', place='Kettering', age=[43, 87], count=2),
             datum(name='Jill', place='Keswick', age=[76, 32], count=2),
         ]
-        results = group_by(data, ['name', 'place'])
+        results = group_by(data, [['name'], ['place']])
 
         assert_that(results,
                     contains(

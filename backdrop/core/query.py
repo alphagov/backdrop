@@ -26,8 +26,8 @@ class Query(_Query):
             delta = duration if start_at else -duration
             start_at, end_at = cls.__calculate_start_and_end(period, date,
                                                              delta)
-        return Query(start_at, end_at, delta, period,
-                     filter_by or [], group_by, sort_by, limit, collect or [])
+        return Query(start_at, end_at, delta, period, filter_by or [],
+                     group_by or [], sort_by, limit, collect or [])
 
     @staticmethod
     def __calculate_start_and_end(period, date, delta):
@@ -50,25 +50,26 @@ class Query(_Query):
 
     @property
     def group_keys(self):
-        """Return a list of fields that are being grouped on
+        """Return a list of lists of combinations of fields that are being
+        grouped on
 
         This is kinda coupled to how we group with Mongo but these keys
         are in the returned results and are used in the nested merge to
         create the hierarchical response.
 
         >>> from ..core.timeseries import WEEK
-        >>> Query.create(group_by="foo").group_keys
-        ['foo']
+        >>> Query.create(group_by=['foo']).group_keys
+        [['foo']]
         >>> Query.create(period=WEEK).group_keys
-        ['_week_start_at']
-        >>> Query.create(group_by="foo", period=WEEK).group_keys
-        ['foo', '_week_start_at']
+        [['_week_start_at']]
+        >>> Query.create(group_by=['foo'], period=WEEK).group_keys
+        [['foo'], ['_week_start_at']]
         """
         keys = []
         if self.group_by:
             keys.append(self.group_by)
         if self.period:
-            keys.append(self.period.start_at_key)
+            keys.append([self.period.start_at_key])
         return keys
 
     @property
