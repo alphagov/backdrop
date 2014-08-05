@@ -79,8 +79,6 @@ def uncaught_error_handler(e):
 @app.errorhandler(404)
 @app.errorhandler(405)
 def http_error_handler(e):
-    _record_write_error(e)
-
     if e.code == 401:
         description = getattr(e, 'description',
                               'Bad or missing Authorization header')

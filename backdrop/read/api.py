@@ -80,7 +80,6 @@ def uncaught_error_handler(e):
 @app.errorhandler(404)
 @app.errorhandler(405)
 def http_error_handler(e):
-    app.logger.exception(e)
     return (jsonify(status='error',
                     message=getattr(e, 'name', 'Internal error')),
             getattr(e, 'code', 500))
