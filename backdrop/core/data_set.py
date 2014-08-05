@@ -106,6 +106,9 @@ class DataSet(object):
             if shift != 0:
                 return self.execute_query(query.get_shifted_query(shift))
 
+        if query.flatten and query.is_grouped:
+            data = flatten_data(data)
+
         return data.data()
 
 
@@ -157,3 +160,9 @@ def _limit_grouped_results(results, limit):
     """Limit a grouped set of results
     """
     return results[:limit] if limit else results
+
+
+def flatten_data(data):
+    """Flatten nested data
+    """
+    return data

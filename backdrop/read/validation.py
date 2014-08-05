@@ -49,6 +49,7 @@ class ParameterValidator(Validator):
             'sort_by',
             'limit',
             'collect',
+            'flatten',
         ])
         super(ParameterValidator, self).__init__(request_args)
 
@@ -96,6 +97,14 @@ class PositiveIntegerValidator(Validator):
             except ValueError:
                 self.add_error("%s must be a positive integer"
                                % context['param_name'])
+
+
+class BooleanValidator(Validator):
+    def validate(self, request_args, context):
+        if context['param_name'] in request_args:
+            if request_args[context['param_name']] not in ['true', 'false']:
+                self.add_error("{} must be either 'true' or 'false'".format(
+                    context['param_name']))
 
 
 class FilterByValidator(Validator):
@@ -322,6 +331,7 @@ def validate_request_args(request_args, raw_queries_allowed=False):
                                  depends_on=['group_by', 'period']),
         RelativeTimeValidator(request_args),
         CollectValidator(request_args),
+        BooleanValidator(request_args, param_name='flatten'),
     ]
 
     if not raw_queries_allowed:

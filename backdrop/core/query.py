@@ -11,7 +11,7 @@ This is the internal Query object
 _Query = namedtuple(
     '_Query',
     ['start_at', 'end_at', 'delta', 'period',
-     'filter_by', 'group_by', 'sort_by', 'limit', 'collect'])
+     'filter_by', 'group_by', 'sort_by', 'limit', 'collect', 'flatten'])
 
 
 class Query(_Query):
@@ -19,7 +19,7 @@ class Query(_Query):
     def create(cls,
                start_at=None, end_at=None, duration=None, delta=None,
                period=None, filter_by=None, group_by=None,
-               sort_by=None, limit=None, collect=None):
+               sort_by=None, limit=None, collect=None, flatten=None):
         delta = None
         if duration is not None:
             date = start_at or end_at or now()
@@ -27,7 +27,7 @@ class Query(_Query):
             start_at, end_at = cls.__calculate_start_and_end(period, date,
                                                              delta)
         return Query(start_at, end_at, delta, period, filter_by or [],
-                     group_by or [], sort_by, limit, collect or [])
+                     group_by or [], sort_by, limit, collect or [], flatten)
 
     @staticmethod
     def __calculate_start_and_end(period, date, delta):
