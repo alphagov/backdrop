@@ -76,6 +76,13 @@ Feature: grouping queries for read api
           and the JSON should have "0" results
 
 
+    Scenario: subgroups should contain _count
+        Given "subgroup.json" is in "weekly" data_set
+         when I go to "/weekly?limit=1&period=month&group_by=organisation_acronym&filter_by=organisation_acronym%3Aacas&collect=comment_count%3Asum&duration=13"
+         then I should get back a status of "200"
+          and the "1st" result should have "values" with item "{"_end_at": "2013-04-01T00:00:00+00:00", "_count": 0, "_start_at": "2013-03-01T00:00:00+00:00", "comment_count:sum": null}"
+
+
     Scenario: grouping data by a period and field representing period is invalid
         Given "licensing.json" is in "weekly" data_set
          when I go to "/weekly?period=week&group_by=_week_start_at"
