@@ -113,8 +113,8 @@ def apply_collect_to_group(group, collect):
         group['_subgroup'] = apply_collect(group['_subgroup'], collect)
 
     # remove left over collect keys
-    for key, _ in collect:
-        group = remove_keys(group, key)
+    left_over_keys = [key for key, _ in collect]
+    group = remove_keys(group, left_over_keys)
 
     # Hack in the old way
     for key, method in collect:
