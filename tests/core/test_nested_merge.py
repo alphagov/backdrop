@@ -1,26 +1,7 @@
 from hamcrest import assert_that, is_, contains, has_entries, has_entry
 from backdrop.core.nested_merge import nested_merge, group_by, \
     apply_collect_to_group, collect_all_values
-from backdrop.core.timeseries import WEEK, MONTH
-
-
-def datum(name=None, version=None, place=None, age=None, stamp=None, count=1):
-    result = {
-        "_count": count
-    }
-    if name is not None:
-        result['name'] = name
-    if version is not None:
-        result['version'] = version
-    if place is not None:
-        result['place'] = place
-    if age is not None:
-        result['age'] = age
-    if stamp is not None:
-        result['_timestamp'] = stamp
-        result['_week_start_at'] = WEEK.start(stamp)
-        result['_month_start_at'] = MONTH.start(stamp)
-    return result
+from tests.support.test_helpers import datum
 
 
 class TestNestedMerge(object):

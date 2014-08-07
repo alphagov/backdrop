@@ -4,6 +4,8 @@ from hamcrest.core.base_matcher import BaseMatcher
 import os
 import pytz
 
+from backdrop.core.timeseries import WEEK, MONTH
+
 
 class IsResponseWithStatus(BaseMatcher):
     def __init__(self, expected_status):
@@ -117,3 +119,14 @@ class match(object):
 
     def __eq__(self, other):
         return self.matcher.matches(other)
+
+
+def datum(stamp=None, count=1, **kwargs):
+    key_list = ['name', 'version', 'place', 'age']
+    result = {k: kwargs[k] for k in key_list if k in kwargs}
+    result['_count'] = count
+    if stamp is not None:
+        result['_timestamp'] = stamp
+        result['_week_start_at'] = WEEK.start(stamp)
+        result['_month_start_at'] = MONTH.start(stamp)
+    return result
