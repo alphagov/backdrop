@@ -9,6 +9,7 @@ from backdrop.core.response import PeriodGroupedData, PeriodData, \
 
 import timeutils
 import datetime
+from itertools import chain
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +108,7 @@ class DataSet(object):
                 return self.execute_query(query.get_shifted_query(shift))
 
         if query.flatten and query.is_grouped:
-            data = flatten_data(data)
+            data = flatten_data(data.data(), query)
 
         return data.data()
 
@@ -162,7 +163,50 @@ def _limit_grouped_results(results, limit):
     return results[:limit] if limit else results
 
 
-def flatten_data(data):
+def flatten_data(data, query):
     """Flatten nested data
     """
-    return data
+
+    # flatten the key combinations
+    keys = list(chain.from_iterable(query.group_keys))
+
+    # get a list of flat children for each record
+    flat_children = [_get_flat_children(record, keys) for record in data]
+    # and flatten them into one list
+    flat_data = list(chain(*flat_children))
+
+    return flat_data
+
+
+def _get_flat_children(record, keys):
+    # the prefix is a string like 'cabinet-office:desktop'
+    prefix = ':'.join([record[k] for k in keys if k in record])
+    # we no longer need the items that went into the prefix
+    record = {k: v for k, v in record.items() if k not in keys}
+
+    # update records with values if they exist
+    if 'values' in record:
+        values = record.pop('values')
+        recs = [_get_updated_dict(record, i) for i in values]
+    else:
+        recs = [record]
+
+    # get rid of the extraneous count keys
+    count_keys = ['_count', '_group_count']
+    recs = [{k: v for k, v in r.items() if k not in count_keys} for r in recs]
+    # add prefixes where applicable
+    recs = [{_add_prefix(k, prefix): v for k, v in r.items()} for r in recs]
+    return recs
+
+
+def _get_updated_dict(current_dict, new_dict):
+    result = current_dict.copy()
+    result.update(new_dict)
+    return result
+
+
+def _add_prefix(key_name, prefix):
+    # we don't prefix keys beginning with '_'
+    if prefix and key_name and key_name[0] != '_':
+        return prefix + ':' + key_name
+    return key_name
