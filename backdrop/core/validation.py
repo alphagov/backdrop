@@ -6,12 +6,12 @@ ValidationResult object.
 """
 from collections import namedtuple
 import jsonschema
+import json
 import datetime
 import re
 import bson
 from dateutil import parser
 import pytz
-import isodate
 
 
 RESERVED_KEYWORDS = (
@@ -116,8 +116,21 @@ def validate_record_data(data):
 
 
 def validate_record_schema(record, schema):
-    return jsonschema.validate(
-        record,
-        schema,
-        format_checker=jsonschema.FormatChecker()
-    )
+    if True:
+        error_iterator = jsonschema.Draft4Validator(
+            schema,
+            format_checker=jsonschema.FormatChecker()).iter_errors(record)
+        error_messages = [str(error) for error in error_iterator]
+        # parse to nice json and except?
+        # or no except - set errors on some object
+        # (one of which is json message)
+        # which are then read and responded with
+        # standard exception type?
+        # json.dumps(error_messages)
+        return error_messages
+    else:
+        return jsonschema.validate(
+            record,
+            schema,
+            format_checker=jsonschema.FormatChecker()
+        )

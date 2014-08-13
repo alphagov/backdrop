@@ -234,6 +234,25 @@ class ValidSchemaTestCase(unittest.TestCase):
         },
         "required": ["_timestamp"]
     }
+    schema_with_two_requirements = {
+        "$schema": "http://json-schema.org/schema#",
+        "title": "Timestamps",
+        "type": "object",
+        "properties": {
+            "downtime": {
+                "description": "Integer",
+                "type": "integer"
+            },
+            "uptime": {
+                "description": "Integer",
+                "type": "integer"
+            }
+        },
+        "required": [
+            "uptime",
+            "downtime"
+        ]
+    }
 
     def test_missing_property_returns_error(self):
         invalid_record = {
@@ -267,7 +286,52 @@ class ValidSchemaTestCase(unittest.TestCase):
 
         assert_that(
             str(e.exception),
-            contains_string("Failed validating 'format' in schema")
+            contains_string("'555' is not a 'date-time'\n\nFailed validating 'format' in schema")
+        )
+
+    def test_multiple_missing_properties_raise_multiple_errors(self):
+        invalid_record = {
+            "_id": "dbl_boff_0000000000000001",
+            "name": "big_boff",
+            "_timestamp": "555"
+        }
+
+        with assert_raises(ValidationError) as e:
+            validate_record_schema(
+                invalid_record,
+                self.schema_with_two_requirements
+            )
+
+        assert_that(
+            str(e.exception),
+            contains_string("uptime' is a required property")
+        )
+        assert_that(
+            str(e.exception),
+            contains_string("downtime' is a required property")
+        )
+
+    def test_multiple_invalid_properties_raise_multiple_errors(self):
+        invalid_record = {
+            "_id": "dbl_boff_0000000000000001",
+            "name": "big_boff",
+            "downtime": "def",
+            "uptime": "abc"
+        }
+
+        with assert_raises(ValidationError) as e:
+            validate_record_schema(
+                invalid_record,
+                self.schema_with_two_requirements
+            )
+
+        assert_that(
+            str(e.exception),
+            contains_string("'abc' is not of type 'integer'\n\nFailed validating 'type' in schema")
+        )
+        assert_that(
+            str(e.exception),
+            contains_string("'def' is not of type 'integer'\n\nFailed validating 'type' in schema")
         )
 
     def test_valid_property_does_not_raise_exception(self):
