@@ -6,6 +6,7 @@ ValidationResult object.
 """
 from collections import namedtuple
 import jsonschema
+import json
 import datetime
 import re
 import bson
@@ -115,19 +116,23 @@ def validate_record_data(data):
 
 
 def validate_record_schema(record, schema):
-    for error in sorted(
-            jsonschema.Draft4Validator(
-                schema,
-                format_checker=jsonschema.FormatChecker())
-            .iter_errors(record), key=str):
-        print error
-    error_iterator = jsonschema.Draft4Validator(
-        schema,
-        format_checker=jsonschema.FormatChecker()).iter_errors(record)
-    errors = [error for error in error_iterator]
-    print errors
-    return jsonschema.validate(
-        record,
-        schema,
-        format_checker=jsonschema.FormatChecker()
-    )
+    if True:
+        error_iterator = jsonschema.Draft4Validator(
+            schema,
+            format_checker=jsonschema.FormatChecker()).iter_errors(record)
+        error_messages = [str(error) for error in error_iterator]
+        if not error_messages:
+            None
+        else:
+            #parse to nice json and except?
+            #or no except - set errors on some object (one of which is json message)
+            #which are then read and responded with
+            #standard exception type?
+            #json.dumps(error_messages)
+            raise jsonschema.ValidationError(" AND ".join(error_messages))
+    else:
+        return jsonschema.validate(
+            record,
+            schema,
+            format_checker=jsonschema.FormatChecker()
+        )

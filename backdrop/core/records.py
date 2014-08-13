@@ -50,6 +50,7 @@ def _generate_auto_id(record, auto_id_keys):
 
 
 def parse_timestamp(record):
+    # now defunct?
     """Parses a timestamp in a record
 
     >>> parse_timestamp({'_timestamp': '2012-12-12T00:00:00'})
