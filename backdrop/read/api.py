@@ -62,6 +62,7 @@ app.json_encoder = JsonEncoder
 
 
 @app.errorhandler(500)
+@crossdomain(origin='*')
 def uncaught_error_handler(e):
     """
     This shouldn't happen. If we get here an unspecified uncaught exception
@@ -79,6 +80,7 @@ def uncaught_error_handler(e):
 
 @app.errorhandler(404)
 @app.errorhandler(405)
+@crossdomain(origin='*')
 def http_error_handler(e):
     return (jsonify(status='error',
                     message=getattr(e, 'name', 'Internal error')),

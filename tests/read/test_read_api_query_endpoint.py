@@ -7,7 +7,7 @@ import pytz
 from backdrop.read import api
 from backdrop.core.query import Query
 from tests.support.performanceplatform_client import fake_data_set_exists
-from tests.support.test_helpers import has_status
+from tests.support.test_helpers import has_status, has_header
 
 from warnings import warn
 
@@ -77,6 +77,21 @@ class QueryingApiTestCase(unittest.TestCase):
         response = self.app.get('/data_set')
         assert_that(response, has_status(404))
 
+    @fake_data_set_exists("data_set", queryable=False)
+    def test_allow_origin_set_on_404(self):
+        response = self.app.get('/data_set')
+        assert_that(response, has_status(404))
+        assert_that(response, has_header('Access-Control-Allow-Origin', '*'))
+
+    @fake_data_set_exists("foo", raw_queries_allowed=True)
+    @patch('backdrop.core.data_set.DataSet.execute_query')
+    def test_allow_origin_set_on_500(self, mock_query):
+        mock_query.side_effect = StandardError('fail!')
+        response = self.app.get('/foo')
+
+        assert_that(response, has_status(500))
+        assert_that(response, has_header('Access-Control-Allow-Origin', '*'))
+
 
 class PreflightChecksApiTestCase(unittest.TestCase):
     def setUp(self):
@@ -91,7 +106,7 @@ class PreflightChecksApiTestCase(unittest.TestCase):
     @fake_data_set_exists("data_set")
     def test_cors_preflight_are_allowed_from_all_origins(self):
         response = self.app.open('/data_set', method='OPTIONS')
-        assert_that(response.headers['Access-Control-Allow-Origin'], is_('*'))
+        assert_that(response, has_header('Access-Control-Allow-Origin', '*'))
 
     @fake_data_set_exists("data_set")
     def test_cors_preflight_result_cache(self):
