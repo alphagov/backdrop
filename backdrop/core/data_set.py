@@ -25,9 +25,20 @@ class DataSet(object):
         return self.config['name']
 
     def is_recent_enough(self):
-        max_age_expected = self.get_max_age_expected()
+        seconds_out_of_date = self.get_seconds_out_of_date()
 
+        return seconds_out_of_date is None or seconds_out_of_date < 0
+
+    def get_max_age_expected(self):
+        return self.config.get('max_age_expected',
+                               DEFAULT_MAX_AGE_EXPECTED)
+
+    def get_last_updated(self):
+        return self.storage.get_last_updated(self.name)
+
+    def get_seconds_out_of_date(self):
         now = timeutils.now()
+        max_age_expected = self.get_max_age_expected()
         last_updated = self.get_last_updated()
 
         """
@@ -40,30 +51,9 @@ class DataSet(object):
         because we already know that, right?
         """
         if max_age_expected is None or not last_updated:
-            return True
-
-        max_age_expected_delta = datetime.timedelta(seconds=max_age_expected)
-
-        return (now - last_updated) < max_age_expected_delta
-
-    def get_max_age_expected(self):
-        return self.config.get('max_age_expected',
-                               DEFAULT_MAX_AGE_EXPECTED)
-
-    def get_last_updated(self):
-        return self.storage.get_last_updated(self.name)
-
-    def get_seconds_out_of_date(self):
-        now = timeutils.now()
-
-        if not self.get_last_updated() or self.get_max_age_expected() is None:
             return None
-        else:
-            last_updated = self.get_last_updated()
 
-        max_age_delta = datetime.timedelta(
-            seconds=self.get_max_age_expected()
-        )
+        max_age_delta = datetime.timedelta(seconds=max_age_expected)
 
         return int((
             now - last_updated - max_age_delta
