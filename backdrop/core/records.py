@@ -119,4 +119,4 @@ def validate_record(record):
     result = validate_record_data(record)
     if not result.is_valid:
         return result.message
-    return []
+    return None
