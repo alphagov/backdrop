@@ -109,5 +109,5 @@ def validate_record(record):
     # TODO: refactor this
     result = validate_record_data(record)
     if not result.is_valid:
-        raise ValidationError(result.message)
+        return result.message
     return record

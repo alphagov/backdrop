@@ -121,15 +121,13 @@ def validate_record_schema(record, schema):
             schema,
             format_checker=jsonschema.FormatChecker()).iter_errors(record)
         error_messages = [str(error) for error in error_iterator]
-        if not error_messages:
-            None
-        else:
-            #parse to nice json and except?
-            #or no except - set errors on some object (one of which is json message)
-            #which are then read and responded with
-            #standard exception type?
-            #json.dumps(error_messages)
-            raise jsonschema.ValidationError(" AND ".join(error_messages))
+        # parse to nice json and except?
+        # or no except - set errors on some object
+        # (one of which is json message)
+        # which are then read and responded with
+        # standard exception type?
+        # json.dumps(error_messages)
+        return error_messages
     else:
         return jsonschema.validate(
             record,
