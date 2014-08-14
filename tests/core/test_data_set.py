@@ -127,10 +127,12 @@ class TestDataSet_store(BaseDataSetTest):
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
 
     def test_store_returns_array_of_errors_if_errors(self):
-        self.setup_config({'schema': self.schema})
+        self.setup_config({
+            'schema': self.schema,
+            'auto_ids': ["_timestamp", "that"]})
         # does store only take lists?
         errors = self.data_set.store([
-            {"_timestamp": "2014-06-12T00:00:00+0000"},
+            {"_timestamp": "2014-06-1xxx0:00:00+0000"},
             {'thing': {}},
             {'_foo': 'bar'}])
 
@@ -149,12 +151,21 @@ class TestDataSet_store(BaseDataSetTest):
             True
         )
         assert_that(
-            "_timestamp is not a valid datetime object",
+            "_timestamp is not a valid datetime object" in errors,
+            True
+        )
+        assert_that(
+            'The following required id fields are missing: that' in errors,
+            True
+        )
+        assert_that(
+            '_timestamp is not a valid timestamp, it must be ISO8601'
+            in errors,
             True
         )
         assert_that(
             len(errors),
-            5
+            7
         )
 
 class TestDataSet_execute_query(BaseDataSetTest):
