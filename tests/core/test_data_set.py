@@ -107,17 +107,18 @@ class TestDataSet_store(BaseDataSetTest):
             match(has_entry('_timestamp',  d_tz(2012, 12, 12))))
 
     def test_record_gets_validated(self):
-        assert_raises(ValidationError, self.data_set.store, [{'_foo': 'bar'}])
+        errors = self.data_set.store([{'_foo': 'bar'}])
+        assert_that(len(errors), 1)
 
     def test_each_record_gets_validated_further_when_schema_given(self):
         self.setup_config({'schema': self.schema})
-        # does store only take lists?
-        with assert_raises(SchemaValidationError) as e:
-            self.data_set.store([{"_timestamp": "2014-06-12T00:00:00+0000"}, {'foo': 'bar'}])
+        errors = self.data_set.store([{"_timestamp": "2014-06-12T00:00:00+0000"}, {'foo': 'bar'}])
 
         assert_that(
-            str(e.exception),
-            contains_string("_timestamp' is a required property")
+            len(filter(
+                lambda error: "'_timestamp' is a required property" in error,
+                errors)),
+            1
         )
 
     def test_period_keys_are_added(self):
