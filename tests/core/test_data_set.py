@@ -126,6 +126,36 @@ class TestDataSet_store(BaseDataSetTest):
             'test_data_set',
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
 
+    def test_store_returns_array_of_errors_if_errors(self):
+        self.setup_config({'schema': self.schema})
+        # does store only take lists?
+        errors = self.data_set.store([
+            {"_timestamp": "2014-06-12T00:00:00+0000"},
+            {'thing': {}},
+            {'_foo': 'bar'}])
+
+        assert_that(
+            len(filter(
+                lambda error: "'_timestamp' is a required property" in error,
+                errors)),
+            2
+        )
+        assert_that(
+            "thing has an invalid value" in errors,
+            True
+        )
+        assert_that(
+            "_foo is not a recognised internal field" in errors,
+            True
+        )
+        assert_that(
+            "_timestamp is not a valid datetime object",
+            True
+        )
+        assert_that(
+            len(errors),
+            5
+        )
 
 class TestDataSet_execute_query(BaseDataSetTest):
 
