@@ -84,19 +84,26 @@ class DataSet(object):
         errors = []
         if 'schema' in self.config:
             for record in records:
+                # doesn't change data
                 errors += validate_record_schema(record, self.config['schema'])
         # validate
         # order was important? should be after auto ids and timestamp?
+        # doesn't change data
         errors += map(validate_record, records)
         # add auto-id keys
-        records = add_auto_ids(records, self.config.get('auto_ids', None))
-        # parse _timestamp
-        records = map(parse_timestamp, records)
-        # add period data
-        records = map(add_period_keys, records)
+        records, auto_id_errors = add_auto_ids(records, self.config.get('auto_ids', None))
+        errors += auto_id_errors
+        records_with_timestamp_parse_and_errors = map(parse_timestamp, records)
+        records = map(lambda item: item[0], records_with_timestamp_parse_and_errors)
+        auto_id_errors = map(lambda item: item[1], records_with_timestamp_parse_and_errors)
+        errors += filter(lambda item: (item is not None), auto_id_errors)
 
         if errors:
             return errors
+
+        # returns no errors so return if we have errors before this point
+        # add period data
+        records = map(add_period_keys, records)
 
         for record in records:
             self.storage.save_record(self.name, record)
