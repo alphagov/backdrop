@@ -1,0 +1,191 @@
+[
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "desktop",
+    "pageviews": [111, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "desktop",
+    "pageviews": [123, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "desktop",
+    "pageviews": [100, 222, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 234, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 200, 333]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 200, 345]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "tablet",
+    "pageviews": [109, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "tablet",
+    "pageviews": [100, 210, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "attorney-generals-office",
+    "deviceCategory": "tablet",
+    "pageviews": [100, 200, 321]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "desktop",
+    "pageviews": [101, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "desktop",
+    "pageviews": [100, 202, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "desktop",
+    "pageviews": [100, 200, 303]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "mobile",
+    "pageviews": [123, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 246, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 200, 369]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "tablet",
+    "pageviews": [111, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "tablet",
+    "pageviews": [123, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "cabinet-office",
+    "deviceCategory": "tablet",
+    "pageviews": [100, 222, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "desktop",
+    "pageviews": [100, 234, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "desktop",
+    "pageviews": [100, 200, 333]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "desktop",
+    "pageviews": [100, 200, 345]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "mobile",
+    "pageviews": [109, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 210, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "mobile",
+    "pageviews": [100, 200, 321]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-14T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "tablet",
+    "pageviews": [101, 200, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-21T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "tablet",
+    "pageviews": [100, 202, 300]
+  },
+  {
+    "_count": 3.0,
+    "_week_start_at": "2014-07-28T00:00:00+00:00",
+    "department": "department-for-business-innovation-skills",
+    "deviceCategory": "tablet",
+    "pageviews": [100, 200, 303]
+  }
+]

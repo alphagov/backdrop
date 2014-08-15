@@ -1,7 +1,10 @@
-import json
+from contextlib import contextmanager
 import datetime
+from dateutil import parser
 from hamcrest.core.base_matcher import BaseMatcher
+import json
 import os
+from os.path import dirname, join as pjoin
 import pytz
 
 
@@ -102,6 +105,25 @@ def d(year, month, day, hour=0, minute=0, second=0):
 
 def fixture_path(name):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'features', 'fixtures', name))
+
+
+@contextmanager
+def json_fixture(name, parse_dates=False):
+    if not parse_dates:
+        with open(filename, 'r') as f:
+            yield json.loads(f.read())
+
+    def _date_hook(json_dict):
+        for (key, value) in json_dict.items():
+            try:
+                json_dict[key] = parser.parse(value)
+            except:
+                pass
+        return json_dict
+
+    filename = pjoin(dirname(__file__), '..', 'fixtures', name)
+    with open(filename, 'r') as f:
+        yield json.loads(f.read(), object_hook=_date_hook)
 
 
 class match(object):
