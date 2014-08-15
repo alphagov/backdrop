@@ -260,15 +260,18 @@ class ValidSchemaTestCase(unittest.TestCase):
             "name": "big_boff",
         }
 
-        with assert_raises(ValidationError) as e:
-            validate_record_schema(
-                invalid_record,
-                self.schema
-            )
+        errors = validate_record_schema(
+            invalid_record,
+            self.schema
+        )
 
         assert_that(
-            str(e.exception),
+            errors[0],
             contains_string("_timestamp' is a required property")
+        )
+        assert_that(
+            len(errors),
+            0
         )
 
     def test_invalid_property_raises_validation_error(self):
@@ -278,15 +281,21 @@ class ValidSchemaTestCase(unittest.TestCase):
             "_timestamp": "555"
         }
 
-        with assert_raises(ValidationError) as e:
-            validate_record_schema(
-                invalid_record,
-                self.schema
-            )
+        errors = validate_record_schema(
+            invalid_record,
+            self.schema
+        )
 
         assert_that(
-            str(e.exception),
-            contains_string("'555' is not a 'date-time'\n\nFailed validating 'format' in schema")
+            errors[0],
+            contains_string(
+                "'555' is not a 'date-time'\n\n"
+                "Failed validating 'format' in schema"
+            )
+        )
+        assert_that(
+            len(errors),
+            is_(1)
         )
 
     def test_multiple_missing_properties_raise_multiple_errors(self):
@@ -296,19 +305,22 @@ class ValidSchemaTestCase(unittest.TestCase):
             "_timestamp": "555"
         }
 
-        with assert_raises(ValidationError) as e:
-            validate_record_schema(
-                invalid_record,
-                self.schema_with_two_requirements
-            )
+        errors = validate_record_schema(
+            invalid_record,
+            self.schema_with_two_requirements
+        )
 
         assert_that(
-            str(e.exception),
+            errors[0],
             contains_string("uptime' is a required property")
         )
         assert_that(
-            str(e.exception),
+            errors[1],
             contains_string("downtime' is a required property")
+        )
+        assert_that(
+            len(errors),
+            2
         )
 
     def test_multiple_invalid_properties_raise_multiple_errors(self):
@@ -319,19 +331,26 @@ class ValidSchemaTestCase(unittest.TestCase):
             "uptime": "abc"
         }
 
-        with assert_raises(ValidationError) as e:
-            validate_record_schema(
-                invalid_record,
-                self.schema_with_two_requirements
-            )
+        errors = validate_record_schema(
+            invalid_record,
+            self.schema_with_two_requirements
+        )
 
         assert_that(
-            str(e.exception),
-            contains_string("'abc' is not of type 'integer'\n\nFailed validating 'type' in schema")
+            errors[0],
+            contains_string(
+                "'abc' is not of type 'integer'\n\n"
+                "Failed validating 'type' in schema")
         )
         assert_that(
-            str(e.exception),
-            contains_string("'def' is not of type 'integer'\n\nFailed validating 'type' in schema")
+            errors[1],
+            contains_string(
+                "'def' is not of type 'integer'\n\n"
+                "Failed validating 'type' in schema")
+        )
+        assert_that(
+            len(errors),
+            2
         )
 
     def test_valid_property_does_not_raise_exception(self):
@@ -343,5 +362,5 @@ class ValidSchemaTestCase(unittest.TestCase):
             validate_record_schema(
                 valid_record,
                 self.schema
-            ), is_(None)
+            ), is_([])
         )
