@@ -58,4 +58,6 @@ def parse_request_args(request_args):
         else:
             args['collect'].append((collect_arg, 'default'))
 
+    args['flatten'] = if_present(boolify, request_args.get('flatten'))
+
     return args
