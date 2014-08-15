@@ -113,6 +113,23 @@ class GroupedData(object):
         return 0
 
 
+class FlatData(object):
+    def __init__(self, cursor):
+        self._data = []
+        for doc in cursor:
+            self.__add(doc)
+
+    def __add(self, document):
+        self._data.append(document)
+
+    def data(self):
+        return tuple(self._data)
+
+    def amount_to_shift(self, delta):
+        """This response type cannot be shifted"""
+        return 0
+
+
 class PeriodGroupedData(object):
     def __init__(self, cursor, period):
         self._period = period
@@ -150,6 +167,41 @@ class PeriodGroupedData(object):
                 data=self._data[i]['values'],
                 default=default
             )
+
+    def amount_to_shift(self, delta):
+        is_reversed = delta < 0
+
+        if len(self._data) == 0:
+            return 0
+
+        return min([
+            first_nonempty(i['values'], is_reversed) for i in self._data],
+            key=abs)
+
+
+class PeriodFlatData(object):
+    def __init__(self, cursor, period):
+        self._period = period
+        self._data = []
+        for doc in cursor:
+            self._add(doc)
+
+    def _add(self, document):
+        datum = create_period_group(document, self._period)
+        self._data.append(datum)
+
+    def data(self):
+        return tuple(self._data)
+
+    def fill_missing_periods(self, start_date, end_date, collect=None):
+        default = {"_count": 0}
+        if collect:
+            default.update((collect_key(k, v), None) for k, v in collect)
+        self._data = timeseries(start=start_date,
+                                end=end_date,
+                                period=self._period,
+                                data=self._data,
+                                default=default)
 
     def amount_to_shift(self, delta):
         is_reversed = delta < 0
