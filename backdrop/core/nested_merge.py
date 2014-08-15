@@ -18,7 +18,7 @@ def nested_merge(keys, collect, data):
         data = apply_counts(data)
 
     data = apply_collect(data, collect)
-    data = sort_all(data, keys)
+    data = sort_subgroups(data, keys)
 
     return data
 
@@ -212,9 +212,9 @@ def collect_reducer_mean(values):
         raise InvalidOperationError("Unable to find the mean of that data")
 
 
-def sort_all(data, keys):
+def sort_subgroups(data, keys):
     key_combo = keys[0]
     if len(keys) > 1:
         for i, group in enumerate(data):
-            data[i]['_subgroup'] = sort_all(group['_subgroup'], keys[1:])
+            data[i]['_subgroup'] = sort_subgroups(group['_subgroup'], keys[1:])
     return sorted(data, key=_multi_itemgetter(key_combo))
