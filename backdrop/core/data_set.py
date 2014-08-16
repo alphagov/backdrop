@@ -106,31 +106,30 @@ def build_data(results, query):
         return SimpleData(results)
 
     if query.flatten:
-        results = flat_merge(query.group_keys, query.collect, results)
+        merge_fn = flat_merge
+        group_period_presenter = PeriodFlatData
+        group_presenter = FlatData
+        period_presenter = PeriodFlatData
     else:
-        results = nested_merge(query.group_keys, query.collect, results)
+        merge_fn = nested_merge
+        group_period_presenter = PeriodGroupedData
+        group_presenter = GroupedData
+        period_presenter = PeriodData
+
+    results = merge_fn(query.group_keys, query.collect, results)
     results = _sort_grouped_results(results, query.sort_by)
     results = _limit_grouped_results(results, query.limit)
 
     if query.group_by and query.period:
-        if query.flatten:
-            data = PeriodFlatData(results, period=query.period)
-        else:
-            data = PeriodGroupedData(results, period=query.period)
+        data = group_period_presenter(results, period=query.period)
         if query.start_at and query.end_at:
             data.fill_missing_periods(
                 query.start_at, query.end_at, collect=query.collect)
         return data
     elif query.group_by:
-        if query.flatten:
-            return FlatData(results)
-        else:
-            return GroupedData(results)
+        return group_presenter(results)
     elif query.period:
-        if query.flatten:
-            data = PeriodFlatData(results, period=query.period)
-        else:
-            data = PeriodData(results, period=query.period)
+        data = period_presenter(results, period=query.period)
         if query.start_at and query.end_at:
             data.fill_missing_periods(
                 query.start_at, query.end_at, collect=query.collect)
