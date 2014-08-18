@@ -45,7 +45,7 @@ DEFAULT_UPLOAD_FORMAT = 'csv'
 def protected(f):
     @wraps(f)
     def verify_user_logged_in(*args, **kwargs):
-        if not "user" in session:
+        if "user" not in session:
             return redirect(
                 url_for('oauth_sign_in'))
         return f(*args, **kwargs)

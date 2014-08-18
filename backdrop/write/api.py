@@ -118,13 +118,14 @@ def write_by_group(data_group, data_type):
         _validate_config(data_set_config)
         _validate_auth(data_set_config)
 
-        data = listify_json(get_json_from_request(request))
-        errors, ok_message = _append_to_data_set(data_set_config, data)
+        try:
+            data = listify_json(get_json_from_request(request))
+        except ValidationError as e:
+            return abort(400, repr(e))
+        errors = _append_to_data_set(data_set_config, data)
 
         if errors:
             abort(400, json.dumps(errors))
-        elif ok_message:
-            return jsonify(status='ok', message=ok_message)
         else:
             return jsonify(status='ok')
 
@@ -166,19 +167,21 @@ def post_to_data_set(data_set_name):
     _validate_config(data_set_config)
     _validate_auth(data_set_config)
 
-    data = listify_json(get_json_from_request(request))
-    errors, ok_message = _append_to_data_set(
+    try:
+        data = listify_json(get_json_from_request(request))
+    except ValidationError as e:
+        return abort(400, repr(e))
+    errors = _append_to_data_set(
         data_set_config,
-        data,
-        ok_message="Deprecation Warning: accessing by data-set name is "
-                   "deprecated, Please use the /data-group/data-type form")
+        data)
 
     if errors:
         abort(400, json.dumps(errors))
-    elif ok_message:
-        return jsonify(status='ok', message=ok_message)
     else:
-        return jsonify(status='ok')
+        ok_message = ("Deprecation Warning: accessing by data-set name is "
+                      "deprecated, Please use the /data-group/data-type form")
+        return jsonify(status='ok',
+                       message=ok_message)
 
 
 @app.route('/data-sets/<data_set_name>', methods=['POST'])
@@ -264,10 +267,10 @@ def _validate_auth(data_set_config):
                   token, data_set_config['name']))
 
 
-def _append_to_data_set(data_set_config, data, ok_message=None):
+def _append_to_data_set(data_set_config, data):
     data_set = DataSet(storage, data_set_config)
     data_set.create_if_not_exists()
-    return data_set.store(data), ok_message
+    return data_set.store(data)
 
 
 def _empty_data_set(data_set_config):

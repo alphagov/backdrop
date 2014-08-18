@@ -46,7 +46,7 @@ def _generate_auto_id(record, auto_id_keys):
     >>> _generate_auto_id({'foo':'foo'}, ['bar'])
     Traceback (most recent call last):
         ...
-    ValidationError: The following required fields are missing: bar
+    ValidationError: The following required id fields are missing: bar
     """
     missing_keys = set(auto_id_keys) - set(record.keys())
     if len(missing_keys) > 0:
@@ -59,17 +59,17 @@ def _generate_auto_id(record, auto_id_keys):
 
 
 def parse_timestamp(record):
-    # now defunct?
     """Parses a timestamp in a record
 
     >>> parse_timestamp({'_timestamp': '2012-12-12T00:00:00'})
-    {'_timestamp': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}
+    ({'_timestamp': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}, None)
     >>> parse_timestamp({})
-    {}
-    >>> parse_timestamp({'_timestamp': 'invalid'})
-    Traceback (most recent call last):
-        ...
-    ParseError: _timestamp is not a valid timestamp, it must be ISO8601
+    ({}, None)
+    >>> record, error = parse_timestamp({'_timestamp': 'invalid'})
+    >>> record
+    {'_timestamp': 'invalid'}
+    >>> error
+    '_timestamp is not a valid timestamp, it must be ISO8601'
     """
     error = None
     if '_timestamp' in record:
@@ -87,7 +87,7 @@ def add_period_keys(record):
     Add a field for each of the periods in timeseries.PERIODS
 
     >>> record = add_period_keys(
-    ...   parse_timestamp({'_timestamp': '2012-12-12T12:12:00'}))
+    ...   parse_timestamp({'_timestamp': '2012-12-12T12:12:00'})[0])
     >>> record['_hour_start_at']
     datetime.datetime(2012, 12, 12, 12, 0, tzinfo=<UTC>)
     >>> record['_day_start_at']

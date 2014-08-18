@@ -86,20 +86,22 @@ class DataSet(object):
             for record in records:
                 # doesn't change data
                 errors += validate_record_schema(record, self.config['schema'])
-        print errors
         records_with_timestamp_parse_and_errors = map(parse_timestamp, records)
-        records = map(lambda item: item[0], records_with_timestamp_parse_and_errors)
-        parse_timestamp_errors = map(lambda item: item[1], records_with_timestamp_parse_and_errors)
-        errors += filter(lambda item: (item is not None), parse_timestamp_errors)
-        print errors
+        records = map(lambda item: item[0],
+                      records_with_timestamp_parse_and_errors)
+        parse_timestamp_errors = map(lambda item: item[1],
+                                     records_with_timestamp_parse_and_errors)
+        errors += filter(lambda item: (item is not None),
+                         parse_timestamp_errors)
         # validate
         # order was important? should be after auto ids and timestamp?
         # doesn't change data
         validate_record_errors = map(validate_record, records)
         errors += filter(lambda item: item is not None, validate_record_errors)
-        print errors
         # add auto-id keys
-        records, auto_id_errors = add_auto_ids(records, self.config.get('auto_ids', None))
+        records, auto_id_errors = add_auto_ids(
+            records,
+            self.config.get('auto_ids', None))
         errors += auto_id_errors
         print errors
 
