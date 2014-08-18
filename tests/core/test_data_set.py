@@ -169,6 +169,7 @@ class TestDataSet_store(BaseDataSetTest):
             7
         )
 
+
 class TestDataSet_execute_query(BaseDataSetTest):
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):

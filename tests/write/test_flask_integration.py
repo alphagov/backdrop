@@ -110,7 +110,8 @@ class PostDataTestCase(unittest.TestCase):
 
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     @patch("backdrop.core.data_set.DataSet.store")
-    def test__id_gets_stored(self, store):
+    def test__id_gets_stored(self, mock_store):
+        mock_store.return_value = []
         response = self.app.post(
             '/foo',
             data = '{"_id": "foo"}',
@@ -119,7 +120,7 @@ class PostDataTestCase(unittest.TestCase):
         )
 
         assert_that(response, is_ok())
-        store.assert_called_with(
+        mock_store.assert_called_with(
             [{"_id": "foo"}]
         )
 
