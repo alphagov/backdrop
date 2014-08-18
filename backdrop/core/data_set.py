@@ -80,21 +80,38 @@ class DataSet(object):
         log.info('received {} records'.format(len(records)))
 
         # Validate schema
-
+        errors = []
         if 'schema' in self.config:
             for record in records:
-                validate_record_schema(record, self.config['schema'])
-        # add auto-id keys
-        records = add_auto_ids(records, self.config.get('auto_ids', None))
-        # parse _timestamp
-        records = map(parse_timestamp, records)
-        # validate
-        records = map(validate_record, records)
-        # add period data
+                # doesn't change data, no need to return records
+                errors += validate_record_schema(record, self.config['schema'])
+
+        # Parse timestamp
+        records, timestamp_errors = separate_errors_and_records(
+            map(parse_timestamp, records))
+        errors += timestamp_errors
+
+        # Custom record validations
+        # doesn't change data, no need to return records
+        errors += filter(None, map(validate_record, records))
+
+        # Add auto-id keys
+        records, auto_id_errors = add_auto_ids(
+            records,
+            self.config.get('auto_ids', None))
+        errors += auto_id_errors
+
+        # Add period data returns no errors so
+        # return if we have errors before this point
+        if errors:
+            return errors
+
+        # Add period data
         records = map(add_period_keys, records)
 
         for record in records:
             self.storage.save_record(self.name, record)
+        return errors
 
     def execute_query(self, query):
         results = self.storage.execute_query(self.name, query)
@@ -157,3 +174,18 @@ def _limit_grouped_results(results, limit):
     """Limit a grouped set of results
     """
     return results[:limit] if limit else results
+
+
+def separate_errors_and_records(errors_and_records):
+    """
+    >>> errors_and_records = [({'the_record':'foo'}, "ERROR"),
+    ...                       ({'another':'thing'}, None)]
+    >>> separate_errors_and_records(errors_and_records)
+    ([{'the_record': 'foo'}, {'another': 'thing'}], ['ERROR'])
+    """
+    records = map(lambda item: item[0],
+                  errors_and_records)
+    errors = map(lambda item: item[1],
+                 filter(lambda item: item[1] is not None,
+                        errors_and_records))
+    return (records, errors)
