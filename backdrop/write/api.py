@@ -120,10 +120,14 @@ def write_by_group(data_group, data_type):
 
         try:
             data = listify_json(get_json_from_request(request))
-            return _append_to_data_set(data_set_config, data)
+        except ValidationError as e:
+            return abort(400, json.dumps([repr(e)]))
+        errors = _append_to_data_set(data_set_config, data)
 
-        except (ParseError, ValidationError) as e:
-            abort(400, repr(e))
+        if errors:
+            abort(400, json.dumps(errors))
+        else:
+            return jsonify(status='ok')
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['PUT'])
@@ -165,14 +169,19 @@ def post_to_data_set(data_set_name):
 
     try:
         data = listify_json(get_json_from_request(request))
-        return _append_to_data_set(
-            data_set_config,
-            data,
-            ok_message="Deprecation Warning: accessing by data-set name is "
-                       "deprecated, Please use the /data-group/data-type form")
+    except ValidationError as e:
+        return abort(400, json.dumps([repr(e)]))
+    errors = _append_to_data_set(
+        data_set_config,
+        data)
 
-    except (ParseError, ValidationError) as e:
-        abort(400, repr(e))
+    if errors:
+        abort(400, json.dumps(errors))
+    else:
+        ok_message = ("Deprecation Warning: accessing by data-set name is "
+                      "deprecated, Please use the /data-group/data-type form")
+        return jsonify(status='ok',
+                       message=ok_message)
 
 
 @app.route('/data-sets/<data_set_name>', methods=['POST'])
@@ -258,15 +267,10 @@ def _validate_auth(data_set_config):
                   token, data_set_config['name']))
 
 
-def _append_to_data_set(data_set_config, data, ok_message=None):
+def _append_to_data_set(data_set_config, data):
     data_set = DataSet(storage, data_set_config)
     data_set.create_if_not_exists()
-    data_set.store(data)
-
-    if ok_message:
-        return jsonify(status='ok', message=ok_message)
-    else:
-        return jsonify(status='ok')
+    return data_set.store(data)
 
 
 def _empty_data_set(data_set_config):
