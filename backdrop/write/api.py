@@ -121,11 +121,11 @@ def write_by_group(data_group, data_type):
         try:
             data = listify_json(get_json_from_request(request))
         except ValidationError as e:
-            return abort(400, json.dumps([repr(e)]))
+            return (jsonify(messages=[repr(e)]), 400)
         errors = _append_to_data_set(data_set_config, data)
 
         if errors:
-            abort(400, json.dumps(errors))
+            return (jsonify(messages=errors), 400)
         else:
             return jsonify(status='ok')
 
@@ -170,13 +170,13 @@ def post_to_data_set(data_set_name):
     try:
         data = listify_json(get_json_from_request(request))
     except ValidationError as e:
-        return abort(400, json.dumps([repr(e)]))
+        return (jsonify(messages=[repr(e)]), 400)
     errors = _append_to_data_set(
         data_set_config,
         data)
 
     if errors:
-        abort(400, json.dumps(errors))
+        return (jsonify(messages=errors), 400)
     else:
         ok_message = ("Deprecation Warning: accessing by data-set name is "
                       "deprecated, Please use the /data-group/data-type form")
