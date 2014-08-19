@@ -179,6 +179,45 @@ class TestDataSet_store(BaseDataSetTest):
         assert_that(add_period_keys_patch.called, is_(False))
         assert_that(save_record_patch.called, is_(False))
 
+    @patch('backdrop.core.storage.mongo.MongoStorageEngine.save_record')
+    @patch('backdrop.core.records.add_period_keys')
+    def test_store_does_not_get_auto_id_type_error_due_to_datetime(
+            self,
+            add_period_keys_patch,
+            save_record_patch):
+        self.setup_config({
+            'schema': self.schema,
+            'auto_ids': ["_timestamp", "that"]})
+        errors = self.data_set.store([
+            {"_timestamp": "2012-12-12T00:00:00+00:00", 'that': 'dog'},
+            {'thing': {}},
+            {'_foo': 'bar'}])
+
+        assert_that(
+            len(filter(
+                lambda error: "'_timestamp' is a required property" in error,
+                errors)),
+            is_(2)
+        )
+        assert_that(
+            "thing has an invalid value" in errors,
+            is_(True)
+        )
+        assert_that(
+            "_foo is not a recognised internal field" in errors,
+            is_(True)
+        )
+        assert_that(
+            'The following required id fields are missing: _timestamp, that'
+            in errors,
+            is_(True)
+        )
+        assert_that(
+            len(errors),
+            is_(5)
+        )
+        assert_that(add_period_keys_patch.called, is_(False))
+        assert_that(save_record_patch.called, is_(False))
 
 class TestDataSet_execute_query(BaseDataSetTest):
 

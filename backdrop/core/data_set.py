@@ -76,6 +76,12 @@ class DataSet(object):
                 # doesn't change data, no need to return records
                 errors += validate_record_schema(record, self.config['schema'])
 
+        # Add auto-id keys
+        records, auto_id_errors = add_auto_ids(
+            records,
+            self.config.get('auto_ids', None))
+        errors += auto_id_errors
+
         # Parse timestamp
         records, timestamp_errors = separate_errors_and_records(
             map(parse_timestamp, records))
@@ -84,12 +90,6 @@ class DataSet(object):
         # Custom record validations
         # doesn't change data, no need to return records
         errors += filter(None, map(validate_record, records))
-
-        # Add auto-id keys
-        records, auto_id_errors = add_auto_ids(
-            records,
-            self.config.get('auto_ids', None))
-        errors += auto_id_errors
 
         # Add period data returns no errors so
         # return if we have errors before this point
