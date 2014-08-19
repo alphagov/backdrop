@@ -2,7 +2,7 @@ from hamcrest import assert_that, has_item, has_entries, \
     has_length, contains, has_entry, contains_string, \
     is_
 from nose.tools import assert_raises
-from mock import Mock
+from mock import Mock, patch
 from freezegun import freeze_time
 
 from backdrop.core import data_set
@@ -127,11 +127,15 @@ class TestDataSet_store(BaseDataSetTest):
             'test_data_set',
             match(has_entry('_day_start_at', d_tz(2012, 12, 12))))
 
-    def test_store_returns_array_of_errors_if_errors(self):
+    @patch('backdrop.core.storage.mongo.MongoStorageEngine.save_record')
+    @patch('backdrop.core.records.add_period_keys')
+    def test_store_returns_array_of_errors_if_errors(
+            self,
+            add_period_keys_patch,
+            save_record_patch):
         self.setup_config({
             'schema': self.schema,
             'auto_ids': ["_timestamp", "that"]})
-        # does store only take lists?
         errors = self.data_set.store([
             {"_timestamp": "2014-06-1xxx0:00:00+0000"},
             {'thing': {}},
@@ -141,34 +145,39 @@ class TestDataSet_store(BaseDataSetTest):
             len(filter(
                 lambda error: "'_timestamp' is a required property" in error,
                 errors)),
-            2
+            is_(2)
         )
-        print errors
+        assert_that(
+            "'2014-06-1xxx0:00:00+0000' is not a 'date-time'" in errors,
+            is_(True)
+        )
         assert_that(
             "thing has an invalid value" in errors,
-            True
+            is_(True)
         )
         assert_that(
             "_foo is not a recognised internal field" in errors,
-            True
+            is_(True)
         )
         assert_that(
             "_timestamp is not a valid datetime object" in errors,
-            True
+            is_(True)
         )
         assert_that(
             'The following required id fields are missing: that' in errors,
-            True
+            is_(True)
         )
         assert_that(
             '_timestamp is not a valid timestamp, it must be ISO8601'
             in errors,
-            True
+            is_(True)
         )
         assert_that(
             len(errors),
-            7
+            is_(8)
         )
+        assert_that(add_period_keys_patch.called, is_(False))
+        assert_that(save_record_patch.called, is_(False))
 
 
 class TestDataSet_execute_query(BaseDataSetTest):
