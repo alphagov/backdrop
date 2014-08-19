@@ -2,10 +2,11 @@ from flask import logging
 from .records import add_auto_ids, parse_timestamp, validate_record,\
     add_period_keys
 from .validation import validate_record_schema
-from .nested_merge import nested_merge
+from .nested_merge import nested_merge, flat_merge
 from .errors import InvalidSortError
-from backdrop.core.response import PeriodGroupedData, PeriodData, \
-    GroupedData, SimpleData
+from backdrop.core.response import (FlatData, GroupedData, PeriodData,
+                                    PeriodGroupedData, PeriodFlatData,
+                                    SimpleData)
 
 import timeutils
 import datetime
@@ -122,20 +123,31 @@ def build_data(results, query):
         # TODO: strip internal fields
         return SimpleData(results)
 
-    results = nested_merge(query.group_keys, query.collect, results)
+    if query.flatten:
+        merge_fn = flat_merge
+        group_period_presenter = PeriodFlatData
+        group_presenter = FlatData
+        period_presenter = PeriodFlatData
+    else:
+        merge_fn = nested_merge
+        group_period_presenter = PeriodGroupedData
+        group_presenter = GroupedData
+        period_presenter = PeriodData
+
+    results = merge_fn(query.group_keys, query.collect, results)
     results = _sort_grouped_results(results, query.sort_by)
     results = _limit_grouped_results(results, query.limit)
 
     if query.group_by and query.period:
-        data = PeriodGroupedData(results, period=query.period)
+        data = group_period_presenter(results, period=query.period)
         if query.start_at and query.end_at:
             data.fill_missing_periods(
                 query.start_at, query.end_at, collect=query.collect)
         return data
     elif query.group_by:
-        return GroupedData(results)
+        return group_presenter(results)
     elif query.period:
-        data = PeriodData(results, period=query.period)
+        data = period_presenter(results, period=query.period)
         if query.start_at and query.end_at:
             data.fill_missing_periods(
                 query.start_at, query.end_at, collect=query.collect)

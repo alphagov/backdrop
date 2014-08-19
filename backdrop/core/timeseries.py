@@ -1,4 +1,5 @@
 from datetime import timedelta, time
+from itertools import groupby
 import time as _time
 from dateutil.relativedelta import relativedelta, MO
 import pytz
@@ -143,15 +144,17 @@ def _time_to_index(dt):
 
 
 def timeseries(start, end, period, data, default):
-    data_by_start_at = _index_by_start_at(data)
+    data_by_start_at = _group_by_start_at(data)
 
-    def entry(start, end):
-        time_index = _time_to_index(start)
+    results = []
+    for period_start, period_end in period.range(start, end):
+        time_index = _time_to_index(period_start)
         if time_index in data_by_start_at:
-            return data_by_start_at[time_index]
+            results += data_by_start_at[time_index]
         else:
-            return _merge(default, _period_limits(start, end))
-    return [entry(s, e) for s, e in period.range(start, end)]
+            result = _merge(default, _period_limits(period_start, period_end))
+            results.append(result)
+    return results
 
 
 def _period_limits(start, end):
@@ -161,8 +164,10 @@ def _period_limits(start, end):
     }
 
 
-def _index_by_start_at(data):
-    return dict((_time_to_index(d["_start_at"]), d) for d in data)
+def _group_by_start_at(data):
+    sorted_data = sorted(data, key=lambda d: d['_start_at'])
+    grouped = groupby(sorted_data, lambda d: _time_to_index(d['_start_at']))
+    return {k: list(g) for k, g in grouped}
 
 
 def _period_range(start, stop, period):
