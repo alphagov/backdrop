@@ -24,6 +24,9 @@ def nested_merge(keys, collect, data):
 
 
 def flat_merge(keys, collect, data):
+    """Like nested_merge above, but prefixes collected values' key names
+    instead of creating nested subgroups.
+    """
     if not collect:
         return data
 
