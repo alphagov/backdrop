@@ -9,10 +9,19 @@ from .errors import ParseError, ValidationError
 def add_auto_ids(records, auto_ids):
     """Adds automatically generated IDs to a list of records
     """
-    if auto_ids:
-        return (_add_auto_id(record, auto_ids) for record in records)
-    else:
-        return records
+    # Max one error per record set if the data comes from a csv.
+    # If the data comes from elsewhere, some records may be missing id fields
+    # and others may not but we won't worry about this for now.
+    # We'll catch a single exception for the set, when we do location we can
+    # set it to the whole document.
+    try:
+        if auto_ids:
+            return ([_add_auto_id(record, auto_ids) for record in records],
+                    [])
+        else:
+            return (records, [])
+    except ValidationError as e:
+        return (records, [e.message])
 
 
 def _add_auto_id(record, auto_ids):
@@ -37,12 +46,12 @@ def _generate_auto_id(record, auto_id_keys):
     >>> _generate_auto_id({'foo':'foo'}, ['bar'])
     Traceback (most recent call last):
         ...
-    ValidationError: The following required fields are missing: bar
+    ValidationError: The following required id fields are missing: bar
     """
     missing_keys = set(auto_id_keys) - set(record.keys())
     if len(missing_keys) > 0:
         raise ValidationError(
-            "The following required fields are missing: {}".format(
+            "The following required id fields are missing: {}".format(
                 ', '.join(missing_keys)))
 
     return b64encode('.'.join(
@@ -53,22 +62,23 @@ def parse_timestamp(record):
     """Parses a timestamp in a record
 
     >>> parse_timestamp({'_timestamp': '2012-12-12T00:00:00'})
-    {'_timestamp': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}
+    ({'_timestamp': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}, None)
     >>> parse_timestamp({})
-    {}
-    >>> parse_timestamp({'_timestamp': 'invalid'})
-    Traceback (most recent call last):
-        ...
-    ParseError: _timestamp is not a valid timestamp, it must be ISO8601
+    ({}, None)
+    >>> record, error = parse_timestamp({'_timestamp': 'invalid'})
+    >>> record
+    {'_timestamp': 'invalid'}
+    >>> error
+    '_timestamp is not a valid timestamp, it must be ISO8601'
     """
+    error = None
     if '_timestamp' in record:
         try:
             record['_timestamp'] = parse_time_as_utc(record['_timestamp'])
         except (TypeError, ValueError):
-            raise ParseError(
-                '_timestamp is not a valid timestamp, it must be ISO8601')
+            error = '_timestamp is not a valid timestamp, it must be ISO8601'
 
-    return record
+    return (record, error)
 
 
 def add_period_keys(record):
@@ -77,7 +87,7 @@ def add_period_keys(record):
     Add a field for each of the periods in timeseries.PERIODS
 
     >>> record = add_period_keys(
-    ...   parse_timestamp({'_timestamp': '2012-12-12T12:12:00'}))
+    ...   parse_timestamp({'_timestamp': '2012-12-12T12:12:00'})[0])
     >>> record['_hour_start_at']
     datetime.datetime(2012, 12, 12, 12, 0, tzinfo=<UTC>)
     >>> record['_day_start_at']
@@ -108,5 +118,5 @@ def validate_record(record):
     # TODO: refactor this
     result = validate_record_data(record)
     if not result.is_valid:
-        raise ValidationError(result.message)
-    return record
+        return result.message
+    return None

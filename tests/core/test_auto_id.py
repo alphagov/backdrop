@@ -10,7 +10,7 @@ class TestDataSetAutoIdGeneration(unittest.TestCase):
     def test_auto_id_for_a_single_field(self):
         records = [{'abc': 'def'}]
 
-        result = add_auto_ids(records, ['abc'])
+        result, errors = add_auto_ids(records, ['abc'])
 
         assert_that(
             result,
@@ -24,12 +24,14 @@ class TestDataSetAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }]
 
-        result = add_auto_ids(records, ['postcode', 'number'])
+        result, errors = add_auto_ids(records, ['postcode', 'number'])
 
         assert_that(
             result,
             contains(
                 has_entry('_id', b64encode('WC2B 6SE.125'))))
+        assert_that(
+            errors, is_([]))
 
     def test_no_id_generated_if_auto_id_is_none(self):
         records = [{
@@ -38,22 +40,25 @@ class TestDataSetAutoIdGeneration(unittest.TestCase):
             "name": "Aviation House"
         }]
 
-        result = add_auto_ids(records, None)
+        result, errors = add_auto_ids(records, None)
 
         assert_that(
             result,
             contains(
                 is_not(has_key('_id'))))
 
-    @raises(ValidationError)
-    def test_validation_error_if_auto_id_property_is_missing(self):
+    def test_errors_if_auto_id_property_is_missing(self):
         records = [{
             "postcode": "WC2B 6SE",
             "name": "Aviation House"
         }]
 
         # call list to evaluate generator
-        list(add_auto_ids(records, ['postcode', 'number']))
+        results, errors = add_auto_ids(records, ['postcode', 'number'])
+        assert_that(
+            errors,
+            contains(
+                'The following required id fields are missing: number'))
 
     def test_auto_id_can_be_generated_from_a_timestamp(self):
         records = [{
@@ -61,7 +66,7 @@ class TestDataSetAutoIdGeneration(unittest.TestCase):
             "foo": "bar"
         }]
 
-        result = add_auto_ids(records, ['_timestamp', 'foo'])
+        result, errors = add_auto_ids(records, ['_timestamp', 'foo'])
 
         assert_that(
             result,

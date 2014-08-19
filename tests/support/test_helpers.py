@@ -64,12 +64,14 @@ class IsErrorResponse(BaseMatcher):
     def _matches(self, response):
         try:
             data = json.loads(response.data)
-            if data.get('status') != 'error':
+            if data.get('status') != 'error' and response.status_code != 400:
                 return False
             # it should not fail with out a message
-            if not data.get('message'):
+            if not data.get('message') and not data.get('messages'):
                 return False
-            if self.message and not data.get('message') == self.message:
+            if self.message and not (
+                    data.get('message') == self.message or
+                    self.message not in data.get('messages')):
                 return False
             return True
         except ValueError:
