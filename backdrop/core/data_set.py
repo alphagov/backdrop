@@ -105,13 +105,14 @@ class DataSet(object):
         # return if we have errors before this point
         if errors:
             return errors
+        else:
+            # Add period data
+            records = map(add_period_keys, records)
 
-        # Add period data
-        records = map(add_period_keys, records)
-
-        for record in records:
-            self.storage.save_record(self.name, record)
-        return errors
+            for record in records:
+                self.storage.save_record(self.name, record)
+            # errors should be empty
+            return errors
 
     def execute_query(self, query):
         results = self.storage.execute_query(self.name, query)
