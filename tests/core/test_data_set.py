@@ -219,6 +219,7 @@ class TestDataSet_store(BaseDataSetTest):
         assert_that(add_period_keys_patch.called, is_(False))
         assert_that(save_record_patch.called, is_(False))
 
+
 class TestDataSet_execute_query(BaseDataSetTest):
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
