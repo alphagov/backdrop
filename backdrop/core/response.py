@@ -174,8 +174,8 @@ class PeriodGroupedData(object):
         if len(self._data) == 0:
             return 0
 
-        return min([
-            first_nonempty(i['values'], is_reversed) for i in self._data],
+        return min(
+            [first_nonempty(i['values'], is_reversed) for i in self._data],
             key=abs)
 
 
@@ -209,9 +209,7 @@ class PeriodFlatData(object):
         if len(self._data) == 0:
             return 0
 
-        return min([
-            first_nonempty(i['values'], is_reversed) for i in self._data],
-            key=abs)
+        return abs(first_nonempty(self._data, is_reversed))
 
 
 def crossdomain(origin=None):
