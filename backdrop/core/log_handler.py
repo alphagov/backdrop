@@ -21,16 +21,20 @@ def get_json_log_handler(path, app_name):
 
 
 def set_up_logging(app, env):
-    log_level = logging._levelNames[app.config['LOG_LEVEL']]
+    log_level = app.config['LOG_LEVEL']
+    numeric_log_level = logging._levelNames[log_level]
     logger = logging.getLogger()
+    if log_level == "DEBUG":
+        logger.addHandler(logging.StreamHandler())
     logger.addHandler(
-        get_log_file_handler("log/%s.log" % env, log_level)
+        get_log_file_handler("log/%s.log" % env, numeric_log_level)
     )
     logger.addHandler(
         get_json_log_handler("log/%s.log.json" % env, app.name)
     )
-    logger.setLevel(log_level)
+    logger.setLevel(numeric_log_level)
     app.logger.info("{} logging started".format(app.name))
+    app.logger.info("{} logging started".format(numeric_log_level))
     app.before_request(create_request_logger(app))
     app.after_request(create_response_logger(app))
 
