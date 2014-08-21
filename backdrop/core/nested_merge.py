@@ -30,11 +30,11 @@ def flat_merge(keys, collect, data):
     if not collect:
         return data
 
-    def apply_prefixes(record, keys):
+    def apply_prefixes(record, prefix_keys):
         # the prefix is a string like 'cabinet-office:desktop'
-        prefix = ':'.join([record[k] for k in group_by_keys if k in record])
+        prefix = ':'.join([str(record[k]) for k in prefix_keys if k in record])
         # we no longer need the items that went into the prefix
-        record = {k: v for k, v in record.items() if k not in group_by_keys}
+        record = {k: v for k, v in record.items() if k not in prefix_keys}
         for key, method in collect:
             old_key = collect_key(key, method)
             new_key = '{}:{}'.format(prefix, old_key)
