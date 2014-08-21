@@ -146,15 +146,13 @@ def _time_to_index(dt):
 def timeseries(start, end, period, data, default):
     data_by_start_at = _group_by_start_at(data)
 
-    results = []
-    for period_start, period_end in period.range(start, end):
-        time_index = _time_to_index(period_start)
+    def entry(start, end):
+        time_index = _time_to_index(start)
         if time_index in data_by_start_at:
-            results += data_by_start_at[time_index]
+            return _merge(*data_by_start_at[time_index])
         else:
-            result = _merge(default, _period_limits(period_start, period_end))
-            results.append(result)
-    return results
+            return _merge(default, _period_limits(start, end))
+    return [entry(s, e) for s, e in period.range(start, end)]
 
 
 def _period_limits(start, end):
