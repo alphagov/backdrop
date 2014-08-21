@@ -176,8 +176,8 @@ def _period_range(start, stop, period):
         start += period
 
 
-def _merge(first, second):
-    return dict(first.items() + second.items())
+def _merge(*args):
+    return {k: v for d in args for k, v in d.items()}
 
 
 def _truncate_time(datetime):
