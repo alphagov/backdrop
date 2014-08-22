@@ -6,9 +6,11 @@ from functools import update_wrapper
 
 
 def create_period_group(doc, period):
-    if period.start_at_key not in doc or "_count" not in doc:
-        raise ValueError("Expected subgroup to have keys '_count'"
-                         " and '{}'".format(period.start_at_key))
+    required = ['_count', period.start_at_key]
+    missing = [r for r in required if r not in doc]
+    if missing:
+        missing_text = ' and '.join(["'{}'".format(m) for m in missing])
+        raise ValueError('Expected record to have {}'.format(missing_text))
 
     datum = doc.copy()
 
