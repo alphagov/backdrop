@@ -34,6 +34,7 @@ class BaseDataSetTest(object):
             'data_group': 'group',
             'data_type': 'type',
             'capped_size': 0,
+            'schema': {},
         }
         self.data_set_config = dict(base_config.items() + additional_config.items())
         self.data_set = data_set.DataSet(
@@ -542,7 +543,7 @@ class TestDataSet_create(BaseDataSetTest):
         self.mock_storage.data_set_exists.return_value = False
         self.data_set.create_if_not_exists()
         self.mock_storage.create_data_set.assert_called_with(
-            'test_data_set', 0)
+            'test_data_set', 0, {})
 
     def test_data_set_is_not_created_if_it_does_exist(self):
         self.mock_storage.data_set_exists.return_value = True

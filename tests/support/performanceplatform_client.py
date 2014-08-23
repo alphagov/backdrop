@@ -43,6 +43,7 @@ def fake_data_set_exists(name, data_group="group", data_type="type",
                 'data_group': data_group,
                 'data_type': data_type,
                 'capped_size': 0,
+                'schema': {},
             }
             config = dict(base_config.items() + data_set_kwargs.items())
             with pretend_this_data_set_exists(config):

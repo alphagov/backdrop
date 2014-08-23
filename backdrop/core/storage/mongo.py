@@ -1,6 +1,7 @@
 import os
 import logging
 import datetime
+
 import itertools
 
 import pymongo
@@ -37,6 +38,7 @@ def reconnecting_save(collection, record, tries=3):
     """Save to mongo, retrying if necesarry
     """
     try:
+
         collection.save(record)
     except AutoReconnect:
         logger.warning('AutoReconnect on save : {}'.format(tries))
@@ -64,7 +66,7 @@ class MongoStorageEngine(object):
     def data_set_exists(self, data_set_id):
         return data_set_id in self._db.collection_names()
 
-    def create_data_set(self, data_set_id, size):
+    def create_data_set(self, data_set_id, size, schema):
         try:
             if size > 0:
                 self._db.create_collection(data_set_id, capped=True, size=size)
