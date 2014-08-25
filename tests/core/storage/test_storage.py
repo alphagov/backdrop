@@ -128,7 +128,7 @@ class BaseStorageTest(object):
         self._save_all('foo_bar',
                        {'_timestamp': datetime.datetime(2012, 8, 8)})
 
-        results = self.engine.execute_query('foo_bar', Query.create())
+        results = list(self.engine.execute_query('foo_bar', Query.create()))
 
         assert_that(results,
                     contains(

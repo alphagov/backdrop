@@ -1,6 +1,7 @@
 import logging
 import json
 import uuid
+import datetime
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -10,6 +11,12 @@ from ..errors import DataSetCreationError
 
 logger = logging.getLogger(__name__)
 
+class JsonEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return timeutils.as_utc(obj).isoformat()
+        return json.JSONEncoder.default(self, obj)
 
 class PostgresStorageEngine(object):
     @classmethod
@@ -132,12 +139,25 @@ $$ LANGUAGE plpgsql;
                     pop(record, '_id', str(uuid.uuid4())),
                     timeutils.now(),
                     pop(record, '_timestamp', None),
-                    json.dumps(record)
+                    json.dumps(record, cls=JsonEncoder)
                 ))
 
     def execute_query(self, data_set_id, query):
+        if query.is_grouped:
+            return self._group_query(data_set_id, query)
+        else:
+            return self._basic_query(data_set_id, query)
+
+    def _group_query(self, data_set_id, query):
         with self._conn.cursor(cursor_factory=DictCursor) as cursor:
-            sql = "SELECT * FROM {} {} {} LIMIT %s"
+            sql = "SELECT {} FROM {} {} {} LIMIT %s"
+
+    def _basic_query(self, data_set_id, query):
+        with self._conn.cursor(cursor_factory=DictCursor) as cursor:
+            sql = """
+SELECT id, updated_at, timestamp, data
+FROM {} {} {}
+LIMIT %s"""
             where, values = get_pg_where(query)
             sql = sql.format(
                 data_set_id,
@@ -164,16 +184,32 @@ def pop(record, key, default):
 def get_pg_where(query):
     """
     >>> from ...read.query import Query
+    >>> from datetime import datetime as dt
     >>> get_pg_where(Query.create())
     ('', ())
     >>> get_pg_where(Query.create(filter_by=[('foo', 'bar')]))
     ("WHERE data->>'foo' = %s", ('bar',))
+    >>> get_pg_where(Query.create(start_at=dt(2012, 12, 12, 0, 0)))
+    ('WHERE timestamp >= %s', (datetime.datetime(2012, 12, 12, 0, 0),))
     """
+    filters = []
+    values = []
     if query.filter_by:
+        filters += ["data->>'{}' = %s".format(field) for field, _ in query.filter_by]
+        values += [value for _, value in query.filter_by]
+    if query.start_at:
+        filters.append('timestamp >= %s')
+        values.append(query.start_at)
+    if query.end_at:
+        filters.append('timestamp < %s')
+        values.append(query.end_at)
+
+    if len(filters) > 0:
         return (
-            "WHERE " + " AND ".join("data->>'{}' = %s".format(field) for field, _ in query.filter_by),
-            tuple(value for _, value in query.filter_by))
-    return ('', tuple())
+            'WHERE ' + ' AND '.join(filters),
+            tuple(values))
+    else:
+        return ('', tuple())
 
 
 def get_pg_sort(query):
