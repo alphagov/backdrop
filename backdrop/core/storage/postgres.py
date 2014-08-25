@@ -2,6 +2,7 @@ import logging
 import json
 import uuid
 import datetime
+import itertools
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -150,7 +151,21 @@ $$ LANGUAGE plpgsql;
 
     def _group_query(self, data_set_id, query):
         with self._conn.cursor(cursor_factory=DictCursor) as cursor:
-            sql = "SELECT {} FROM {} {} {} LIMIT %s"
+            sql = "SELECT {} FROM {} {} {} {} LIMIT %s"
+            keys = list(itertools.chain.from_iterable(query.group_keys))
+            select = "data->>'{0}' as {0}, COUNT(data->>'{0}') as _count".format(keys[0])
+            where, values = get_pg_where(query)
+            group = "GROUP BY data->>'{0}'".format(keys[0])
+            sort = get_pg_sort(query)
+
+            sql = sql.format(
+                select, data_set_id, where, group, sort)
+            cursor.execute(sql, values + (query.limit,))
+
+            for row in cursor:
+                record = dict(row.items())
+
+                yield record
 
     def _basic_query(self, data_set_id, query):
         with self._conn.cursor(cursor_factory=DictCursor) as cursor:
