@@ -6,6 +6,7 @@ import itertools
 
 import psycopg2
 from psycopg2.extras import DictCursor
+from dateutil.parser import parse
 
 from .. import timeutils
 from ..errors import DataSetCreationError
@@ -153,9 +154,17 @@ $$ LANGUAGE plpgsql;
         with self._conn.cursor(cursor_factory=DictCursor) as cursor:
             sql = "SELECT {} FROM {} {} {} {} LIMIT %s"
             keys = list(itertools.chain.from_iterable(query.group_keys))
-            select = "data->>'{0}' as {0}, COUNT(data->>'{0}') as _count".format(keys[0])
+            select = "".join(
+                "data->>'{0}' as {0}, ".format(key) for key in keys)
+            select += "COUNT(*) as _count"
+            if query.collect_fields:
+                select += ", " + ", ".join(
+                    "array_agg(data->'{0}') as {0}".format(key)
+                    for key in query.collect_fields)
             where, values = get_pg_where(query)
-            group = "GROUP BY data->>'{0}'".format(keys[0])
+            group = "GROUP BY {}".format(
+                ', '.join(
+                    "data->>'{0}'".format(key) for key in keys))
             sort = get_pg_sort(query)
 
             sql = sql.format(
@@ -164,6 +173,9 @@ $$ LANGUAGE plpgsql;
 
             for row in cursor:
                 record = dict(row.items())
+                for key, value in record.items():
+                    if key.startswith('_') and key.endswith('_start_at'):
+                        record[key] = parse(value)
 
                 yield record
 
@@ -218,6 +230,10 @@ def get_pg_where(query):
     if query.end_at:
         filters.append('timestamp < %s')
         values.append(query.end_at)
+    if query.group_keys:
+        keys = list(itertools.chain.from_iterable(query.group_keys))
+        filters += ["(data->>'{}') IS NOT NULL".format(field) for field in keys]
+
 
     if len(filters) > 0:
         return (
