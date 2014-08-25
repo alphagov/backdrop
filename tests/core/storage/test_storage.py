@@ -65,8 +65,9 @@ class BaseStorageTest(object):
     def test_simple_saving_and_finding(self):
         self._save_all('foo_bar', {'foo': 'bar'})
 
-        assert_that(self.engine.execute_query('foo_bar', Query.create()),
-                    contains(has_entries({'foo': 'bar'})))
+        assert_that(
+            self.engine.execute_query('foo_bar', Query.create()),
+            contains(has_entries({'foo': 'bar'})))
 
     def test_saving_a_record_adds_an_updated_at(self):
         self._save_all('foo_bar', {'_id': 'first'})
@@ -85,14 +86,16 @@ class BaseStorageTest(object):
                     is_(d_tz(2012, 12, 12)))
 
     def test_get_last_updated_returns_none_if_there_is_none(self):
-        assert_that(self.engine.get_last_updated('foo_bar'), is_(None))
+        assert_that(
+            self.engine.get_last_updated('foo_bar'),
+            is_(None))
 
     def test_saving_a_record_with_an_id_updates_it(self):
         self._save_all('foo_bar',
                        {'_id': 'first', 'foo': 'bar'},
                        {'_id': 'first', 'foo': 'foo'})
 
-        results = self.engine.execute_query('foo_bar', Query.create())
+        results = list(self.engine.execute_query('foo_bar', Query.create()))
 
         assert_that(len(results), is_(1))
         assert_that(results, contains(has_entries({'foo': 'foo'})))
@@ -103,20 +106,23 @@ class BaseStorageTest(object):
         for i in range(100):
             self.engine.save_record('foo_bar', {'foo': i})
 
+        result = self.engine.execute_query('foo_bar', Query.create())
         assert_that(
-            len(self.engine.execute_query('foo_bar', Query.create())),
+            len(list(result)),
             less_than(70))
 
     def test_empty_a_data_set(self):
         self._save_all('foo_bar',
                        {'foo': 'bar'}, {'bar': 'foo'})
 
-        assert_that(len(self.engine.execute_query('foo_bar', Query.create())), is_(2))
+        result = self.engine.execute_query('foo_bar', Query.create())
+        assert_that(len(list(result)), is_(2))
 
         # TODO: fix inconsistency
         self.engine.empty_data_set('foo_bar')
 
-        assert_that(len(self.engine.execute_query('foo_bar', Query.create())), is_(0))
+        result = self.engine.execute_query('foo_bar', Query.create())
+        assert_that(len(list(result)), is_(0))
 
     def test_datetimes_are_returned_as_utc(self):
         self._save_all('foo_bar',
