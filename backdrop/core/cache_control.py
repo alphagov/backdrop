@@ -1,8 +1,7 @@
 """
 Cache control decorators for flask apps
 """
-import hashlib
-from flask import make_response, request
+from flask import make_response
 from functools import wraps
 
 
@@ -21,14 +20,3 @@ def set(cache_control):
             return resp
         return new_func
     return decorator
-
-
-def etag(func):
-    @wraps(func)
-    def new_func(*args, **kwargs):
-        resp = make_response(func(*args, **kwargs))
-        resp.set_etag(hashlib.sha1(resp.data).hexdigest())
-        resp.make_conditional(request)
-        return resp
-
-    return new_func
