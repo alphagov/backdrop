@@ -8,7 +8,7 @@ from flask_featureflags import FeatureFlag
 
 from .query import parse_query_from_request
 from .validation import validate_request_args
-from ..core import log_handler, cache_control
+from ..core import log_handler, cache_control, http_validation
 from ..core.data_set import DataSet
 from ..core.errors import InvalidOperationError
 from ..core.timeutils import as_utc
@@ -157,7 +157,7 @@ def data(data_group, data_type):
 
 
 @app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
-@cache_control.etag
+@http_validation.etag
 def query(data_set_name):
     with statsd.timer('read.route.{data_set_name}'.format(
             data_set_name=data_set_name)):
