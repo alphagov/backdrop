@@ -128,14 +128,6 @@ class FilterByValidator(Validator):
                 'filter_by must not start with a $')
 
 
-class ParameterMustBeThisValidator(Validator):
-    def validate(self, request_args, context):
-        if context['param_name'] in request_args:
-            if request_args[context['param_name']] != context['must_be_this']:
-                self.add_error('Unrecognised grouping for period. '
-                               'Supported periods include: week')
-
-
 class ParameterMustBeOneOfTheseValidator(Validator):
     def validate(self, request_args, context):
         param_to_check = context['param_name']
