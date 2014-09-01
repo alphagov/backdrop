@@ -1,5 +1,6 @@
 import requests
 from requests.exceptions import ConnectionError
+from requests.packages.urllib3.exceptions import ProtocolError
 from nose.tools import assert_raises
 from hamcrest import assert_that, is_
 
@@ -79,13 +80,13 @@ class TestStagecraftService(object):
 
     def test_calls_fail_if_service_is_not_started(self):
         self.create_service()
-        assert_raises(ConnectionError, requests.get, ('http://localhost:8089/example'))
+        assert_raises(ProtocolError, requests.get, ('http://localhost:8089/example'))
 
     def test_calls_fail_after_service_is_stopped(self):
         service = self.create_service()
         service.start()
         service.stop()
-        assert_raises(ConnectionError, requests.get, ('http://localhost:8089/example'))
+        assert_raises(ProtocolError, requests.get, ('http://localhost:8089/example'))
 
     def test_calls_succeed_after_service_is_restarted(self):
         service = self.create_service()
