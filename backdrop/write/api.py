@@ -1,5 +1,6 @@
 from os import getenv
 import json
+import cProfile
 
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
@@ -16,6 +17,19 @@ from ..core.storage.mongo import MongoStorageEngine
 from .validation import auth_header_is_valid, extract_bearer_token
 
 from performanceplatform import client
+
+
+def do_profile(func):
+    def profiled_func(*args, **kwargs):
+        profile = cProfile.Profile()
+        try:
+            profile.enable()
+            result = func(*args, **kwargs)
+            profile.disable()
+            return result
+        finally:
+            profile.print_stats()
+    return profiled_func
 
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -103,6 +117,7 @@ def health_check():
 
 @app.route('/data/<data_group>/<data_type>', methods=['POST'])
 @cache_control.nocache
+@do_profile
 def write_by_group(data_group, data_type):
     """
     Write by group/type
