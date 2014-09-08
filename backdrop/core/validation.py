@@ -53,9 +53,7 @@ def key_is_valid(key):
     key = key.lower()
     if not key:
         return False
-    if VALID_KEY.match(key):
-        return True
-    return False
+    return VALID_KEY.match(key) is not None
 
 
 def key_is_reserved(key):
