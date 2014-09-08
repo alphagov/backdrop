@@ -16,7 +16,7 @@ def parse_time_as_utc(time_string):
     if isinstance(time_string, datetime.datetime):
         time = time_string
     else:
-        time = parser.parse(time_string)
+        time = datetime.datetime.strptime(time_string, "%Y-%m-%dT%H:%M:%SZ")
 
     return as_utc(time)
 
