@@ -1,6 +1,7 @@
 from os import getenv
 import json
 import cProfile
+import time
 
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
@@ -28,7 +29,13 @@ def do_profile(func):
             profile.disable()
             return result
         finally:
-            profile.print_stats()
+            profile.dump_stats(
+                '/tmp/{}-{}-{}.profile'.format(
+                    kwargs.get('data_group', 'no-group'),
+                    kwargs.get('data_type', 'no-type'),
+                    str(time.time())
+                )
+            )
     return profiled_func
 
 
