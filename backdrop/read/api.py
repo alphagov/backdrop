@@ -36,10 +36,16 @@ storage = MongoStorageEngine.create(
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME'])
 
+
+def generate_request_id():
+    return request.headers.get('Request-Id')
+
+
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
     app.config['SIGNON_API_USER_TOKEN'],
     dry_run=False,
+    request_id_fn = generate_request_id,
 )
 
 DEFAULT_DATA_SET_QUERYABLE = True
