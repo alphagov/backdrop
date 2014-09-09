@@ -41,7 +41,8 @@ def set_up_logging(app, env):
 
 def create_request_logger(app):
     def log_request():
-        app.logger.info("request: %s - %s" % (request.method, request.url))
+        app.logger.info("request: %s - %s" % (request.method, request.url),
+                        extra=create_logging_extra_dict())
     return log_request
 
 
@@ -50,7 +51,12 @@ def create_response_logger(app):
         app.logger.info(
             "response: %s - %s - %s" % (
                 request.method, request.url, response.status
-            )
+            ),
+            extra=create_logging_extra_dict()
         )
         return response
     return log_response
+
+
+def create_logging_extra_dict():
+    return { 'request_id': request.headers.get('Request-Id')}
