@@ -4,6 +4,8 @@
 
 [![Dependency Status](https://gemnasium.com/alphagov/backdrop.png)](https://gemnasium.com/alphagov/backdrop)
 
+[![Code Health](https://landscape.io/github/alphagov/backdrop/master/landscape.png)](https://landscape.io/github/alphagov/backdrop/master)
+
 ##What is it?
 
 Backdrop is a datastore built with Python and MongoDB. It is made up of two separately deployable APIs for reading and writing data over HTTP. The plan is to be able to gather data from a variety of sources and then aggregate and compare this data in useful ways.
