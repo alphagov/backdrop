@@ -5,6 +5,7 @@ from bson import ObjectId
 
 from flask import Flask, jsonify, request
 from flask_featureflags import FeatureFlag
+from flask_limiter import Limiter
 
 from .query import parse_query_from_request
 from .validation import validate_request_args
@@ -25,6 +26,7 @@ GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
 app = Flask("backdrop.read.api")
 
+limiter = Limiter(app)
 feature_flags = FeatureFlag(app)
 
 # Configuration
@@ -153,7 +155,16 @@ def log_error_and_respond(data_set, message, status_code):
     return jsonify(status='error', message=message), status_code
 
 
+def data_group_key():
+    """Key used for rate-limiting requests to data-types"""
+    return '{data_group}:{data_type}'.format(
+        data_group=request.view_args.get('data_group'),
+        data_type=request.view_args.get('data_type'))
+
+
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
+@limiter.limit(app.config.get('DATA_SET_RATE_LIMIT', '100/minute;5/second'),
+               data_group_key)
 def data(data_group, data_type):
     with statsd.timer('read.route.data.{data_group}.{data_type}'.format(
             data_group=data_group,
@@ -162,7 +173,15 @@ def data(data_group, data_type):
         return fetch(data_set_config)
 
 
+def data_set_key():
+    """Key used for rate-limiting requests to data sets"""
+    return '{data_set_name}'.format(
+        data_set_name=request.view_args.get('data_set_name'))
+
+
 @app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
+@limiter.limit(app.config.get('DATA_SET_RATE_LIMIT', '100/minute;5/second'),
+               data_set_key)
 @http_validation.etag
 def query(data_set_name):
     with statsd.timer('read.route.{data_set_name}'.format(

@@ -1,6 +1,7 @@
 argh==0.25
 Flask==0.10.1
 Flask-FeatureFlags==0.4
+Flask-Limiter==0.6.4
 gunicorn==19.1.1
 invoke
 isodate==0.5.0
