@@ -37,6 +37,11 @@ def step(context, token):
     context.bearer_token = token
 
 
+@given(u'I have compressed content')
+def step(context):
+    context.content_encoding = True
+
+
 @when('I "{http_method}" the compressed request body to the path "{path}"')
 def step(context, http_method, path):
     assert http_method in ('POST', 'PUT'), "Only support POST, PUT"
@@ -157,9 +162,12 @@ def step(context, collection, size):
 
 
 def _make_headers_from_context(context):
+    result = []
     if context and 'bearer_token' in context:
-        return [('Authorization', "Bearer %s" % context.bearer_token)]
-    return []
+        result.append(('Authorization', "Bearer %s" % context.bearer_token))
+    if context and 'content_encoding' in context:
+        result.append(('Content-Encoding', u'gzip'))
+    return result
 
 
 def _make_malformed_header_from_context(context):

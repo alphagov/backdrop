@@ -1,6 +1,6 @@
 import gzip
 
-from flask import current_app, g
+from flask import current_app, g, abort
 from flask.wrappers import Request
 from io import BytesIO
 
@@ -34,8 +34,7 @@ class DecompressingRequest(Request):
 
             gzipped_content = BytesIO(bytes)
 
-            decompressed_content = gzip.GzipFile(mode='rb',
-                                                 fileobj=gzipped_content)
+            decompressed_content = SafeGzipDecompressor(gzipped_content)
 
             data = decompressed_content.read().decode('utf-8')
 
@@ -47,3 +46,32 @@ class DecompressingRequest(Request):
             g._has_decompressed_entity = True
 
         return super(DecompressingRequest, self).get_data(*args, **kwargs)
+
+
+class SafeGzipDecompressor(object):
+    """Class that decompresses gzip streams, and supports a maximum
+    size to avoid zipbombs.
+
+    See http://en.wikipedia.org/wiki/Zip_bomb
+    """
+    blocksize = 8 * 1024
+
+    def __init__(self, fileobj, maxsize=10 * 1024 * 1024):
+        self.maxsize = maxsize
+        self.gzipobj = gzip.GzipFile(mode='rb', fileobj=fileobj)
+
+    def read(self):
+        b = [""]
+        buf_size = 0
+        while True:
+            data = self.gzipobj.read(self.blocksize)
+            if not data:
+                break
+            b.append(data)
+            buf_size += len(data)
+
+            if buf_size > self.maxsize:
+                # Compressed file is too large
+                abort(413)
+
+        return "".join(b)
