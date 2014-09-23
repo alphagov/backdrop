@@ -21,7 +21,7 @@ def step(context, element_text):
 
 @then(u'I should see the text "{message}"')
 def step(context, message):
-    assert context.client.browser.is_text_present(message)
+    assert context.client.browser.is_text_present(message), context.client.browser.html
 
 
 @then(u'I should see the signed in user "{name}"')
