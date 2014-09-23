@@ -17,5 +17,6 @@ branches:
   except:
     - release
     - /^release_[0-9]+$/
+    - /^deployed-to-(preview|staging|production)$/
 notifications:
   email: false
