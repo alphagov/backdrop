@@ -93,3 +93,14 @@ Feature: the performance platform write api
           and I use the bearer token for the data_set
          when I "POST" the compressed request body to the path "/data/group/type"
          then I should get back a status of "200"
+
+    Scenario: posting gzip-bomb payload to a data-set
+        Given I have the data in "gzip-bomb.gz"
+          and I have a data_set named "data_with_times" with settings
+            | key        | value   |
+            | data_group | "group" |
+            | data_type  | "type"  |
+          and I use the bearer token for the data_set
+          and I have compressed content
+         when I POST to the specific path "/data/group/type"
+         then I should get back a status of "413"
