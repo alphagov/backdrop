@@ -55,7 +55,7 @@ def _generate_auto_id(record, auto_id_keys):
                 ', '.join(missing_keys)))
 
     return b64encode('.'.join(
-        record[key] for key in auto_id_keys))
+        str(record[key]) for key in auto_id_keys))
 
 
 def parse_timestamp(record):
