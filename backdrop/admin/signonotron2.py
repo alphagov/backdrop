@@ -6,6 +6,7 @@ log = getLogger(__name__)
 
 
 class Signonotron2(object):
+
     def __init__(self, client_id, client_secret, base_url,
                  redirect_url):
         self.signon = OAuth2Service(

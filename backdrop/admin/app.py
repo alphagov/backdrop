@@ -232,15 +232,15 @@ def _store_data(data_set_config):
 
 
 def log_upload_error(message, app, e, data_set_config):
-        app.logger.error(
-            '{}: {}'.format(message, e.message),
-            extra={
-                'backdrop_upload_error': type(e).__name__,
-                'data_group': data_set_config['data_group'],
-                'data_type': data_set_config['data_type'],
-            },
-            exc_info=True
-        )
+    app.logger.error(
+        '{}: {}'.format(message, e.message),
+        extra={
+            'backdrop_upload_error': type(e).__name__,
+            'data_group': data_set_config['data_group'],
+            'data_type': data_set_config['data_type'],
+        },
+        exc_info=True
+    )
 
 
 def start(port):

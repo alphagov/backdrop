@@ -47,6 +47,7 @@ def reconnecting_save(collection, record, tries=3):
 
 
 class MongoStorageEngine(object):
+
     @classmethod
     def create(cls, hosts, port, database):
         return cls(get_mongo_client(hosts, port), database)

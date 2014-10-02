@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 
 
 class FileUploadError(IOError):
+
     def __init__(self, message):
         self.message = message
 

@@ -15,6 +15,7 @@ _Query = namedtuple(
 
 
 class Query(_Query):
+
     @classmethod
     def create(cls,
                start_at=None, end_at=None, duration=None, delta=None,

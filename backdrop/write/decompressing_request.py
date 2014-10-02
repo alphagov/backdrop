@@ -6,6 +6,7 @@ from io import BytesIO
 
 
 class DecompressingRequest(Request):
+
     """
     Subclass of flask.wrappers.Request which supports requests made with
     compressed requests bodies.
@@ -49,6 +50,7 @@ class DecompressingRequest(Request):
 
 
 class SafeGzipDecompressor(object):
+
     """Class that decompresses gzip streams, and supports a maximum
     size to avoid zipbombs.
 

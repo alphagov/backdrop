@@ -45,7 +45,7 @@ admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
     app.config['SIGNON_API_USER_TOKEN'],
     dry_run=False,
-    request_id_fn = generate_request_id,
+    request_id_fn=generate_request_id,
 )
 
 log_handler.set_up_logging(app, GOVUK_ENV)
