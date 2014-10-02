@@ -47,7 +47,7 @@ admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
     app.config['SIGNON_API_USER_TOKEN'],
     dry_run=False,
-    request_id_fn = generate_request_id,
+    request_id_fn=generate_request_id,
 )
 
 DEFAULT_DATA_SET_QUERYABLE = True
@@ -208,7 +208,9 @@ def fetch(data_set_config):
         # if the client uses custom headers
         response = app.make_default_options_response()
         response.headers['Access-Control-Max-Age'] = '86400'
-        response.headers['Access-Control-Allow-Headers'] = 'cache-control'
+        response.headers[
+            'Access-Control-Allow-Headers'] = \
+            'cache-control, govuk-request-id, request-id'
     else:
         raw_queries_allowed = data_set_config.get(
             'raw_queries_allowed', DEFAULT_DATA_SET_RAW_QUERIES)
