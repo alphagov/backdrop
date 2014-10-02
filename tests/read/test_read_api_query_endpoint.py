@@ -118,4 +118,4 @@ class PreflightChecksApiTestCase(unittest.TestCase):
     def test_cors_requests_can_cache_control(self):
         response = self.app.open('/data_set', method='OPTIONS')
         assert_that(response.headers['Access-Control-Allow-Headers'],
-                    is_('cache-control'))
+                    is_('cache-control, govuk-request-id, request-id'))

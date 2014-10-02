@@ -12,11 +12,13 @@ from tests.support.test_helpers import has_status, has_header, d_tz
 
 
 class NoneData(object):
+
     def data(self):
         return None
 
 
 class QueryingApiTestCase(unittest.TestCase):
+
     def setUp(self):
         self.app = api.app.test_client()
 
@@ -110,42 +112,50 @@ class QueryingApiTestCase(unittest.TestCase):
 
 
 class PreflightChecksApiTestCase(unittest.TestCase):
+
     def setUp(self):
         self.app = api.app.test_client()
         api.storage._mongo.drop_database(api.app.config['DATABASE_NAME'])
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type")
     def test_cors_preflight_requests_have_empty_body(self):
-        response = self.app.open('/data/some-group/some-type', method='OPTIONS')
+        response = self.app.open(
+            '/data/some-group/some-type', method='OPTIONS')
         assert_that(response.status_code, is_(200))
         assert_that(response.data, is_(""))
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type")
     def test_cors_preflight_are_allowed_from_all_origins(self):
-        response = self.app.open('/data/some-group/some-type', method='OPTIONS')
+        response = self.app.open(
+            '/data/some-group/some-type', method='OPTIONS')
         assert_that(response, has_header('Access-Control-Allow-Origin', '*'))
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type")
     def test_cors_preflight_result_cache(self):
-        response = self.app.open('/data/some-group/some-type', method='OPTIONS')
+        response = self.app.open(
+            '/data/some-group/some-type', method='OPTIONS')
         assert_that(response, has_header('Access-Control-Max-Age', '86400'))
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type")
     def test_cors_requests_can_cache_control(self):
-        response = self.app.open('/data/some-group/some-type', method='OPTIONS')
-        assert_that(response, has_header('Access-Control-Allow-Headers', 'cache-control'))
+        response = self.app.open(
+            '/data/some-group/some-type', method='OPTIONS')
+        assert_that(response, has_header('Access-Control-Allow-Headers',
+                                         'cache-control, govuk-request-id, request-id'))
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
     def test_max_age_is_30_min_for_non_realtime_data_sets(self):
         response = self.app.get('/data/some-group/some-type')
 
-        assert_that(response, has_header('Cache-Control', 'max-age=1800, must-revalidate'))
+        assert_that(
+            response, has_header('Cache-Control', 'max-age=1800, must-revalidate'))
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type", realtime=True, raw_queries_allowed=True)
     def test_max_age_is_2_min_for_realtime_data_sets(self):
         response = self.app.get('/data/some-group/some-type')
 
-        assert_that(response, has_header('Cache-Control', 'max-age=120, must-revalidate'))
+        assert_that(
+            response, has_header('Cache-Control', 'max-age=120, must-revalidate'))
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type", raw_queries_allowed=True, published=False)
     def test_cache_control_is_set_to_no_cache_for_unpublished_data_sets(self):
