@@ -59,4 +59,4 @@ def create_response_logger(app):
 
 
 def create_logging_extra_dict():
-    return { 'request_id': request.headers.get('Request-Id')}
+    return {'request_id': request.headers.get('Request-Id')}

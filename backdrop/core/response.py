@@ -40,6 +40,7 @@ def first_nonempty(data, is_reversed):
 
 
 class SimpleData(object):
+
     def __init__(self, cursor):
         self._data = []
         for doc in cursor:
@@ -60,6 +61,7 @@ class SimpleData(object):
 
 
 class PeriodData(object):
+
     def __init__(self, cursor, period):
         self.period = period
         self._data = []
@@ -97,6 +99,7 @@ class PeriodData(object):
 
 
 class GroupedData(object):
+
     def __init__(self, cursor):
         self._data = []
         for doc in cursor:
@@ -114,6 +117,7 @@ class GroupedData(object):
 
 
 class FlatData(object):
+
     def __init__(self, cursor):
         self._data = []
         for doc in cursor:
@@ -131,6 +135,7 @@ class FlatData(object):
 
 
 class PeriodGroupedData(object):
+
     def __init__(self, cursor, period):
         self._period = period
         self._data = []
@@ -180,6 +185,7 @@ class PeriodGroupedData(object):
 
 
 class PeriodFlatData(object):
+
     def __init__(self, cursor, period):
         self._period = period
         self._data = []

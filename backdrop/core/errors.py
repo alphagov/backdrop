@@ -19,6 +19,7 @@ class InvalidSortError(ValueError):
 
 
 class InvalidOperationError(ValueError):
+
     """Raised if an invalid collect function is provided, or if an error
     is raised from a collect function"""
     pass

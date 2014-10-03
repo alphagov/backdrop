@@ -9,6 +9,7 @@ import re
 
 
 class Validator(object):
+
     def __init__(self, request_args, **context):
         self.errors = []
         self.validate(request_args, context)
@@ -24,6 +25,7 @@ class Validator(object):
 
 
 class MultiValueValidator(Validator):
+
     def param_name(self, context):
         return context.get('param_name')
 
@@ -38,6 +40,7 @@ class MultiValueValidator(Validator):
 
 
 class ParameterValidator(Validator):
+
     def __init__(self, request_args):
         self.allowed_parameters = set([
             'start_at',
@@ -62,6 +65,7 @@ class ParameterValidator(Validator):
 
 
 class DatetimeValidator(Validator):
+
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
             if not value_is_valid_datetime_string(
@@ -71,6 +75,7 @@ class DatetimeValidator(Validator):
 
 
 class PeriodQueryValidator(Validator):
+
     def validate(self, request_args, context):
         if 'period' not in request_args:
             return
@@ -89,6 +94,7 @@ class PeriodQueryValidator(Validator):
 
 
 class PositiveIntegerValidator(Validator):
+
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
             try:
@@ -100,6 +106,7 @@ class PositiveIntegerValidator(Validator):
 
 
 class BooleanValidator(Validator):
+
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
             if request_args[context['param_name']] not in ['true', 'false']:
@@ -108,6 +115,7 @@ class BooleanValidator(Validator):
 
 
 class FilterByValidator(Validator):
+
     def validate(self, request_args, context):
         MultiValueValidator(
             request_args,
@@ -129,6 +137,7 @@ class FilterByValidator(Validator):
 
 
 class ParameterMustBeOneOfTheseValidator(Validator):
+
     def validate(self, request_args, context):
         param_to_check = context['param_name']
         allowed_params = context['must_be_one_of_these']
@@ -142,6 +151,7 @@ class ParameterMustBeOneOfTheseValidator(Validator):
 
 
 class SortByValidator(Validator):
+
     def _unrecognised_direction(self, sort_by):
         return not re.match(r'^.+:(ascending|descending)$', sort_by)
 
@@ -163,6 +173,7 @@ class SortByValidator(Validator):
 
 
 class GroupByValidator(Validator):
+
     def validate(self, request_args, context):
         if 'group_by' in request_args:
             if not key_is_valid(request_args['group_by']):
@@ -173,6 +184,7 @@ class GroupByValidator(Validator):
 
 
 class ParamDependencyValidator(Validator):
+
     def validate(self, request_args, context):
         if context['param_name'] in request_args:
             if all(param not in request_args
@@ -183,6 +195,7 @@ class ParamDependencyValidator(Validator):
 
 
 class CollectValidator(Validator):
+
     def validate(self, request_args, context):
         MultiValueValidator(
             request_args,
@@ -207,6 +220,7 @@ class CollectValidator(Validator):
 
 
 class RawQueryValidator(Validator):
+
     def _is_a_raw_query(self, request_args):
         if 'group_by' in request_args:
             return False
@@ -224,6 +238,7 @@ def _is_valid_date(string):
 
 
 class TimeSpanValidator(Validator):
+
     def validate(self, request_args, context):
         if self._is_valid_date_query(request_args):
             start_at = parser.parse(request_args['start_at'])
@@ -239,6 +254,7 @@ class TimeSpanValidator(Validator):
 
 
 class MidnightValidator(Validator):
+
     def validate(self, request_args, context):
         timestamp = request_args.get(context['param_name'])
         if _is_valid_date(timestamp) and request_args.get('period') != 'hour':
@@ -248,6 +264,7 @@ class MidnightValidator(Validator):
 
 
 class MondayValidator(Validator):
+
     def validate(self, request_args, context):
         if request_args.get('period') == 'week':
             timestamp = request_args.get(context['param_name'])
@@ -258,6 +275,7 @@ class MondayValidator(Validator):
 
 
 class FirstOfMonthValidator(Validator):
+
     def validate(self, request_args, context):
 
         if request_args.get('period') == 'month':
@@ -270,6 +288,7 @@ class FirstOfMonthValidator(Validator):
 
 
 class RelativeTimeValidator(Validator):
+
     def validate(self, request_args, context):
 
         start_at = request_args.get('start_at')

@@ -6,7 +6,9 @@ __all__ = ['statsd']
 
 
 class StatsClient(object):
+
     """Wrap statsd.StatsClient to allow data_set to be added to stat"""
+
     def __init__(self, statsd):
         self._statsd = statsd
 

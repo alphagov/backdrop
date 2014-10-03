@@ -1,6 +1,6 @@
 LOG_LEVEL = "DEBUG"
 BACKDROP_ADMIN_UI_HOST = "http://admin.development.performance.service.gov.uk"
-ALLOW_TEST_SIGNIN=True
+ALLOW_TEST_SIGNIN = True
 SECRET_KEY = "something unique and secret"
 
 DATABASE_NAME = "backdrop"

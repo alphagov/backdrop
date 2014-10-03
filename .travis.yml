@@ -8,7 +8,7 @@ install:
   - pip install -r requirements_for_tests.txt --use-mirrors
 # command to run tests
 env:
-  - SKIP_VIRUS_SCAN=1 SKIP_SPLINTER_TESTS=1 MONGO_REPLICA_SET=''
+  - SKIP_VIRUS_SCAN=1 SKIP_SPLINTER_TESTS=1 MONGO_REPLICA_SET='' NO_AUTOPEP8=1
 script:
   - ./run_tests.sh
 after_script:

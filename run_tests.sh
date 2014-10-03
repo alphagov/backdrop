@@ -33,6 +33,10 @@ pip install -r requirements_for_tests.txt
 rm -f coverage.xml .coverage nosetests.xml
 find . -name '*.pyc' -delete
 
+if [ -z "$NO_AUTOPEP8" ]; then
+  autopep8 -i -r backdrop
+fi
+
 # run doctests -- breaks if run with main tests
 nosetests -v --with-xunit --with-coverage --cover-package=backdrop --with-doctest backdrop
 

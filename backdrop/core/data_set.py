@@ -17,6 +17,7 @@ DEFAULT_MAX_AGE_EXPECTED = 2678400
 
 
 class DataSet(object):
+
     def __init__(self, storage, config):
         self.storage = storage
         self.config = config

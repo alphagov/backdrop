@@ -4,11 +4,13 @@ from subprocess import Popen, PIPE
 
 
 class VirusSignatureError(StandardError):
+
     def __init__(self, message):
         self.message = message
 
 
 class ScannedFile(object):
+
     def __init__(self, file_object):
         self.file_object = file_object
         self._virus_signature = False

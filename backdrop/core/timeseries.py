@@ -6,6 +6,7 @@ import pytz
 
 
 class Period(object):
+
     @property
     def delta(self):
         return self._delta
@@ -41,6 +42,7 @@ class Period(object):
 
 
 class Hour(Period):
+
     def __init__(self):
         self.name = "hour"
         self._delta = timedelta(hours=1)
@@ -56,6 +58,7 @@ class Hour(Period):
 
 
 class Day(Period):
+
     def __init__(self):
         self.name = "day"
         self._delta = timedelta(days=1)
@@ -68,6 +71,7 @@ class Day(Period):
 
 
 class Week(Period):
+
     def __init__(self):
         self.name = "week"
         self._delta = timedelta(days=7)
@@ -80,6 +84,7 @@ class Week(Period):
 
 
 class Month(Period):
+
     def __init__(self):
         self.name = "month"
         self._delta = relativedelta(months=1)
@@ -93,6 +98,7 @@ class Month(Period):
 
 
 class Quarter(Period):
+
     def __init__(self):
         self.name = "quarter"
         self._delta = relativedelta(months=3)
@@ -111,6 +117,7 @@ class Quarter(Period):
 
 
 class Year(Period):
+
     def __init__(self):
         self.name = "year"
         self._delta = relativedelta(years=1)
