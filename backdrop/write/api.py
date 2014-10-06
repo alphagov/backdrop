@@ -10,13 +10,13 @@ from backdrop.write.decompressing_request import DecompressingRequest
 
 from ..core.errors import ParseError, ValidationError
 from ..core import log_handler, cache_control
+from ..core.flaskutils import generate_request_id
 
 from ..core.storage.mongo import MongoStorageEngine
 
 from .validation import auth_header_is_valid, extract_bearer_token
 
 from performanceplatform import client
-
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -35,11 +35,6 @@ storage = MongoStorageEngine.create(
     app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME'])
-
-
-def generate_request_id():
-    return request.headers.get('Request-Id')
-
 
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
