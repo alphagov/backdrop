@@ -12,6 +12,7 @@ from .validation import validate_request_args
 from ..core import log_handler, cache_control, http_validation
 from ..core.data_set import DataSet
 from ..core.errors import InvalidOperationError
+from ..core.flaskutils import generate_request_id
 from ..core.timeutils import as_utc
 from ..core.response import crossdomain
 
@@ -37,11 +38,6 @@ storage = MongoStorageEngine.create(
     app.config['MONGO_HOSTS'],
     app.config['MONGO_PORT'],
     app.config['DATABASE_NAME'])
-
-
-def generate_request_id():
-    return request.headers.get('Request-Id')
-
 
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
