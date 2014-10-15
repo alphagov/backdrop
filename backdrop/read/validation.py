@@ -197,10 +197,10 @@ class CollectValidator(Validator):
 
         if not key_is_valid(value):
             self.add_error('Cannot collect an invalid field name')
-        if value.startswith('_'):
-            self.add_error('Cannot collect internal fields, '
-                           'internal fields start '
-                           'with an underscore')
+        # if value.startswith('_'):
+        #     self.add_error('Cannot collect internal fields, '
+        #                    'internal fields start '
+        #                    'with an underscore')
         if value == request_args.get('group_by'):
             self.add_error("Cannot collect by a field that is "
                            "used for group_by")
