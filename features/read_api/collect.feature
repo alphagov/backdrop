@@ -42,8 +42,9 @@ Feature: collect fields into grouped responses
         Given "sort_and_limit.json" is in "foo" data_set
          when I go to "/foo?group_by=type&filter_by=type:wild&collect=value:sum&collect=value:mean&flatten=true"
          then I should get back a status of "200"
-         and the "1st" result should have "wild:value:sum" with json "27"
-         and the "1st" result should have "wild:value:mean" with json "6.75"
+         and the "1st" result should have "type" equaling "wild"
+         and the "1st" result should have "value:sum" with json "27"
+         and the "1st" result should have "value:mean" with json "6.75"
 
     Scenario: should be able to perform maths on sub groups
         Given "evl_volumetrics.json" is in "foo" data_set

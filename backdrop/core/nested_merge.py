@@ -24,28 +24,10 @@ def nested_merge(keys, collect, data):
 
 
 def flat_merge(keys, collect, data):
-    """Like nested_merge above, but prefixes collected values' key names
-    instead of creating nested subgroups.
-    """
     if not collect:
         return data
 
-    def apply_prefixes(record, keys):
-        # the prefix is a string like 'cabinet-office:desktop'
-        prefix = ':'.join([record[k] for k in group_by_keys if k in record])
-        # we no longer need the items that went into the prefix
-        record = {k: v for k, v in record.items() if k not in group_by_keys}
-        for key, method in collect:
-            old_key = collect_key(key, method)
-            new_key = '{}:{}'.format(prefix, old_key)
-            record[new_key] = record.pop(old_key)
-        return record
-
-    # get the group_by key combinations
-    group_by_keys = keys[0]
-
     data = apply_collect(data, collect)
-    data = [apply_prefixes(record, group_by_keys) for record in data]
 
     return data
 
