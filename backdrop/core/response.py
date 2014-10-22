@@ -215,7 +215,7 @@ class PeriodFlatData(object):
         if len(self._data) == 0:
             return 0
 
-        return abs(first_nonempty(self._data, is_reversed))
+        return first_nonempty(self._data, is_reversed)
 
 
 def crossdomain(origin=None):

@@ -47,3 +47,9 @@ Feature: more complex combination of parameters that are used by clients
          then I should get back a status of "200"
           and the "1st" result should have "_start_at" equaling "2013-03-04T00:00:00+00:00"
           and the "1st" result should have "_count" equaling the integer "3"
+
+    Scenario: flattened queries with missing data are shifted correctly on boundaries
+         when I go to "/licensing?flatten=true&period=week&duration=6&end_at=2013-05-01T00:00:00Z&group_by=paymentStatus"
+         then I should get back a status of "200"
+          and the "14th" result should have "_end_at" equaling "2013-04-08T00:00:00+00:00"
+          and the "14th" result should have "_count" equaling the integer "3"
