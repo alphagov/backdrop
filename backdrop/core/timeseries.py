@@ -3,6 +3,7 @@ from itertools import groupby
 import time as _time
 from dateutil.relativedelta import relativedelta, MO
 import pytz
+import itertools
 
 
 class Period(object):
@@ -151,6 +152,10 @@ def _time_to_index(dt):
 
 
 def timeseries(start, end, period, data, default):
+    """
+    Return a list of results from start to end, with missing
+    data filled in with default.
+    """
     data_by_start_at = _group_by_start_at(data)
 
     results = []
@@ -161,6 +166,41 @@ def timeseries(start, end, period, data, default):
         else:
             result = _merge(default, _period_limits(period_start, period_end))
             results.append(result)
+    return results
+
+
+def fill_group_by_permutations(start, end, period, data, default, group_by):
+
+    # Generate all permutations of group_by keys
+    def unique_values(key):
+        return set([d[key] for d in data])
+
+    def all_group_by_permutations():
+        possible_keys = {group_key: unique_values(group_key) for group_key in group_by}
+        step_1 = {k: [(k, v) for v in possible_keys[k]] for k in possible_keys}
+        step_2 = list(itertools.product(*[step_1[x] for x in step_1]))
+        return [dict(item) for item in step_2]
+
+    permutations = all_group_by_permutations()
+
+    results = []
+    # for each time period (e.g. 1 week) in the period requested (e.g. 3 weeks)
+    for period_start, period_end in period.range(start, end):
+        for group in permutations:
+            group['_start_at'] = period_start
+            group['_end_at'] = period_end
+            match = False
+            # iterate through all data, matching keys and a time index.
+            for value in data:
+                if all(item in value.items() for item in group.items()):
+                    print "Match found: %s" % value
+                    results.append(value)
+                    match = True
+
+            # No match found in all values
+            if not match:
+                results.append(_merge(default, group))
+
     return results
 
 

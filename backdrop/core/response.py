@@ -1,6 +1,6 @@
 import pytz
 from backdrop.core.nested_merge import collect_key
-from backdrop.core.timeseries import timeseries, PERIODS
+from backdrop.core.timeseries import timeseries, fill_group_by_permutations, PERIODS
 from flask import make_response
 from functools import update_wrapper
 
@@ -160,7 +160,7 @@ class PeriodGroupedData(object):
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_periods(self, start_date, end_date, collect=None):
+    def fill_missing_periods(self, start_date, end_date, collect=None, group_by=[]):
         default = {"_count": 0}
         if collect:
             default.update((collect_key(k, v), None) for k, v in collect)
@@ -199,15 +199,21 @@ class PeriodFlatData(object):
     def data(self):
         return tuple(self._data)
 
-    def fill_missing_periods(self, start_date, end_date, collect=None):
+    def fill_missing_periods(self, start_date, end_date, collect=None, group_by=[]):
         default = {"_count": 0}
         if collect:
             default.update((collect_key(k, v), None) for k, v in collect)
-        self._data = timeseries(start=start_date,
-                                end=end_date,
-                                period=self._period,
-                                data=self._data,
-                                default=default)
+
+        filled_in_data = fill_group_by_permutations(start=start_date,
+                                                    end=end_date,
+                                                    period=self._period,
+                                                    data=self._data,
+                                                    default=default,
+                                                    group_by=group_by,
+                                                    )
+
+        self._data = filled_in_data
+        return filled_in_data
 
     def amount_to_shift(self, delta):
         is_reversed = delta < 0
