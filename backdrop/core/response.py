@@ -216,12 +216,7 @@ class PeriodFlatData(object):
         return filled_in_data
 
     def amount_to_shift(self, delta):
-        is_reversed = delta < 0
-
-        if len(self._data) == 0:
-            return 0
-
-        return first_nonempty(self._data, is_reversed)
+        return 0
 
 
 def crossdomain(origin=None):

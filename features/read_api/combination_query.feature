@@ -40,16 +40,3 @@ Feature: more complex combination of parameters that are used by clients
           and the "5th" result should have "licenceUrlSlug" equaling "fake-licence-5"
           and the "5th" result should have "_count" equaling the integer "12"
           and the "5th" result should have "licenceName" with item ""Fake Licence 5""
-
-
-    Scenario: flattened queries are shifted to the first non-zero _count
-         when I go to "/licensing?flatten=true&period=week&duration=52&filter_by=authorityUrlSlug:testport&group_by=licenceUrlSlug&collect=licenceName&start_at=2013-02-11T00:00:00%2B00:00"
-         then I should get back a status of "200"
-          and the "1st" result should have "_start_at" equaling "2013-03-04T00:00:00+00:00"
-          and the "1st" result should have "_count" equaling the integer "3"
-
-    Scenario: flattened queries with missing data are shifted correctly on boundaries
-         when I go to "/licensing?flatten=true&period=week&duration=6&end_at=2013-05-01T00:00:00Z&group_by=paymentStatus"
-         then I should get back a status of "200"
-          and the "14th" result should have "_end_at" equaling "2013-04-08T00:00:00+00:00"
-          and the "14th" result should have "_count" equaling the integer "3"
