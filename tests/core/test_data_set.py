@@ -428,7 +428,7 @@ class TestDataSet_execute_query(BaseDataSetTest):
                          start_at=d(2013, 1, 1),
                          end_at=d(2013, 4, 2),
                          flatten=True))
-        assert_that(data, has_length(4))
+        assert_that(data, has_length(8))
 
         assert_that(data, has_item(has_entries({
             '_count': 1,

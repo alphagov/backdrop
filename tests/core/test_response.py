@@ -5,10 +5,7 @@ from nose.tools import assert_raises, nottest
 import pytz
 import datetime
 
-from backdrop.core.response import PeriodFlatData
-from backdrop.core.timeseries import timeseries_the_return_of_the_keys, MONTH
-
-from itertools import groupby
+from backdrop.core.timeseries import fill_group_by_permutations, MONTH
 
 
 class TestPeriodFlatData(TestCase):
@@ -45,14 +42,14 @@ class TestPeriodFlatData(TestCase):
             }
         ]
 
-        series = timeseries_the_return_of_the_keys(start=datetime.datetime(2013, 1, 1, 0, 0, tzinfo=pytz.UTC),
-                                          end=datetime.datetime(2013, 2, 1, 0, 0, tzinfo=pytz.UTC),
-                                          period=MONTH,
-                                          data=data,
-                                          default={"_count": 0})
+        series = fill_group_by_permutations(start=datetime.datetime(2013, 1, 1, 0, 0, tzinfo=pytz.UTC),
+                                            end=datetime.datetime(2013, 2, 1, 0, 0, tzinfo=pytz.UTC),
+                                            period=MONTH,
+                                            data=data,
+                                            default={"_count": 0},
+                                            group_by=['paymentStatus', 'paymentThing', 'no'])
 
         assert_that(series, has_length(18))
-
 
     def test_multiple_group_by_months(self):
         """
@@ -81,11 +78,12 @@ class TestPeriodFlatData(TestCase):
             },
         ]
 
-        series = timeseries_the_return_of_the_keys(start=datetime.datetime(2013, 1, 1, 0, 0, tzinfo=pytz.UTC),
-                                                   end=datetime.datetime(2013, 3, 1, 0, 0, tzinfo=pytz.UTC),
-                                                   period=MONTH,
-                                                   data=data,
-                                                   default={"_count": 0})
+        series = fill_group_by_permutations(start=datetime.datetime(2013, 1, 1, 0, 0, tzinfo=pytz.UTC),
+                                            end=datetime.datetime(2013, 3, 1, 0, 0, tzinfo=pytz.UTC),
+                                            period=MONTH,
+                                            data=data,
+                                            default={"_count": 0},
+                                            group_by=['paymentStatus', 'paymentThing', 'no'])
 
         assert_that(series, has_length(16))
 
