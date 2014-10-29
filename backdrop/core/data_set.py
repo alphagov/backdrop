@@ -143,7 +143,7 @@ def build_data(results, query):
         data = group_period_presenter(results, period=query.period)
         if query.start_at and query.end_at:
             data.fill_missing_periods(
-                query.start_at, query.end_at, collect=query.collect)
+                query.start_at, query.end_at, collect=query.collect, group_by=query.group_by)
         return data
     elif query.group_by:
         return group_presenter(results)
