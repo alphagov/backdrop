@@ -17,6 +17,7 @@ class Signonotron2(object):
             access_token_url="%s/oauth/token" % base_url,
             base_url=base_url
         )
+        self.client_id = client_id
         self.redirect_url = redirect_url
 
     def __json_access_token(self, something):
@@ -52,7 +53,8 @@ class Signonotron2(object):
             return None, None
 
         session = self.signon.get_session(access_token)
-        user_details_response = session.get('user.json')
+        user_details_response = session.get(
+            'user.json?client_id={0}'.format(self.client_id))
         if user_details_response.status_code in [200, 201]:
             _user_details = user_details_response.json()
             user_details = _user_details, \
