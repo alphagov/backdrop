@@ -107,3 +107,19 @@ class Signonotron2TestCase(unittest.TestCase):
         assert_that(access_token, is_(None))
         assert_that(mock_logger.warn.call_args[0][0],
                     starts_with('Could not parse token from response'))
+
+    def test_user_details_submits_client_id(self):
+        oauth_service = Signonotron2("clientid", None, None, "")
+        oauth_service.signon = Mock()
+        session_object = Mock()
+        response = Response()
+        user_details_json = \
+            { "user": {"name": "Gareth The Wizard", "permissions": "signin"}}
+        response._content = json.dumps(user_details_json)
+        response.status_code = 200
+        session_object.get.return_value = response
+        oauth_service.signon.get_session.return_value = session_object
+
+        oauth_service.user_details("token is accepted")
+
+        session_object.get.assert_called_with('user.json?client_id=clientid')
