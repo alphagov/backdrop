@@ -43,7 +43,7 @@ DUMPDIR="dump-$DATE"
 FILENAME="backdrop-$DATE.tar.gz"
 
 # collections to ignore
-BLACKLIST='system.indexes\|govuk_asset_requests'
+BLACKLIST='system.indexes\|govuk_asset_requests\|govuk_info_page_statistics'
 
 # ssh to mongo-1 and mongodump
 ssh $SOURCE_HOST "mongo backdrop --eval 'rs.slaveOk(); db.getCollectionNames().join(\"\\n\")' --quiet | grep -v '\\(${BLACKLIST}\\)' | xargs -L 1 mongodump -d backdrop -o ${DUMPDIR} -c"

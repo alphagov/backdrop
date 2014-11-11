@@ -183,22 +183,33 @@ def fill_group_by_permutations(start, end, period, data, default, group_by):
 
     permutations = all_group_by_permutations()
 
+    def hash_datum(datum):
+        return '{0}{1}{2}'.format(
+            datum['_start_at'],
+            datum['_end_at'],
+            str([datum[key] for key in group_by]))
+
+    def hash_permutation(perm, start, end):
+        return '{0}{1}{2}'.format(
+            start, end,
+            str([perm[key] for key in group_by]))
+
+    hashed_data = {hash_datum(datum): datum for datum in data}
+
     results = []
     # for each time period (e.g. 1 week) in the period requested (e.g. 3 weeks)
     for period_start, period_end in period.range(start, end):
         for group in permutations:
             group['_start_at'] = period_start
             group['_end_at'] = period_end
-            match = False
-            # iterate through all data, matching keys and a time index.
-            for value in data:
-                if all(item in value.items() for item in group.items()):
-                    print "Match found: %s" % value
-                    results.append(value)
-                    match = True
 
-            # No match found in all values
-            if not match:
+            datum = hashed_data.get(
+                hash_permutation(group, period_start, period_end),
+                None)
+
+            if datum is not None:
+                results.append(datum)
+            else:
                 results.append(_merge(default, group))
 
     return results
