@@ -176,8 +176,7 @@ def fill_group_by_permutations(start, end, period, data, default, group_by):
         return set([d[key] for d in data])
 
     def all_group_by_permutations():
-        possible_keys = {
-            group_key: unique_values(group_key) for group_key in group_by}
+        possible_keys = {group_key: unique_values(group_key) for group_key in group_by}
         step_1 = {k: [(k, v) for v in possible_keys[k]] for k in possible_keys}
         step_2 = list(itertools.product(*[step_1[x] for x in step_1]))
         return [dict(item) for item in step_2]
