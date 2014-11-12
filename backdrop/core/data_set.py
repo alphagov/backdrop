@@ -117,10 +117,14 @@ class DataSet(object):
             if shift != 0:
                 return self.execute_query(query.get_shifted_query(shift))
 
-        if query.sort_by:
-            return data.data()
-        else:
+        if not query.sort_by and _has_start_at(data):
             return sorted(data.data(), key=lambda d: d['_start_at'])
+
+        return data.data()
+
+
+def _has_start_at(data):
+    return all([data_point['_start_at'] for data_point in data.data()])
 
 
 def build_data(results, query):
