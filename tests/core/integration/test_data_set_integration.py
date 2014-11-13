@@ -59,6 +59,7 @@ class TestDataSetIntegration(unittest.TestCase):
         self.setup__timestamp_data()
         query = Query.create(period=WEEK)
         result = self.data_set.execute_query(query)
+        import pdb; pdb.set_trace()
         assert_that(result, contains(
             has_entry('_start_at', d_tz(2012, 12, 31)),
             has_entry('_start_at', d_tz(2013, 1, 28)),

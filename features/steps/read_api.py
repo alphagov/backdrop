@@ -105,7 +105,6 @@ def get_error_message(response_data):
 
 @then('I should get back a status of "{expected_status}"')
 def step(context, expected_status):
-    import pdb; pdb.set_trace()
     assert_that(context.response.status_code, is_(int(expected_status)),
                 get_error_message(context.response.data))
 
