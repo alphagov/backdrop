@@ -13,6 +13,7 @@ from mock import Mock
 from pymongo.errors import AutoReconnect
 
 from backdrop.core.storage.mongo import MongoStorageEngine, reconnecting_save
+from backdrop.core.data_set import DataSet
 
 from .test_storage import BaseStorageTest
 
@@ -40,3 +41,18 @@ class TestReconnectingSave(object):
         collection.save.side_effect = [AutoReconnect, AutoReconnect, AutoReconnect, None]
 
         assert_raises(AutoReconnect, reconnecting_save, collection, 'record')
+
+
+class TestMongoStorage(object):
+    def test_batch_last_updated(self):
+        db = Mock()
+        db.eval.return_value = [
+            { 'last_updated': 'thing' }
+        ]
+
+        storage = MongoStorageEngine({'foo': db}, 'foo')
+        data_set = DataSet(storage, {'name': 'bar'})
+
+        storage.batch_last_updated([data_set])
+
+        assert_that(data_set.get_last_updated(), is_('thing'))

@@ -112,12 +112,14 @@ def data_set_health():
 
     failing_data_sets = []
     data_set_configs = admin_api.list_data_sets()
+    data_sets = [DataSet(storage, config) for config in data_set_configs]
 
-    for data_set_config in data_set_configs:
-        new_data_set = DataSet(storage, data_set_config)
-        if not new_data_set.is_recent_enough():
+    storage.batch_last_updated(data_sets)
+
+    for data_set in data_sets:
+        if not data_set.is_recent_enough():
             failing_data_sets.append(
-                _data_set_object(new_data_set)
+                _data_set_object(data_set)
             )
 
     if len(failing_data_sets):
