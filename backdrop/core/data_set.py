@@ -22,6 +22,8 @@ class DataSet(object):
         self.storage = storage
         self.config = config
 
+        self._last_updated = None
+
     @property
     def name(self):
         return self.config['name']
@@ -36,7 +38,11 @@ class DataSet(object):
                                DEFAULT_MAX_AGE_EXPECTED)
 
     def get_last_updated(self):
-        return self.storage.get_last_updated(self.name)
+        if self._last_updated is not None:
+            return self._last_updated
+        else:
+            self._last_updated = self.storage.get_last_updated(self.name)
+            return self._last_updated
 
     def get_seconds_out_of_date(self):
         now = timeutils.now()
