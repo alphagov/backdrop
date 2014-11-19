@@ -242,8 +242,8 @@ if __name__ == '__main__':
     print "timespans_of_okay_records=================="
     print timespans_of_okay_records
     print "data_sets_that_may_intentionally_miss_proper_ids=================="
-    print("recollect these manually - these are all collected since"
-          "only 3 ruling out search terms")
+    print("these are all collected since"
+          "they may correctly have no proper id but it seems unlikely, they get overwritten during a run, check the config but we can be pretty sure it's okay")
     print data_sets_that_may_intentionally_miss_proper_ids
     print "data_set_changes_dicts=================="
     #print json.dumps(data_set_changes_dicts, indent=2)
