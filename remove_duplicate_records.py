@@ -41,8 +41,7 @@ def had_default_id(config):
         return True
     for data_point in data:
         if 'humanId' in data_point and 'timeSpan' in data_point:
-            if('week' in data_point['humanId']
-               or 'day' in data_point['humanId']):
+            if(data_point['timeSpan'] in data_point['humanId']):
                 has = True
                 break
     return has
@@ -136,110 +135,127 @@ groups_and_types = [
 ]
 
 if __name__ == '__main__':
-    count = 0
-    other_timespan = 0
+    total_changed = 0
+    total_okay_records = 0
     no_timespan = 0
     no_humanid = 0
-    what = 0
-    waaaa = 0
-    waaaa_stuff = []
-    this_stuff = []
-    stuff = []
-    rar = []
-    rar2 = []
-    rar3 = []
-    other_timespan_stuff = Set([])
+    i_dont_know_what_this_is = 0
+    count_of_data_sets_that_may_intentionally_miss_proper_ids = 0
+    data_sets_that_may_intentionally_miss_proper_ids = []
+    data_set_changes_dicts = []
+    may_never_have_had_id_with_timespan = []
+    incorrectly_formatted_ids = []
+    capped_collection_error = []
+    already_fixed = []
+    timespans_of_okay_records = Set([])
+
     for group_and_type in groups_and_types:
-        data_set_config = admin_api.get_data_set(
-            group_and_type['data_group'],
-            group_and_type['data_type'])
+        def get_config_from_admin_app():
+            return admin_api.get_data_set(
+                group_and_type['data_group'],
+                group_and_type['data_type'])
 
         def current_mongo_collection():
             return storage._db[data_set_config['name']]
 
-        data = [i for i in current_mongo_collection()
-                .find({
-                    '_updated_at': {
-                        '$gte': datetime.datetime(2014, 11, 13, 0, 0)}
-                })]
+        def get_data_set_data_since_change():
+            return [i for i in current_mongo_collection()
+                    .find({
+                        '_updated_at': {
+                            '$gte': datetime.datetime(2014, 11, 13, 0, 0)}
+                    })]
 
-        this_count = 0
-        this_other_timespan = 0
-        this_other_timespan_stuff = Set([])
-        if GOVUK_ENV is 'production':
-            env = ''
-        else:
-            env = GOVUK_ENV + '.'
-        url = 'http://www.{}performance.service.gov.uk/data/{}/{}{}'.format(
-            env,
-            group_and_type['data_group'],
-            group_and_type['data_type'],
-            "?start_at=2014-10-25T00%3A00%3A00Z&"
-            "end_at=2014-11-21T23%3A59%3A59Z"
-        )
+        data_set_config = get_config_from_admin_app()
+
+        data = get_data_set_data_since_change()
+
+        changes_in_collection = 0
+        okay_records_in_collections = 0
+
         if had_default_id(data_set_config):
-            for data_point in data:  # ['data']:
+            for data_point in data:
+                def no_timespan_in_id():
+                    return data_point['timeSpan'] not in data_point['humanId']
+
+                def update_with_ids(the_id, humanId):
+                    update = True
+
+                    try:
+                        current_mongo_collection().remove(
+                            {'_id': data_point['_id']})
+                    except pymongo.errors.OperationFailure:
+                        capped_collection_error.append(data_set_config['name'])
+                        update = False
+                    if update:
+                        new_data = data_point
+                        new_data['_id'] = the_id
+                        new_data['humanId'] = humanId
+                        try:
+                            current_mongo_collection().insert(new_data)
+                        except pymongo.errors.DuplicateKeyError:
+                            update = False
+                            already_fixed.append(data_set_config['name'])
+                    return update
+
                 if 'humanId' in data_point and 'timeSpan' in data_point:
-                    if('week' not in data_point['humanId']
-                       and 'day' not in data_point['humanId']):
+                    if no_timespan_in_id():
                         (the_id, humanId) = generate_id(data_point)
                         if "_{}".format(
                                 data_point['timeSpan']) not in humanId:
-                            rar.append(humanId)
-                        removal = True
-                        try:
-                            current_mongo_collection().remove(
-                                {'_id': data_point['_id']})
-                        except pymongo.errors.OperationFailure:
-                            rar3.append(data_set_config['name'])
-                            removal = False
-                        if removal:
-                            new_data = data_point
-                            new_data['_id'] = the_id
-                            new_data['humanId'] = humanId
-                            print url
-                            try:
-                                current_mongo_collection().insert(new_data)
-                            except pymongo.errors.DuplicateKeyError:
-                                rar2.append(url)
-                        count += 1
-                        this_count += 1
+                            incorrectly_formatted_ids.append(humanId)
+                        if update_with_ids(the_id, humanId):
+                            total_changed += 1
+                            changes_in_collection += 1
                     else:
-                        other_timespan += 1
-                        this_other_timespan += 1
-                        this_other_timespan_stuff.add(data_point['timeSpan'])
-                        other_timespan_stuff.add(data_point['timeSpan'])
+                        total_okay_records += 1
+                        okay_records_in_collections += 1
+                        timespans_of_okay_records.add(data_point['timeSpan'])
                 else:
                     if 'humanId' not in data_point:
                         no_humanid += 1
                     elif 'timeSpan' in data_point:
                         no_timespan += 1
                     else:
-                        what += 1
+                        i_dont_know_what_this_is += 1
         else:
-            stuff.append(url)
-        this_stuff.append({url: this_count})
-        if this_other_timespan == 0 and not len(data) == 0:
-            waaaa_stuff.append(url)
-            waaaa += 1
+            may_never_have_had_id_with_timespan.append(data_set_config['name'])
+
+        data_set_changes_dicts.append({data_set_config['name']: changes_in_collection})
+
+        def may_intentionally_miss_proper_ids():
+            return okay_records_in_collections == 0 and not len(data) == 0
+
+        if may_intentionally_miss_proper_ids():
+            data_sets_that_may_intentionally_miss_proper_ids.append(data_set_config['name'])
+            count_of_data_sets_that_may_intentionally_miss_proper_ids += 1
+
+        # save some memory?
         data = None
-    print [
-        count,
-        other_timespan,
-        no_timespan,
-        no_humanid,
-        what,
-        waaaa]
-    print other_timespan_stuff
-    print "=================="
+    print "COUNTS"
+    print {
+        'total_changed': total_changed,
+        'total_okay_records': total_okay_records,
+        'no_timespan': no_timespan,
+        'no_humanid': no_humanid,
+        'i_dont_know_what_this_is': i_dont_know_what_this_is,
+        'count_of_data_sets_that_may_intentionally_miss_proper_ids': count_of_data_sets_that_may_intentionally_miss_proper_ids}
+    print "timespans_of_okay_records=================="
+    print timespans_of_okay_records
+    print "data_sets_that_may_intentionally_miss_proper_ids=================="
     print("recollect these manually - these are all collected since"
           "only 3 ruling out search terms")
-    print waaaa_stuff
-    print json.dumps(this_stuff, indent=2)
-    print stuff
-    print rar
-    print len(rar)
-    print rar2
-    print len(rar2)
-    print rar3
-    print len(rar3)
+    print data_sets_that_may_intentionally_miss_proper_ids
+    print "data_set_changes_dicts=================="
+    #print json.dumps(data_set_changes_dicts, indent=2)
+    print data_set_changes_dicts
+    print "may_never_have_had_id_with_timespan=================="
+    print may_never_have_had_id_with_timespan
+    print "incorrectly_formatted_ids=================="
+    print incorrectly_formatted_ids
+    print len(incorrectly_formatted_ids)
+    print "capped_collection_error=================="
+    print capped_collection_error
+    print len(capped_collection_error)
+    print "already_fixed=================="
+    print already_fixed
+    print len(already_fixed)
