@@ -234,6 +234,16 @@ class TestDataSet_execute_query(BaseDataSetTest):
             Query.create(period=WEEK)
         )
 
+    def test_last_updated_only_queries_once(self):
+        self.mock_storage.get_last_updated.return_value = 3
+
+        initial_last_updated = self.data_set.get_last_updated()
+        second_last_updated = self.data_set.get_last_updated()
+
+        assert_that(initial_last_updated, is_(3))
+        assert_that(second_last_updated, is_(3))
+        assert_that(self.mock_storage.get_last_updated.call_count, 1)
+
     def test_period_query_fails_when_months_do_not_start_on_the_1st(self):
         self.mock_storage.execute_query.return_value = [
             {"_month_start_at": d(2013, 1, 7, 0, 0, 0), "_count": 3},

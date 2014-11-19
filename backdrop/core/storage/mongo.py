@@ -16,6 +16,30 @@ logger = logging.getLogger(__name__)
 __all__ = ['MongoStorageEngine']
 
 
+"""Convert datatime values in a result to UTC
+
+MongoDB ignores offsets, we don't.
+
+>>> convert_datetimes_to_utc({})
+{}
+>>> convert_datetimes_to_utc({'foo': 'bar'})
+{'foo': 'bar'}
+>>> convert_datetimes_to_utc({'foo': datetime.datetime(2012, 12, 12)})
+{'foo': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}
+"""
+
+
+def time_as_utc(value):
+    if isinstance(value, datetime.datetime):
+        return timeutils.as_utc(value)
+    return value
+
+
+def convert_datetimes_to_utc(result):
+
+    return dict((key, time_as_utc(value)) for key, value in result.items())
+
+
 def get_mongo_client(hosts, port):
     """Return an appropriate mongo client
     """
@@ -46,6 +70,23 @@ def reconnecting_save(collection, record, tries=3):
             raise
 
 
+LAST_UPDATED_COMBINED_JS = """
+function(collection_names) {
+    return collection_names.map(function(name) {
+        return db[name];
+    }).filter(function(collection) {
+        return collection !== undefined;
+    }).map(function(collection, i) {
+        query = collection.find().sort({_timestamp:-1}).limit(1);
+        return {
+            name: collection_names[i],
+            last_updated: query.hasNext() ? query.next()['_timestamp'] : undefined
+        }
+    });
+}
+"""
+
+
 class MongoStorageEngine(object):
 
     @classmethod
@@ -71,6 +112,9 @@ class MongoStorageEngine(object):
                 self._db.create_collection(data_set_id, capped=True, size=size)
             else:
                 self._db.create_collection(data_set_id, capped=False)
+
+            self._collection(data_set_id).create_index(
+                [('_timestamp', pymongo.DESCENDING)])
         except CollectionInvalid as e:
             raise DataSetCreationError(e.message)
 
@@ -82,6 +126,16 @@ class MongoStorageEngine(object):
             sort=[("_updated_at", pymongo.DESCENDING)])
         if last_updated and last_updated.get('_updated_at') is not None:
             return timeutils.utc(last_updated['_updated_at'])
+
+    def batch_last_updated(self, data_sets):
+        all_last_updated = self._db.eval(
+            LAST_UPDATED_COMBINED_JS,
+            [ds.name for ds in data_sets]
+        )
+
+        for i, last_updated in enumerate(all_last_updated):
+            data_sets[i]._last_updated = time_as_utc(
+                last_updated.get('last_updated', datetime.datetime.min))
 
     def empty_data_set(self, data_set_id):
         self._collection(data_set_id).remove({})
@@ -118,26 +172,6 @@ class MongoStorageEngine(object):
         limit = get_mongo_limit(query)
 
         return self._collection(data_set_id).find(spec, sort=sort, limit=limit)
-
-
-def convert_datetimes_to_utc(result):
-    """Convert datatime values in a result to UTC
-
-    MongoDB ignores offsets, we don't.
-
-    >>> convert_datetimes_to_utc({})
-    {}
-    >>> convert_datetimes_to_utc({'foo': 'bar'})
-    {'foo': 'bar'}
-    >>> convert_datetimes_to_utc({'foo': datetime.datetime(2012, 12, 12)})
-    {'foo': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}
-    """
-    def time_as_utc(value):
-        if isinstance(value, datetime.datetime):
-            return timeutils.as_utc(value)
-        return value
-
-    return dict((key, time_as_utc(value)) for key, value in result.items())
 
 
 def get_mongo_spec(query):
