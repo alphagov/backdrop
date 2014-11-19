@@ -5,6 +5,7 @@ from flask import Flask
 from os import getenv
 import requests
 import json
+import datetime
 from sets import Set
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
@@ -12,95 +13,98 @@ app = Flask("backdrop.read.api", static_url_path="/static")
 app.config.from_object(
     "backdrop.read.config.{}".format(GOVUK_ENV))
 
+from backdrop.core.storage.mongo import MongoStorageEngine
+storage = MongoStorageEngine.create(
+    app.config['MONGO_HOSTS'],
+    app.config['MONGO_PORT'],
+    app.config['DATABASE_NAME'])
+
+admin_api = client.AdminAPI(
+    app.config['STAGECRAFT_URL'],
+    app.config['SIGNON_API_USER_TOKEN'],
+    dry_run=False,
+)
+
 groups_and_types = [
-    {'data_group': 'accelerated-possession-eviction', 'data_type': 'journey'},
-    {'data_group': 'accelerated-possession-eviction', 'data_type': 'journey'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'browser-usage'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'completion-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'conversions-by-keyword'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'conversions-by-landing-page'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'conversions-by-medium'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'conversions-by-social-network'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'conversions-by-source'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'device-usage'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'journey-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'journey-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'journey-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'journey-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'journey-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'journey-by-goal'},
-    {'data_group': 'blood-donor-appointments', 'data_type': 'new-returning-count'},
-    {'data_group': 'carers-allowance', 'data_type': 'journey'},
-    {'data_group': 'carers-allowance', 'data_type': 'organic-rate'},
-    {'data_group': 'carers-allowance', 'data_type': 'referrers-rate'},
-    {'data_group': 'carers-allowance', 'data_type': 'social-rate'},
-    {'data_group': 'carers-allowance', 'data_type': 'time-taken-to-complete'},
-    {'data_group': 'digital-marketplace', 'data_type': 'browsers'},
-    {'data_group': 'digital-marketplace', 'data_type': 'devices'},
-    {'data_group': 'digital-marketplace', 'data_type': 'traffic-count'},
-    {'data_group': 'driving-test-practical-public', 'data_type': 'device-usage'},
-    {'data_group': 'driving-test-practical-public', 'data_type': 'journey-help'},
-    {'data_group': 'driving-test-practical-public', 'data_type': 'journey'},
-    {'data_group': 'employment-tribunal-applications', 'data_type': 'browser-usage'},
-    {'data_group': 'employment-tribunal-applications', 'data_type': 'device-usage'},
-    {'data_group': 'employment-tribunal-applications', 'data_type': 'journey-by-page'},
-    {'data_group': 'employment-tribunal-applications', 'data_type': 'journey-by-page'},
-    {'data_group': 'employment-tribunal-applications', 'data_type': 'journey-by-page'},
-    {'data_group': 'employment-tribunal-applications', 'data_type': 'new-returning-count'},
-    {'data_group': 'govuk', 'data_type': 'browsers'},
-    {'data_group': 'govuk', 'data_type': 'devices'},
-    {'data_group': 'govuk', 'data_type': 'most_viewed'},
-    {'data_group': 'govuk', 'data_type': 'most_viewed_news'},
-    {'data_group': 'govuk', 'data_type': 'most_viewed_policies'},
-    {'data_group': 'govuk', 'data_type': 'visitors'},
-    {'data_group': 'govuk-info', 'data_type': 'page-statistics'},
-    #{'data_group': 'govuk-info', 'data_type': 'search-terms'},
-    {'data_group': 'insidegov', 'data_type': 'visitors'},
-    {'data_group': 'lasting-power-of-attorney', 'data_type': 'journey'},
-    {'data_group': 'legal-aid-civil-claims', 'data_type': 'browser-usage'},
-    {'data_group': 'legal-aid-civil-claims', 'data_type': 'device-usage'},
-    {'data_group': 'licensing', 'data_type': 'browsers'},
-    {'data_group': 'licensing', 'data_type': 'devices'},
-    {'data_group': 'licensing', 'data_type': 'journey'},
-    {'data_group': 'pay-foreign-marriage-certificates', 'data_type': 'journey'},
-    {'data_group': 'pay-legalisation-drop-off', 'data_type': 'journey'},
-    {'data_group': 'pay-legalisation-post', 'data_type': 'journey'},
-    {'data_group': 'pay-register-birth-abroad', 'data_type': 'journey'},
-    {'data_group': 'pay-register-death-abroad', 'data_type': 'journey'},
-    {'data_group': 'paye-employee-company-car', 'data_type': 'browser-usage'},
-    {'data_group': 'paye-employee-company-car', 'data_type': 'device-usage'},
-    {'data_group': 'paye-employee-company-car', 'data_type': 'new-returning-count'},
-    {'data_group': 'performance-platform', 'data_type': 'browsers'},
-    {'data_group': 'performance-platform', 'data_type': 'devices'},
-    {'data_group': 'performance-platform', 'data_type': 'traffic-count'},
-    {'data_group': 'police-uk-postcode-search', 'data_type': 'browser-usage'},
-    {'data_group': 'police-uk-postcode-search', 'data_type': 'device-usage'},
-    {'data_group': 'police-uk-postcode-search', 'data_type': 'new-returning-count'},
-    {'data_group': 'prison-visits', 'data_type': 'device-usage'},
-    {'data_group': 'prison-visits', 'data_type': 'journey'},
-    {'data_group': 'renewtaxcredits', 'data_type': 'device-usage'},
-    {'data_group': 'renewtaxcredits', 'data_type': 'journey'},
-    {'data_group': 'service-submission-portal', 'data_type': 'browsers'},
-    {'data_group': 'service-submission-portal', 'data_type': 'devices'},
-    {'data_group': 'service-submission-portal', 'data_type': 'traffic-count'},
-    {'data_group': 'student-finance', 'data_type': 'browser-usage'},
-    {'data_group': 'student-finance', 'data_type': 'device-usage'},
-    {'data_group': 'student-finance', 'data_type': 'journey'},
-    {'data_group': 'student-finance', 'data_type': 'new-returning-users'},
-    {'data_group': 'student-finance', 'data_type': 'site-traffic'},
-    {'data_group': 'tax-vat-content', 'data_type': 'devices-count'},
-    {'data_group': 'tax-vat-content', 'data_type': 'new-returning-count'},
-    {'data_group': 'tax-vat-content', 'data_type': 'organic-rate'},
-    {'data_group': 'tax-vat-content', 'data_type': 'pageviews-count'},
-    {'data_group': 'tax-vat-content', 'data_type': 'referrers-rate'},
-    {'data_group': 'tax-vat-content', 'data_type': 'social-rate'},
-    {'data_group': 'tax-vat-content', 'data_type': 'top-count'},
-    {'data_group': 'tax-vat-content', 'data_type': 'traffic-count'},
-    {'data_group': 'tier-2-visit-visa', 'data_type': 'devices'},
-    {'data_group': 'tier-2-visit-visa', 'data_type': 'journey'},
-    {'data_group': 'tier-2-visit-visa', 'data_type': 'volumetrics'},
-    {'data_group': 'view-driving-record', 'data_type': 'devices'},
-    {'data_group': 'view-driving-record', 'data_type': 'digital-transactions'}
+    {'data_group': u'accelerated-possession-eviction', 'data_type': u'journey'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'browser-usage'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'completion-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-keyword'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-landing-page'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-medium'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-social-network'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-source'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'device-usage'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'journey-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'journey-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'journey-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'journey-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'journey-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'journey-by-goal'},
+    {'data_group': u'blood-donor-appointments', 'data_type': u'new-returning-count'},
+    {'data_group': u'carers-allowance', 'data_type': u'journey'},
+    {'data_group': u'carers-allowance', 'data_type': u'organic-rate'},
+    {'data_group': u'carers-allowance', 'data_type': u'referrers-rate'},
+    {'data_group': u'carers-allowance', 'data_type': u'social-rate'},
+    {'data_group': u'carers-allowance', 'data_type': u'time-taken-to-complete'},
+    {'data_group': u'digital-marketplace', 'data_type': u'browsers'},
+    {'data_group': u'digital-marketplace', 'data_type': u'devices'},
+    {'data_group': u'digital-marketplace', 'data_type': u'traffic-count'},
+    {'data_group': u'driving-test-practical-public', 'data_type': u'device-usage'},
+    {'data_group': u'driving-test-practical-public', 'data_type': u'journey-help'},
+    {'data_group': u'driving-test-practical-public', 'data_type': u'journey'},
+    {'data_group': u'employment-tribunal-applications', 'data_type': u'browser-usage'},
+    {'data_group': u'employment-tribunal-applications', 'data_type': u'device-usage'},
+    {'data_group': u'employment-tribunal-applications', 'data_type': u'journey-by-page'},
+    {'data_group': u'employment-tribunal-applications', 'data_type': u'journey-by-page'},
+    {'data_group': u'employment-tribunal-applications', 'data_type': u'journey-by-page'},
+    {'data_group': u'employment-tribunal-applications', 'data_type': u'new-returning-count'},
+    {'data_group': u'govuk', 'data_type': u'browsers'},
+    {'data_group': u'govuk', 'data_type': u'devices'},
+    {'data_group': u'govuk', 'data_type': u'most_viewed'},
+    {'data_group': u'govuk', 'data_type': u'most_viewed_news'},
+    {'data_group': u'govuk', 'data_type': u'most_viewed_policies'},
+    {'data_group': u'govuk', 'data_type': u'visitors'},
+    {'data_group': u'govuk-info', 'data_type': u'page-statistics'},
+    {'data_group': u'govuk-info', 'data_type': u'search-terms'},
+    {'data_group': u'insidegov', 'data_type': u'visitors'},
+    {'data_group': u'lasting-power-of-attorney', 'data_type': u'journey'},
+    {'data_group': u'legal-aid-civil-claims', 'data_type': u'browser-usage'},
+    {'data_group': u'legal-aid-civil-claims', 'data_type': u'device-usage'},
+    {'data_group': u'licensing', 'data_type': u'browsers'},
+    {'data_group': u'licensing', 'data_type': u'devices'},
+    {'data_group': u'licensing', 'data_type': u'journey'},
+    {'data_group': u'pay-foreign-marriage-certificates', 'data_type': u'journey'},
+    {'data_group': u'pay-legalisation-drop-off', 'data_type': u'journey'},
+    {'data_group': u'pay-legalisation-post', 'data_type': u'journey'},
+    {'data_group': u'pay-register-birth-abroad', 'data_type': u'journey'},
+    {'data_group': u'pay-register-death-abroad', 'data_type': u'journey'},
+    {'data_group': u'paye-employee-company-car', 'data_type': u'browser-usage'},
+    {'data_group': u'paye-employee-company-car', 'data_type': u'device-usage'},
+    {'data_group': u'paye-employee-company-car', 'data_type': u'new-returning-count'},
+    {'data_group': u'performance-platform', 'data_type': u'browsers'},
+    {'data_group': u'performance-platform', 'data_type': u'devices'},
+    {'data_group': u'performance-platform', 'data_type': u'traffic-count'},
+    {'data_group': u'police-uk-postcode-search', 'data_type': u'browser-usage'},
+    {'data_group': u'police-uk-postcode-search', 'data_type': u'device-usage'},
+    {'data_group': u'police-uk-postcode-search', 'data_type': u'new-returning-count'},
+    {'data_group': u'prison-visits', 'data_type': u'device-usage'},
+    {'data_group': u'prison-visits', 'data_type': u'journey'},
+    {'data_group': u'renewtaxcredits', 'data_type': u'device-usage'},
+    {'data_group': u'renewtaxcredits', 'data_type': u'journey'},
+    {'data_group': u'service-submission-portal', 'data_type': u'browsers'},
+    {'data_group': u'service-submission-portal', 'data_type': u'devices'},
+    {'data_group': u'service-submission-portal', 'data_type': u'traffic-count'},
+    {'data_group': u'student-finance', 'data_type': u'browser-usage'},
+    {'data_group': u'student-finance', 'data_type': u'device-usage'},
+    {'data_group': u'student-finance', 'data_type': u'journey'},
+    {'data_group': u'student-finance', 'data_type': u'new-returning-users'},
+    {'data_group': u'student-finance', 'data_type': u'site-traffic'},
+    {'data_group': u'tier-2-visit-visa', 'data_type': u'devices'},
+    {'data_group': u'tier-2-visit-visa', 'data_type': u'journey'},
+    {'data_group': u'tier-2-visit-visa', 'data_type': u'volumetrics'},
+    {'data_group': u'view-driving-record', 'data_type': u'devices'},
+    {'data_group': u'view-driving-record', 'data_type': u'digital-transactions'}
 ]
 
 if __name__ == '__main__':
@@ -111,8 +115,23 @@ if __name__ == '__main__':
     what = 0
     waaaa = 0
     waaaa_stuff = []
+    this_stuff = []
     other_timespan_stuff = Set([])
     for group_and_type in groups_and_types:
+        data_set_config = admin_api.get_data_set(
+            group_and_type['data_group'],
+            group_and_type['data_type'])
+        #get for updated at after 14
+        #check getting same data? - yes - both 51481, 12441
+        #test remove
+        data = [i for i in storage._db[data_set_config['name']]
+                .find({
+                    '_updated_at': {
+                        '$gte': datetime.datetime(2014, 11, 13, 0, 0)}
+                })]
+
+        import pdb; pdb.set_trace()
+
         this_count = 0
         this_other_timespan = 0
         this_no_timespan = 0
@@ -133,10 +152,10 @@ if __name__ == '__main__':
             "end_at=2014-11-21T23%3A59%3A59Z"
         )
         print url
-        resp = requests.get(url)
+        #resp = requests.get(url)
         print 'got'
-        data = resp.json()
-        for data_point in data['data']:
+        #data = resp.json()
+        for data_point in data:  # ['data']:
             #import pdb; pdb.set_trace()
             if 'humanId' in data_point and 'timeSpan' in data_point:
                 if 'week' not in data_point['humanId'] and 'day' not in data_point['humanId']:
@@ -172,7 +191,8 @@ if __name__ == '__main__':
         print this_count
         print this_other_timespan
         print this_other_timespan_stuff
-        if this_other_timespan == 0 and not len(data['data']) == 0:
+        this_stuff.append({url: this_count})
+        if this_other_timespan == 0 and not len(data) == 0:
             print "WAAAAAA"
             waaaa_stuff.append(url)
             waaaa += 1
@@ -195,4 +215,8 @@ if __name__ == '__main__':
     # recollect these manually - these are all collected since
     # only 3 ruling out search terms
     print waaaa_stuff
+    print json.dumps(this_stuff, indent=2)
     # purge and push too big - need to remove single record and re push
+    #[45808, 6554, 0, 0, 0, 3]
+    #====
+    #[54835, 6521, 0, 0, 0, 3]
