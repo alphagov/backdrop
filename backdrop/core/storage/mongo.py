@@ -112,6 +112,9 @@ class MongoStorageEngine(object):
                 self._db.create_collection(data_set_id, capped=True, size=size)
             else:
                 self._db.create_collection(data_set_id, capped=False)
+
+            self._collection(data_set_id).create_index(
+                [('_timestamp', pymongo.DESCENDING)])
         except CollectionInvalid as e:
             raise DataSetCreationError(e.message)
 

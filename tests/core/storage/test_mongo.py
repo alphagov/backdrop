@@ -6,7 +6,7 @@ amount of setup and mocking. Small unit tests are in doctest format in the
 module itself.
 """
 
-from hamcrest import assert_that, is_
+from hamcrest import assert_that, is_, has_key
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -22,6 +22,14 @@ class TestMongoStorageEngine(BaseStorageTest):
     def setup(self):
         self.engine = MongoStorageEngine.create(
             ['localhost'], 27017, 'backdrop_test')
+
+    def test_create_data_set(self):
+        self.engine.create_data_set('should_have_index', 0)
+
+        coll = self.engine._collection('should_have_index')
+        indicies = coll.index_information()
+
+        assert_that(indicies, has_key('_timestamp_-1'))
 
     def teardown(self):
         self.engine._mongo.drop_database('backdrop_test')
