@@ -35,7 +35,7 @@ def had_default_id(config):
             .find({
                 '_updated_at': {
                     '$lt': datetime.datetime(2014, 11, 13, 0, 0),
-                    '$gte': datetime.datetime(2014, 11, 01, 0, 0)}
+                    '$gte': datetime.datetime(2014, 11, 10, 0, 0)}
             })]
     if len(data) == 0:
         return True
@@ -65,73 +65,7 @@ def generate_id(data_point):
 
 
 groups_and_types = [
-    {'data_group': u'accelerated-possession-eviction', 'data_type': u'journey'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'browser-usage'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'completion-by-goal'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-keyword'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-landing-page'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-medium'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-social-network'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'conversions-by-source'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'device-usage'},
-    {'data_group': u'blood-donor-appointments', 'data_type': u'new-returning-count'},
-    {'data_group': u'carers-allowance', 'data_type': u'journey'},
-    {'data_group': u'carers-allowance', 'data_type': u'organic-rate'},
-    {'data_group': u'carers-allowance', 'data_type': u'referrers-rate'},
-    {'data_group': u'carers-allowance', 'data_type': u'social-rate'},
-    {'data_group': u'carers-allowance', 'data_type': u'time-taken-to-complete'},
-    {'data_group': u'digital-marketplace', 'data_type': u'browsers'},
-    {'data_group': u'digital-marketplace', 'data_type': u'devices'},
-    {'data_group': u'digital-marketplace', 'data_type': u'traffic-count'},
-    {'data_group': u'driving-test-practical-public', 'data_type': u'device-usage'},
-    {'data_group': u'driving-test-practical-public', 'data_type': u'journey-help'},
-    {'data_group': u'driving-test-practical-public', 'data_type': u'journey'},
-    {'data_group': u'employment-tribunal-applications', 'data_type': u'browser-usage'},
-    {'data_group': u'employment-tribunal-applications', 'data_type': u'device-usage'},
-    {'data_group': u'employment-tribunal-applications', 'data_type': u'new-returning-count'},
-    {'data_group': u'govuk', 'data_type': u'browsers'},
-    {'data_group': u'govuk', 'data_type': u'devices'},
-    {'data_group': u'govuk', 'data_type': u'visitors'},
-    #{'data_group': u'govuk-info', 'data_type': u'page-statistics'},
-    {'data_group': u'govuk-info', 'data_type': u'search-terms'},
-    {'data_group': u'insidegov', 'data_type': u'visitors'},
-    {'data_group': u'lasting-power-of-attorney', 'data_type': u'journey'},
-    {'data_group': u'legal-aid-civil-claims', 'data_type': u'browser-usage'},
-    {'data_group': u'legal-aid-civil-claims', 'data_type': u'device-usage'},
-    {'data_group': u'licensing', 'data_type': u'browsers'},
-    {'data_group': u'licensing', 'data_type': u'devices'},
-    {'data_group': u'licensing', 'data_type': u'journey'},
-    {'data_group': u'pay-foreign-marriage-certificates', 'data_type': u'journey'},
-    {'data_group': u'pay-legalisation-drop-off', 'data_type': u'journey'},
-    {'data_group': u'pay-legalisation-post', 'data_type': u'journey'},
-    {'data_group': u'pay-register-birth-abroad', 'data_type': u'journey'},
-    {'data_group': u'pay-register-death-abroad', 'data_type': u'journey'},
-    {'data_group': u'paye-employee-company-car', 'data_type': u'browser-usage'},
-    {'data_group': u'paye-employee-company-car', 'data_type': u'device-usage'},
-    {'data_group': u'paye-employee-company-car', 'data_type': u'new-returning-count'},
-    {'data_group': u'performance-platform', 'data_type': u'browsers'},
-    {'data_group': u'performance-platform', 'data_type': u'devices'},
-    {'data_group': u'performance-platform', 'data_type': u'traffic-count'},
-    {'data_group': u'police-uk-postcode-search', 'data_type': u'browser-usage'},
-    {'data_group': u'police-uk-postcode-search', 'data_type': u'device-usage'},
-    {'data_group': u'police-uk-postcode-search', 'data_type': u'new-returning-count'},
-    {'data_group': u'prison-visits', 'data_type': u'device-usage'},
-    {'data_group': u'prison-visits', 'data_type': u'journey'},
-    {'data_group': u'renewtaxcredits', 'data_type': u'device-usage'},
-    {'data_group': u'renewtaxcredits', 'data_type': u'journey'},
-    {'data_group': u'service-submission-portal', 'data_type': u'browsers'},
-    {'data_group': u'service-submission-portal', 'data_type': u'devices'},
-    {'data_group': u'service-submission-portal', 'data_type': u'traffic-count'},
-    {'data_group': u'student-finance', 'data_type': u'browser-usage'},
-    {'data_group': u'student-finance', 'data_type': u'device-usage'},
-    {'data_group': u'student-finance', 'data_type': u'journey'},
-    {'data_group': u'student-finance', 'data_type': u'new-returning-users'},
-    {'data_group': u'student-finance', 'data_type': u'site-traffic'},
-    {'data_group': u'tier-2-visit-visa', 'data_type': u'devices'},
-    {'data_group': u'tier-2-visit-visa', 'data_type': u'journey'},
-    {'data_group': u'tier-2-visit-visa', 'data_type': u'volumetrics'},
-    {'data_group': u'view-driving-record', 'data_type': u'devices'},
-    {'data_group': u'view-driving-record', 'data_type': u'digital-transactions'},
+    {'data_group': u'govuk-info', 'data_type': u'page-statistics'}
 ]
 
 if __name__ == '__main__':
@@ -159,17 +93,20 @@ if __name__ == '__main__':
         def current_mongo_collection():
             return storage._db[data_set_config['name']]
 
+        def data_query():
+            return current_mongo_collection().find({
+                '_updated_at': {
+                '$gte': datetime.datetime(2014, 11, 13, 0, 0)}
+	    }, limit=100)
+
         def get_data_set_data_since_change():
-            return [i for i in current_mongo_collection()
-                    .find({
-                        '_updated_at': {
-                            '$gte': datetime.datetime(2014, 11, 13, 0, 0)}
-                    })]
+            return [i for i in data_query()]
 
         print "getting config"
         data_set_config = get_config_from_admin_app()
 
         print "getting data"
+        import pdb; pdb.set_trace()
         data = get_data_set_data_since_change()
         print "data got"
 
