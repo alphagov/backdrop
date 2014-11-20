@@ -92,7 +92,7 @@ groups_and_types = [
     {'data_group': u'govuk', 'data_type': u'browsers'},
     {'data_group': u'govuk', 'data_type': u'devices'},
     {'data_group': u'govuk', 'data_type': u'visitors'},
-    {'data_group': u'govuk-info', 'data_type': u'page-statistics'},
+    #{'data_group': u'govuk-info', 'data_type': u'page-statistics'},
     {'data_group': u'govuk-info', 'data_type': u'search-terms'},
     {'data_group': u'insidegov', 'data_type': u'visitors'},
     {'data_group': u'lasting-power-of-attorney', 'data_type': u'journey'},
@@ -150,6 +150,7 @@ if __name__ == '__main__':
     timespans_of_okay_records = Set([])
 
     for group_and_type in groups_and_types:
+        print "DATA SET {}".format(group_and_type)
         def get_config_from_admin_app():
             return admin_api.get_data_set(
                 group_and_type['data_group'],
@@ -165,15 +166,21 @@ if __name__ == '__main__':
                             '$gte': datetime.datetime(2014, 11, 13, 0, 0)}
                     })]
 
+        print "getting config"
         data_set_config = get_config_from_admin_app()
 
+        print "getting data"
         data = get_data_set_data_since_change()
+        print "data got"
 
         changes_in_collection = 0
         okay_records_in_collections = 0
 
+        print "what we doing?"
         if had_default_id(data_set_config):
+            print "we doing"
             for data_point in data:
+                print "DATA POINT {}".format(group_and_type)
                 def no_timespan_in_id():
                     return data_point['timeSpan'] not in data_point['humanId']
 
