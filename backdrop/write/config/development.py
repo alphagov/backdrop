@@ -17,3 +17,5 @@ STAGECRAFT_URL = 'http://localhost:3204'
 STAGECRAFT_DATA_SET_QUERY_TOKEN = 'dev-data-set-query-token'
 
 SIGNON_API_USER_TOKEN = 'development-oauth-access-token'
+
+TRANSFORMER_AMQP_URL = 'amqp://transformer:notarealpw@localhost:5672/%2Ftransformations'
