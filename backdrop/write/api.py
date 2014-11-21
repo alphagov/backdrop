@@ -1,5 +1,4 @@
 from os import getenv
-import json
 
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
@@ -7,6 +6,8 @@ from backdrop import statsd
 from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.write.decompressing_request import DecompressingRequest
+
+from backdrop.transformers.tasks import dispatch
 
 from ..core.errors import ParseError, ValidationError
 from ..core import log_handler, cache_control
@@ -126,6 +127,7 @@ def write_by_group(data_group, data_type):
         if errors:
             return (jsonify(messages=errors), 400)
         else:
+            dispatch.delay(data_set_config['name'])
             return jsonify(status='ok')
 
 
@@ -150,6 +152,7 @@ def put_by_group_and_type(data_group, data_type):
         if len(data) > 0:
             abort(400, 'Not implemented: you can only pass an empty JSON list')
 
+        dispatch.delay(data_set_config['name'])
         return _empty_data_set(data_set_config)
 
     except (ParseError, ValidationError) as e:
