@@ -9,7 +9,6 @@ DATA_SET_AUTO_ID_KEYS = {
     "data_set_with_timestamp_auto_id": ["_timestamp", "key"],
     "evl_volumetrics": ["_timestamp", "service", "transaction"],
 }
-TRANSFORMER_AMQP_URL = 'memory://'
 
 from development import (STAGECRAFT_COLLECTION_ENDPOINT_TOKEN, STAGECRAFT_URL,
                          STAGECRAFT_DATA_SET_QUERY_TOKEN, SIGNON_API_USER_TOKEN)
