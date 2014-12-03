@@ -1,4 +1,17 @@
-from worker import app
+from celery import Celery
+
+# Load the appropriate config from backdrop.write
+import importlib
+from os import getenv
+
+GOVUK_ENV = getenv("GOVUK_ENV", "development")
+config = importlib.import_module(
+    "backdrop.write.config.{}".format(GOVUK_ENV))
+
+app = Celery(
+    'transformations',
+    broker=config.TRANSFORMER_AMQP_URL,
+    include=['backdrop.transformers.tasks'])
 
 
 @app.task(ignore_result=True)
