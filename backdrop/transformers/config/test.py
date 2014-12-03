@@ -1,0 +1,1 @@
+TRANSFORMER_AMQP_URL = 'memory://'
