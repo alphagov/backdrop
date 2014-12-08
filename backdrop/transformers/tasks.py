@@ -1,12 +1,12 @@
 from celery import Celery
 
-# Load the appropriate config from backdrop.write
+# Load the appropriate config as a python module
 import importlib
 from os import getenv
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 config = importlib.import_module(
-    "backdrop.write.config.{}".format(GOVUK_ENV))
+    "backdrop.transformers.config.{}".format(GOVUK_ENV))
 
 app = Celery(
     'transformations',
