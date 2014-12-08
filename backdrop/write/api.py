@@ -7,7 +7,7 @@ from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.write.decompressing_request import DecompressingRequest
 
-from backdrop.transformers.tasks import dispatch
+from backdrop.write.tasks import dispatch
 
 from ..core.errors import ParseError, ValidationError
 from ..core import log_handler, cache_control

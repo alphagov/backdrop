@@ -6,7 +6,7 @@ from os import getenv
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 config = importlib.import_module(
-    "backdrop.transformers.config.{}".format(GOVUK_ENV))
+    "backdrop.write.config.{}".format(GOVUK_ENV))
 
 app = Celery(
     'transformations',
