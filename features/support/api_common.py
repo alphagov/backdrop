@@ -20,6 +20,31 @@ def ensure_data_set_exists(context, data_set_name, settings={}):
         'capped_size': 5040,
         'max_age_expected': 2678400,
         'published': True,
+        "schema": {
+            "definitions": {
+                "_timestamp": {
+                    "$schema": "http://json-schema.org/schema#",
+                    "required": [
+                        "_timestamp"
+                    ],
+                    "type": "object",
+                    "properties": {
+                        "_timestamp": {
+                            "type": "string",
+                            "description": "An ISO8601 formatted date time",
+                            "format": "date-time"
+                        }
+                    },
+                    "title": "Timestamps"
+                }
+            },
+            "description": "Schema for {0}/{0}".format(data_set_name),
+            "allOf": [
+                {
+                    "$ref": "#/definitions/_timestamp"
+                }
+            ]
+        }
     }
 
     response.update(settings)
