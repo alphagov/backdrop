@@ -21,15 +21,16 @@ def entrypoint(dataset_id, earliest, latest):
     )
 
     transforms = admin_api.get_data_set_transforms(dataset_id)
+    data_set_config = admin_api.get_data_set_by_name(dataset_id)
 
     for transform in transforms:
         app.send_task(
             'backdrop.transformers.dispatch.run_transform',
-            args=(dataset_id, transform, earliest, latest)
+            args=(data_set_config, transform, earliest, latest)
         )
 
 
 @app.task(ignore_result=True)
-def run_transform(dataset_id, transform, earliest, latest):
-    logger.info(dataset_id, transform, earliest, latest)
+def run_transform(data_set_config, transform, earliest, latest):
+    logger.info(data_set_config, transform, earliest, latest)
     pass
