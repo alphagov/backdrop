@@ -11,7 +11,7 @@ config = importlib.import_module(
 app = Celery(
     'transformations',
     broker=config.TRANSFORMER_AMQP_URL,
-    include=['backdrop.transformers.tasks'])
+    include=['backdrop.transformers.dispatch'])
 
 
 if __name__ == '__main__':
