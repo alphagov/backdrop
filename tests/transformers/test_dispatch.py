@@ -31,17 +31,27 @@ class DispatchTestCase(unittest.TestCase):
             args=({"group": "foo", "type": "bar"}, {'type': 2}, 'earliest', 'latest'))
 
     @patch('backdrop.transformers.dispatch.DataSet')
-    def test_run_transform(self, mock_data_set):
+    @patch('backdrop.transformers.tasks.debug.logging')
+    def test_run_transform(self, mock_logging_task, mock_data_set):
         data_set_instance = MagicMock()
+        data_set_instance.get.return_value = {
+            'data': [
+                {'data': 'point'},
+            ],
+        }
         mock_data_set.from_group_and_type.return_value = data_set_instance
 
         run_transform({
             'data_group': 'group',
             'data_type': 'type',
         }, {
+            'type': {
+                'function': 'backdrop.transformers.tasks.debug.logging',
+            },
             'query-parameters': {
                 'period': 'day',
             },
+            'options': {},
         }, 'earliest', 'latest')
 
         data_set_instance.get.assert_called_with(
@@ -51,4 +61,8 @@ class DispatchTestCase(unittest.TestCase):
                 'start_at': 'earliest',
                 'end_at': 'latest',
             },
+        )
+        mock_logging_task.assert_called_with(
+            [{'data': 'point'}],
+            {}
         )

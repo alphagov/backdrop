@@ -1,3 +1,4 @@
+import importlib
 import logging
 
 from worker import app, config
@@ -45,4 +46,13 @@ def run_transform(data_set_config, transform, earliest, latest):
 
     data = data_set.get(query_parameters=query_parameters)
 
-    logger.info(data)
+    function_namespace = transform['type']['function']
+    function_name = function_namespace.split('.')[-1]
+    module_namespace = '.'.join(function_namespace.split('.')[:-1])
+
+    transform_module = importlib.import_module(module_namespace)
+    transform_function = getattr(transform_module, function_name)
+
+    transformed_data = transform_function(data['data'], transform['options'])
+
+    logger.info(transformed_data)
