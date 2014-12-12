@@ -2,7 +2,7 @@ import logging
 
 from worker import app, config
 
-from performanceplatform.client import AdminAPI
+from performanceplatform.client import AdminAPI, DataSet
 
 
 logger = logging.getLogger(__name__)
@@ -32,5 +32,17 @@ def entrypoint(dataset_id, earliest, latest):
 
 @app.task(ignore_result=True)
 def run_transform(data_set_config, transform, earliest, latest):
-    logger.info(data_set_config, transform, earliest, latest)
-    pass
+    data_set = DataSet.from_group_and_type(
+        config.BACKDROP_URL,
+        data_set_config['data_group'],
+        data_set_config['data_type'],
+    )
+
+    query_parameters = transform.get('query-parameters', {})
+    query_parameters['flatten'] = 'true'
+    query_parameters['start_at'] = earliest
+    query_parameters['end_at'] = latest
+
+    data = data_set.get(query_parameters=query_parameters)
+
+    logger.info(data)

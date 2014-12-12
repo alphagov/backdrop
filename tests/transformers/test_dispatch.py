@@ -1,9 +1,9 @@
 import unittest
 
 from hamcrest import assert_that, is_
-from mock import patch
+from mock import patch, MagicMock
 
-from backdrop.transformers.dispatch import entrypoint
+from backdrop.transformers.dispatch import entrypoint, run_transform
 
 
 class DispatchTestCase(unittest.TestCase):
@@ -29,3 +29,26 @@ class DispatchTestCase(unittest.TestCase):
         mock_app.send_task.assert_any_call(
             'backdrop.transformers.dispatch.run_transform',
             args=({"group": "foo", "type": "bar"}, {'type': 2}, 'earliest', 'latest'))
+
+    @patch('backdrop.transformers.dispatch.DataSet')
+    def test_run_transform(self, mock_data_set):
+        data_set_instance = MagicMock()
+        mock_data_set.from_group_and_type.return_value = data_set_instance
+
+        run_transform({
+            'data_group': 'group',
+            'data_type': 'type',
+        }, {
+            'query-parameters': {
+                'period': 'day',
+            },
+        }, 'earliest', 'latest')
+
+        data_set_instance.get.assert_called_with(
+            query_parameters={
+                'period': 'day',
+                'flatten': 'true',
+                'start_at': 'earliest',
+                'end_at': 'latest',
+            },
+        )
