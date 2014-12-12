@@ -34,7 +34,7 @@ def entrypoint(dataset_id, earliest, latest):
 @app.task(ignore_result=True)
 def run_transform(data_set_config, transform, earliest, latest):
     data_set = DataSet.from_group_and_type(
-        config.BACKDROP_URL,
+        config.BACKDROP_READ_URL,
         data_set_config['data_group'],
         data_set_config['data_type'],
     )
@@ -55,4 +55,20 @@ def run_transform(data_set_config, transform, earliest, latest):
 
     transformed_data = transform_function(data['data'], transform['options'])
 
-    logger.info(transformed_data)
+    output_group = transform['output'].get(
+        'data-group', data_set_config['data_group'])
+    output_type = transform['output']['data-type']
+
+    admin_api = AdminAPI(
+        config.STAGECRAFT_URL,
+        config.STAGECRAFT_OAUTH_TOKEN,
+    )
+    output_data_set_config = admin_api.get_data_set(output_group, output_type)
+
+    output_data_set = DataSet.from_group_and_type(
+        config.BACKDROP_WRITE_URL,
+        output_group,
+        output_type,
+        token=output_data_set_config['bearer_token'],
+    )
+    output_data_set.post(transformed_data)
