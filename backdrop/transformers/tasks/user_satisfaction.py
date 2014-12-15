@@ -1,3 +1,6 @@
+from .util import encode_id
+
+
 def calculate_rating(datum):
     # See
     # https://github.com/alphagov/spotlight/blob/ca291ffcc86a5397003be340ec263a2466b72cfe/app/common/collections/user-satisfaction.js
@@ -21,6 +24,8 @@ def compute(data):
     # Calculate rating and set keys that spotlight expects.
     computed = []
     for datum in data:
+        datum['_id'] = encode_id(datum['_start_at'], datum['_end_at'])
+        datum['_timestamp'] = datum['_start_at']
         datum['number_of_responses'] = datum['total:sum']
         datum['days_with_responses'] = datum['_count']
         datum['rating'] = calculate_rating(datum)

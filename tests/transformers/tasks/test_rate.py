@@ -54,5 +54,17 @@ class ComputeTestCase(unittest.TestCase):
         })
 
         assert_that(len(transformed_data), is_(2))
+        assert_that(
+            transformed_data[0]['_id'],
+            is_('MjAxMy0xMS0yNVQwMDowMDowMCswMDowMF8yMDEzLTEyLTAyVDAwOjAwOjAwKzAwOjAw'))
+        assert_that(
+            transformed_data[0]['_timestamp'],
+            is_('2013-11-25T00:00:00+00:00'))
+        assert_that(
+            transformed_data[0]['_start_at'],
+            is_('2013-11-25T00:00:00+00:00'))
+        assert_that(
+            transformed_data[0]['_end_at'],
+            is_('2013-12-02T00:00:00+00:00'))
         assert_that(transformed_data[0]['rate'], is_(2.0 / 3.0))
         assert_that(transformed_data[1]['rate'], is_(None))
