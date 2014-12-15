@@ -1,5 +1,7 @@
+import pytz
 import unittest
 
+from datetime import datetime
 from hamcrest import assert_that, is_
 from mock import patch, MagicMock
 
@@ -20,15 +22,17 @@ class DispatchTestCase(unittest.TestCase):
             "type": "bar",
         }
 
-        entrypoint('dataset123', 'earliest', 'latest')
+        earliest = datetime(2014, 12, 10, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+        entrypoint('dataset123', earliest, latest)
 
         assert_that(mock_app.send_task.call_count, is_(2))
         mock_app.send_task.assert_any_call(
             'backdrop.transformers.dispatch.run_transform',
-            args=({"group": "foo", "type": "bar"}, {'type': 1}, 'earliest', 'latest'))
+            args=({"group": "foo", "type": "bar"}, {'type': 1}, earliest, latest))
         mock_app.send_task.assert_any_call(
             'backdrop.transformers.dispatch.run_transform',
-            args=({"group": "foo", "type": "bar"}, {'type': 2}, 'earliest', 'latest'))
+            args=({"group": "foo", "type": "bar"}, {'type': 2}, earliest, latest))
 
     @patch('backdrop.transformers.dispatch.AdminAPI')
     @patch('backdrop.transformers.dispatch.DataSet')
@@ -47,6 +51,9 @@ class DispatchTestCase(unittest.TestCase):
         }
         mock_data_set.from_group_and_type.return_value = data_set_instance
 
+        earliest = datetime(2014, 12, 10, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+
         run_transform({
             'data_group': 'group',
             'data_type': 'type',
@@ -63,7 +70,7 @@ class DispatchTestCase(unittest.TestCase):
                 'data-group': 'other-group',
                 'data-type': 'other-type',
             },
-        }, 'earliest', 'latest')
+        }, earliest, latest)
 
         mock_data_set.from_group_and_type.assert_any_call(
             'http://backdrop/data', 'group', 'type',
@@ -72,8 +79,8 @@ class DispatchTestCase(unittest.TestCase):
             query_parameters={
                 'period': 'day',
                 'flatten': 'true',
-                'start_at': 'earliest',
-                'end_at': 'latest',
+                'start_at': '2014-12-10T12:00:00+00:00',
+                'end_at': '2014-12-14T12:00:00+00:00',
             },
         )
         mock_logging_task.assert_called_with(
@@ -102,6 +109,9 @@ class DispatchTestCase(unittest.TestCase):
         }
         mock_data_set.from_group_and_type.return_value = data_set_instance
 
+        earliest = datetime(2014, 12, 10, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+
         run_transform({
             'data_group': 'group',
             'data_type': 'type',
@@ -117,7 +127,7 @@ class DispatchTestCase(unittest.TestCase):
             'output': {
                 'data-type': 'other-type',
             },
-        }, 'earliest', 'latest')
+        }, earliest, latest)
 
         mock_data_set.from_group_and_type.assert_any_call(
             'http://backdrop/data', 'group', 'other-type', token='foo2',

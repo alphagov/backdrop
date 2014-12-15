@@ -34,8 +34,8 @@ def entrypoint(dataset_id, earliest, latest):
 def get_query_parameters(transform, earliest, latest):
     query_parameters = transform.get('query-parameters', {})
     query_parameters['flatten'] = 'true'
-    query_parameters['start_at'] = earliest
-    query_parameters['end_at'] = latest
+    query_parameters['start_at'] = earliest.isoformat()
+    query_parameters['end_at'] = latest.isoformat()
 
     return query_parameters
 
