@@ -3,6 +3,8 @@ import functools
 
 from collections import OrderedDict
 
+from .util import encode_id
+
 
 def group_by(keys, arr):
     groupped = OrderedDict()
@@ -54,6 +56,8 @@ def compute_for_date(matchingAttribute, valueAttribute, denominatorRe, numerator
         rate = numerator / denominator if denominator > 0 else None
 
     return {
+        '_id': encode_id(start_at, end_at),
+        '_timestamp': start_at,
         '_start_at': start_at,
         '_end_at': end_at,
         'rate': rate,

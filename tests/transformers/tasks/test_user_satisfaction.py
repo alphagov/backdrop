@@ -69,6 +69,18 @@ class UserSatisfactionTestCase(unittest.TestCase):
         transformed_data = compute(data)
 
         assert_that(len(transformed_data), is_(5))
+        assert_that(
+            transformed_data[0]['_id'],
+            is_('MjAxNC0xMS0xMFQwMDowMDowMCswMDowMF8yMDE0LTExLTE3VDAwOjAwOjAwKzAwOjAw'))
+        assert_that(
+            transformed_data[0]['_timestamp'],
+            is_('2014-11-10T00:00:00+00:00'))
+        assert_that(
+            transformed_data[0]['_start_at'],
+            is_('2014-11-10T00:00:00+00:00'))
+        assert_that(
+            transformed_data[0]['_end_at'],
+            is_('2014-11-17T00:00:00+00:00'))
         assert_that(transformed_data[0]['rating'], is_(0.5))
         assert_that(transformed_data[1]['rating'], is_(0.75))
         assert_that(transformed_data[2]['rating'], is_(0.25))
