@@ -128,9 +128,7 @@ def write_by_group(data_group, data_type):
         if errors:
             return (jsonify(messages=errors), 400)
         else:
-            earliest, latest = bounding_dates(data)
-            celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
-                                 args=(data_set_config['name'], earliest, latest))
+            trigger_transforms(data_set_config, data)
             return jsonify(status='ok')
 
 
@@ -155,8 +153,6 @@ def put_by_group_and_type(data_group, data_type):
         if len(data) > 0:
             abort(400, 'Not implemented: you can only pass an empty JSON list')
 
-        celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
-                             args=(data_set_config['name'], None, None))
         return _empty_data_set(data_set_config)
 
     except (ParseError, ValidationError) as e:
@@ -287,6 +283,13 @@ def listify_json(data):
 def bounding_dates(data):
     sorted_data = sorted(data, key=lambda datum: datum['_timestamp'])
     return sorted_data[0]['_timestamp'], sorted_data[-1]['_timestamp']
+
+
+def trigger_transforms(data_set_config, data):
+    if len(data) > 0:
+        earliest, latest = bounding_dates(data)
+        celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
+                             args=(data_set_config['name'], earliest, latest))
 
 
 def start(port):
