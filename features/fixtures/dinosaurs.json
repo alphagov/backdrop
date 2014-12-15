@@ -1,23 +1,27 @@
 [
     {
+        "_timestamp": "2013-03-20T10:10:10+00:00",
         "type": "dinosaur",
         "size": "big",
         "name": "t-rex",
         "eats_people": true
     },
     {
+        "_timestamp": "2013-03-20T10:10:11+00:00",
         "type": "dinosaur",
         "size": "big",
         "name": "sarcosuchus",
         "eats_people": true
     },
     {
+        "_timestamp": "2013-03-20T10:10:12+00:00",
         "type": "dinosaur",
         "size": "medium",
         "name": "pterodactyl",
         "eats_people": true
     },
     {
+        "_timestamp": "2013-03-20T10:10:13+00:00",
         "type": "dinosaur",
         "size": "small",
         "name": "microraptor",

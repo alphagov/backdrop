@@ -7,7 +7,7 @@ Feature: delete_data_set
             | key        | value        |
             | data_group | "data-group" |
             | data_type  | "data-type"  |
-          and I have JSON data '{"foo":"bar"}'
+          and I have JSON data '{"_timestamp": "2014-09-10T12:00:00Z","foo":"bar"}'
           and I use the bearer token for the data_set
          when I POST to the specific path "/data/data-group/data-type"
          then I should get back a status of "200"
