@@ -2,10 +2,12 @@ import pytz
 import unittest
 
 from datetime import datetime
-from hamcrest import assert_that, is_
+from hamcrest import assert_that, is_, has_entries
 from mock import patch, MagicMock
 
-from backdrop.transformers.dispatch import entrypoint, run_transform
+from backdrop.transformers.dispatch import (
+    entrypoint, run_transform, get_query_parameters
+)
 
 
 class DispatchTestCase(unittest.TestCase):
@@ -132,3 +134,23 @@ class DispatchTestCase(unittest.TestCase):
         mock_data_set.from_group_and_type.assert_any_call(
             'http://backdrop/data', 'group', 'other-type', token='foo2',
         )
+
+
+class GetQueryParametersTestCase(unittest.TestCase):
+
+    def test_get_query_parameters_same_timestamps(self):
+        earliest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+        transform = {
+            'query-parameters': {
+                'period': 'week',
+            }
+        }
+
+        query_parameters = get_query_parameters(transform, earliest, latest)
+
+        assert_that(query_parameters, has_entries({
+            'period': 'week',
+            'duration': 1,
+            'start_at': '2014-12-14T12:00:00+00:00',
+        }))
