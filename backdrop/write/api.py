@@ -18,7 +18,11 @@ from ..core.flaskutils import generate_request_id
 
 from ..core.storage.mongo import MongoStorageEngine
 
-from .validation import auth_header_is_valid, extract_bearer_token
+from .validation import extract_bearer_token
+
+from functools import wraps
+
+import auth
 
 from performanceplatform import client
 
@@ -110,6 +114,7 @@ def health_check():
 
 @app.route('/data/<data_group>/<data_type>', methods=['POST'])
 @cache_control.nocache
+@auth.check(admin_api)
 def write_by_group(data_group, data_type):
     """
     Write by group/type
@@ -118,27 +123,23 @@ def write_by_group(data_group, data_type):
     with statsd.timer('write.route.data.{data_group}.{data_type}'.format(
             data_group=data_group,
             data_type=data_type)):
-        data_set_config = admin_api.get_data_set(data_group, data_type)
-
-        _validate_config(data_set_config)
-        _validate_auth(data_set_config)
-
         try:
             data = listify_json(get_json_from_request(request))
         except ValidationError as e:
             return (jsonify(messages=[repr(e)]), 400)
-        errors = _append_to_data_set(data_set_config, data)
+        errors = _append_to_data_set(g.data_set_config, data)
 
         if errors:
             return (jsonify(messages=errors), 400)
         else:
-            trigger_transforms(data_set_config, data)
+            trigger_transforms(g.data_set_config, data)
             return jsonify(status='ok')
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['PUT'])
 @cache_control.nocache
 @statsd.timer('write.route.data.empty.data_set')
+@auth.check(admin_api)
 def put_by_group_and_type(data_group, data_type):
     """
     Put by group/type
@@ -147,38 +148,51 @@ def put_by_group_and_type(data_group, data_type):
           Trying to PUT a non empty list of records will result in a
           PutNonEmptyNotImplementedError exception.
     """
-    data_set_config = admin_api.get_data_set(data_group, data_type)
-
-    _validate_config(data_set_config)
-    _validate_auth(data_set_config)
-
     try:
         data = listify_json(get_json_from_request(request))
         if len(data) > 0:
             abort(400, 'Not implemented: you can only pass an empty JSON list')
 
-        return _empty_data_set(data_set_config)
+        return _empty_data_set(g.data_set_config)
 
     except (ParseError, ValidationError) as e:
         abort(400, repr(e))
 
 
+def deprecated_auth(admin_api):
+    """
+    To use common auth decorator, we need special handling for the deprecated
+    route /<data_set:data_set_name>.
+
+    Possibly this highlights that we should examine the logs and remove this
+    route entirely if we control all the clients?
+    """
+    def decorator(func):
+        @wraps(func)
+        def new_func(*args, **kwargs):
+            data_set_name = request.view_args['data_set_name']
+            data_set_config = admin_api.get_data_set_by_name(data_set_name)
+            request.view_args['data_group'] = data_set_config['data_group']
+            request.view_args['data_type'] = data_set_config['data_type']
+            return func(*args, **kwargs)
+        return new_func
+    return decorator
+
+
 @app.route('/<data_set:data_set_name>', methods=['POST'])
 @cache_control.nocache
+@deprecated_auth(admin_api)
+@auth.check(admin_api)
 def post_to_data_set(data_set_name):
     app.logger.warning("Deprecated use of write API by name: {}".format(
         data_set_name))
-    data_set_config = admin_api.get_data_set_by_name(data_set_name)
-
-    _validate_config(data_set_config)
-    _validate_auth(data_set_config)
 
     try:
         data = listify_json(get_json_from_request(request))
     except ValidationError as e:
         return (jsonify(messages=[repr(e)]), 400)
     errors = _append_to_data_set(
-        data_set_config,
+        g.data_set_config,
         data)
 
     if errors:
@@ -211,16 +225,13 @@ def delete_collection_by_data_set_name(data_set_name):
 
 @app.route('/data/<data_group>/<data_type>/transform', methods=['POST'])
 @cache_control.nocache
+@auth.check(admin_api)
 def transform_data_set(data_group, data_type):
     """
     Runs all transforms on the specified data. _start_at and _end_at
     are specify the date range to be used. _end_at defaults to now.
     TODO: allow the transform to be specified.
     """
-
-    data_set_config = admin_api.get_data_set(data_group, data_type)
-    _validate_config(data_set_config)
-    _validate_auth(data_set_config)
 
     try:
         data = get_json_from_request(request)
@@ -232,7 +243,7 @@ def transform_data_set(data_group, data_type):
     if start_at is None:
         abort(400, 'You must specify a _start_at timestamp')
 
-    trigger_transforms(data_set_config, earliest=start_at, latest=end_at)
+    trigger_transforms(g.data_set_config, earliest=start_at, latest=end_at)
 
     return jsonify(status='ok')
 
@@ -252,26 +263,6 @@ def _allow_delete_collection(auth_header):
 
 def _allow_create_collection(auth_header):
     return _allow_modify_collection(auth_header)
-
-
-def _validate_config(data_set_config):
-    if data_set_config is None:
-        abort(404, 'Could not find data_set_config')
-
-    g.data_set_name = data_set_config['name']
-
-
-def _validate_auth(data_set_config):
-    try:
-        auth_header = request.headers['Authorization']
-    except KeyError:
-        abort(401, 'Expected header of form: Authorization: Bearer <token>')
-
-    if not auth_header_is_valid(data_set_config, auth_header):
-        token = extract_bearer_token(auth_header)
-        abort(401,
-              'Unauthorized: Invalid bearer token \'{0}\' for \'{1}\''.format(
-                  token, data_set_config['name']))
 
 
 def _append_to_data_set(data_set_config, data):
