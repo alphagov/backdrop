@@ -1,3 +1,5 @@
+import datetime
+
 from os import getenv
 from celery import Celery
 
@@ -207,6 +209,39 @@ def delete_collection_by_data_set_name(data_set_name):
     storage.delete_data_set(data_set_name)
 
     return jsonify(status='ok', message='Deleted {}'.format(data_set_name))
+
+
+@app.route('/data/<data_group>/<data_type>/transform', methods=['POST'])
+@cache_control.nocache
+def transform_data_set(data_group, data_type):
+    """
+    Runs all transforms on the specified data. _start_at and _end_at
+    are specify the date range to be used. _end_at defaults to now.
+    TODO: allow the transform to be specified.
+    """
+
+    data_set_config = admin_api.get_data_set(data_group, data_type)
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = get_json_from_request(request)
+    except ValidationError as e:
+        return (jsonify(messages=[repr(e)]), 400)
+
+    if '_start_at' in data:
+        start_at = data['_start_at']
+        if '_end_at' in data:
+            end_at = data['_end_at']
+        else:
+            end_at = datetime.datetime.now()
+    else:
+        abort(400, 'You must specify a _start_at timestamp')
+
+    celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
+                         args=(data_set_config['name'], start_at, end_at))
+
+    return jsonify(status='ok')
 
 
 def _allow_modify_collection(auth_header):
