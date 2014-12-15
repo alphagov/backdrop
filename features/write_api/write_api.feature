@@ -38,6 +38,18 @@ Feature: the performance platform write api
           and the stored data should contain "2" "size" equaling "big"
           and the stored data should contain "1" "name" equaling "microraptor"
 
+    Scenario: posting a list of time chunks to a data_set
+        Given I have the data in "time_chunks.json"
+          and I have a data_Set named "time_chunk_data_set" with settings
+            | key        | value        |
+            | data_group | "time_chunk" |
+            | data_type  | "data"       |
+          and I use the bearer token for the data_set
+         when I POST to the specific path "/data/time_chunk/data"
+         then I should get back a status of "200"
+          and the stored data should contain "1" "_start_at" on "2013-12-09T00:00:00+00:00"
+          and the stored data should contain "1" "_end_at" on "2013-12-16T00:00:00+00:00"
+
     Scenario: tagging data with week start at
         Given I have the data in "timestamps.json"
           and I have a data_set named "data_with_times" with settings
