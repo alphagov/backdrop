@@ -59,5 +59,6 @@ def parse_request_args(request_args):
             args['collect'].append((collect_arg, 'default'))
 
     args['flatten'] = if_present(boolify, request_args.get('flatten'))
+    args['inclusive'] = if_present(boolify, request_args.get('inclusive'))
 
     return args

@@ -189,12 +189,13 @@ def get_mongo_spec(query):
     >>> get_mongo_spec(Query.create(start_at=dt(2012, 12, 12)))
     {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 0, 0)}}
     """
-    time_range = time_range_to_mongo_query(query.start_at, query.end_at)
+    time_range = time_range_to_mongo_query(
+        query.start_at, query.end_at, query.inclusive)
 
     return dict(query.filter_by + time_range.items())
 
 
-def time_range_to_mongo_query(start_at, end_at):
+def time_range_to_mongo_query(start_at, end_at, inclusive=False):
     """
     >>> from datetime import datetime as dt
     >>> time_range_to_mongo_query(dt(2012, 12, 12, 12), None)
@@ -215,7 +216,8 @@ def time_range_to_mongo_query(start_at, end_at):
         if start_at:
             mongo['_timestamp']['$gte'] = start_at
         if end_at:
-            mongo['_timestamp']['$lt'] = end_at
+            comparator = '$lte' if inclusive else '$lt'
+            mongo['_timestamp'][comparator] = end_at
 
     return mongo
 

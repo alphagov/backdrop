@@ -53,6 +53,7 @@ class ParameterValidator(Validator):
             'limit',
             'collect',
             'flatten',
+            'inclusive',
         ])
         super(ParameterValidator, self).__init__(request_args)
 
@@ -343,6 +344,9 @@ def validate_request_args(request_args, raw_queries_allowed=False):
         RelativeTimeValidator(request_args),
         CollectValidator(request_args),
         BooleanValidator(request_args, param_name='flatten'),
+        BooleanValidator(request_args, param_name='inclusive'),
+        ParamDependencyValidator(request_args, param_name='inclusive',
+                                 depends_on=['start_at', 'end_at']),
     ]
 
     if not raw_queries_allowed:
