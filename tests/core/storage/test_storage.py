@@ -291,3 +291,17 @@ class BaseStorageTest(object):
                     contains_inanyorder(
                         has_entries({'foo': 'one', '_count': 1}),
                         has_entries({'foo': 'two', '_count': 1})))
+
+    def test_basic_query_with_inclusive_time_limits(self):
+        self._save_all('foo_bar',
+                       {'_timestamp': d_tz(2014, 12, 01)},
+                       {'_timestamp': d_tz(2014, 12, 02)},
+                       {'_timestamp': d_tz(2014, 12, 03)})
+
+        # start at
+        results = self.engine.execute_query('foo_bar', Query.create(
+            start_at=d_tz(2014, 12, 01),
+            end_at=d_tz(2014, 12, 03),
+            inclusive=True))
+
+        assert_that(len(results), is_(3))

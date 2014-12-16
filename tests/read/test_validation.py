@@ -22,6 +22,28 @@ class TestRequestValidation(TestCase):
             is_invalid_with_message("start_at is not a valid datetime")
         )
 
+    def test_that_inclusive_queries_with_no_end_at_fail(self):
+        validation_result = validate_request_args({
+            'inclusive': 'true',
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            "inclusive can be used only with either ['start_at', 'end_at']"))
+
+    def test_that_inclusive_queries_with_not_a_bool(self):
+        validation_result = validate_request_args({
+            'inclusive': 'foo',
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            "inclusive must be either 'true' or 'false'"))
+
+    def test_that_inclusive_queries(self):
+        validation_result = validate_request_args({
+            'inclusive': 'true',
+            'start_at': '2012-12-01T00:00:00Z',
+            'end_at': '2012-12-01T00:00:00Z',
+        })
+        assert_that(validation_result, is_valid())
+
     def test_queries_with_well_formatted_start_at_are_allowed(self):
         validation_result = validate_request_args({
             'start_at': '2000-02-02T00:02:02+00:00',
