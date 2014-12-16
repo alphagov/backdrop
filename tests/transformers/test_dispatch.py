@@ -138,7 +138,7 @@ class DispatchTestCase(unittest.TestCase):
 
 class GetQueryParametersTestCase(unittest.TestCase):
 
-    def test_get_query_parameters_same_timestamps(self):
+    def test_same_timestamps_period(self):
         earliest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
         latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
         transform = {
@@ -153,4 +153,20 @@ class GetQueryParametersTestCase(unittest.TestCase):
             'period': 'week',
             'duration': 1,
             'start_at': '2014-12-14T12:00:00+00:00',
+        }))
+
+    def test_same_timestamps_non_period(self):
+        earliest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+        transform = {
+            'query-parameters': {
+            }
+        }
+
+        query_parameters = get_query_parameters(transform, earliest, latest)
+
+        assert_that(query_parameters, has_entries({
+            'start_at': '2014-12-14T12:00:00+00:00',
+            'end_at': '2014-12-14T12:00:00+00:00',
+            'inclusive': 'true',
         }))

@@ -35,9 +35,14 @@ def get_query_parameters(transform, earliest, latest):
     query_parameters = transform.get('query-parameters', {})
     query_parameters['flatten'] = 'true'
 
-    if earliest == latest and 'period' in query_parameters:
-        query_parameters['duration'] = 1
-        query_parameters['start_at'] = latest.isoformat()
+    if earliest == latest:
+        if 'period' in query_parameters:
+            query_parameters['duration'] = 1
+            query_parameters['start_at'] = latest.isoformat()
+        else:
+            query_parameters['inclusive'] = 'true'
+            query_parameters['start_at'] = earliest.isoformat()
+            query_parameters['end_at'] = latest.isoformat()
     else:
         query_parameters['start_at'] = earliest.isoformat()
         query_parameters['end_at'] = latest.isoformat()
