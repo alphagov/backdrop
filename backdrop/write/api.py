@@ -3,6 +3,7 @@ import datetime
 from os import getenv
 from celery import Celery
 
+from dateutil.parser import parse as datetime_parse
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
 from backdrop import statsd
@@ -130,9 +131,7 @@ def write_by_group(data_group, data_type):
         if errors:
             return (jsonify(messages=errors), 400)
         else:
-            earliest, latest = bounding_dates(data)
-            celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
-                                 args=(data_set_config['name'], earliest, latest))
+            trigger_transforms(data_set_config, data)
             return jsonify(status='ok')
 
 
@@ -157,8 +156,6 @@ def put_by_group_and_type(data_group, data_type):
         if len(data) > 0:
             abort(400, 'Not implemented: you can only pass an empty JSON list')
 
-        celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
-                             args=(data_set_config['name'], None, None))
         return _empty_data_set(data_set_config)
 
     except (ParseError, ValidationError) as e:
@@ -230,16 +227,15 @@ def transform_data_set(data_group, data_type):
         return (jsonify(messages=[repr(e)]), 400)
 
     if '_start_at' in data:
-        start_at = data['_start_at']
+        start_at = datetime_parse(data['_start_at'])
         if '_end_at' in data:
-            end_at = data['_end_at']
+            end_at = datetime_parse(data['_end_at'])
         else:
             end_at = datetime.datetime.now()
     else:
         abort(400, 'You must specify a _start_at timestamp')
 
-    celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
-                         args=(data_set_config['name'], start_at, end_at))
+    trigger_transforms(data_set_config, earliest=start_at, latest=end_at)
 
     return jsonify(status='ok')
 
@@ -322,6 +318,15 @@ def listify_json(data):
 def bounding_dates(data):
     sorted_data = sorted(data, key=lambda datum: datum['_timestamp'])
     return sorted_data[0]['_timestamp'], sorted_data[-1]['_timestamp']
+
+
+def trigger_transforms(data_set_config, data=[], earliest=None, latest=None):
+    if len(data) > 0:
+        earliest, latest = bounding_dates(data)
+
+    if earliest is not None and latest is not None:
+        celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
+                             args=(data_set_config['name'], earliest, latest))
 
 
 def start(port):
