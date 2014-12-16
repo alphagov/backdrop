@@ -58,18 +58,27 @@ def _generate_auto_id(record, auto_id_keys):
         str(record[key]) for key in auto_id_keys))
 
 
-def parse_timestamp(record):
+def parse_timestamps(record):
     """Parses a timestamp in a record
 
-    >>> parse_timestamp({'_timestamp': '2012-12-12T00:00:00'})
+    >>> parse_timestamps({'_timestamp': '2012-12-12T00:00:00'})
     ({'_timestamp': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}, None)
-    >>> parse_timestamp({})
+    >>> parse_timestamps({'_start_at': '2012-12-12T00:00:00'})
+    ({'_start_at': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}, None)
+    >>> parse_timestamps({'_end_at': '2012-12-12T00:00:00'})
+    ({'_end_at': datetime.datetime(2012, 12, 12, 0, 0, tzinfo=<UTC>)}, None)
+    >>> parse_timestamps({})
     ({}, None)
-    >>> record, error = parse_timestamp({'_timestamp': 'invalid'})
+    >>> record, error = parse_timestamps({'_timestamp': 'invalid'})
     >>> record
     {'_timestamp': 'invalid'}
     >>> error
     '_timestamp is not a valid timestamp, it must be ISO8601'
+    >>> record, error = parse_timestamps({'_start_at': 'invalid'})
+    >>> record
+    {'_start_at': 'invalid'}
+    >>> error
+    '_start_at is not a valid timestamp, it must be ISO8601'
     """
     error = None
     if '_timestamp' in record:
@@ -77,6 +86,18 @@ def parse_timestamp(record):
             record['_timestamp'] = parse_time_as_utc(record['_timestamp'])
         except (TypeError, ValueError):
             error = '_timestamp is not a valid timestamp, it must be ISO8601'
+
+    if '_start_at' in record:
+        try:
+            record['_start_at'] = parse_time_as_utc(record['_start_at'])
+        except (TypeError, ValueError):
+            error = '_start_at is not a valid timestamp, it must be ISO8601'
+
+    if '_end_at' in record:
+        try:
+            record['_end_at'] = parse_time_as_utc(record['_end_at'])
+        except (TypeError, ValueError):
+            error = '_end_at is not a valid timestamp, it must be ISO8601'
 
     return (record, error)
 
@@ -87,7 +108,7 @@ def add_period_keys(record):
     Add a field for each of the periods in timeseries.PERIODS
 
     >>> record = add_period_keys(
-    ...   parse_timestamp({'_timestamp': '2012-12-12T12:12:00'})[0])
+    ...   parse_timestamps({'_timestamp': '2012-12-12T12:12:00'})[0])
     >>> record['_hour_start_at']
     datetime.datetime(2012, 12, 12, 12, 0, tzinfo=<UTC>)
     >>> record['_day_start_at']

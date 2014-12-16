@@ -1,5 +1,5 @@
 from flask import logging
-from .records import add_auto_ids, parse_timestamp, validate_record,\
+from .records import add_auto_ids, parse_timestamps, validate_record,\
     add_period_keys
 from .validation import validate_record_schema
 from .nested_merge import nested_merge, flat_merge
@@ -90,9 +90,9 @@ class DataSet(object):
             self.config.get('auto_ids', None))
         errors += auto_id_errors
 
-        # Parse timestamp
+        # Parse timestamps
         records, timestamp_errors = separate_errors_and_records(
-            map(parse_timestamp, records))
+            map(parse_timestamps, records))
         errors += timestamp_errors
 
         # Custom record validations

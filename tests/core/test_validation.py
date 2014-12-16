@@ -52,6 +52,8 @@ class ReservedKeysTestCase(unittest.TestCase):
 
     def test_reserved_keys_are_reserved(self):
         assert_that(key_is_reserved("_timestamp"), is_(True))
+        assert_that(key_is_reserved("_start_at"), is_(True))
+        assert_that(key_is_reserved("_end_at"), is_(True))
         assert_that(key_is_reserved("_id"), is_(True))
         assert_that(key_is_reserved("_name"), is_(False))
         assert_that(key_is_reserved("name"), is_(False))
@@ -166,6 +168,22 @@ class TestValidateRecordData(unittest.TestCase):
         assert_that(validation_result,
                     is_invalid_with_message(
                         "_timestamp is not a valid datetime object"))
+
+    def test_objects_with_invalid_start_ats_are_disallowed(self):
+        validation_result = validate_record_data({
+            '_start_at': 'this is not a timestamp'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "_start_at is not a valid datetime object"))
+
+    def test_objects_with_invalid_end_ats_are_disallowed(self):
+        validation_result = validate_record_data({
+            '_end_at': 'this is not a timestamp'
+        })
+        assert_that(validation_result,
+                    is_invalid_with_message(
+                        "_end_at is not a valid datetime object"))
 
     def test_objects_with_invalid_ids_are_disallowed(self):
         validation_result = validate_record_data({

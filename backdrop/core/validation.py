@@ -16,7 +16,9 @@ import pytz
 
 RESERVED_KEYWORDS = (
     '_timestamp',
-    '_id'
+    '_start_at',
+    '_end_at',
+    '_id',
 )
 VALID_KEY = re.compile('^[a-z_][a-z0-9_]+$')
 
@@ -106,6 +108,14 @@ def validate_record_data(data):
         if key == '_timestamp' and not isinstance(value, datetime.datetime):
             return invalid(
                 '_timestamp is not a valid datetime object')
+
+        if key == '_start_at' and not isinstance(value, datetime.datetime):
+            return invalid(
+                '_start_at is not a valid datetime object')
+
+        if key == '_end_at' and not isinstance(value, datetime.datetime):
+            return invalid(
+                '_end_at is not a valid datetime object')
 
         if key == '_id' and not value_is_valid_id(value):
             return invalid('_id is not a valid id')
