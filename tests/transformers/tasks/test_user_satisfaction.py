@@ -81,8 +81,8 @@ class UserSatisfactionTestCase(unittest.TestCase):
         assert_that(
             transformed_data[0]['_end_at'],
             is_('2014-11-17T00:00:00+00:00'))
-        assert_that(transformed_data[0]['rating'], is_(0.5))
-        assert_that(transformed_data[1]['rating'], is_(0.75))
-        assert_that(transformed_data[2]['rating'], is_(0.25))
-        assert_that(transformed_data[3]['rating'], is_(None))
-        assert_that(transformed_data[4]['rating'], is_(None))
+        assert_that(transformed_data[0]['score'], is_(0.5))
+        assert_that(transformed_data[1]['score'], is_(0.75))
+        assert_that(transformed_data[2]['score'], is_(0.25))
+        assert_that(transformed_data[3]['score'], is_(None))
+        assert_that(transformed_data[4]['score'], is_(None))
