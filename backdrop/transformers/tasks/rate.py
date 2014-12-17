@@ -23,7 +23,7 @@ def group_by(keys, arr):
 
 
 def pattern_filter(key, pattern, datum):
-    return key in datum and datum[key] and pattern.match(datum[key])
+    return key in datum and datum[key] and pattern.search(datum[key])
 
 
 def sum_matching(data, matchKey, pattern, valueKey):
