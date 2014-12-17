@@ -1,10 +1,11 @@
 import datetime
 import unittest
+import pytz
 
 from hamcrest import assert_that, is_
 from mock import patch
 
-from backdrop.write.api import bounding_dates, trigger_transforms
+from backdrop.write.api import bounding_dates, trigger_transforms, parse_bounding_dates
 
 
 class BoundingDatesTestCase(unittest.TestCase):
@@ -21,6 +22,24 @@ class BoundingDatesTestCase(unittest.TestCase):
 
         assert_that(earliest.day, is_(1))
         assert_that(latest.day, is_(9))
+
+
+class ParseBoundingDatesTestCase(unittest.TestCase):
+    def setUp(self):
+        self.data = {
+            "_start_at": "2014-12-17T00:00:00Z",
+            # _end_at omitted so that it's generated
+        }
+
+    def test_end_at_has_no_microseconds_when_generated(self):
+        _, latest = parse_bounding_dates(self.data)
+
+        assert_that(latest.microsecond, is_(0))
+
+    def test_end_at_has_utc_timezone_when_generated(self):
+        _, latest = parse_bounding_dates(self.data)
+
+        assert_that(latest.tzinfo, is_(pytz.UTC))
 
 
 class TriggerTransformsTestCase(unittest.TestCase):

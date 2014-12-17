@@ -1,4 +1,5 @@
 import datetime
+import pytz
 
 from os import getenv
 from celery import Celery
@@ -226,13 +227,9 @@ def transform_data_set(data_group, data_type):
     except ValidationError as e:
         return (jsonify(messages=[repr(e)]), 400)
 
-    if '_start_at' in data:
-        start_at = datetime_parse(data['_start_at'])
-        if '_end_at' in data:
-            end_at = datetime_parse(data['_end_at'])
-        else:
-            end_at = datetime.datetime.now()
-    else:
+    (start_at, end_at) = parse_bounding_dates(data)
+
+    if start_at is None:
         abort(400, 'You must specify a _start_at timestamp')
 
     trigger_transforms(data_set_config, earliest=start_at, latest=end_at)
@@ -318,6 +315,19 @@ def listify_json(data):
 def bounding_dates(data):
     sorted_data = sorted(data, key=lambda datum: datum['_timestamp'])
     return sorted_data[0]['_timestamp'], sorted_data[-1]['_timestamp']
+
+
+def parse_bounding_dates(data):
+    if '_start_at' in data:
+        start_at = datetime_parse(data['_start_at'])
+        if '_end_at' in data:
+            end_at = datetime_parse(data['_end_at'])
+        else:
+            end_at = datetime.datetime.now(pytz.UTC).replace(microsecond=0)
+    else:
+        return (None, None)
+
+    return (start_at, end_at)
 
 
 def trigger_transforms(data_set_config, data=[], earliest=None, latest=None):
