@@ -6,8 +6,6 @@ def calculate_rating(datum):
     # https://github.com/alphagov/spotlight/blob/ca291ffcc86a5397003be340ec263a2466b72cfe/app/common/collections/user-satisfaction.js
     if not datum['total:sum']:
         return None
-    # Copy datum before we mutate it.
-    datum = dict(datum)
     min_score = 1
     max_score = 5
     score = 0
@@ -20,14 +18,21 @@ def calculate_rating(datum):
     return (mean - min_score) / (max_score - min_score)
 
 
-def compute(data):
+def compute(data, options):
     # Calculate rating and set keys that spotlight expects.
     computed = []
     for datum in data:
-        datum['_id'] = encode_id(datum['_start_at'], datum['_end_at'])
-        datum['_timestamp'] = datum['_start_at']
-        datum['number_of_responses'] = datum['total:sum']
-        datum['days_with_responses'] = datum['_count']
-        datum['rating'] = calculate_rating(datum)
-        computed.append(datum)
+        computed.append({
+            '_id': encode_id(datum['_start_at'], datum['_end_at']),
+            '_timestamp': datum['_start_at'],
+            '_start_at': datum['_start_at'],
+            '_end_at': datum['_end_at'],
+            'rating_1': datum['rating_1:sum'],
+            'rating_2': datum['rating_1:sum'],
+            'rating_3': datum['rating_1:sum'],
+            'rating_4': datum['rating_1:sum'],
+            'rating_5': datum['rating_1:sum'],
+            'num_repsonses': datum['total:sum'],
+            'score': calculate_rating(datum),
+        })
     return computed
