@@ -20,7 +20,7 @@ def calculate_rating(datum):
     return (mean - min_score) / (max_score - min_score)
 
 
-def compute(data):
+def compute(data, options):
     # Calculate rating and set keys that spotlight expects.
     computed = []
     for datum in data:

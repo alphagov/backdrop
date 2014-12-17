@@ -66,7 +66,7 @@ data = [
 
 class UserSatisfactionTestCase(unittest.TestCase):
     def test_compute_user_satisfaction(self):
-        transformed_data = compute(data)
+        transformed_data = compute(data, {})
 
         assert_that(len(transformed_data), is_(5))
         assert_that(
