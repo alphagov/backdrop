@@ -32,7 +32,7 @@ def compute(data, options):
             'rating_3': datum['rating_3:sum'],
             'rating_4': datum['rating_4:sum'],
             'rating_5': datum['rating_5:sum'],
-            'num_repsonses': datum['total:sum'],
+            'num_responses': datum['total:sum'],
             'score': calculate_rating(datum),
         })
     return computed
