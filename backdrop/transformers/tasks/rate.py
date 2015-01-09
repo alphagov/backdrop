@@ -1,25 +1,7 @@
 import re
 import functools
 
-from collections import OrderedDict
-
-from .util import encode_id
-
-
-def group_by(keys, arr):
-    groupped = OrderedDict()
-    for item in arr:
-        if isinstance(keys, list):
-            key = tuple([item[p] for p in keys])
-        else:
-            key = item[keys]
-
-        try:
-            groupped[key].append(item)
-        except KeyError:
-            groupped[key] = [item]
-
-    return groupped
+from .util import encode_id, group_by
 
 
 def pattern_filter(key, pattern, datum):
