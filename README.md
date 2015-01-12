@@ -87,3 +87,16 @@ Other parameters:
 ## Useful tools
 
 * Copy data from an environment to the local Backdrop database (should be run on your host machine): `cd tools && ./replicate-db.sh <youruser>@mongo-1.pp-preview`
+
+## Emptying a dataset
+
+To empty a dataset, get its token from stagecraft. Then run the following curl
+command
+
+```
+curl -X PUT -d "[]" https://{backdrop_url}/data/<data-group>/<data-type> -H 'Authorization: Bearer <token-from-stagecraft>' -H 'Content-Type: application/json'
+```
+
+
+
+
