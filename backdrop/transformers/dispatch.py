@@ -59,7 +59,7 @@ def get_transform_function(transform):
     return getattr(transform_module, function_name)
 
 
-def get_output_dataset(transform, input_dataset):
+def get_or_get_and_create_output_dataset(transform, input_dataset):
     output_group = transform['output'].get(
         'data-group', input_dataset['data_group'])
     output_type = transform['output']['data-type']
@@ -69,6 +69,15 @@ def get_output_dataset(transform, input_dataset):
         config.STAGECRAFT_OAUTH_TOKEN,
     )
     output_data_set_config = admin_api.get_data_set(output_group, output_type)
+    if not output_data_set_config:
+        # this needs more thought as to what we are creating with,
+        # here are the basics:
+        data_set_config = {
+            'data_type': output_type,
+            'data_group': output_group,
+            'bearer_token': input_dataset['bearer_token']
+        }
+        output_data_set_config = admin_api.create_data_set(data_set_config)
 
     return DataSet.from_group_and_type(
         config.BACKDROP_WRITE_URL,
@@ -93,5 +102,7 @@ def run_transform(data_set_config, transform, earliest, latest):
     transform_function = get_transform_function(transform)
     transformed_data = transform_function(data['data'], transform['options'])
 
-    output_data_set = get_output_dataset(transform, data_set_config)
+    output_data_set = get_or_get_and_create_output_dataset(
+        transform,
+        data_set_config)
     output_data_set.post(transformed_data)
