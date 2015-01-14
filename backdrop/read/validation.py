@@ -48,6 +48,7 @@ class ParameterValidator(Validator):
             'duration',
             'period',
             'filter_by',
+            'filter_by_prefix',
             'group_by',
             'sort_by',
             'limit',
@@ -118,9 +119,17 @@ class BooleanValidator(Validator):
 class FilterByValidator(Validator):
 
     def validate(self, request_args, context):
+
+        if 'filter_by' in request_args and 'filter_by_prefix' in request_args:
+            self.add_error("Cannot use both filter_by "
+                           "and filter_by_prefix in the same query")
         MultiValueValidator(
             request_args,
             param_name='filter_by',
+            validate_field_value=self.validate_field_value)
+        MultiValueValidator(
+            request_args,
+            param_name='filter_by_prefix',
             validate_field_value=self.validate_field_value)
 
     def validate_field_value(self, value, request_args, context):

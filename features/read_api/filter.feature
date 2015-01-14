@@ -60,6 +60,44 @@ Feature: filtering queries for read api
          then I should get back a status of "200"
           and the JSON should have "3" results
 
+    Scenario: filtering by a key and prefix value
+        Given "licensing.json" is in "foo" data_set with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
+         when I go to "/foo?filter_by_prefix=authority:Camd"
+         then I should get back a status of "200"
+          and the JSON should have "2" results
+
+    Scenario: prefix filtering by a field name starting with "$" is not allowed because of security reasons
+        Given "licensing.json" is in "weekly" data_set
+         when I go to "/weekly?filter_by_prefix=$prefix:function(){}"
+         then I should get back a status of "400"
+
+    Scenario: prefix filtering does not execute regex search
+        Given "licensing.json" is in "foo" data_set with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
+         when I go to "/foo?filter_by_prefix=authority:.*"
+         then I should get back a status of "200"
+          and the JSON should have "0" results
+
+    Scenario: querying for data between two points and filtered by a key and prefix value
+        Given "licensing.json" is in "foo" data_set with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
+         when I go to "/foo?start_at=2012-12-13T00:00:02%2B00:00&end_at=2012-12-19T00:00:00%2B00:00&filter_by_prefix=type:succ"
+         then I should get back a status of "200"
+          and the JSON should have "1" results
+          and the "1st" result should be "{"_timestamp": "2012-12-13T01:01:01+00:00", "licence_name": "Temporary events notice", "interaction": "success", "authority": "Westminster", "type": "success", "_id": "1236"}"
+
+    Scenario: query does not convert to boolean with prefix filter
+        Given "dinosaurs.json" is in "lizards" data_set with settings
+            | key                 | value |
+            | raw_queries_allowed | true  |
+         when I go to "/lizards?filter_by_prefix=eats_people:true"
+         then I should get back a status of "200"
+          and the JSON should have "0" results
+
     Scenario: querying for more boolean data
         Given "dinosaurs.json" is in "lizards" data_set
          when I go to "/lizards?group_by=eats_people"

@@ -186,13 +186,20 @@ def get_mongo_spec(query):
     {}
     >>> get_mongo_spec(Query.create(filter_by=[('foo', 'bar')]))
     {'foo': 'bar'}
+    >>> get_mongo_spec(Query.create(filter_by_prefix=[('foo', 'bar')]))
+    {'foo': 'bar'}
     >>> get_mongo_spec(Query.create(start_at=dt(2012, 12, 12)))
     {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 0, 0)}}
     """
     time_range = time_range_to_mongo_query(
         query.start_at, query.end_at, query.inclusive)
 
-    return dict(query.filter_by + time_range.items())
+    if query.filter_by:
+        filter_term = query.filter_by
+    else:
+        filter_term = query.filter_by_prefix
+
+    return dict(filter_term + time_range.items())
 
 
 def time_range_to_mongo_query(start_at, end_at, inclusive=False):

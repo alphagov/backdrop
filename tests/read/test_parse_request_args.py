@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 import unittest
 
 from hamcrest import assert_that, is_, has_item
@@ -78,6 +79,42 @@ class Test_parse_request_args(unittest.TestCase):
 
         assert_that(args['filter_by'], has_item([ "planet", True ]))
         assert_that(args['filter_by'], has_item([ "star", False ]))
+
+    def test_one_filter_by_prefix_is_parsed(self):
+        request_args = MultiDict([
+            ("filter_by_prefix", "foo:/hello/world")])
+
+        args = parse_request_args(request_args)
+
+        parsed_regex = re.compile('^\\/hello\\/world.*')
+
+        assert_that(args['filter_by_prefix'],
+                    has_item(["foo", parsed_regex]))
+
+    def test_many_filter_by_are_parsed(self):
+        request_args = MultiDict([
+            ("filter_by_prefix", "foo:bar"),
+            ("filter_by_prefix", "bar:foo")
+        ])
+
+        args = parse_request_args(request_args)
+
+        parsed_regex1 = re.compile('^bar.*')
+        parsed_regex2 = re.compile('^foo.*')
+
+        assert_that(args['filter_by_prefix'], has_item(["foo", parsed_regex1]))
+        assert_that(args['filter_by_prefix'], has_item(["bar", parsed_regex2]))
+
+    def test_filter_by_prefix_escapes_regex_group_operators(self):
+        request_args = MultiDict([
+            ("filter_by_prefix", "foo:(a)+")])
+
+        args = parse_request_args(request_args)
+
+        parsed_regex = re.compile('^\(a\)\+.*')
+
+        assert_that(args['filter_by_prefix'],
+                    has_item(["foo", parsed_regex]))
 
     def test_group_by_is_passed_through_untouched(self):
         request_args = MultiDict([("group_by", "foobar")])
