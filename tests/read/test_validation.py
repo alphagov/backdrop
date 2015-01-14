@@ -67,6 +67,16 @@ class TestRequestValidation(TestCase):
         })
         assert_that(validation_result, is_valid())
 
+    def test_queries_with_both_filter_by_params_are_disallowed(self):
+        validation_result = validate_request_args({
+            'filter_by': 'bar',
+            'filter_by_prefix': 'foo'
+        })
+        assert_that( validation_result, is_invalid_with_message(
+            "Cannot use both filter_by "
+            "and filter_by_prefix in the same query"
+        ))
+
     def test_queries_with_no_colon_in_filter_by_are_disallowed(self):
         validation_result = validate_request_args({
             'filter_by': 'bar'
@@ -95,6 +105,47 @@ class TestRequestValidation(TestCase):
     def test_queries_filtering_by_invalid_field_names_are_disallowed(self):
         validation_result = validate_request_args({
             'filter_by': 'with-hyphen:bar'
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            'Cannot filter by an invalid field name'
+        ))
+
+    def test_queries_with_no_colon_in_filter_by_prefix_are_disallowed(self):
+        validation_result = validate_request_args({
+            'filter_by_prefix': 'bar'
+        })
+        assert_that( validation_result, is_invalid_with_message(
+            "filter_by must be a field name and value separated by a "
+            "colon (:) eg. authority:Westminster"
+        ))
+
+    def test_queries_with_well_formatted_filter_by_prefix_are_allowed(self):
+        validation_result = validate_request_args(MultiDict([
+            ('filter_by_prefix', 'foo:bar')
+        ]))
+        assert_that(validation_result, is_valid())
+
+    def test_subsequent_filter_by_prefix_parameters_are_validated(self):
+        validation_result = validate_request_args(MultiDict([
+            ('filter_by_prefix', 'foo:bar'),
+            ('filter_by_prefix', 'bar'),
+        ]))
+        assert_that(validation_result, is_invalid_with_message(
+            "filter_by must be a field name and value separated by a colon "
+            "(:) eg. authority:Westminster"
+        ))
+
+    def test_filter_by_prefix_with_invalid_field_names_is_disallowed(self):
+        validation_result = validate_request_args({
+            'filter_by_prefix': 'with-hyphen:bar'
+        })
+        assert_that(validation_result, is_invalid_with_message(
+            'Cannot filter by an invalid field name'
+        ))
+
+    def test_filter_by_prefix_with_invalid_field_names_is_disallowed(self):
+        validation_result = validate_request_args({
+            'filter_by_prefix': 'with-hyphen:bar'
         })
         assert_that(validation_result, is_invalid_with_message(
             'Cannot filter by an invalid field name'

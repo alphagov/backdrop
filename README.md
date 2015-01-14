@@ -77,6 +77,8 @@ number of scores.
 
 `GET /data/$DATA_GROUP/$DATA_TYPE?filter_by=name:Foo` returns all elements with `name` equal to "Foo".
 
+`GET /data/$DATA_GROUP/$DATA_TYPE?filter_by_prefix=name:Foo` returns all elements with `name` beginning with "Foo".
+
 Other parameters:
 
 - `start_at` (YYYY-MM-DDTHH:MM:SS+HH:MM) and `end_at` (YYYY-MM-DDTHH:MM:SS+HH:MM)

@@ -1,6 +1,7 @@
 from backdrop.core.timeseries import parse_period
 from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.query import Query
+import re
 
 
 __all__ = ['parse_query_from_request']
@@ -37,12 +38,22 @@ def parse_request_args(request_args):
             "false": False,
         }.get(value, value)
 
-    def parse_filter_by(filter_by):
+    def construct_prefix_regex(value):
+        return re.compile('^%s.*' % re.escape(value))
+
+    def parse_filter_by(filter_by, is_regex):
         key, value = filter_by.split(':', 1)
 
-        return [key, boolify(value)]
+        if not is_regex:
+            return [key, boolify(value)]
+        else:
+            return [key, construct_prefix_regex(value)]
 
-    args['filter_by'] = map(parse_filter_by, request_args.getlist('filter_by'))
+    args['filter_by'] = [parse_filter_by(p, False) for p in
+                         request_args.getlist('filter_by')]
+
+    args['filter_by_prefix'] = [parse_filter_by(p, True) for p in
+                                request_args.getlist('filter_by_prefix')]
 
     args['group_by'] = request_args.getlist('group_by')
 
