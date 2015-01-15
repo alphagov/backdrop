@@ -5,4 +5,5 @@
 --ignore-dir=tests/fixtures/perf/
 --ignore-file=match:.coverage
 --ignore-file=match:nosetests.xml
+--ignore-dir=.ropeproject
 
