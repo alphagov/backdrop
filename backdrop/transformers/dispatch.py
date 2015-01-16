@@ -98,7 +98,9 @@ def run_transform(data_set_config, transform, earliest, latest):
     )
 
     transform_function = get_transform_function(transform)
-    transformed_data = transform_function(data['data'], transform['options'])
+    transformed_data = transform_function(data['data'],
+                                          transform['options'],
+                                          data_set_config)
 
     output_data_set = get_or_get_and_create_output_dataset(
         transform,

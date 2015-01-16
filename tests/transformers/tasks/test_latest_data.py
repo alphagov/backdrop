@@ -2,7 +2,7 @@ import unittest
 
 from hamcrest import assert_that, is_
 
-from backdrop.transformers.tasks.latest_data import compute
+from backdrop.transformers.tasks.latest_dataset_value import compute
 
 from mock import patch
 
