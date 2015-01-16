@@ -44,12 +44,7 @@ class ComputeTestCase(unittest.TestCase):
     @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
     def test_compute(self, mock_dashboard):
         mock_dashboard.slug = 'test-dashboard'
-        transformed_data = compute(data, {
-            "denominatorMatcher": 'start',
-            "numeratorMatcher": 'done',
-            "matchingAttribute": 'eventCategory',
-            "valueAttribute": 'uniqueEvents:sum',
-        })
+        transformed_data = compute(data, {}, {'data_type': 'completion_rate'})
 
         assert_that(len(transformed_data), is_(1))
         assert_that(
