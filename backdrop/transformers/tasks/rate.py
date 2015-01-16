@@ -46,7 +46,7 @@ def compute_for_date(matchingAttribute, valueAttribute, denominatorRe, numerator
     }
 
 
-def compute(data, options):
+def compute(data, options, data_set_config=None):
     groupped = group_by(['_start_at', '_end_at'], data)
     denominatorRe = re.compile(options['denominatorMatcher'])
     numeratorRe = re.compile(options['numeratorMatcher'])
