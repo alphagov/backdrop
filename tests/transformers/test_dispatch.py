@@ -102,7 +102,8 @@ class DispatchTestCase(unittest.TestCase):
         )
         mock_logging_task.assert_called_with(
             [{'data': 'point'}],
-            {}
+            {},
+            {'token': 'foo', 'data_type': 'type', 'data_group': 'group'}
         )
         mock_data_set.from_group_and_type.assert_any_call(
             'http://backdrop/data', 'other-group', 'other-type', token='foo2',
