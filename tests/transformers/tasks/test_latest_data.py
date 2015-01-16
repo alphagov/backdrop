@@ -4,6 +4,9 @@ from hamcrest import assert_that, is_
 
 from backdrop.transformers.tasks.latest_data import compute
 
+from mock import patch
+
+
 data = [
     {
       "_day_start_at": "2013-10-07T00:00:00+00:00",
@@ -37,7 +40,10 @@ data = [
 
 
 class ComputeTestCase(unittest.TestCase):
-    def test_compute(self):
+
+    @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
+    def test_compute(self, mock_dashboard):
+        mock_dashboard.slug = 'test-dashboard'
         transformed_data = compute(data, {
             "denominatorMatcher": 'start',
             "numeratorMatcher": 'done',
@@ -45,31 +51,11 @@ class ComputeTestCase(unittest.TestCase):
             "valueAttribute": 'uniqueEvents:sum',
         })
 
-        assert_that(len(transformed_data), is_(2))
+        assert_that(len(transformed_data), is_(1))
         assert_that(
             transformed_data[0]['_id'],
-            is_('MjAxMy0xMS0yNVQwMDowMDowMCswMDowMF8yMDEzLTEyLTAyVDAwOjAwOjAwKzAwOjAw'))
+            is_('dGVzdC1kYXNoYm9hcmRjb21wbGV0aW9uLXJhdGU'))
         assert_that(
             transformed_data[0]['_timestamp'],
-            is_('2013-11-25T00:00:00+00:00'))
-        assert_that(
-            transformed_data[0]['_start_at'],
-            is_('2013-11-25T00:00:00+00:00'))
-        assert_that(
-            transformed_data[0]['_end_at'],
-            is_('2013-12-02T00:00:00+00:00'))
-        assert_that(transformed_data[0]['rate'], is_(2.0 / 3.0))
-        assert_that(transformed_data[1]['rate'], is_(None))
-
-    def test_regex_matching_supports_carets(self):
-        # The numeratorMatcher should match just "digital"
-        # The denominatorMatcher should match both "digital" and "non-digital"
-        transformed_data = compute(data, {
-            "denominatorMatcher": 'digital$',
-            "numeratorMatcher": '^digital$',
-            "matchingAttribute": 'channel',
-            "valueAttribute": 'uniqueEvents:sum',
-        })
-
-        assert_that(transformed_data[0]['rate'], is_(8.0 / (8.0 + 15.0)))
-        assert_that(transformed_data[1]['rate'], is_(12.0 / (12.0 + 25.0)))
+            is_('2013-10-14T00:00:00+00:00'))
+        assert_that(transformed_data[0]['rate'], is_(0.29334396173774413))
