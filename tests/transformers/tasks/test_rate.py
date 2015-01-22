@@ -52,12 +52,15 @@ data = [
 
 class ComputeTestCase(unittest.TestCase):
     def test_compute(self):
-        transformed_data = compute(data, {
-            "denominatorMatcher": 'start',
-            "numeratorMatcher": 'done',
-            "matchingAttribute": 'eventCategory',
-            "valueAttribute": 'uniqueEvents:sum',
-        })
+        transform = {
+            "options": {
+                "denominatorMatcher": 'start',
+                "numeratorMatcher": 'done',
+                "matchingAttribute": 'eventCategory',
+                "valueAttribute": 'uniqueEvents:sum',
+            }
+        }
+        transformed_data = compute(data, transform)
 
         assert_that(len(transformed_data), is_(2))
         assert_that(
@@ -78,12 +81,15 @@ class ComputeTestCase(unittest.TestCase):
     def test_regex_matching_supports_carets(self):
         # The numeratorMatcher should match just "digital"
         # The denominatorMatcher should match both "digital" and "non-digital"
-        transformed_data = compute(data, {
-            "denominatorMatcher": 'digital$',
-            "numeratorMatcher": '^digital$',
-            "matchingAttribute": 'channel',
-            "valueAttribute": 'uniqueEvents:sum',
-        })
+        transform = {
+            "options": {
+                "denominatorMatcher": 'digital$',
+                "numeratorMatcher": '^digital$',
+                "matchingAttribute": 'channel',
+                "valueAttribute": 'uniqueEvents:sum',
+            }
+        }
+        transformed_data = compute(data, transform)
 
         assert_that(transformed_data[0]['rate'], is_(8.0 / (8.0 + 15.0)))
         assert_that(transformed_data[1]['rate'], is_(12.0 / (12.0 + 25.0)))

@@ -5,7 +5,7 @@ from hamcrest import assert_that, is_
 
 from backdrop.transformers.tasks.latest_dataset_value import compute
 
-from mock import patch
+from mock import patch, Mock
 
 
 data = [
@@ -42,8 +42,9 @@ data = [
 
 class ComputeTestCase(unittest.TestCase):
 
+    @patch("performanceplatform.client.DataSet.from_group_and_type")
     @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
-    def test_compute(self, mock_dashboard):
+    def test_compute(self, mock_dashboard, mock_dataset):
         mock_dashboard_data = [
             {
                 'published': True,
@@ -55,8 +56,22 @@ class ComputeTestCase(unittest.TestCase):
             }
         ]
         mock_dashboard.return_value = mock_dashboard_data
+
+        mockdata = Mock()
+        mockdata.get.return_value = {
+            'data': [
+                {
+                    '_count': 1.0,
+                    '_end_at': '2015-01-19T00:00:00+00:00',
+                    '_start_at': '2015-01-12T00:00:00+00:00'
+                }
+            ]
+        }
+        mock_dataset.return_value = mockdata
+
         transformed_data = compute(data, {}, {
             'name': 'apply_carers_allowance_completion_rate',
+            'data_group': 'apply-carers-allowance',
             'data_type': 'completion-rate'
         })
 
@@ -69,3 +84,74 @@ class ComputeTestCase(unittest.TestCase):
             is_('2013-10-14T00:00:00+00:00'))
         assert_that(
             transformed_data[0]['completion_rate'], is_(0.29334396173774413))
+
+    @patch("performanceplatform.client.DataSet.from_group_and_type")
+    @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
+    def test_compute_old_date_range(self, mock_dashboard, mock_dataset):
+        mock_dashboard_data = [
+            {
+                'published': True,
+                'slug': 'published'
+            }
+        ]
+        mock_dashboard.return_value = mock_dashboard_data
+
+        mockdata = Mock()
+        mockdata.get.return_value = {
+            'data': [
+                {
+                    '_count': 1.0,
+                    '_end_at': '2015-01-19T00:00:00+00:00',
+                    '_start_at': '2015-01-12T00:00:00+00:00'
+                },
+                {
+                    '_count': 1.0,
+                    '_end_at': '2015-01-19T00:00:00+00:00',
+                    '_start_at': '2015-01-12T00:00:00+00:00'
+                }
+            ]
+        }
+        mock_dataset.return_value = mockdata
+
+        transformed_data = compute(data, {}, {
+            'name': 'apply_carers_allowance_completion_rate',
+            'data_group': 'apply-carers-allowance',
+            'data_type': 'completion-rate'
+        })
+
+        assert_that(len(transformed_data), is_(0))
+
+    @patch("performanceplatform.client.DataSet.from_group_and_type")
+    @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
+    def test_compute_old_date_period(self, mock_dashboard, mock_dataset):
+        mock_dashboard_data = [
+            {
+                'published': True,
+                'slug': 'published'
+            }
+        ]
+        mock_dashboard.return_value = mock_dashboard_data
+
+        mockdata = Mock()
+        mockdata.get.return_value = {
+            'data': [
+                {
+                    '_count': 1.0,
+                    '_start_at': '2016-10-07T00:00:00+00:00'
+                }
+            ]
+        }
+        mock_dataset.return_value = mockdata
+
+        transform_params = {
+            'query_parameters': {
+                'period': 'week'
+            }
+        }
+        transformed_data = compute(data, transform_params, {
+            'name': 'apply_carers_allowance_completion_rate',
+            'data_group': 'apply-carers-allowance',
+            'data_type': 'completion-rate'
+        })
+
+        assert_that(len(transformed_data), is_(0))
