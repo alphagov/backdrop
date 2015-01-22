@@ -161,8 +161,6 @@ def data_group_key():
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
-@limiter.limit(app.config.get('DATA_SET_RATE_LIMIT', '100/minute;5/second'),
-               data_group_key)
 def data(data_group, data_type):
     with statsd.timer('read.route.data.{data_group}.{data_type}'.format(
             data_group=data_group,
@@ -178,8 +176,6 @@ def data_set_key():
 
 
 @app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
-@limiter.limit(app.config.get('DATA_SET_RATE_LIMIT', '100/minute;5/second'),
-               data_set_key)
 @http_validation.etag
 def query(data_set_name):
     with statsd.timer('read.route.{data_set_name}'.format(
