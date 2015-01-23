@@ -63,13 +63,23 @@ def _dashboard_configs_with_latest_data(data):
             yield dashboard_config, latest_data
 
 
-def _get_data_points_for_each_tx_metric(data):
+def is_latest_data(a, b, c):
+    return True
+
+
+def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
     for dashboard_config, latest_data in _dashboard_configs_with_latest_data(
             data):
         for data_point_name in REQUIRED_DATA_POINTS:
-            yield _get_stripped_down_data_for_data_point_name_only(
+            latest_datum = _get_stripped_down_data_for_data_point_name_only(
                 dashboard_config, latest_data, data_point_name)
+            if is_latest_data(data_set_config, transform, latest_datum):
+                yield latest_datum
 
 
-def compute(data, options, data_set_config=None):
-    return [datum for datum in _get_data_points_for_each_tx_metric(data)]
+def compute(data, transform, data_set_config=None):
+    return [datum for datum
+            in _get_data_points_for_each_tx_metric(
+                data,
+                transform,
+                data_set_config)]
