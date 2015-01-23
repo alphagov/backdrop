@@ -1,48 +1,15 @@
 import string
 
-from .util import encode_id
+from .util import encode_id, is_latest_data
 from ..worker import config
 
-from performanceplatform.client import AdminAPI, DataSet
+from performanceplatform.client import AdminAPI
 
 data_type_to_value_mappings = {
     'completion-rate': 'rate',
     'digital-takeup': 'rate',
     'user-satisfaction-score': 'score',
 }
-
-
-def get_read_params(transform_params, latest_timestamp):
-    read_params = {}
-    if 'period' in transform_params:
-        read_params['duration'] = 1
-        read_params['period'] = transform_params['period']
-    else:
-        read_params['start_at'] = latest_timestamp
-    read_params['sort_by'] = '_timestamp:descending'
-    return read_params
-
-
-def is_latest_data(data_set_config, transform, latest_datum):
-    """
-    Read from backdrop to determine if new data is the latest.
-    """
-
-    data_set = DataSet.from_group_and_type(
-        config.BACKDROP_READ_URL,
-        data_set_config['data_group'],
-        data_set_config['data_type']
-    )
-
-    transform_params = transform.get('query_parameters', {})
-    read_params = get_read_params(transform_params, latest_datum['_timestamp'])
-    existing_data = data_set.get(query_parameters=read_params)
-
-    if existing_data['data']:
-        if existing_data['data'][0]['_timestamp'] > latest_datum['_timestamp']:
-            return False
-
-    return True
 
 
 def compute(new_data, transform, data_set_config):
@@ -71,7 +38,8 @@ def compute(new_data, transform, data_set_config):
     data_type = string.replace(data_set_config['data_type'], '-', '_')
 
     for dashboard_config in configs:
-        if dashboard_config['published'] and latest_datum[value_key] is not None:
+        if(dashboard_config['published']
+           and latest_datum[value_key] is not None):
             slug = dashboard_config['slug']
             id = encode_id(slug, data_type)
             latest_values.append({

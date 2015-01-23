@@ -2,7 +2,7 @@ from ..worker import config
 
 from performanceplatform.client import AdminAPI
 
-from .util import encode_id, group_by
+from .util import encode_id, group_by, is_latest_data
 
 REQUIRED_DATA_POINTS = [
     "cost_per_transaction",
@@ -27,7 +27,7 @@ admin_api = AdminAPI(
 
 
 def _get_latest_data_points(data):
-    data.sort(key=lambda item: item['_timestamp'])
+    data.sort(key=lambda item: item['_timestamp'], reverse=True)
     return data[0]
 
 
@@ -61,10 +61,6 @@ def _dashboard_configs_with_latest_data(data):
         dashboard_config = admin_api.get_dashboard_by_tx_id(service_id)[0]
         if dashboard_config:
             yield dashboard_config, latest_data
-
-
-def is_latest_data(a, b, c):
-    return True
 
 
 def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
