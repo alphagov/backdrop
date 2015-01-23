@@ -62,8 +62,8 @@ class ComputeTestCase(unittest.TestCase):
             'data': [
                 {
                     '_count': 1.0,
-                    '_end_at': '2015-01-19T00:00:00+00:00',
-                    '_start_at': '2015-01-12T00:00:00+00:00'
+                    '_end_at': '2012-01-19T00:00:00+00:00',
+                    '_timestamp': '2012`-01-12T00:00:00+00:00'
                 }
             ]
         }
@@ -102,12 +102,12 @@ class ComputeTestCase(unittest.TestCase):
                 {
                     '_count': 1.0,
                     '_end_at': '2015-01-19T00:00:00+00:00',
-                    '_start_at': '2015-01-12T00:00:00+00:00'
+                    '_timestamp': '2015-01-12T00:00:00+00:00'
                 },
                 {
                     '_count': 1.0,
                     '_end_at': '2015-01-19T00:00:00+00:00',
-                    '_start_at': '2015-01-12T00:00:00+00:00'
+                    '_timestamp': '2015-01-12T00:00:00+00:00'
                 }
             ]
         }
@@ -137,7 +137,7 @@ class ComputeTestCase(unittest.TestCase):
             'data': [
                 {
                     '_count': 1.0,
-                    '_start_at': '2016-10-07T00:00:00+00:00'
+                    '_timestamp': '2016-10-07T00:00:00+00:00'
                 }
             ]
         }

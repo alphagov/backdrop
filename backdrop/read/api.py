@@ -5,7 +5,6 @@ from bson import ObjectId
 
 from flask import Flask, jsonify, request
 from flask_featureflags import FeatureFlag
-from flask_limiter import Limiter
 
 from .query import parse_query_from_request
 from .validation import validate_request_args
@@ -27,7 +26,6 @@ GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
 app = Flask("backdrop.read.api")
 
-limiter = Limiter(app)
 feature_flags = FeatureFlag(app)
 
 # Configuration

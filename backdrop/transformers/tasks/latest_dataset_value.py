@@ -18,7 +18,8 @@ def get_read_params(transform_params, latest_timestamp):
         read_params['duration'] = 1
         read_params['period'] = transform_params['period']
     else:
-        read_params['_start_at'] = latest_timestamp
+        read_params['start_at'] = latest_timestamp
+    read_params['sort_by'] = '_timestamp:descending'
     return read_params
 
 
@@ -38,14 +39,8 @@ def is_latest_data(data_set_config, transform, latest_datum):
     existing_data = data_set.get(query_parameters=read_params)
 
     if existing_data['data']:
-        if 'period' in transform_params:
-            if existing_data['data'][0]['_start_at'] > latest_datum['_timestamp']:
-                return False
-        else:
-            # If we got more than one data point back, assume latest_data
-            # isn't the newest in the dataset.
-            if len(existing_data['data']) > 1:
-                return False
+        if existing_data['data'][0]['_timestamp'] > latest_datum['_timestamp']:
+            return False
 
     return True
 
