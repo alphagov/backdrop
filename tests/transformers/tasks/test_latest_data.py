@@ -78,7 +78,7 @@ class ComputeTestCase(unittest.TestCase):
         assert_that(len(transformed_data), is_(1))
         assert_that(
             transformed_data[0]['_id'],
-            is_(base64.b64encode(mock_dashboard_data[0]['slug'] + 'completion_rate')))
+            is_('cHVibGlzaGVkX2NvbXBsZXRpb25fcmF0ZQ=='))
         assert_that(
             transformed_data[0]['_timestamp'],
             is_('2013-10-14T00:00:00+00:00'))

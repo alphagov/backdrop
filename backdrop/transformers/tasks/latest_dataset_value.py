@@ -1,6 +1,6 @@
-import base64
 import string
 
+from .util import encode_id
 from ..worker import config
 
 from performanceplatform.client import AdminAPI, DataSet
@@ -78,7 +78,7 @@ def compute(new_data, transform, data_set_config):
     for dashboard_config in configs:
         if dashboard_config['published'] and latest_datum[value_key] is not None:
             slug = dashboard_config['slug']
-            id = base64.b64encode(slug + data_type)
+            id = encode_id(slug, data_type)
             latest_values.append({
                 '_id': id,
                 'dashboard_slug': slug,
