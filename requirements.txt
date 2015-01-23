@@ -2,12 +2,11 @@ argh==0.25
 Celery==3.1.17
 Flask==0.10.1
 Flask-FeatureFlags==0.4
-Flask-Limiter==0.6.4
 gunicorn==19.1.1
 invoke
 isodate==0.5.0
 jsonschema==2.4
-performanceplatform-client==0.4.0
+performanceplatform-client==0.6.0
 pip==1.5.6
 pymongo==2.7.2
 python-dateutil==2.2

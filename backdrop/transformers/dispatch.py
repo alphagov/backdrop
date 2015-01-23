@@ -1,12 +1,19 @@
 import importlib
 import logging
 
+from os import getenv
+
+from backdrop.core.log_handler import get_log_file_handler
+
 from worker import app, config
 
 from performanceplatform.client import AdminAPI, DataSet
 
-
-logger = logging.getLogger(__name__)
+GOVUK_ENV = getenv("GOVUK_ENV", "development")
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+logger.addHandler(
+    get_log_file_handler("log/{}.log".format(GOVUK_ENV), logging.DEBUG))
 
 
 @app.task(ignore_result=True)
@@ -98,7 +105,9 @@ def run_transform(data_set_config, transform, earliest, latest):
     )
 
     transform_function = get_transform_function(transform)
-    transformed_data = transform_function(data['data'], transform['options'])
+    transformed_data = transform_function(data['data'],
+                                          transform,
+                                          data_set_config)
 
     output_data_set = get_or_get_and_create_output_dataset(
         transform,
