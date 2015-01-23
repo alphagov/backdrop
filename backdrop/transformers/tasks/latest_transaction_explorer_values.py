@@ -41,8 +41,10 @@ def compute(data, options, data_set_config=None):
         new_data = {}
         for field in all_fields:
             new_data[field] = most_recent_data[field]
-        new_data['slug'] = dashboard_config['slug']
-        new_data['id'] = encode_id(new_data['slug'], data_point_name)
+        new_data['dashboard_slug'] = dashboard_config['slug']
+        new_data['_id'] = encode_id(
+            new_data['dashboard_slug'],
+            data_point_name)
         return new_data
 
     def service_ids():
