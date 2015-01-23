@@ -43,6 +43,10 @@ data_to_post = [
         "type": "seasonally-adjusted"
     },
     {
+        # It looks like this id generation is correct.
+        # The latest data point transform takes the data_type
+        # as the second argument. In the case of digital_takeup
+        # the data_type is digital_takeup.
         "_id": encode_id('sorn', 'digital_takeup'),
         "_timestamp": "2011-04-01T00:00:00+00:00",
         "digital_takeup": 0.965537995968002,
