@@ -69,7 +69,16 @@ def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
         for data_point_name in REQUIRED_DATA_POINTS:
             latest_datum = _get_stripped_down_data_for_data_point_name_only(
                 dashboard_config, latest_data, data_point_name)
-            if is_latest_data(data_set_config, transform, latest_datum):
+            # we need to look at, for example,
+            # digital-takeup on the output data set - tx not the only source.
+            if is_latest_data({'data_group': transform['output']['data-group'],
+                               'data_type': transform['output']['data-type']},
+                              transform,
+                              latest_datum,
+                              additional_read_params={
+                                  'filter_by': 'dashboard_slug:{}'.format(
+                                      latest_datum['dashboard_slug'])
+            }):
                 yield latest_datum
 
 

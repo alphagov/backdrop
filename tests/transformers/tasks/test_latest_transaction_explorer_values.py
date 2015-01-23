@@ -7,7 +7,7 @@ from backdrop.transformers.tasks.latest_transaction_explorer_values import(
 from backdrop.transformers.tasks.util import(
     encode_id)
 
-from mock import patch, Mock
+from mock import patch, Mock, call
 
 import json
 import os
@@ -178,11 +178,23 @@ class ComputeTestCase(unittest.TestCase):
             'bis-annual-returns': bis_returns_dashboard_config,
             'sorn-innit': sorn_dashboard_config
         }.get(x, [])
-        # we need to look at digital-takeup on target - tx not only source.
-        transformed_data = compute(data, {}, {
-            'data_group': 'transactions-explorer',
-            'data_type': 'spreadsheet'})
+        transformed_data = compute(data, {'output': {
+            'data-group': 'transactions-explorer',
+            'data-type': 'spreadsheet'}})
 
+        calls = [call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'})]
+        mockdata.get.has_calls(calls)
         assert_that(transformed_data, contains_inanyorder(*data_to_post))
         assert_that(len(transformed_data), is_(12))
 
@@ -216,9 +228,23 @@ class ComputeTestCase(unittest.TestCase):
             'bis-annual-returns': bis_returns_dashboard_config,
             'sorn-innit': sorn_dashboard_config
         }.get(x, [])
-        transformed_data = compute(data, {}, {
-            'data_group': 'transactions-explorer',
-            'data_type': 'spreadsheet'})
+        transformed_data = compute(data, {'output': {
+            'data-group': 'transactions-explorer',
+            'data-type': 'spreadsheet'}})
+
+        calls = [call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:bis-returns', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'}),
+             call(query_parameters={'filter_by': 'dashboard_slug:sorn', 'start_at': u'2013-04-01T00:00:00+00:00', 'sort_by': '_timestamp:descending'})]
+        mockdata.get.has_calls(calls)
 
         assert_that(transformed_data, equal_to([]))
         assert_that(len(transformed_data), is_(0))

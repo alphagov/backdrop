@@ -40,7 +40,10 @@ def _get_read_params(transform_params, latest_timestamp):
     return read_params
 
 
-def is_latest_data(data_set_config, transform, latest_datum):
+def is_latest_data(data_set_config,
+                   transform,
+                   latest_datum,
+                   additional_read_params={}):
     """
     Read from backdrop to determine if new data is the latest.
     """
@@ -52,8 +55,10 @@ def is_latest_data(data_set_config, transform, latest_datum):
     )
 
     transform_params = transform.get('query_parameters', {})
-    read_params = _get_read_params(
+    generated_read_params = _get_read_params(
         transform_params, latest_datum['_timestamp'])
+    read_params = dict(
+        generated_read_params.items() + additional_read_params.items())
     existing_data = data_set.get(query_parameters=read_params)
 
     if existing_data['data']:
