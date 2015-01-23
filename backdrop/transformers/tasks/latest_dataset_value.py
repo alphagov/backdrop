@@ -12,13 +12,21 @@ data_type_to_value_mappings = {
 }
 
 
-def compute(new_data, transform, data_set_config):
+def get_read_params(transform_params, latest_timestamp):
+    read_params = {}
+    if 'period' in transform_params:
+        read_params['duration'] = 1
+        read_params['period'] = transform_params['period']
+    else:
+        read_params['_start_at'] = latest_timestamp
+    return read_params
 
-    # Sort the new data by timestamp and use the latest data point.
-    new_data.sort(key=lambda item: item['_timestamp'], reverse=True)
-    latest_datum = new_data[0]
 
-    # Read from the backdrop API to determine if new data is the latest.
+def is_latest_data(data_set_config, transform, latest_datum):
+    """
+    Read from backdrop to determine if new data is the latest.
+    """
+
     data_set = DataSet.from_group_and_type(
         config.BACKDROP_READ_URL,
         data_set_config['data_group'],
@@ -26,26 +34,31 @@ def compute(new_data, transform, data_set_config):
     )
 
     transform_params = transform.get('query_parameters', {})
-    read_params = {}
-    if 'period' in transform_params:
-        read_params['duration'] = 1
-        read_params['period'] = transform_params['period']
-    else:
-        read_params['_start_at'] = latest_datum['_timestamp']
-
+    read_params = get_read_params(transform_params, latest_datum['_timestamp'])
     existing_data = data_set.get(query_parameters=read_params)
 
-    # Fall-through case is that there is no existing data in the data set -
-    # so the data just written must be the latest.
     if existing_data['data']:
         if 'period' in transform_params:
             if existing_data['data'][0]['_start_at'] > latest_datum['_timestamp']:
-                return []
+                return False
         else:
             # If we got more than one data point back, assume latest_data
             # isn't the newest in the dataset.
             if len(existing_data['data']) > 1:
-                return []
+                return False
+
+    return True
+
+
+def compute(new_data, transform, data_set_config):
+
+    # Sort the new data by timestamp and use the latest data point.
+    new_data.sort(key=lambda item: item['_timestamp'], reverse=True)
+    latest_datum = new_data[0]
+
+    # Only continue if we are not back filling data.
+    if not is_latest_data(data_set_config, transform, latest_datum):
+        return []
 
     # Input data won't have a unique key for each type of value.
     # E.g. completion rate and digital takeup are both "rate".
