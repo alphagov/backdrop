@@ -63,7 +63,7 @@ class ComputeTestCase(unittest.TestCase):
                 {
                     '_count': 1.0,
                     '_end_at': '2012-01-19T00:00:00+00:00',
-                    '_timestamp': '2012`-01-12T00:00:00+00:00'
+                    '_timestamp': '2012-01-12T00:00:00+00:00'
                 }
             ]
         }
