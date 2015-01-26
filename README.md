@@ -99,6 +99,15 @@ command
 curl -X PUT -d "[]" https://{backdrop_url}/data/<data-group>/<data-type> -H 'Authorization: Bearer <token-from-stagecraft>' -H 'Content-Type: application/json'
 ```
 
+## Celery worker
+
+Backdrop uses celery for running tasks on data post write - these can be found
+in `backdrop/transformers/tasks/`
+
+To process these tasks, you must run the worker - this can be done with the
+following command
+
+`celery worker -A backdrop.transformers.worker -l debug`
 
 
 
