@@ -1,3 +1,5 @@
+import datetime
+import pytz
 import string
 
 from .util import encode_id
@@ -19,6 +21,7 @@ def get_read_params(transform_params, latest_timestamp):
         read_params['period'] = transform_params['period']
     else:
         read_params['start_at'] = latest_timestamp
+        read_params['end_at'] = datetime.datetime.now(pytz.UTC).replace(microsecond=0).isoformat()
     read_params['sort_by'] = '_timestamp:descending'
     return read_params
 
