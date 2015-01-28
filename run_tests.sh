@@ -53,11 +53,7 @@ python -m coverage.__main__ xml --include=backdrop*
 #       created, meaning we still instantiate ie a SplinterClient for skipped
 #       tests(!) Our python code *also* has to change to get round this... yuk.
 
-if [ "${SKIP_SPLINTER_TESTS}" != "" ] ; then
-    behave --stop --tags=~@wip --tags=~@use_admin_client
-else
-    behave --stop --tags=~@wip
-fi
+behave --stop --tags=~@wip
 
 display_result $? 2 "Feature tests"
 

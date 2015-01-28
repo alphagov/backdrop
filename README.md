@@ -48,22 +48,6 @@ Run tests with ```./run_tests.sh```
 
 Splinter tests are not run in Travis or Jenkins due to their instability.
 
-### Getting set up locally to test signon
-
-[Sign-on-o-Tron](https://github.com/alphagov/signonotron2) is a GOV.UK Ruby project
-that runs on a separate infrastructure to the Performance Platform.
-
-Set up Sign-on-o-tron so that it can be accessed from `signon.dev.gov.uk` on your machine.
-It's easiest to do this using the GOV.UK development machine.
-
-Add a new application: `bundle exec rake applications:create name=backdrop redirect_uri=http://admin.development.performance.service.gov.uk/authorized`
-
-Edit `/backdrop/admin/config/development_environment.py` to contain your OAuth token and secret from the previous step.
-
-Create a new user by following the prompts: `bundle exec rake users:create name=Test email=test@example.com applications=backdrop`
-
-Visit http://admin.development.performance.service.gov.uk/
-
 ## Requesting data
 
 Requests return a JSON object containing a `data` array.

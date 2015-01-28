@@ -3,16 +3,14 @@ from argh.dispatching import dispatch_command
 
 
 def load_app(name):
-    if name == "admin":
-        from backdrop.admin import app as app
-    elif name == "read":
+    if name == "read":
         from backdrop.read import api as app
     elif name == "write":
         from backdrop.write import api as app
     return app
 
 
-APP_CHOICES = ['admin', 'read', 'write']
+APP_CHOICES = ['read', 'write']
 
 
 @arg('name', choices=APP_CHOICES, help='The name of the app to start')

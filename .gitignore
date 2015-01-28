@@ -1,4 +1,3 @@
-backdrop/admin/config/development_environment.py
 backdrop/write/config/development_environment.py
 
 *.pyc
