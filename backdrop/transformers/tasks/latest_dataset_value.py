@@ -20,7 +20,7 @@ def compute(new_data, transform, data_set_config):
 
     # Only continue if we are not back filling data.
     if not is_latest_data(data_set_config, transform, latest_datum):
-        return []
+        pass
 
     # Input data won't have a unique key for each type of value.
     # E.g. completion rate and digital takeup are both "rate".

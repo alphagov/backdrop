@@ -7,6 +7,8 @@ from backdrop.transformers.tasks.latest_dataset_value import compute
 
 from mock import patch, Mock
 
+from unittest.case import SkipTest
+
 
 data = [
     {
@@ -88,6 +90,7 @@ class ComputeTestCase(unittest.TestCase):
     @patch("performanceplatform.client.DataSet.from_group_and_type")
     @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
     def test_compute_old_date_range(self, mock_dashboard, mock_dataset):
+        raise SkipTest('skipped until latest data restriction reinstated')
         mock_dashboard_data = [
             {
                 'published': True,
@@ -124,6 +127,7 @@ class ComputeTestCase(unittest.TestCase):
     @patch("performanceplatform.client.DataSet.from_group_and_type")
     @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
     def test_compute_old_date_period(self, mock_dashboard, mock_dataset):
+        raise SkipTest('skipped until latest data restriction reinstated')
         mock_dashboard_data = [
             {
                 'published': True,
