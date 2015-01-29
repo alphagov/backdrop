@@ -61,9 +61,9 @@ def _service_ids_with_latest_data(data):
 
 def _dashboard_configs_with_latest_data(data):
     for service_id, latest_data in _service_ids_with_latest_data(data):
-        dashboard_config = admin_api.get_dashboard_by_tx_id(service_id)[0]
-        if dashboard_config:
-            yield dashboard_config, latest_data
+        dashboard_configs = admin_api.get_dashboard_by_tx_id(service_id)
+        if dashboard_configs:
+            yield dashboard_configs[0], latest_data
 
 
 def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
