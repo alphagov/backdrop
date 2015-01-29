@@ -12,7 +12,6 @@
         "digital_cost_per_transaction": 2.52,
         "digital_takeup": 0.965537995968002,
         "end_at": "2012-04-01T00:00:00+00:00",
-        "number_of_digital_transactions": 2184914,
         "number_of_transactions": 2262898,
         "period": "year",
         "service_id": "bis-annual-returns",
