@@ -117,6 +117,16 @@ data_to_post = [
         "type": "seasonally-adjusted"
     },
     {
+        "_id": encode_id('bis-returns', 'number_of_digital_transactions'),
+        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "end_at": "2013-01-01T00:00:00+00:00",
+        "number_of_digital_transactions": 2301214,
+        "period": "year",
+        "service_id": "bis-annual-returns",
+        "dashboard_slug": "bis-returns",
+        "type": "seasonally-adjusted"
+    },
+    {
         "_id": encode_id('bis-returns', 'number_of_transactions'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "end_at": "2012-04-01T00:00:00+00:00",
@@ -172,7 +182,7 @@ class ComputeTestCase(unittest.TestCase):
             'data-group': 'transactions-explorer',
             'data-type': 'spreadsheet'}})
 
-        assert_that(len(transformed_data), is_(11))
+        assert_that(len(transformed_data), is_(12))
         assert_that(transformed_data, contains_inanyorder(*data_to_post))
 
     @patch("performanceplatform.client.DataSet.from_group_and_type")
