@@ -115,9 +115,12 @@ def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
                      'data_type': transform['output']['data-type']},
                     transform,
                     datum,
+                    # filter by record id as this is a hash of dashboard_slug
+                    # and data_point_name and is therefore the important
+                    # identifier of newer data
                     additional_read_params={
-                        'filter_by': 'dashboard_slug:{}'.format(
-                            datum['dashboard_slug'])}):
+                        'filter_by': '_id:{}'.format(
+                            datum['_id'])}):
                 yield datum
 
 
