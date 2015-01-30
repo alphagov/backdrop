@@ -29,7 +29,7 @@ admin_api = AdminAPI(
     config.STAGECRAFT_OAUTH_TOKEN)
 
 
-def _get_latest_data_points(data, data_point_name):
+def _get_latest_data_point(data, data_point_name):
     data.sort(key=lambda item: item['_timestamp'], reverse=True)
     for data_point in data:
         if data_point_name in data_point and data_point[data_point_name]:
@@ -46,7 +46,9 @@ def _get_stripped_down_data_for_data_point_name_only(
 
     It does this by iterating through the passed in data_point_name
     and all the REQUIRED_FIELDS and building up a new dict based on
-    these key: value pairings
+    these key: value pairings. We then loop through additional fields and add
+    those if present. If a REQUIRED_FIELD is not found we return None for
+    this data_point.
     """
     required_fields = REQUIRED_FIELDS + [data_point_name]
     new_data = {}
@@ -65,36 +67,54 @@ def _get_stripped_down_data_for_data_point_name_only(
     return new_data
 
 
-def _service_ids_with_latest_data(data, data_point_name):
-    for service_data_group in group_by('service_id', data).items():
-        yield service_data_group[0], _get_latest_data_points(
-            service_data_group[1], data_point_name)
+def _service_ids_with_data(data):
+    return group_by('service_id', data).items()
 
 
-def _dashboard_configs_with_latest_data(data, data_point_name):
-    for service_id, latest_data in _service_ids_with_latest_data(data, data_point_name):  # noqa
-        dashboard_configs = admin_api.get_dashboard_by_tx_id(service_id)
-        if dashboard_configs:
-            yield dashboard_configs[0], latest_data
+def _get_dashboard_config(service_id):
+    dashboard_configs = admin_api.get_dashboard_by_tx_id(service_id)
+    if dashboard_configs:
+        return dashboard_configs[0]
+    else:
+        return None
+
+
+def _get_dashboard_configs_with_data(ids_with_data):
+    dashboard_configs_with_data = []
+    for service_id, data in ids_with_data:
+        dashboard_config = _get_dashboard_config(service_id)
+        if dashboard_config:
+            dashboard_configs_with_data.append((dashboard_config, data))
+    return dashboard_configs_with_data
 
 
 def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
+    ids_with_data = _service_ids_with_data(
+        data)
+    dashboard_configs_with_data = _get_dashboard_configs_with_data(
+        ids_with_data)
     for data_point_name in REQUIRED_DATA_POINTS:
-        for dashboard_config, latest_data in _dashboard_configs_with_latest_data(data, data_point_name):  # noqa
-            if latest_data:
-                latest_datum = _get_stripped_down_data_for_data_point_name_only(  # noqa
-                    dashboard_config, latest_data, data_point_name)
-                # we need to look at, for example, digital-takeup
-                # on the output data set - tx not the only source.
-                if latest_datum and is_latest_data(
-                        {'data_group': transform['output']['data-group'],
-                         'data_type': transform['output']['data-type']},
-                        transform,
-                        latest_datum,
-                        additional_read_params={
-                            'filter_by': 'dashboard_slug:{}'.format(
-                                latest_datum['dashboard_slug'])}):
-                    yield latest_datum
+        for dashboard_config, dashboard_data in dashboard_configs_with_data:
+            latest_data = _get_latest_data_point(
+                dashboard_data,
+                data_point_name)
+            if not latest_data:
+                continue
+            datum = _get_stripped_down_data_for_data_point_name_only(
+                dashboard_config, latest_data, data_point_name)
+            # we need to look at whether this is later than the latest
+            # data currently present on the output data set as
+            # for things like digital-takeup the  transactions explorer
+            # dataset is not the only source.
+            if datum and is_latest_data(
+                    {'data_group': transform['output']['data-group'],
+                     'data_type': transform['output']['data-type']},
+                    transform,
+                    datum,
+                    additional_read_params={
+                        'filter_by': 'dashboard_slug:{}'.format(
+                            datum['dashboard_slug'])}):
+                yield datum
 
 
 def compute(data, transform, data_set_config=None):
