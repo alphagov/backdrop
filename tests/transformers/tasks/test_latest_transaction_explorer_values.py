@@ -67,16 +67,6 @@ data_to_post = [
         "type": "seasonally-adjusted"
     },
     {
-        "_id": encode_id('sorn', 'number_of_transactions'),
-        "_timestamp": "2013-04-01T00:00:00+00:00",
-        "end_at": "2012-04-01T00:00:00+00:00",
-        "number_of_transactions": 2262898,
-        "period": "year",
-        "service_id": "sorn-innit",
-        "dashboard_slug": "sorn",
-        "type": "seasonally-adjusted"
-    },
-    {
         "_id": encode_id('sorn', 'total_cost'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "end_at": "2012-04-01T00:00:00+00:00",
@@ -111,6 +101,16 @@ data_to_post = [
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "digital_takeup": 0.965537995968002,
         "end_at": "2012-04-01T00:00:00+00:00",
+        "period": "year",
+        "service_id": "bis-annual-returns",
+        "dashboard_slug": "bis-returns",
+        "type": "seasonally-adjusted"
+    },
+    {
+        "_id": encode_id('bis-returns', 'number_of_digital_transactions'),
+        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "end_at": "2013-01-01T00:00:00+00:00",
+        "number_of_digital_transactions": 2301214,
         "period": "year",
         "service_id": "bis-annual-returns",
         "dashboard_slug": "bis-returns",
