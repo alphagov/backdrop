@@ -68,6 +68,7 @@ def _get_stripped_down_data_for_data_point_name_only(
     for field in ADDITIONAL_FIELDS:
         if field in latest_data_points:
             new_data[field] = latest_data_points[field]
+    import pdb; pdb.set_trace()
     new_data['dashboard_slug'] = dashboard_config['slug']
     new_data['_id'] = encode_id(
         new_data['dashboard_slug'],
@@ -96,38 +97,38 @@ def _get_dashboard_configs_with_data(ids_with_data):
     return dashboard_configs_with_data
 
 
-def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
+def _get_data_points_for_each_tx_metric(data, transform, data_set_config,
+                                        dashboard_config):
     ids_with_data = _service_ids_with_data(
         data)
-    dashboard_configs_with_data = _get_dashboard_configs_with_data(
-        ids_with_data)
+    dashboard_data = ids_with_data[0][1]
     for data_point_name in REQUIRED_DATA_POINTS:
-        for dashboard_config, dashboard_data in dashboard_configs_with_data:
-            latest_data = _get_latest_data_point(
-                dashboard_data,
-                data_point_name)
-            if not latest_data:
-                continue
-            datum = _get_stripped_down_data_for_data_point_name_only(
-                dashboard_config, latest_data, data_point_name)
-            # we need to look at whether this is later than the latest
-            # data currently present on the output data set as
-            # for things like digital-takeup the  transactions explorer
-            # dataset is not the only source.
-            if datum and is_latest_data(
-                    {'data_group': transform['output']['data-group'],
-                     'data_type': transform['output']['data-type']},
-                    transform,
-                    datum,
-                    additional_read_params={
-                        'filter_by': 'dashboard_slug:{}'.format(
-                            datum['dashboard_slug'])}):
-                yield datum
+        latest_data = _get_latest_data_point(
+            dashboard_data,
+            data_point_name)
+        if not latest_data:
+            continue
+        datum = _get_stripped_down_data_for_data_point_name_only(
+            dashboard_config, latest_data, data_point_name)
+        # we need to look at whether this is later than the latest
+        # data currently present on the output data set as
+        # for things like digital-takeup the  transactions explorer
+        # dataset is not the only source.
+        if datum and is_latest_data(
+                {'data_group': transform['output']['data-group'],
+                 'data_type': transform['output']['data-type']},
+                transform,
+                datum,
+                additional_read_params={
+                    'filter_by': 'dashboard_slug:{}'.format(
+                        datum['dashboard_slug'])}):
+            yield datum
 
 
-def compute(data, transform, data_set_config=None):
+def compute(data, transform, dashboard_config, data_set_config=None):
     return [datum for datum
             in _get_data_points_for_each_tx_metric(
                 data,
                 transform,
-                data_set_config)]
+                data_set_config,
+                dashboard_config)]

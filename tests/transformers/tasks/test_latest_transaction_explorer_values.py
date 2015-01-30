@@ -18,8 +18,13 @@ FIXTURE_PATH = os.path.join(
     'fixtures')
 with open(os.path.join(
         FIXTURE_PATH,
-        'transactions_explorer_example_data.json'), 'r') as f:
+        'data.json'), 'r') as f:
     data = json.loads(f.read())
+
+with open(os.path.join(
+        FIXTURE_PATH,
+        'dashboard.json'), 'r') as f:
+    dashboard_config = json.loads(f.read())
 
 data_to_post = [
     {
@@ -172,6 +177,30 @@ quarterly_data_dashboard_config = [{
 
 
 class ComputeTestCase(unittest.TestCase):
+
+    @patch("performanceplatform.client.DataSet.from_group_and_type")
+    @patch("performanceplatform.client.AdminAPI.get_dashboard_by_tx_id")
+    def test_compute_pre_provided(self, mock_dashboard_finder, mock_dataset):
+        mockdata = Mock()
+        mockdata.get.return_value = {
+            'data': [
+                {
+                    '_count': 1.0,
+                    '_end_at': '2012-01-19T00:00:00+00:00',
+                    '_timestamp': '2012-01-12T00:00:00+00:00'
+                }
+            ]
+        }
+        mock_dataset.return_value = mockdata
+
+        transformed_data = compute(data, {'output': {
+            'data-group': 'transactions-explorer',
+            'data-type': 'spreadsheet'}},
+            dashboard_config)
+
+        import pdb; pdb.set_trace()
+        assert_that(len(transformed_data), is_(13))
+        assert_that(transformed_data, contains_inanyorder(*data_to_post))
 
     @patch("performanceplatform.client.DataSet.from_group_and_type")
     @patch("performanceplatform.client.AdminAPI.get_dashboard_by_tx_id")

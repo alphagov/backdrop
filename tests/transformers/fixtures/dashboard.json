@@ -1,0 +1,1073 @@
+[
+ {
+  "description_extra": "",
+  "strapline": "Dashboard",
+  "description": "Changes to the date or test centre for practical driving or riding tests.",
+  "links": [
+   {
+    "url": "https://www.gov.uk/change-date-practical-driving-test",
+    "type": "transaction",
+    "title": "Practical driving test: changes to bookings"
+   }
+  ],
+  "title": "Practical driving test: changes to bookings",
+  "tagline": "",
+  "organisation": {
+   "abbreviation": "DVSA",
+   "type": {
+    "id": "e0845ea5-cf73-4b63-94b7-55c833876863",
+    "name": "agency"
+   },
+   "id": "b003addb-0226-4e0c-83ae-3883da429995",
+   "parent": {
+    "abbreviation": "DFT",
+    "type": {
+     "id": "c4875643-67c9-4618-ba38-55f7f498f4e0",
+     "name": "department"
+    },
+    "id": "bac2bd05-519b-4857-9efb-939dadf47c1b",
+    "name": "Department for Transport"
+   },
+   "name": "Driver and Vehicle Standards Agency"
+  },
+  "modules": [
+   {
+    "description": "",
+    "data_type": "summaries",
+    "id": "8dd36e18-0eea-4564-bfde-0378690845cf",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport"
+    ],
+    "parent": null,
+    "title": "Transactions per year",
+    "query_parameters": {
+     "sort_by": "_timestamp:descending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:seasonally-adjusted"
+     ]
+    },
+    "modules": [],
+    "slug": "transactions-per-year",
+    "dashboard": {
+     "id": "e595e87d-7eb9-4cd7-800b-a460bac96b4b"
+    },
+    "type": {
+     "id": "9e81e2d1-e818-40b1-b5a0-cfb79c24e687"
+    },
+    "options": {
+     "classes": "cols3",
+     "value-attribute": "number_of_transactions",
+     "format": {
+      "sigfigs": 3,
+      "magnitude": true,
+      "type": "number"
+     }
+    }
+   },
+   {
+    "description": "",
+    "data_type": "summaries",
+    "id": "c2460f26-6d83-4756-9614-10c226706674",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport",
+     "Total cost is the overall cost per year of providing a service, including staff, IT and accommodation costs; the total cost is automatically calculated from volume and cost per transaction figures, and some rounding errors may occur."
+    ],
+    "parent": null,
+    "title": "Total cost",
+    "query_parameters": {
+     "sort_by": "_timestamp:descending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:seasonally-adjusted"
+     ]
+    },
+    "modules": [],
+    "slug": "total-cost",
+    "dashboard": {
+     "id": "e595e87d-7eb9-4cd7-800b-a460bac96b4b"
+    },
+    "type": {
+     "id": "9e81e2d1-e818-40b1-b5a0-cfb79c24e687"
+    },
+    "options": {
+     "classes": "cols3",
+     "value-attribute": "total_cost",
+     "format": {
+      "sigfigs": 3,
+      "magnitude": true,
+      "type": "currency"
+     }
+    }
+   },
+   {
+    "description": "",
+    "data_type": "summaries",
+    "id": "b0756a13-db2f-43de-bc6e-911e127b5d15",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport",
+     "<a href=\"https://www.gov.uk/service-manual/measurement/cost-per-transaction.html\">Cost per transaction</a> is the average cost of providing each successfully completed transaction, across all channels. Staff, IT and accommodation costs should be included."
+    ],
+    "parent": null,
+    "title": "Cost per transaction",
+    "query_parameters": {
+     "sort_by": "_timestamp:descending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:seasonally-adjusted"
+     ]
+    },
+    "modules": [],
+    "slug": "cost-per-transaction",
+    "dashboard": {
+     "id": "e595e87d-7eb9-4cd7-800b-a460bac96b4b"
+    },
+    "type": {
+     "id": "9e81e2d1-e818-40b1-b5a0-cfb79c24e687"
+    },
+    "options": {
+     "classes": "cols3",
+     "value-attribute": "cost_per_transaction",
+     "format": {
+      "pence": true,
+      "type": "currency"
+     }
+    }
+   },
+   {
+    "description": "Total number of transactions each quarter",
+    "data_type": "summaries",
+    "id": "7d5d78c9-c85d-41e4-9962-e6555896cd94",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport"
+    ],
+    "parent": null,
+    "title": "Transactions per quarter",
+    "query_parameters": {
+     "sort_by": "_timestamp:ascending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:quarterly"
+     ]
+    },
+    "modules": [],
+    "slug": "transactions-per-quarter",
+    "dashboard": {
+     "id": "e595e87d-7eb9-4cd7-800b-a460bac96b4b"
+    },
+    "type": {
+     "id": "99d99ec4-0f39-4e8a-8168-fc5fc783ca5b"
+    },
+    "options": {
+     "value-attribute": "number_of_transactions",
+     "axis-period": "quarter"
+    }
+   },
+   {
+    "description": "Digital take-up rates each quarter",
+    "data_type": "summaries",
+    "id": "63d4a888-f398-4d82-b76a-b04006207b34",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport",
+     "<a href=\"https://www.gov.uk/service-manual/measurement/digital-takeup.html\">Digital take-up</a> measures the percentage of completed applications that are made through a digital channel versus non-digital channels."
+    ],
+    "parent": null,
+    "title": "Digital take-up",
+    "query_parameters": {
+     "sort_by": "_timestamp:ascending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:quarterly"
+     ]
+    },
+    "modules": [],
+    "slug": "digital-take-up-per-quarter",
+    "dashboard": {
+     "id": "e595e87d-7eb9-4cd7-800b-a460bac96b4b"
+    },
+    "type": {
+     "id": "99d99ec4-0f39-4e8a-8168-fc5fc783ca5b"
+    },
+    "options": {
+     "value-attribute": "digital_takeup",
+     "axis-period": "quarter",
+     "axes": {
+      "y": [
+       {
+        "label": "Percentage digital take-up"
+       }
+      ]
+     },
+     "format": {
+      "type": "percent"
+     }
+    }
+   }
+  ],
+  "dashboard_type": "high-volume-transaction",
+  "slug": "dft-amend-practical-driving-test",
+  "improve_dashboard_message": true,
+  "customer_type": "Individuals",
+  "costs": "",
+  "page_type": "dashboard",
+  "published": true,
+  "business_model": "Fees and charges",
+  "id": "e595e87d-7eb9-4cd7-800b-a460bac96b4b",
+  "other_notes": ""
+ },
+ {
+  "description_extra": "",
+  "strapline": "Dashboard",
+  "description": "Before you can drive on public roads, you need to show you can drive safely by passing the practical and driving theory tests.<br><br>More performance information for the <strong>practical driving test</strong> can be found <a href='/performance/practical-driving-test'>here</a>.  The performance dashboard for <strong>Practical driving test bookings</strong> can be found <a href='/performance/book-practical-driving-test'>here</a>",
+  "links": [
+   {
+    "url": "https://www.gov.uk/change-date-practical-driving-test",
+    "type": "transaction",
+    "title": "Change the date of your practical driving or riding test"
+   }
+  ],
+  "title": "Practical driving test changes and cancellations",
+  "tagline": "",
+  "organisation": {
+   "abbreviation": "DVSA",
+   "type": {
+    "id": "e0845ea5-cf73-4b63-94b7-55c833876863",
+    "name": "agency"
+   },
+   "id": "b003addb-0226-4e0c-83ae-3883da429995",
+   "parent": {
+    "abbreviation": "DFT",
+    "type": {
+     "id": "c4875643-67c9-4618-ba38-55f7f498f4e0",
+     "name": "department"
+    },
+    "id": "bac2bd05-519b-4857-9efb-939dadf47c1b",
+    "name": "Department for Transport"
+   },
+   "name": "Driver and Vehicle Standards Agency"
+  },
+  "modules": [
+   {
+    "description": "",
+    "data_type": "summaries",
+    "id": "7a75dd7b-a376-4d1d-a50d-7f5183379fb2",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport"
+    ],
+    "parent": null,
+    "title": "Transactions per year",
+    "query_parameters": {
+     "sort_by": "_timestamp:descending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:seasonally-adjusted"
+     ]
+    },
+    "modules": [],
+    "slug": "transactions-per-year",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "9e81e2d1-e818-40b1-b5a0-cfb79c24e687"
+    },
+    "options": {
+     "classes": "cols3",
+     "value-attribute": "number_of_transactions",
+     "format": {
+      "sigfigs": 3,
+      "magnitude": true,
+      "type": "number"
+     }
+    }
+   },
+   {
+    "description": "",
+    "data_type": "summaries",
+    "id": "859264e4-3c6c-4c3d-b484-a66182ae497f",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport",
+     "Total cost is the overall cost per year of providing a service, including staff, IT and accommodation costs; the total cost is automatically calculated from volume and cost per transaction figures, and some rounding errors may occur."
+    ],
+    "parent": null,
+    "title": "Total cost",
+    "query_parameters": {
+     "sort_by": "_timestamp:descending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:seasonally-adjusted"
+     ]
+    },
+    "modules": [],
+    "slug": "total-cost",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "9e81e2d1-e818-40b1-b5a0-cfb79c24e687"
+    },
+    "options": {
+     "classes": "cols3",
+     "value-attribute": "total_cost",
+     "format": {
+      "sigfigs": 3,
+      "magnitude": true,
+      "type": "currency"
+     }
+    }
+   },
+   {
+    "description": "",
+    "data_type": "summaries",
+    "id": "89c851db-14f0-4746-a2c1-002ea33ff7a8",
+    "data_group": "transactional-services",
+    "info": [
+     "Data source: Department for Transport",
+     "<a href=\"https://www.gov.uk/service-manual/measurement/cost-per-transaction.html\">Cost per transaction</a> is the average cost of providing each successfully completed transaction, across all channels. Staff, IT and accommodation costs should be included."
+    ],
+    "parent": null,
+    "title": "Cost per transaction",
+    "query_parameters": {
+     "sort_by": "_timestamp:descending",
+     "filter_by": [
+      "service_id:dft-amend-practical-driving-test",
+      "type:seasonally-adjusted"
+     ]
+    },
+    "modules": [],
+    "slug": "cost-per-transaction",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "9e81e2d1-e818-40b1-b5a0-cfb79c24e687"
+    },
+    "options": {
+     "classes": "cols3",
+     "value-attribute": "cost_per_transaction",
+     "format": {
+      "pence": true,
+      "type": "currency"
+     }
+    }
+   },
+   {
+    "description": "Practical driving test changes and cancellations <span class=\"group0\">online</span> and by <span class=\"group1\">telephone</span>",
+    "data_type": "transactions-by-channel",
+    "id": "8e4bc2c2-5ff7-4515-bded-f53d7a0c9407",
+    "data_group": "driving-test-practical",
+    "info": [
+     "Data source: Driver and Vehicle Standards Agency",
+     "Practical driving test (public users) changes and cancellations, broken down by channel"
+    ],
+    "parent": null,
+    "title": "Public changes/cancellations breakdown",
+    "query_parameters": {
+     "duration": 52,
+     "collect": [
+      "count:sum"
+     ],
+     "group_by": [
+      "channel"
+     ],
+     "period": "week",
+     "filter_by": [
+      "sector:public",
+      "action:change"
+     ]
+    },
+    "modules": [],
+    "slug": "volumetrics",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "6477fdf3-8778-4003-a075-70642091f0e6"
+    },
+    "options": {
+     "category": "channel",
+     "show-total-lines": true,
+     "value-attribute": "count:sum",
+     "axis-period": "month",
+     "axes": {
+      "y": [
+       {
+        "label": "Online",
+        "groupId": "online",
+        "format": "integer"
+       },
+       {
+        "label": "Telephone",
+        "groupId": "phone",
+        "format": "integer"
+       }
+      ],
+      "x": {
+       "label": "Date",
+       "key": [
+        "_start_at",
+        "_end_at"
+       ],
+       "format": "date"
+      }
+     },
+     "use_stack": true,
+     "show-line-labels": true
+    }
+   },
+   {
+    "description": "",
+    "data_type": "digital-takeup",
+    "id": "7c854498-274b-4d84-a664-fd4024e240c4",
+    "data_group": "driving-test-practical-change-practical-driving-test",
+    "info": [
+     "Data source: Driver and Vehicle Standards Agency",
+     "<a href='/service-manual/measurement/digital-takeup' rel='external'>Digital take-up</a> measures the percentage of changed or cancelled bookings that are made through a digital channel versus non-digital channels."
+    ],
+    "parent": null,
+    "title": "Digital take-up",
+    "query_parameters": {
+     "sort_by": "_timestamp:ascending"
+    },
+    "modules": [],
+    "slug": "digital-takeup",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "36546562-b2bd-44a9-b94a-e3cfc472ddf4"
+    },
+    "options": {
+     "format-options": {
+      "type": "percent"
+     },
+     "axes": {
+      "y": [
+       {
+        "label": "Completion percentage"
+       }
+      ],
+      "x": {
+       "label": "Date",
+       "key": [
+        "_start_at",
+        "_end_at"
+       ],
+       "format": "date"
+      }
+     },
+     "value-attribute": "rate"
+    }
+   },
+   {
+    "description": "Practical driving test changes and cancellations <span class=\"group0\">online</span> and by <span class=\"group1\">telephone</span>",
+    "data_type": "transactions-by-channel",
+    "id": "23c6dc56-a083-4891-890c-14005c81c1d3",
+    "data_group": "driving-test-practical",
+    "info": [
+     "Data source: Driver and Vehicle Standards Agency",
+     "Practical driving test (public users) changes and cancellations, broken down by channel"
+    ],
+    "parent": null,
+    "title": "Business changes/cancellations breakdown",
+    "query_parameters": {
+     "duration": 52,
+     "collect": [
+      "count:sum"
+     ],
+     "group_by": [
+      "channel"
+     ],
+     "period": "week",
+     "filter_by": [
+      "sector:business",
+      "action:change"
+     ]
+    },
+    "modules": [],
+    "slug": "business-volumetrics",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "6477fdf3-8778-4003-a075-70642091f0e6"
+    },
+    "options": {
+     "category": "channel",
+     "show-total-lines": true,
+     "value-attribute": "count:sum",
+     "axis-period": "month",
+     "axes": {
+      "y": [
+       {
+        "label": "Online",
+        "groupId": "online",
+        "format": "integer"
+       },
+       {
+        "label": "Telephone",
+        "groupId": "phone",
+        "format": "integer"
+       }
+      ],
+      "x": {
+       "label": "Date",
+       "key": [
+        "_start_at",
+        "_end_at"
+       ],
+       "format": "date"
+      }
+     },
+     "use_stack": true,
+     "show-line-labels": true
+    }
+   },
+   {
+    "description": "Practical driving test changes and cancellations <span class=\"group0\">online</span> and by <span class=\"group1\">telephone</span>",
+    "data_type": "transactions-by-channel",
+    "id": "2d8da1af-892c-4dd9-bbe8-6901657a9c3f",
+    "data_group": "driving-test-practical",
+    "info": [
+     "Data source: Driver and Vehicle Standards Agency",
+     "Practical driving test (public users) changes and cancellations, broken down by channel"
+    ],
+    "parent": null,
+    "title": "Business digital take-up",
+    "query_parameters": {
+     "duration": 52,
+     "collect": [
+      "count:sum"
+     ],
+     "group_by": [
+      "channel"
+     ],
+     "period": "week",
+     "filter_by": [
+      "sector:business",
+      "action:change"
+     ]
+    },
+    "modules": [],
+    "slug": "business-digital-takeup",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "9c84c9ee-8919-4dc4-8c7d-fa08080f2a5a"
+    },
+    "options": {
+     "value-attribute": "count:sum",
+     "matching-attribute": "channel",
+     "axes": {
+      "y": [
+       {
+        "label": "Digital take-up",
+        "key": "completion",
+        "format": "percent"
+       }
+      ],
+      "x": {
+       "label": "Date",
+       "key": [
+        "_start_at",
+        "_end_at"
+       ],
+       "format": "date"
+      }
+     },
+     "numerator-matcher": "online",
+     "denominator-matcher": "[phone|online]",
+     "axis-period": "week"
+    }
+   },
+   {
+    "description": "Performance metrics for the public facing change/cancellation service",
+    "parent": null,
+    "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af",
+    "info": [],
+    "title": "Public digital service",
+    "data_set": null,
+    "query_parameters": null,
+    "modules": [
+     {
+      "description": "Average score of satisfied responses",
+      "data_type": "user-satisfaction-score",
+      "id": "c0ebc164-e015-4468-b711-f681b54fa5a5",
+      "data_group": "change-date-practical-driving-test",
+      "info": [
+       "Data source: GOV.UK user feedback database",
+       "<a href='/service-manual/measurement/user-satisfaction' rel='external'>User satisfaction</a> is measured by surveying users at the point of transaction completion. It is measured on a five-point scale, from most satisfied to least satisfied. The mean of these responses is converted to a percentage for display purposes."
+      ],
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "title": "User satisfaction",
+      "query_parameters": {
+       "sort_by": "_timestamp:ascending"
+      },
+      "modules": [],
+      "slug": "user-satisfaction",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "6eaa00d0-934c-44ea-882e-a150b540169f"
+      },
+      "options": {
+       "trim": false,
+       "migrated": true,
+       "value-attribute": "score",
+       "axis-period": "month",
+       "axes": {
+        "y": [
+         {
+          "label": "User satisfaction",
+          "key": "score",
+          "format": "percent"
+         },
+         {
+          "label": "Very dissatisfied",
+          "key": "rating_1",
+          "format": "integer"
+         },
+         {
+          "label": "Dissatisfied",
+          "key": "rating_2",
+          "format": "integer"
+         },
+         {
+          "label": "Neither satisfied or dissatisfied",
+          "key": "rating_3",
+          "format": "integer"
+         },
+         {
+          "label": "Satisfied",
+          "key": "rating_4",
+          "format": "integer"
+         },
+         {
+          "label": "Very satisfied",
+          "key": "rating_5",
+          "format": "integer"
+         }
+        ],
+        "x": {
+         "label": "Date",
+         "key": "_start_at",
+         "format": "date"
+        }
+       },
+       "total-attribute": "num_responses"
+      }
+     },
+     {
+      "description": "",
+      "data_type": "time-to-complete-by-event",
+      "id": "7fd534d3-bf90-43b6-9fb7-6e074743a3b0",
+      "data_group": "driving-test-practical-public",
+      "info": [
+       "Data source: Google Analytics"
+      ],
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "title": "Average time to complete a booking change",
+      "query_parameters": {
+       "duration": 52,
+       "collect": [
+        "avgSessionDuration:sum"
+       ],
+       "period": "week",
+       "filter_by": [
+        "eventAction:confirm-changes"
+       ]
+      },
+      "modules": [],
+      "slug": "time-to-complete-booking-change",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "36546562-b2bd-44a9-b94a-e3cfc472ddf4"
+      },
+      "options": {
+       "format-options": {
+        "type": "duration",
+        "unit": "m"
+       },
+       "axes": {
+        "y": [
+         {
+          "label": "Average session time"
+         }
+        ],
+        "x": {
+         "label": "Date",
+         "key": [
+          "_start_at",
+          "_end_at"
+         ],
+         "format": "date"
+        }
+       },
+       "value-attribute": "avgSessionDuration:sum"
+      }
+     },
+     {
+      "description": "",
+      "data_type": "time-to-complete-by-event",
+      "id": "8e6a7d14-5579-4bde-a14c-8127fd004902",
+      "data_group": "driving-test-practical-public",
+      "info": [
+       "Data source: Google Analytics"
+      ],
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "title": "Average time to complete a booking cancellation",
+      "query_parameters": {
+       "duration": 52,
+       "collect": [
+        "avgSessionDuration:sum"
+       ],
+       "period": "week",
+       "filter_by": [
+        "eventAction:confirm-cancellation"
+       ]
+      },
+      "modules": [],
+      "slug": "time-to-complete-booking-cancellation",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "36546562-b2bd-44a9-b94a-e3cfc472ddf4"
+      },
+      "options": {
+       "format-options": {
+        "type": "duration",
+        "unit": "m"
+       },
+       "axes": {
+        "y": [
+         {
+          "label": "Average session time"
+         }
+        ],
+        "x": {
+         "label": "Date",
+         "key": [
+          "_start_at",
+          "_end_at"
+         ],
+         "format": "date"
+        }
+       },
+       "value-attribute": "avgSessionDuration:sum"
+      }
+     },
+     {
+      "description": "",
+      "data_type": "completion-rate",
+      "id": "91065fd6-78a8-4435-bfc9-1b230d90f7f3",
+      "data_group": "driving-test-practical-public-change-practical-driving-test",
+      "info": [
+       "Data source: Google Analytics",
+       "<a href='/service-manual/measurement/completion-rate' rel='external'>Completion rate</a> measures the proportion of people who started a change or cancellation of booking and were able to complete it.",
+       "It is calculated as percentage of unique visitors who arrived at the final stage of the service out of those who arrived at the start.",
+       "The change transaction includes 8 possible user actions \u2013 and success does not involve reaching the done page in all cases. This significantly reduces the overall reported completion rate."
+      ],
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "title": "Completion rate",
+      "query_parameters": {
+       "sort_by": "_timestamp:ascending"
+      },
+      "modules": [],
+      "slug": "completion-rate",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "36546562-b2bd-44a9-b94a-e3cfc472ddf4"
+      },
+      "options": {
+       "format-options": {
+        "type": "percent"
+       },
+       "axes": {
+        "y": [
+         {
+          "label": "Completion percentage"
+         }
+        ],
+        "x": {
+         "label": "Date",
+         "key": [
+          "_start_at",
+          "_end_at"
+         ],
+         "format": "date"
+        }
+       },
+       "value-attribute": "rate"
+      }
+     },
+     {
+      "description": "Number of users who completed important steps of the transaction last week",
+      "data_type": "journey",
+      "id": "3411e0f8-fe4a-4a74-bb6a-0dad2845697e",
+      "data_group": "driving-test-practical-public",
+      "info": [
+       "Data source: Google Analytics",
+       "The total number of users who arrived at each step.",
+       "Number of users is measured using the count of unique events from each step.",
+       "The change transaction includes 8 possible user actions \u2013 and success does not involve reaching the done page in all cases. This significantly reduces the overall reported completion rate."
+      ],
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "title": "Users at each step",
+      "query_parameters": {
+       "filter_by": [
+        "eventCategory:pp-change-practical-driving-test-public"
+       ]
+      },
+      "modules": [],
+      "slug": "users-at-each-step",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "fdb98896-0b96-4790-8bc6-9d2fa9295f51"
+      },
+      "options": {
+       "axes": {
+        "y": [
+         {
+          "label": "Access your booking",
+          "groupId": "access-your-booking",
+          "format": "integer"
+         },
+         {
+          "label": "Change booking",
+          "groupId": "change-booking",
+          "format": "integer"
+         },
+         {
+          "label": "Choose test centre",
+          "groupId": "choose-test-centre",
+          "format": "integer"
+         },
+         {
+          "label": "Choose date and time",
+          "groupId": "choose-date-and-time",
+          "format": "integer"
+         },
+         {
+          "label": "Enter your details",
+          "groupId": "enter-your-details",
+          "format": "integer"
+         },
+         {
+          "label": "Enter payment details",
+          "groupId": "enter-payment-details",
+          "format": "integer"
+         },
+         {
+          "label": "Confirm changes",
+          "groupId": "confirm-changes",
+          "format": "integer"
+         },
+         {
+          "label": "Confirm cancellation",
+          "groupId": "confirm-cancellation",
+          "format": "integer"
+         },
+         {
+          "label": "Your test fee will be refunded",
+          "groupId": "your-test-fee-will-be-refunded",
+          "format": "integer"
+         },
+         {
+          "label": "You went away and came back again",
+          "groupId": "you-went-away-and-came-back-again",
+          "format": "integer"
+         }
+        ]
+       },
+       "matching-attribute": "eventAction"
+      }
+     },
+     {
+      "description": "Number of occurences of users selecting online help during the booking change or cancellation process",
+      "data_type": "journey-help",
+      "id": "03650da5-06da-40e5-8920-107bbf75a35a",
+      "data_group": "driving-test-practical-public",
+      "info": [
+       "<li>Data source: <abbr title='Driver and Vehicle Standards Agency'>DVSA</abbr> database</li>",
+       "<li>More than one help use may be logged per user.</li>"
+      ],
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "title": "How help was used",
+      "query_parameters": {
+       "duration": 2,
+       "collect": [
+        "uniqueEvents:sum"
+       ],
+       "group_by": [
+        "eventDetail"
+       ],
+       "period": "week",
+       "filter_by": [
+        "eventCategory:pp-change-practical-driving-test-public",
+        "eventType:help"
+       ]
+      },
+      "modules": [],
+      "slug": "help-usage",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "55086b02-6892-4045-96fb-08e4b225f768"
+      },
+      "options": {
+       "axes": {
+        "y": [
+         {
+          "label": "Volume last week",
+          "key": "uniqueEvents:sum",
+          "format": "integer"
+         },
+         {
+          "label": "Percentage of total help usage",
+          "key": "percentOfTotal(uniqueEvents:sum)",
+          "format": "percent"
+         },
+         {
+          "label": "Change since previous week",
+          "key": "delta(uniqueEvents:sum)",
+          "format": {
+           "showSigns": true,
+           "type": "percent"
+          }
+         }
+        ],
+        "x": {
+         "label": "Help usage",
+         "key": "eventDetail",
+         "format": {
+          "uppercase": [
+           "dvsa"
+          ],
+          "type": "sentence"
+         }
+        }
+       },
+       "sort-by": "uniqueEvents:sum",
+       "sort-order": "descending"
+      }
+     },
+     {
+      "description": "",
+      "parent": {
+       "id": "5bc3368a-afa6-4a91-8be7-37e6e19e83af"
+      },
+      "id": "222174af-7ac9-4d1b-90fa-e983bbd379b1",
+      "info": [
+       "Data source: Pingdom",
+       "Page load time measures the time taken for a sample page within the service to load.",
+       "<a href='/service-manual/operations/uptime-and-availability' rel='external'>Uptime</a> measures the percentage of time that the service was observed to be available.",
+       "This service is only available between 06:00 \u2013 midnight so that overnight processing can take place. This is reflected in the service availability figure."
+      ],
+      "title": "Service availability",
+      "data_set": null,
+      "query_parameters": null,
+      "modules": [],
+      "slug": "service-availability",
+      "dashboard": {
+       "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+      },
+      "type": {
+       "id": "282a6399-c577-4c15-bacf-e539d5d65bff"
+      },
+      "options": {
+       "tabs": [
+        {
+         "data-source": {
+          "data-group": "driving-test-practical-public",
+          "data-type": "monitoring",
+          "query-params": {
+           "period": "day"
+          }
+         },
+         "module-type": "availability",
+         "title": "30 days",
+         "axes": {
+          "x": {
+           "label": "Date",
+           "key": "_timestamp",
+           "format": "date"
+          }
+         },
+         "slug": "30-days",
+         "description": ""
+        },
+        {
+         "data-source": {
+          "data-group": "driving-test-practical-public",
+          "data-type": "monitoring",
+          "query-params": {
+           "period": "hour"
+          }
+         },
+         "module-type": "availability",
+         "title": "24 hours",
+         "axes": {
+          "x": {
+           "label": "Time",
+           "key": "_timestamp",
+           "format": "time"
+          }
+         },
+         "slug": "24-hours",
+         "description": ""
+        }
+       ]
+      }
+     }
+    ],
+    "slug": "public-digital-service",
+    "dashboard": {
+     "id": "5036b5e8-00e4-4f77-8686-55a51dd15025"
+    },
+    "type": {
+     "id": "bc7b8c46-f1c4-49fe-99f7-c6156f459423"
+    },
+    "options": {}
+   }
+  ],
+  "dashboard_type": "transaction",
+  "slug": "change-practical-driving-test",
+  "improve_dashboard_message": true,
+  "customer_type": "Individuals",
+  "costs": "",
+  "page_type": "dashboard",
+  "published": true,
+  "business_model": "Fees and charges",
+  "id": "5036b5e8-00e4-4f77-8686-55a51dd15025",
+  "other_notes": ""
+ }
+]
