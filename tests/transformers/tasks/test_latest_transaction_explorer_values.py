@@ -67,16 +67,6 @@ data_to_post = [
         "type": "seasonally-adjusted"
     },
     {
-        "_id": encode_id('sorn', 'number_of_transactions'),
-        "_timestamp": "2013-04-01T00:00:00+00:00",
-        "end_at": "2012-04-01T00:00:00+00:00",
-        "number_of_transactions": 2262898,
-        "period": "year",
-        "service_id": "sorn-innit",
-        "dashboard_slug": "sorn",
-        "type": "seasonally-adjusted"
-    },
-    {
         "_id": encode_id('sorn', 'total_cost'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "end_at": "2012-04-01T00:00:00+00:00",
@@ -182,7 +172,7 @@ class ComputeTestCase(unittest.TestCase):
             'data-group': 'transactions-explorer',
             'data-type': 'spreadsheet'}})
 
-        assert_that(len(transformed_data), is_(12))
+        assert_that(len(transformed_data), is_(11))
         assert_that(transformed_data, contains_inanyorder(*data_to_post))
 
     @patch("performanceplatform.client.DataSet.from_group_and_type")
