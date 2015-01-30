@@ -80,18 +80,14 @@ def _service_ids_with_data(data):
 
 
 def _get_dashboard_config(service_id):
-    dashboard_configs = admin_api.get_dashboard_by_tx_id(service_id)
-    if dashboard_configs:
-        return dashboard_configs[0]
-    else:
-        return None
+    return admin_api.get_dashboard_by_tx_id(service_id)
 
 
 def _get_dashboard_configs_with_data(ids_with_data):
     dashboard_configs_with_data = []
     for service_id, data in ids_with_data:
-        dashboard_config = _get_dashboard_config(service_id)
-        if dashboard_config:
+        dashboard_configs = _get_dashboard_config(service_id)
+        for dashboard_config in dashboard_configs:
             dashboard_configs_with_data.append((dashboard_config, data))
     return dashboard_configs_with_data
 
