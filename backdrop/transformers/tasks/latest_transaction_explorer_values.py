@@ -5,12 +5,12 @@ from performanceplatform.client import AdminAPI
 from .util import encode_id, group_by, is_latest_data
 
 REQUIRED_DATA_POINTS = [
-    "cost_per_transaction",
-    "digital_cost_per_transaction",
-    "digital_takeup",
-    "number_of_digital_transactions",
-    "number_of_transactions",
-    "total_cost",
+    {'name': "cost_per_transaction", 'ignore': 'quarterly'},
+    {'name': "digital_cost_per_transaction", 'ignore': None},
+    {'name': "digital_takeup", 'ignore': None},
+    {'name': "number_of_digital_transactions", 'ignore': 'quarterly'},
+    {'name': "number_of_transactions", 'ignore': 'quarterly'},
+    {'name': "total_cost", 'ignore': 'quarterly'},
 ]
 
 ADDITIONAL_FIELDS = [
@@ -30,9 +30,17 @@ admin_api = AdminAPI(
 
 
 def _get_latest_data_point(data, data_point_name):
+    def _use_data_point(data_point, name, ignore):
+        has_data = (name in data_point and data_point[name])
+        should_not_be_ignored = (ignore != data_point['type'])
+        return has_data and should_not_be_ignored
+
+    name = data_point_name['name']
+    ignore = data_point_name['ignore']
+
     data.sort(key=lambda item: item['_timestamp'], reverse=True)
     for data_point in data:
-        if data_point_name in data_point and data_point[data_point_name]:
+        if _use_data_point(data_point, name, ignore):
             return data_point
     return None
 
@@ -50,7 +58,7 @@ def _get_stripped_down_data_for_data_point_name_only(
     those if present. If a REQUIRED_FIELD is not found we return None for
     this data_point.
     """
-    required_fields = REQUIRED_FIELDS + [data_point_name]
+    required_fields = REQUIRED_FIELDS + [data_point_name['name']]
     new_data = {}
     for field in required_fields:
         if field in latest_data_points:
@@ -63,7 +71,7 @@ def _get_stripped_down_data_for_data_point_name_only(
     new_data['dashboard_slug'] = dashboard_config['slug']
     new_data['_id'] = encode_id(
         new_data['dashboard_slug'],
-        data_point_name)
+        data_point_name['name'])
     return new_data
 
 

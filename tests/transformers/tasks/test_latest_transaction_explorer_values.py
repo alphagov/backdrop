@@ -23,6 +23,26 @@ with open(os.path.join(
 
 data_to_post = [
     {
+        "_id": encode_id('quarterly-nonsense', 'digital_cost_per_transaction'),
+        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "digital_cost_per_transaction": 2.36,
+        "end_at": "2013-01-01T00:00:00+00:00",
+        "period": "year",
+        "service_id": "service-with-quarterly-data",
+        "dashboard_slug": "quarterly-nonsense",
+        "type": "quarterly"
+    },
+    {
+        "_id": encode_id('quarterly-nonsense', 'digital_takeup'),
+        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "digital_takeup": 0.9756123825537215,
+        "end_at": "2013-01-01T00:00:00+00:00",
+        "period": "year",
+        "service_id": "service-with-quarterly-data",
+        "dashboard_slug": "quarterly-nonsense",
+        "type": "quarterly"
+    },
+    {
         "_id": encode_id('sorn', 'cost_per_transaction'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "cost_per_transaction": 5.2,
@@ -138,6 +158,18 @@ data_to_post = [
     }
 ]
 
+sorn_dashboard_config = [{
+    'slug': 'sorn'
+}]
+
+bis_returns_dashboard_config = [{
+    'slug': 'bis-returns'
+}]
+
+quarterly_data_dashboard_config = [{
+    'slug': 'quarterly-nonsense'
+}]
+
 
 class ComputeTestCase(unittest.TestCase):
 
@@ -156,23 +188,16 @@ class ComputeTestCase(unittest.TestCase):
         }
         mock_dataset.return_value = mockdata
 
-        sorn_dashboard_config = [{
-            'slug': 'sorn'
-        }]
-
-        bis_returns_dashboard_config = [{
-            'slug': 'bis-returns'
-        }]
-
         mock_dashboard_finder.side_effect = lambda x: {
             'bis-annual-returns': bis_returns_dashboard_config,
-            'sorn-innit': sorn_dashboard_config
+            'sorn-innit': sorn_dashboard_config,
+            'service-with-quarterly-data': quarterly_data_dashboard_config
         }.get(x, [])
         transformed_data = compute(data, {'output': {
             'data-group': 'transactions-explorer',
             'data-type': 'spreadsheet'}})
 
-        assert_that(len(transformed_data), is_(11))
+        assert_that(len(transformed_data), is_(13))
         assert_that(transformed_data, contains_inanyorder(*data_to_post))
 
     @patch("performanceplatform.client.DataSet.from_group_and_type")
@@ -193,17 +218,10 @@ class ComputeTestCase(unittest.TestCase):
         }
         mock_dataset.return_value = mockdata
 
-        sorn_dashboard_config = [{
-            'slug': 'sorn'
-        }]
-
-        bis_returns_dashboard_config = [{
-            'slug': 'bis-returns'
-        }]
-
         mock_dashboard_finder.side_effect = lambda x: {
             'bis-annual-returns': bis_returns_dashboard_config,
-            'sorn-innit': sorn_dashboard_config
+            'sorn-innit': sorn_dashboard_config,
+            'service-with-quarterly-data': quarterly_data_dashboard_config
         }.get(x, [])
         transformed_data = compute(data, {'output': {
             'data-group': 'transactions-explorer',
