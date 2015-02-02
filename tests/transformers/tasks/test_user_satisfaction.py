@@ -1,4 +1,5 @@
 import unittest
+from freezegun import freeze_time
 
 from hamcrest import assert_that, is_
 
@@ -40,7 +41,7 @@ data = [
         "total:sum": 10.0
     },
     {
-        "_count": 0.0,
+        "_count": 7.0,
         "_start_at": "2014-12-01T00:00:00+00:00",
         "_end_at": "2014-12-08T00:00:00+00:00",
         "rating_1:sum": None,
@@ -52,8 +53,20 @@ data = [
     },
     {
         "_count": 7.0,
-        "_start_at": "2014-12-01T00:00:00+00:00",
-        "_end_at": "2014-12-08T00:00:00+00:00",
+        "_start_at": "2014-12-08T00:00:00+00:00",
+        "_end_at": "2014-12-15T00:00:00+00:00",
+        "rating_1:sum": 0.0,
+        "rating_2:sum": 0.0,
+        "rating_3:sum": 0.0,
+        "rating_4:sum": 0.0,
+        "rating_5:sum": 0.0,
+        "total:sum": 0.0
+    },
+    # this should be excluded as not yet 7 days
+    {
+        "_count": 3.0,
+        "_start_at": "2014-12-15T00:00:00+00:00",
+        "_end_at": "2014-12-22T00:00:00+00:00",
         "rating_1:sum": 0.0,
         "rating_2:sum": 0.0,
         "rating_3:sum": 0.0,
@@ -65,13 +78,15 @@ data = [
 
 
 class UserSatisfactionTestCase(unittest.TestCase):
+    @freeze_time('2014, 12, 18 00:00:00')
     def test_compute_user_satisfaction(self):
         transformed_data = compute(data, {})
 
         assert_that(len(transformed_data), is_(5))
         assert_that(
             transformed_data[0]['_id'],
-            is_('MjAxNC0xMS0xMFQwMDowMDowMCswMDowMF8yMDE0LTExLTE3VDAwOjAwOjAwKzAwOjAw'))
+            is_("MjAxNC0xMS0xMFQwMDowMDowMCswMDowM"
+                "F8yMDE0LTExLTE3VDAwOjAwOjAwKzAwOjAw"))
         assert_that(
             transformed_data[0]['_timestamp'],
             is_('2014-11-10T00:00:00+00:00'))
