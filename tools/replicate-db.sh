@@ -12,8 +12,7 @@ if [ "$(hostname)" == "development-1" ]; then
 fi
 
 if [ "$(basename $(pwd))" != 'tools' ]; then
-    echo "This script should be run from the backdrop/tools directory!"
-    exit
+    cd $(dirname $0)
 fi
 
 
