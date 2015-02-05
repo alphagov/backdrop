@@ -51,6 +51,7 @@ def get_query_parameters(transform, earliest, latest):
             query_parameters['start_at'] = earliest.isoformat()
             query_parameters['end_at'] = latest.isoformat()
     else:
+        query_parameters['inclusive'] = 'true'
         query_parameters['start_at'] = earliest.isoformat()
         query_parameters['end_at'] = latest.isoformat()
 

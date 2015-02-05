@@ -98,6 +98,7 @@ class DispatchTestCase(unittest.TestCase):
                 'flatten': 'true',
                 'start_at': '2014-12-10T12:00:00+00:00',
                 'end_at': '2014-12-14T12:00:00+00:00',
+                'inclusive': 'true',
             },
         )
         mock_data_set.from_group_and_type.assert_any_call(
