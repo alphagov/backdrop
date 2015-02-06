@@ -3,7 +3,10 @@ import logging
 
 from os import getenv
 
+from statsd import StatsClient
+
 from backdrop.core.log_handler import get_log_file_handler
+from backdrop.core.errors import incr_on_error
 
 from worker import app, config
 
@@ -14,6 +17,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 logger.addHandler(
     get_log_file_handler("log/{}.log".format(GOVUK_ENV), logging.DEBUG))
+
+stats_client = StatsClient(prefix=getenv("GOVUK_STATSD_PREFIX",
+                                         "pp.apps.backdrop.transformers.worker"))
 
 
 @app.task(ignore_result=True)
@@ -36,6 +42,7 @@ def entrypoint(dataset_id, earliest, latest):
             'backdrop.transformers.dispatch.run_transform',
             args=(data_set_config, transform, earliest, latest)
         )
+        stats_client.incr('dispatch')
 
 
 def get_query_parameters(transform, earliest, latest):
@@ -94,6 +101,8 @@ def get_or_get_and_create_output_dataset(transform, input_dataset):
 
 
 @app.task(ignore_result=True)
+@stats_client.timer('run_transform')
+@incr_on_error(stats_client, 'run_transform.error')
 def run_transform(data_set_config, transform, earliest, latest):
     data_set = DataSet.from_group_and_type(
         config.BACKDROP_READ_URL,
@@ -114,3 +123,5 @@ def run_transform(data_set_config, transform, earliest, latest):
         transform,
         data_set_config)
     output_data_set.post(transformed_data)
+
+    stats_client.incr('run_transform.success')
