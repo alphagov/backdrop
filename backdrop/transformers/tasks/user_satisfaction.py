@@ -1,7 +1,4 @@
 from .util import encode_id
-import datetime
-import pytz
-from dateutil import parser
 
 
 def calculate_rating(datum):
@@ -25,22 +22,17 @@ def compute(data, transform, data_set_config=None):
     # Calculate rating and set keys that spotlight expects.
     computed = []
     for datum in data:
-        time_now = datetime.datetime.now(pytz.UTC)
-        end_at = parser.parse(datum['_end_at']).astimezone(pytz.utc)
-        # do not add record if period represented by this record
-        # is not yet finished.
-        if end_at < time_now:
-            computed.append({
-                '_id': encode_id(datum['_start_at'], datum['_end_at']),
-                '_timestamp': datum['_start_at'],
-                '_start_at': datum['_start_at'],
-                '_end_at': datum['_end_at'],
-                'rating_1': datum['rating_1:sum'],
-                'rating_2': datum['rating_2:sum'],
-                'rating_3': datum['rating_3:sum'],
-                'rating_4': datum['rating_4:sum'],
-                'rating_5': datum['rating_5:sum'],
-                'num_responses': datum['total:sum'],
-                'score': calculate_rating(datum),
-            })
+        computed.append({
+            '_id': encode_id(datum['_start_at'], datum['_end_at']),
+            '_timestamp': datum['_start_at'],
+            '_start_at': datum['_start_at'],
+            '_end_at': datum['_end_at'],
+            'rating_1': datum['rating_1:sum'],
+            'rating_2': datum['rating_2:sum'],
+            'rating_3': datum['rating_3:sum'],
+            'rating_4': datum['rating_4:sum'],
+            'rating_5': datum['rating_5:sum'],
+            'num_responses': datum['total:sum'],
+            'score': calculate_rating(datum),
+        })
     return computed
