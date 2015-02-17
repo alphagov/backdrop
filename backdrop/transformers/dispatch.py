@@ -1,10 +1,13 @@
 import importlib
 import logging
+import pytz
 
+from datetime import datetime
 from os import getenv
 
 from statsd import StatsClient
 
+from backdrop.core.timeseries import parse_period
 from backdrop.core.log_handler import get_log_file_handler
 from backdrop.core.errors import incr_on_error
 
@@ -45,6 +48,12 @@ def entrypoint(dataset_id, earliest, latest):
         stats_client.incr('dispatch')
 
 
+def _now():
+    now = datetime.utcnow()
+    now = now.replace(tzinfo=pytz.utc)
+    return now
+
+
 def get_query_parameters(transform, earliest, latest):
     query_parameters = transform.get('query-parameters', {})
     query_parameters['flatten'] = 'true'
@@ -58,9 +67,22 @@ def get_query_parameters(transform, earliest, latest):
             query_parameters['start_at'] = earliest.isoformat()
             query_parameters['end_at'] = latest.isoformat()
     else:
+        if 'period' in query_parameters:
+            period = parse_period(query_parameters['period'])
+            start_at = period.start(earliest).isoformat()
+            end_datetime = period.end(latest)
+
+            if end_datetime > _now():
+                end_datetime = period.start(latest)
+
+            end_at = end_datetime.isoformat()
+        else:
+            start_at = earliest.isoformat()
+            end_at = latest.isoformat()
+
         query_parameters['inclusive'] = 'true'
-        query_parameters['start_at'] = earliest.isoformat()
-        query_parameters['end_at'] = latest.isoformat()
+        query_parameters['start_at'] = start_at
+        query_parameters['end_at'] = end_at
 
     return query_parameters
 
