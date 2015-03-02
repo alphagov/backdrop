@@ -1,5 +1,4 @@
 import unittest
-from freezegun import freeze_time
 
 from hamcrest import assert_that, is_
 
@@ -61,24 +60,11 @@ data = [
         "rating_4:sum": 0.0,
         "rating_5:sum": 0.0,
         "total:sum": 0.0
-    },
-    # this should be excluded as not yet 7 days
-    {
-        "_count": 3.0,
-        "_start_at": "2014-12-15T00:00:00+00:00",
-        "_end_at": "2014-12-22T00:00:00+00:00",
-        "rating_1:sum": 0.0,
-        "rating_2:sum": 0.0,
-        "rating_3:sum": 0.0,
-        "rating_4:sum": 0.0,
-        "rating_5:sum": 0.0,
-        "total:sum": 0.0
     }
 ]
 
 
 class UserSatisfactionTestCase(unittest.TestCase):
-    @freeze_time('2014, 12, 18 00:00:00')
     def test_compute_user_satisfaction(self):
         transformed_data = compute(data, {})
 

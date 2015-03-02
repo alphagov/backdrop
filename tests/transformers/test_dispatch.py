@@ -2,6 +2,7 @@ import pytz
 import unittest
 
 from datetime import datetime
+from freezegun import freeze_time
 from hamcrest import assert_that, is_, has_entries, equal_to
 from mock import patch, MagicMock
 
@@ -50,6 +51,7 @@ class DispatchTestCase(unittest.TestCase):
     @patch('backdrop.transformers.dispatch.AdminAPI')
     @patch('backdrop.transformers.dispatch.DataSet')
     @patch('backdrop.transformers.tasks.debug.logging')
+    @freeze_time('2014-12-14')
     def test_run_transform(
             self,
             mock_logging_task,
@@ -96,8 +98,8 @@ class DispatchTestCase(unittest.TestCase):
             query_parameters={
                 'period': 'day',
                 'flatten': 'true',
-                'start_at': '2014-12-10T12:00:00+00:00',
-                'end_at': '2014-12-14T12:00:00+00:00',
+                'start_at': '2014-12-10T00:00:00+00:00',
+                'end_at': '2014-12-14T00:00:00+00:00',
                 'inclusive': 'true',
             },
         )
@@ -288,5 +290,41 @@ class GetQueryParametersTestCase(unittest.TestCase):
         assert_that(query_parameters, has_entries({
             'start_at': '2014-12-14T12:00:00+00:00',
             'end_at': '2014-12-14T12:00:00+00:00',
+            'inclusive': 'true',
+        }))
+
+    @freeze_time('2015-02-18')
+    def test_period_no_intra_week(self):
+        earliest = datetime(2015, 2, 10, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2015, 2, 17, 12, 00, 00, tzinfo=pytz.utc)
+        transform = {
+            'query-parameters': {
+                'period': 'week',
+            }
+        }
+
+        query_parameters = get_query_parameters(transform, earliest, latest)
+
+        assert_that(query_parameters, has_entries({
+            'start_at': '2015-02-09T00:00:00+00:00',
+            'end_at': '2015-02-16T00:00:00+00:00',
+            'inclusive': 'true',
+        }))
+
+    @freeze_time('2015-02-24')
+    def test_period(self):
+        earliest = datetime(2015, 2, 10, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2015, 2, 17, 12, 00, 00, tzinfo=pytz.utc)
+        transform = {
+            'query-parameters': {
+                'period': 'week',
+            }
+        }
+
+        query_parameters = get_query_parameters(transform, earliest, latest)
+
+        assert_that(query_parameters, has_entries({
+            'start_at': '2015-02-09T00:00:00+00:00',
+            'end_at': '2015-02-23T00:00:00+00:00',
             'inclusive': 'true',
         }))
