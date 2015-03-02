@@ -5,6 +5,7 @@ from bson import ObjectId
 
 from flask import Flask, jsonify, request
 from flask_featureflags import FeatureFlag
+from backdrop.core.profutils import profiler
 
 from .query import parse_query_from_request
 from .validation import validate_request_args
@@ -183,6 +184,7 @@ def query(data_set_name):
 
 
 @crossdomain(origin='*')
+@profiler('fetch')
 def fetch(data_set_config):
     error_text = 'data_set not found'
 
