@@ -39,6 +39,14 @@ def set_up_logging(app, env):
     app.after_request(create_response_logger(app))
 
 
+def set_up_audit_logging(app, env):
+    logger = logging.getLogger('backdrop.write.audit')
+    logger.setLevel(logging._levelNames['INFO'])
+    logger.addHandler(
+        get_json_log_handler("log/audit/%s.log.json" % env, app.name))
+    app.audit_logger = logger
+
+
 def create_request_logger(app):
     def log_request():
         app.logger.info("request: %s - %s" % (request.method, request.url),
