@@ -48,6 +48,7 @@ admin_api = client.AdminAPI(
 )
 
 log_handler.set_up_logging(app, GOVUK_ENV)
+log_handler.set_up_audit_logging(app, GOVUK_ENV)
 
 app.url_map.converters["data_set"] = DataSetConverter
 
@@ -86,6 +87,10 @@ def uncaught_error_handler(e):
 @app.errorhandler(404)
 @app.errorhandler(405)
 def http_error_handler(e):
+    if e.code in [401, 403]:
+        name_or_path = getattr(g, 'data_set_name', request.path)
+        app.audit_logger.info("Bad auth", extra={'data_set': name_or_path})
+
     if e.code == 401:
         description = getattr(e, 'description',
                               'Bad or missing Authorization header')
@@ -204,6 +209,7 @@ def delete_collection_by_data_set_name(data_set_name):
     if not storage.data_set_exists(data_set_name):
         abort(404, 'No collection exists with name "{}"'.format(data_set_name))
 
+    audit_delete(data_set_name)
     storage.delete_data_set(data_set_name)
 
     return jsonify(status='ok', message='Deleted {}'.format(data_set_name))
@@ -275,12 +281,14 @@ def _validate_auth(data_set_config):
 
 
 def _append_to_data_set(data_set_config, data):
+    audit_append(data_set_config['name'], data)
     data_set = DataSet(storage, data_set_config)
     data_set.create_if_not_exists()
     return data_set.store(data)
 
 
 def _empty_data_set(data_set_config):
+    audit_delete(data_set_config['name'])
     data_set = DataSet(storage, data_set_config)
     data_set.create_if_not_exists()
     data_set.empty()
@@ -337,6 +345,23 @@ def trigger_transforms(data_set_config, data=[], earliest=None, latest=None):
     if earliest is not None and latest is not None:
         celery_app.send_task('backdrop.transformers.dispatch.entrypoint',
                              args=(data_set_config['name'], earliest, latest))
+
+
+def audit_append(data_set_name, data):
+    start_at, end_at = parse_bounding_dates(data)
+    extra = {
+        'data_set': data_set_name,
+        'start_at': start_at,
+        'end_at': end_at,
+        'datapoints': len(data),
+    }
+    app.audit_logger.info("Data append action", extra=extra)
+
+
+def audit_delete(data_set_name):
+    app.audit_logger.info("Data delete action", extra={
+        'data_set': data_set_name
+    })
 
 
 def start(port):
