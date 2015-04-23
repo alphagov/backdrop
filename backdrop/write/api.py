@@ -348,14 +348,15 @@ def trigger_transforms(data_set_config, data=[], earliest=None, latest=None):
 
 
 def audit_append(data_set_name, data):
-    start_at, end_at = parse_bounding_dates(data)
-    extra = {
-        'data_set': data_set_name,
-        'start_at': start_at,
-        'end_at': end_at,
-        'datapoints': len(data),
-    }
-    app.audit_logger.info("Data append action", extra=extra)
+    if data:
+        start_at, end_at = parse_bounding_dates(data)
+        extra = {
+            'data_set': data_set_name,
+            'start_at': start_at,
+            'end_at': end_at,
+            'datapoints': len(data),
+        }
+        app.audit_logger.info("Data append action", extra=extra)
 
 
 def audit_delete(data_set_name):
