@@ -118,7 +118,7 @@ def validate_record_data(data):
                 '_end_at is not a valid datetime object')
 
         if key == '_id' and not value_is_valid_id(value):
-            return invalid('_id is not a valid id')
+            return invalid('_id "{0}" is not a valid id'.format(value))
 
     return valid()
 
