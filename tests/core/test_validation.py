@@ -190,7 +190,7 @@ class TestValidateRecordData(unittest.TestCase):
             '_id': 'invalid id'
         })
         assert_that(validation_result,
-                    is_invalid_with_message("_id is not a valid id"))
+                    is_invalid_with_message("_id \"invalid id\" is not a valid id"))
 
     def test_objects_with_unrecognised_internal_keys_are_disallowed(self):
         validation_result = validate_record_data({
