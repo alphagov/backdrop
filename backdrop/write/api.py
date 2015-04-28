@@ -351,6 +351,7 @@ def audit_append(data_set_name, data):
     if data:
         start_at, end_at = parse_bounding_dates(data)
         extra = {
+            'token': request.headers.get('Authorization'),
             'data_set': data_set_name,
             'start_at': start_at,
             'end_at': end_at,
@@ -361,7 +362,8 @@ def audit_append(data_set_name, data):
 
 def audit_delete(data_set_name):
     app.audit_logger.info("Data delete action", extra={
-        'data_set': data_set_name
+        'token': request.headers.get('Authorization'),
+        'data_set': data_set_name,
     })
 
 
