@@ -31,9 +31,8 @@ admin_api = AdminAPI(
 
 def _get_latest_data_point(data, data_point_name):
     def _use_data_point(data_point, name, ignore):
-        has_data = (name in data_point and data_point[name])
         should_not_be_ignored = (ignore != data_point['type'])
-        return has_data and should_not_be_ignored
+        return should_not_be_ignored
 
     name = data_point_name['name']
     ignore = data_point_name['ignore']
@@ -64,7 +63,7 @@ def _get_stripped_down_data_for_data_point_name_only(
         if field in latest_data_points:
             new_data[field] = latest_data_points[field]
         else:
-            return None
+            new_data[field] = None
     for field in ADDITIONAL_FIELDS:
         if field in latest_data_points:
             new_data[field] = latest_data_points[field]
