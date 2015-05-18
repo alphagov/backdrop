@@ -83,7 +83,7 @@ Feature: grouping queries for read api
          then I should get back a status of "200"
           and the JSON should have "0" results
 
-
+    @wip
     Scenario: subgroups should contain _count
         Given "subgroup.json" is in "weekly" data_set
          when I go to "/weekly?limit=1&period=month&group_by=organisation_acronym&filter_by=organisation_acronym%3Aacas&collect=comment_count%3Asum&duration=13"
