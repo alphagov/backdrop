@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+set -euo pipefail
+
 #
 # Replicate backdrop mongo db from a source host to a target host.
 # Useful to import data from the preview environment to the development
