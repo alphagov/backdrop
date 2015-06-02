@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+set -euo pipefail
+
 #
 # Replicate backdrop mongo db from a source host to a target host.
 # Useful to import data from the preview environment to the development
@@ -62,6 +64,10 @@ tar xzvf $FILENAME
 if [ -z "$2" ]; then
     pushd ../../pp-puppet/
     vagrant ssh development-1 -c "cd /var/apps/backdrop/tools && mongorestore --drop ${DUMPDIR}"
+    popd
+elif [ "$2" = 'govuk_dev' ]; then
+    pushd ../../puppet/development
+    vagrant ssh -c "cd /var/govuk/backdrop/tools && mongorestore --drop ${DUMPDIR}"
     popd
 else
     mongorestore --drop -h $DESTINATION_HOST $DUMPDIR
