@@ -6,7 +6,7 @@
 
 [![Code Health](https://landscape.io/github/alphagov/backdrop/master/landscape.png)](https://landscape.io/github/alphagov/backdrop/master)
 
-##What is it?
+## What is it?
 
 Backdrop is a datastore built with Python and MongoDB. It is made up of two separately deployable APIs for reading and writing data over HTTP. The plan is to be able to gather data from a variety of sources and then aggregate and compare this data in useful ways.
 
@@ -91,6 +91,38 @@ command
 ```
 curl -X PUT -d "[]" https://{backdrop_url}/data/<data-group>/<data-type> -H 'Authorization: Bearer <token-from-stagecraft>' -H 'Content-Type: application/json'
 ```
+
+## Triggering a transform manually
+
+A transform occurs when data is written to in Backdrop. The transform applies
+calculations to the data and writes the results to a second dataset.
+
+You may wish to trigger a transform manually if data is missing from a output
+data set.
+
+Transformations are configured in [Stagecraft][] via the API or Django admin
+application.
+
+[Stagecraft]: https://github.com/alphagov/stagecraft
+
+1. Log in to the Stagecraft Django admin application to obtain a bearer token
+   for the source data set:
+
+    a. Select 'Data sets' from the 'Datasets' section in the main menu.
+    b. Search for the source data set
+    c. Make a note of the data group and data type for the data set you wish to
+      transform
+    d. Click on the name of the data set
+    e. Copy the bearer token from the form field
+
+1. Run the following command, replacing the fields in capitals:
+
+   ```
+   curl-H 'Authorization: Bearer <INSERT BEARER TOKEN HERE>' \
+     -H 'content-type: application/json' \
+     -d '{"_start_at": "2012-01-01T00:00:00Z", "_end_at": "2015-03-20T00:00:00Z"}' \
+     https://www.performance.service.gov.uk/data/<DATA GROUP>/<DATA TYPE>/transform
+   ```
 
 ## Celery worker
 
