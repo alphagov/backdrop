@@ -46,6 +46,28 @@ class PostDataTestCase(unittest.TestCase):
         assert_that( response, is_unauthorized())
         assert_that( response, is_error_response())
 
+    @fake_data_set_exists("foo", bearer_token="")
+    def test_authorization_header_must_not_be_empty(self):
+        response = self.app.post(
+            '/foo',
+            data='[]',
+            headers=[('Authorization', 'Bearer')],
+        )
+
+        assert_that( response, is_unauthorized())
+        assert_that( response, is_error_response())
+
+    @fake_data_set_exists("foo", bearer_token=None)
+    def test_authorization_header_must_not_be_none(self):
+        response = self.app.post(
+            '/foo',
+            data='[]',
+            headers=[('Authorization', 'Bearer')],
+        )
+
+        assert_that( response, is_unauthorized())
+        assert_that( response, is_error_response())
+
     @fake_data_set_exists("foo", bearer_token="foo-bearer-token")
     def test_authorization_header_must_match_server_side_value(self):
         response = self.app.post(
