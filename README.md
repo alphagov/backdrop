@@ -100,7 +100,7 @@ calculations to the data and writes the results to a second dataset.
 You may wish to trigger a transform manually if data is missing from a output
 data set.
 
-Transformations are configured in [Stagecraft][] via the API or Django admin
+Tranforms are configured in [Stagecraft][] via the API or Django admin
 application.
 
 [Stagecraft]: https://github.com/alphagov/stagecraft
