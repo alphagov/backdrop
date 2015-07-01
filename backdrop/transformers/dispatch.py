@@ -107,11 +107,18 @@ def get_or_get_and_create_output_dataset(transform, input_dataset):
     )
     output_data_set_config = admin_api.get_data_set(output_group, output_type)
     if not output_data_set_config:
-        data_set_config = dict(input_dataset.items() + {
+        data_set_config = {
             'data_type': output_type,
             'data_group': output_group,
-        }.items())
-        del(data_set_config['name'])
+            'bearer_token': input_dataset['bearer_token'],
+            'realtime': input_dataset['realtime'],
+            'published': input_dataset['published'],
+            'max_age_expected': input_dataset['max_age_expected'],
+        }
+
+        if 'capped_size' in input_dataset and input_dataset['capped_size']:
+            data_set_config['capped_size'] = input_dataset['capped_size']
+
         output_data_set_config = admin_api.create_data_set(data_set_config)
 
     return DataSet.from_group_and_type(

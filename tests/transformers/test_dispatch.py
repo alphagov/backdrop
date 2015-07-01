@@ -245,12 +245,7 @@ class DispatchTestCase(unittest.TestCase):
             'data_type': 'wibble',
             'bearer_token': 'foo2',
             'realtime': False,
-            'auto_ids': 'aa,bb',
             'max_age_expected': 86400,
-            'upload_filters': 'backdrop.filter.1',
-            'queryable': True,
-            'upload_format': '',
-            'raw_queries_allowed': True,
             'published': False
         })
         mock_data_set.from_group_and_type.assert_called_once_with(
