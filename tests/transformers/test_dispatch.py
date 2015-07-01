@@ -111,6 +111,74 @@ class DispatchTestCase(unittest.TestCase):
     @patch('backdrop.transformers.dispatch.AdminAPI')
     @patch('backdrop.transformers.dispatch.DataSet')
     @patch('backdrop.transformers.tasks.debug.logging')
+    @freeze_time('2014-12-14')
+    def test_run_transform_applies_additional_fields(
+            self,
+            mock_logging_task,
+            mock_data_set,
+            mock_adminAPI):
+        mock_logging_task.return_value = [{'new-data': 'point'}]
+        adminAPI_instance = mock_adminAPI.return_value
+        adminAPI_instance.get_data_set.return_value = {
+            "bearer_token": "foo2",
+        }
+        data_set_instance = MagicMock()
+        data_set_instance.get.return_value = {
+            'data': [
+                {'data': 'point'},
+            ],
+        }
+        mock_data_set.from_group_and_type.return_value = data_set_instance
+
+        earliest = datetime(2014, 12, 10, 12, 00, 00, tzinfo=pytz.utc)
+        latest = datetime(2014, 12, 14, 12, 00, 00, tzinfo=pytz.utc)
+
+        run_transform({
+            'data_group': 'group',
+            'data_type': 'type',
+            'token': 'foo',
+        }, {
+            'type': {
+                'function': 'backdrop.transformers.tasks.debug.logging',
+            },
+            'query-parameters': {
+                'period': 'day',
+            },
+            'options': {
+                'additionalFields': {
+                    'foo': 'bar',
+                }
+            },
+            'output': {
+                'data-group': 'other-group',
+                'data-type': 'other-type',
+            },
+        }, earliest, latest)
+
+        mock_data_set.from_group_and_type.assert_any_call(
+            'http://backdrop/data', 'group', 'type',
+        )
+        data_set_instance.get.assert_called_with(
+            query_parameters={
+                'period': 'day',
+                'flatten': 'true',
+                'start_at': '2014-12-10T00:00:00+00:00',
+                'end_at': '2014-12-14T00:00:00+00:00',
+                'inclusive': 'true',
+            },
+        )
+        mock_data_set.from_group_and_type.assert_any_call(
+            'http://backdrop/data', 'other-group', 'other-type', token='foo2',
+        )
+        data_set_instance.post.assert_called_with([{
+            '_id': 'X2ZvbzpiYXI=',
+            'new-data': 'point',
+            'foo': 'bar'
+        }])
+
+    @patch('backdrop.transformers.dispatch.AdminAPI')
+    @patch('backdrop.transformers.dispatch.DataSet')
+    @patch('backdrop.transformers.tasks.debug.logging')
     def test_run_transform_no_output_group(
             self,
             mock_logging_task,
