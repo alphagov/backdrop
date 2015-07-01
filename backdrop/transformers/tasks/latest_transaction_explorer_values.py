@@ -31,8 +31,9 @@ admin_api = AdminAPI(
 
 def _get_latest_data_point(data, data_point_name):
     def _use_data_point(data_point, name, ignore):
+        has_data = (name in data_point and data_point[name] is not None)
         should_not_be_ignored = (ignore != data_point['type'])
-        return should_not_be_ignored
+        return has_data and should_not_be_ignored
 
     name = data_point_name['name']
     ignore = data_point_name['ignore']

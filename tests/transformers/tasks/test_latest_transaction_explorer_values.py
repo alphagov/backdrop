@@ -24,7 +24,7 @@ with open(os.path.join(
 data_to_post = [
     {
         "_id": encode_id('quarterly-nonsense', 'digital_cost_per_transaction'),
-        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "_timestamp": "2014-12-12T00:00:00+00:00",
         "digital_cost_per_transaction": 2.36,
         "end_at": "2013-01-01T00:00:00+00:00",
         "period": "year",
@@ -34,8 +34,8 @@ data_to_post = [
     },
     {
         "_id": encode_id('quarterly-nonsense', 'digital_takeup'),
-        "_timestamp": "2012-12-12T00:00:00+00:00",
-        "digital_takeup": 0.9756123825537215,
+        "_timestamp": "2013-12-12T00:00:00+00:00",
+        "digital_takeup": 0,
         "end_at": "2013-01-01T00:00:00+00:00",
         "period": "year",
         "service_id": "service-with-quarterly-data",
@@ -46,7 +46,7 @@ data_to_post = [
         "_id": encode_id(
             'quarterly-nonsense2',
             'digital_cost_per_transaction'),
-        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "_timestamp": "2014-12-12T00:00:00+00:00",
         "digital_cost_per_transaction": 2.36,
         "end_at": "2013-01-01T00:00:00+00:00",
         "period": "year",
@@ -56,8 +56,8 @@ data_to_post = [
     },
     {
         "_id": encode_id('quarterly-nonsense2', 'digital_takeup'),
-        "_timestamp": "2012-12-12T00:00:00+00:00",
-        "digital_takeup": 0.9756123825537215,
+        "_timestamp": "2013-12-12T00:00:00+00:00",
+        "digital_takeup": 0,
         "end_at": "2013-01-01T00:00:00+00:00",
         "period": "year",
         "service_id": "service-with-quarterly-data",
@@ -119,16 +119,6 @@ data_to_post = [
         "type": "seasonally-adjusted"
     },
     {
-        "_id": encode_id('sorn', 'number_of_transactions'),
-        '_timestamp': u'2013-04-01T00:00:00+00:00',
-        'period': u'year',
-        'end_at': u'2012-04-01T00:00:00+00:00',
-        'number_of_transactions': None,
-        'dashboard_slug': 'sorn',
-        'service_id': u'sorn-innit',
-        'type': u'seasonally-adjusted'
-    },
-    {
         "_id": encode_id('bis-returns', 'cost_per_transaction'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "cost_per_transaction": 5.2,
@@ -160,9 +150,9 @@ data_to_post = [
     },
     {
         "_id": encode_id('bis-returns', 'number_of_digital_transactions'),
-        "_timestamp": "2013-04-01T00:00:00+00:00",
-        "end_at": "2012-04-01T00:00:00+00:00",
-        "number_of_digital_transactions": None,
+        "_timestamp": "2012-12-12T00:00:00+00:00",
+        "end_at": "2013-01-01T00:00:00+00:00",
+        "number_of_digital_transactions": 2301214,
         "period": "year",
         "service_id": "bis-annual-returns",
         "dashboard_slug": "bis-returns",
