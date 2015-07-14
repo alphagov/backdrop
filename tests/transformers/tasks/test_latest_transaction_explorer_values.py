@@ -177,6 +177,16 @@ data_to_post = [
         "dashboard_slug": "bis-returns",
         "total_cost": 11767069.6,
         "type": "seasonally-adjusted"
+    },
+    {
+        'number_of_digital_transactions': None,
+        '_timestamp': u'2013-04-01T00:00:00+00:00',
+        'period': u'year',
+        'end_at': u'2012-04-01T00:00:00+00:00',
+        'dashboard_slug': 'bis-returns',
+        'service_id': u'bis-annual-returns',
+        "_id": encode_id('bis-returns', 'number_of_digital_transactions'),
+        'type': u'seasonally-adjusted'
     }
 ]
 

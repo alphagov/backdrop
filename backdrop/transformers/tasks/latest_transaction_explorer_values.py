@@ -63,7 +63,7 @@ def _get_stripped_down_data_for_data_point_name_only(
         if field in latest_data_points:
             new_data[field] = latest_data_points[field]
         else:
-            return None
+            new_data[field] = None
     for field in ADDITIONAL_FIELDS:
         if field in latest_data_points:
             new_data[field] = latest_data_points[field]
