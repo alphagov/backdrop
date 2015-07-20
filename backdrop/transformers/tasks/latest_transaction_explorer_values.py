@@ -20,16 +20,12 @@ ADDITIONAL_FIELDS = [
     "type"
 ]
 
-REQUIRED_FIELDS = [
-    "_timestamp",
-]
-
 admin_api = AdminAPI(
     config.STAGECRAFT_URL,
     config.STAGECRAFT_OAUTH_TOKEN)
 
 
-def _get_latest_data_point(data, data_point_name):
+def _get_latest_data_point(sorted_data, data_point_name):
     def _use_data_point(data_point, name, ignore):
         should_not_be_ignored = (ignore != data_point['type'])
         return should_not_be_ignored
@@ -37,30 +33,45 @@ def _get_latest_data_point(data, data_point_name):
     name = data_point_name['name']
     ignore = data_point_name['ignore']
 
-    data.sort(key=lambda item: item['_timestamp'], reverse=True)
-    for data_point in data:
+    # sorted_data should be pre sorted so
+    # the first returned is always the most recent
+    for data_point in sorted_data:
         if _use_data_point(data_point, name, ignore):
             return data_point
     return None
 
 
+def _up_to_date(latest_data_points,
+                latest_quarter,
+                latest_seasonally_adjusted):
+    if latest_data_points['type'] == 'seasonally-adjusted':
+        return latest_data_points['_timestamp'] == latest_seasonally_adjusted
+    else:
+        return latest_data_points['_timestamp'] == latest_quarter
+
+
 def _get_stripped_down_data_for_data_point_name_only(
         dashboard_config,
         latest_data_points,
-        data_point_name):
+        data_point_name,
+        latest_quarter,
+        latest_seasonally_adjusted):
     """
     Builds up backdrop ready datum for a single transaction explorer metric.
 
     It does this by iterating through the passed in data_point_name
-    and all the REQUIRED_FIELDS and building up a new dict based on
+    and building up a new dict based on
     these key: value pairings. We then loop through additional fields and add
-    those if present. If a REQUIRED_FIELD is not found we return None for
-    this data_point.
+    those if present. If a required_field is not found we return
+    a dict with a value of None for this data_point.
     """
-    required_fields = REQUIRED_FIELDS + [data_point_name['name']]
+    required_fields = [data_point_name['name']]
     new_data = {}
     for field in required_fields:
-        if field in latest_data_points:
+        if field in latest_data_points and _up_to_date(
+                latest_data_points,
+                latest_quarter,
+                latest_seasonally_adjusted):
             new_data[field] = latest_data_points[field]
         else:
             new_data[field] = None
@@ -68,6 +79,12 @@ def _get_stripped_down_data_for_data_point_name_only(
         if field in latest_data_points:
             new_data[field] = latest_data_points[field]
     new_data['dashboard_slug'] = dashboard_config['slug']
+
+    if latest_data_points['type'] == 'seasonally-adjusted':
+        new_data['_timestamp'] = latest_seasonally_adjusted
+    else:
+        new_data['_timestamp'] = latest_quarter
+
     new_data['_id'] = encode_id(
         new_data['dashboard_slug'],
         data_point_name['name'])
@@ -92,10 +109,25 @@ def _get_dashboard_configs_with_data(ids_with_data):
 
 
 def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
-    ids_with_data = _service_ids_with_data(
-        data)
+    # This sorted should be preserved through the grouping by service id
+    # and then the creating a (dashboard_config, data) tuple. That way, get
+    # _get_latest_data_point should not need to sort itself.
+    data_ordered_by_timestamp = sorted(
+        data, key=lambda k: k['_timestamp'], reverse=True)
+    quarterly_data_ordered_by_timestamp = \
+        [datum for datum in data_ordered_by_timestamp
+         if datum['type'] == 'quarterly']
+    seasonally_adjusted_data_ordered_by_timestamp = \
+        [datum for datum in data_ordered_by_timestamp
+         if datum['type'] == 'seasonally-adjusted']
+    latest_quarter = quarterly_data_ordered_by_timestamp[0]['_timestamp']
+    latest_seasonally_adjusted = \
+        seasonally_adjusted_data_ordered_by_timestamp[0]['_timestamp']
+
+    ids_with_data = _service_ids_with_data(data_ordered_by_timestamp)
     dashboard_configs_with_data = _get_dashboard_configs_with_data(
         ids_with_data)
+
     for data_point_name in REQUIRED_DATA_POINTS:
         for dashboard_config, dashboard_data in dashboard_configs_with_data:
             latest_data = _get_latest_data_point(
@@ -104,7 +136,9 @@ def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
             if not latest_data:
                 continue
             datum = _get_stripped_down_data_for_data_point_name_only(
-                dashboard_config, latest_data, data_point_name)
+                dashboard_config, latest_data, data_point_name,
+                latest_quarter,
+                latest_seasonally_adjusted)
             # we need to look at whether this is later than the latest
             # data currently present on the output data set as
             # for things like digital-takeup the  transactions explorer
