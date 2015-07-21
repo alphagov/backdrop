@@ -1,3 +1,4 @@
+import json
 from ..worker import config
 
 from performanceplatform.client import AdminAPI
@@ -92,10 +93,13 @@ def _get_dashboard_configs_with_data(ids_with_data):
 
 
 def _get_data_points_for_each_tx_metric(data, transform, data_set_config):
-    ids_with_data = _service_ids_with_data(
-        data)
+    data_ordered_by_timestamp = sorted(
+        data, key=lambda k: k['_timestamp'], reverse=True)
+
+    ids_with_data = _service_ids_with_data(data_ordered_by_timestamp)
     dashboard_configs_with_data = _get_dashboard_configs_with_data(
         ids_with_data)
+
     for data_point_name in REQUIRED_DATA_POINTS:
         for dashboard_config, dashboard_data in dashboard_configs_with_data:
             latest_data = _get_latest_data_point(
