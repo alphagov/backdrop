@@ -71,7 +71,9 @@ class ComputeTestCase(unittest.TestCase):
         }
         mock_dataset.return_value = mockdata
 
-        transformed_data = compute(data, {}, {
+        transformed_data = compute(data, {'output': {
+            'data-group': 'transactions-explorer',
+            'data-type': 'spreadsheet'}}, {
             'name': 'apply_carers_allowance_completion_rate',
             'data_group': 'apply-carers-allowance',
             'data_type': 'completion-rate'
@@ -116,7 +118,9 @@ class ComputeTestCase(unittest.TestCase):
         }
         mock_dataset.return_value = mockdata
 
-        transformed_data = compute(data, {}, {
+        transformed_data = compute(data, {'output': {
+            'data-group': 'transactions-explorer',
+            'data-type': 'spreadsheet'}}, {
             'name': 'apply_carers_allowance_completion_rate',
             'data_group': 'apply-carers-allowance',
             'data_type': 'completion-rate'
@@ -159,3 +163,49 @@ class ComputeTestCase(unittest.TestCase):
         })
 
         assert_that(len(transformed_data), is_(0))
+
+    @patch("performanceplatform.client.DataSet.from_group_and_type")
+    @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")
+    def test_compute_when_new_data_not_released(
+            self, mock_dashboard, mock_dataset):
+        mock_dashboard_data = [
+            {
+                'published': True,
+                'slug': 'published'
+            },
+            {
+                'published': False,
+                'slug': 'unpublished'
+            }
+        ]
+        mock_dashboard.return_value = mock_dashboard_data
+
+        mockdata = Mock()
+        mockdata.get.return_value = {
+            'data': [
+                {
+                    '_count': 1.0,
+                    '_end_at': '2012-01-19T00:00:00+00:00',
+                    '_timestamp': '2012-01-12T00:00:00+00:00'
+                }
+            ]
+        }
+        mock_dataset.return_value = mockdata
+
+        transformed_data = compute(data, {'output': {
+            'data-group': 'service-aggregates',
+            'data-type': 'latest-dataset-value'}}, {
+            'name': 'apply_carers_allowance_completion_rate',
+            'data_group': 'apply-carers-allowance',
+            'data_type': 'completion-rate'
+        })
+
+        assert_that(len(transformed_data), is_(1))
+        assert_that(
+            transformed_data[0]['_id'],
+            is_('cHVibGlzaGVkX2NvbXBsZXRpb25fcmF0ZQ=='))
+        assert_that(
+            transformed_data[0]['_timestamp'],
+            is_('2013-10-14T00:00:00+00:00'))
+        assert_that(
+            transformed_data[0]['completion_rate'], is_(0.29334396173774413))
