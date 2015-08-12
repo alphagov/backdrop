@@ -4,6 +4,18 @@ import logging
 from flask import request
 
 
+class RequestIdFilter(logging.Filter):
+    def filter(self, record):
+        try:
+            record.govuk_request_id = request.headers.get('Govuk-Request-Id')
+        except RuntimeError:
+            # flask will throw a runtime error if we are attempting to get the
+            # header outside of the application context. In this case we can't
+            # infer the request_id, so we can just pass
+            pass
+        return True
+
+
 def get_log_file_handler(path, log_level=logging.DEBUG):
     handler = FileHandler(path)
     handler.setFormatter(logging.Formatter(
@@ -33,6 +45,8 @@ def set_up_logging(app, env):
         get_json_log_handler("log/%s.log.json" % env, app.name)
     )
     logger.setLevel(numeric_log_level)
+    request_id_filter = RequestIdFilter()
+    app.logger.addFilter(request_id_filter)
     app.logger.info("{} logging started".format(app.name))
     app.logger.info("{} logging started".format(numeric_log_level))
     app.before_request(create_request_logger(app))
@@ -67,4 +81,4 @@ def create_response_logger(app):
 
 
 def create_logging_extra_dict():
-    return {'request_id': request.headers.get('Request-Id')}
+    return {'govuk_request_id': request.headers.get('Govuk-Request-Id')}
