@@ -12,4 +12,4 @@ class DataSetConverter(BaseConverter):
 
 
 def generate_request_id():
-    return request.headers.get('Request-Id', '')
+    return request.headers.get('Govuk-Request-Id', '')

@@ -10,6 +10,7 @@ from statsd import StatsClient
 from backdrop.core.timeseries import parse_period
 from backdrop.core.log_handler import get_log_file_handler
 from backdrop.core.errors import incr_on_error
+from backdrop.transformers.tasks.util import encode_id
 
 from worker import app, config
 
@@ -129,6 +130,13 @@ def get_or_get_and_create_output_dataset(transform, input_dataset):
     )
 
 
+def merge_additional_fields(datum, fields):
+    fieldsId = '_'.join(['{}:{}'.format(*i) for i in fields.items()])
+    merged_datum = dict(fields.items() + datum.items())
+    merged_datum['_id'] = encode_id(datum.get('_id', ''), fieldsId)
+    return merged_datum
+
+
 @app.task(ignore_result=True)
 @stats_client.timer('run_transform')
 @incr_on_error(stats_client, 'run_transform.error')
@@ -147,6 +155,11 @@ def run_transform(data_set_config, transform, earliest, latest):
     transformed_data = transform_function(data['data'],
                                           transform,
                                           data_set_config)
+
+    if 'additionalFields' in transform['options']:
+        additionalFields = transform['options']['additionalFields']
+        transformed_data = [
+            merge_additional_fields(datum, additionalFields) for datum in transformed_data]
 
     output_data_set = get_or_get_and_create_output_dataset(
         transform,
