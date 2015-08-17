@@ -135,4 +135,9 @@ following command
 `celery worker -A backdrop.transformers.worker -l debug`
 
 
+## Runing on govuk dev vm
 
+The govuk dev vm doesnt setup a replica set for mongo - so the app must be run
+by setting the env variable `MONGO_REPLICA_SET`
+
+`MONGO_REPLICA_SET='' ./start-app.sh read 3070`
