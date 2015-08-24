@@ -4,7 +4,7 @@ import datetime
 from hamcrest import assert_that, is_
 from mock import patch
 import pytz
-from backdrop.core.timeseries import WEEK
+from backdrop.core.timeseries import WEEK, DAY
 from backdrop.read import api
 from backdrop.core.query import Query
 from tests.support.performanceplatform_client import fake_data_set_exists, fake_no_data_sets_exist
@@ -99,6 +99,21 @@ class QueryingApiTestCase(unittest.TestCase):
         )
         mock_query.assert_called_with(
             Query.create(sort_by=["value", "descending"]))
+
+    @fake_data_set_exists("foo", data_group="some-group", data_type="some-type", raw_queries_allowed=True)
+    @patch('backdrop.core.data_set.DataSet.execute_query')
+    def test_relative_start_and_end_dates_is_executed(self, mock_query):
+        mock_query.return_value = NoneData()
+        self.app.get(
+            '/data/some-group/some-type?group_by=period&duration=7&period=day')
+
+        mock_query.assert_called_with(
+            Query.create(period=DAY,
+                         group_by=['period'],
+                         duration=7)
+        )
+
+
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type", queryable=False)
     def test_returns_404_when_data_set_is_not_queryable(self):

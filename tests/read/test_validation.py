@@ -545,6 +545,13 @@ class TestRequestValidationWithNoRawQueries(TestCase):
         }, False)
         assert_that(validation_result, is_valid())
 
+    def test_queries_for_last_seven_days_is_valid(self):
+        validation_result = validate_request_args({
+            'period': 'day',
+            'duration': 7
+        }, False)
+        assert_that(validation_result, is_valid())
+
 
 class TestValidationHelpers(TestCase):
     def test_timestamp_is_valid_method(self):
