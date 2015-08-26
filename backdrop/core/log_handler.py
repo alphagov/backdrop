@@ -42,7 +42,7 @@ def set_up_logging(app, env):
         get_log_file_handler("log/%s.log" % env, numeric_log_level)
     )
     logger.addHandler(
-        get_json_log_handler("log/%s.log.json" % env, app.name)
+        get_json_log_handler("log/%s.json.log" % env, app.name)
     )
     logger.setLevel(numeric_log_level)
     request_id_filter = RequestIdFilter()
