@@ -19,7 +19,7 @@ class TestJsonLogging(unittest.TestCase):
         log_handler.set_up_logging(self.app, 'json_test')
         self.logger.info('Writing out JSON formatted logs m8')
 
-        with open('log/json_test.log.json') as log_file:
+        with open('log/json_test.json.log') as log_file:
             data = json.loads(log_file.readlines()[-1])
 
         assert_that(data, has_entries({
@@ -31,5 +31,5 @@ class TestJsonLogging(unittest.TestCase):
         }))
 
         # Only remove file if assertion passes
-        os.remove('log/json_test.log.json')
+        os.remove('log/json_test.json.log')
         os.remove('log/json_test.log')
