@@ -160,11 +160,8 @@ def data_group_key():
 
 @app.route('/data/<data_group>/<data_type>', methods=['GET', 'OPTIONS'])
 def data(data_group, data_type):
-    with statsd.timer('read.route.data.{data_group}.{data_type}'.format(
-            data_group=data_group,
-            data_type=data_type)):
-        data_set_config = admin_api.get_data_set(data_group, data_type)
-        return fetch(data_set_config)
+    data_set_config = admin_api.get_data_set(data_group, data_type)
+    return fetch(data_set_config)
 
 
 def data_set_key():
@@ -176,10 +173,8 @@ def data_set_key():
 @app.route('/<data_set_name>', methods=['GET', 'OPTIONS'])
 @http_validation.etag
 def query(data_set_name):
-    with statsd.timer('read.route.{data_set_name}'.format(
-            data_set_name=data_set_name)):
-        data_set_config = admin_api.get_data_set_by_name(data_set_name)
-        return fetch(data_set_config)
+    data_set_config = admin_api.get_data_set_by_name(data_set_name)
+    return fetch(data_set_config)
 
 
 @crossdomain(origin='*')
