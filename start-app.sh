@@ -1,4 +1,5 @@
 #!/bin/bash -e
+export MONGO_REPLICA_SET=''
 
 VENV_DIR=~/.virtualenvs/$(basename $(cd $(dirname $0) && pwd -P))-$1-$2
 LOCK_DIR=./tmp-start
