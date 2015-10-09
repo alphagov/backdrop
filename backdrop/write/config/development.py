@@ -13,7 +13,7 @@ try:
 except ImportError:
     from development_environment_sample import *
 
-STAGECRAFT_URL = 'http://localhost:3204'
+STAGECRAFT_URL = 'http://localhost:3103'
 
 SIGNON_API_USER_TOKEN = 'development-oauth-access-token'
 

@@ -1,7 +1,7 @@
 from .stagecraft import create_or_update_stagecraft_service
 
 
-TEST_STAGECRAFT_PORT = 3204
+TEST_STAGECRAFT_PORT = 3103
 
 
 def ensure_data_set_exists(context, data_set_name, settings={}):
