@@ -14,7 +14,7 @@ from features.support.stagecraft import create_or_update_stagecraft_service
 
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
-TEST_STAGECRAFT_PORT = 3204
+TEST_STAGECRAFT_PORT = 3103
 
 
 @given('the api is running in protected mode')

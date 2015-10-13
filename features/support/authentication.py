@@ -1,7 +1,7 @@
 from .stagecraft import create_or_update_stagecraft_service
 
 
-TEST_STAGECRAFT_PORT = 3204
+TEST_STAGECRAFT_PORT = 3103
 
 
 def _get_user_routes(email, data):
