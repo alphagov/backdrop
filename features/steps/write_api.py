@@ -76,15 +76,13 @@ def step(context, http_method, path):
         'PUT': context.client.put
     }[http_method]
 
-    print http_function
-
     context.response = http_function(
         path,
         data=context.data_to_post,
         content_type="application/json",
         headers=_make_headers_from_context(context),
     )
-    print context.response
+    print context.response.text
 
 
 @when('I {http_method} to "{path}" with a malformed authorization header')
