@@ -60,6 +60,7 @@ class StagecraftService(object):
         print "START FAKE SERVER"
         if self.stopped():
             self.__proc = Process(target=self._run)
+            print "STARTING FAKE SERVER"
             self.__proc.start()
             wait_until(self.running)
 
@@ -80,7 +81,7 @@ class StagecraftService(object):
         if self.__proc is None:
             return False
         try:
-            print "TRYING TO GET FAKE SERVER"
+            print "FAKE SERVER RUNNING"
             url = 'http://127.0.0.1:{}/_is_fake_server_up'.format(self.__port)
             return requests.get(url).status_code == 200
         except:
