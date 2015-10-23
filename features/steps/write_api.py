@@ -82,7 +82,6 @@ def step(context, http_method, path):
         content_type="application/json",
         headers=_make_headers_from_context(context),
     )
-    print context.response.content
 
 
 @when('I {http_method} to "{path}" with a malformed authorization header')
