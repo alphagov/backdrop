@@ -57,12 +57,14 @@ class StagecraftService(object):
         self.restart()
 
     def start(self):
+        print "START FAKE SERVER"
         if self.stopped():
             self.__proc = Process(target=self._run)
             self.__proc.start()
             wait_until(self.running)
 
     def stop(self):
+        print "STOP FAKE SERVER"
         if self.running():
             self.__proc.terminate()
             self.__proc.join()
@@ -70,6 +72,7 @@ class StagecraftService(object):
         wait_until(self.stopped)
 
     def restart(self):
+        print "RESTART FAKE SERVER"
         self.stop()
         self.start()
 
@@ -84,6 +87,7 @@ class StagecraftService(object):
             return False
 
     def stopped(self):
+        print "FAKE SERVER STOPPED"
         return not self.running()
 
     def _run(self):
