@@ -33,6 +33,7 @@ class StagecraftService(object):
         @self.__app.route('/<path:path>')
         def catch_all(path):
             if path == '_is_fake_server_up':
+                print "YES!!!!"
                 return Response('Yes: {}'.format(os.getpid()), 200)
 
             path_and_query = path
@@ -76,6 +77,7 @@ class StagecraftService(object):
         if self.__proc is None:
             return False
         try:
+            print "TRYING TO GET FAKE SERVER"
             url = 'http://127.0.0.1:{}/_is_fake_server_up'.format(self.__port)
             return requests.get(url).status_code == 200
         except:
