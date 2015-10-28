@@ -219,6 +219,31 @@ class TestDataSet_store(BaseDataSetTest):
         assert_that(add_period_keys_patch.called, is_(False))
         assert_that(save_record_patch.called, is_(False))
 
+    def test_store_parses_timestamp_to_utc_before_generating_auto_id(self):
+        self.setup_config({'auto_ids': ['_timestamp']})
+
+        expected_id = 'MjAxMi0xMi0xMiAwMDowMDowMCswMDowMA=='
+
+        self.data_set.store([{"_timestamp": "2012-12-12T00:00:00Z"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+        self.data_set.store([{"_timestamp": "2012-12-12T00:00:00+00:00"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+        self.data_set.store([{"_timestamp": "12/12/2012"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+        self.data_set.store([{"_timestamp": "12-12-2012 00:00:00"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
 
 class TestDataSet_execute_query(BaseDataSetTest):
 
