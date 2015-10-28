@@ -13,7 +13,7 @@ try:
 except ImportError:
     from development_environment_sample import *
 
-STAGECRAFT_URL = 'http://localhost:3103'
+STAGECRAFT_URL = 'http://stagecraft.dev.gov.uk'
 
 SIGNON_API_USER_TOKEN = 'development-oauth-access-token'
 
