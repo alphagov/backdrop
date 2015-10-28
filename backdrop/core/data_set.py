@@ -84,16 +84,16 @@ class DataSet(object):
                 # doesn't change data, no need to return records
                 errors += validate_record_schema(record, self.config['schema'])
 
+        # Parse timestamps
+        records, timestamp_errors = separate_errors_and_records(
+            map(parse_timestamps, records))
+        errors += timestamp_errors
+
         # Add auto-id keys
         records, auto_id_errors = add_auto_ids(
             records,
             self.config.get('auto_ids', None))
         errors += auto_id_errors
-
-        # Parse timestamps
-        records, timestamp_errors = separate_errors_and_records(
-            map(parse_timestamps, records))
-        errors += timestamp_errors
 
         # Custom record validations
         # doesn't change data, no need to return records
