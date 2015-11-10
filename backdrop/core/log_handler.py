@@ -5,6 +5,7 @@ from flask import request
 
 
 class RequestIdFilter(logging.Filter):
+
     def filter(self, record):
         try:
             record.govuk_request_id = request.headers.get('Govuk-Request-Id')
