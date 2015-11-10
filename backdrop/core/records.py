@@ -58,6 +58,14 @@ def _generate_auto_id(record, auto_id_keys):
         str(record[key]) for key in auto_id_keys))
 
 
+def make_query_criteria_from_auto_ids(record, auto_id_keys):
+    auto_id_dict = {}
+    for key, value in record.iteritems():
+        if key in auto_id_keys:
+            auto_id_dict[key] = value
+    return auto_id_dict
+
+
 def parse_timestamps(record):
     """Parses a timestamp in a record
 

@@ -1,6 +1,6 @@
 from flask import logging
 from .records import add_auto_ids, parse_timestamps, validate_record,\
-    add_period_keys
+    add_period_keys, make_query_criteria_from_auto_ids
 from .validation import validate_record_schema
 from .nested_merge import nested_merge, flat_merge
 from .errors import InvalidSortError
@@ -75,6 +75,8 @@ class DataSet(object):
         return self.storage.empty_data_set(self.name)
 
     def store(self, records):
+        # See manual entry for details about how the primary key is created
+        # https://github.gds/pages/gds/pp-manual/the-applications/backdrop/storing-datasets.html
         log.info('received {} records'.format(len(records)))
 
         # Validate schema
@@ -84,16 +86,18 @@ class DataSet(object):
                 # doesn't change data, no need to return records
                 errors += validate_record_schema(record, self.config['schema'])
 
-        # Add auto-id keys
-        records, auto_id_errors = add_auto_ids(
-            records,
-            self.config.get('auto_ids', None))
-        errors += auto_id_errors
-
         # Parse timestamps
         records, timestamp_errors = separate_errors_and_records(
             map(parse_timestamps, records))
         errors += timestamp_errors
+
+        auto_id_keys = self.config.get('auto_ids', None)
+
+        # Add auto-id keys
+        records, auto_id_errors = add_auto_ids(
+            records,
+            auto_id_keys)
+        errors += auto_id_errors
 
         # Custom record validations
         # doesn't change data, no need to return records
@@ -108,6 +112,10 @@ class DataSet(object):
             records = map(add_period_keys, records)
 
             for record in records:
+                if auto_id_keys:
+                    query_criteria = make_query_criteria_from_auto_ids(
+                        record, auto_id_keys)
+                    self.storage.delete_record(self.name, query_criteria)
                 self.storage.save_record(self.name, record)
             # errors should be empty
             return errors

@@ -6,7 +6,7 @@ amount of setup and mocking. Small unit tests are in doctest format in the
 module itself.
 """
 
-from hamcrest import assert_that, is_, has_key
+from hamcrest import assert_that, is_, has_key, has_entry
 from nose.tools import assert_raises
 from mock import Mock
 
@@ -51,6 +51,57 @@ class TestMongoStorageEngine(BaseStorageTest):
         assert_that(last_updated.hour, is_(timestamp.hour))
         assert_that(last_updated.minute, is_(timestamp.minute))
         assert_that(last_updated.second, is_(timestamp.second))
+
+    def test_only_delete_if_row_exists(self):
+        self.engine.create_data_set('some_data', 0)
+        coll = self.engine._collection('some_data')
+
+        self.engine.save_record('some_data', {
+            '_timestamp': '2012-12-12T00:00:00+00:00',
+            'count': 3
+        })
+
+        self.engine.save_record('some_data', {
+            '_timestamp': '2012-11-12T00:00:00+00:00',
+            'count': 2
+        })
+
+        data_set = DataSet(self.engine, {'name': 'some_data'})
+
+        self.engine.delete_record(
+            data_set.name, {'_timestamp': '2012-12-12T00:00:00+00:00'})
+
+        get_record = self.engine._collection('some_data').find_one(
+            {"_timestamp": "2012-12-12T00:00:00+00:00"})
+
+        assert_that(get_record, is_(None))
+
+        get_record = self.engine._collection('some_data').find_one(
+            {"_timestamp": "2012-11-12T00:00:00+00:00"})
+
+        assert_that(get_record,
+                    has_entry("_timestamp", "2012-11-12T00:00:00+00:00"))
+
+    def test_delete_all_rows_that_match_record(self):
+        self.engine.save_record('some_data', {
+            '_timestamp': '2012-12-12T00:00:00+00:00',
+            'count': 2
+        })
+
+        self.engine.save_record('some_data', {
+            '_timestamp': '2012-12-12T00:00:00+00:00',
+            'count': 3
+        })
+
+        data_set = DataSet(self.engine, {'name': 'some_data'})
+
+        self.engine.delete_record(
+            data_set.name, {'_timestamp': '2012-12-12T00:00:00+00:00'})
+
+        get_record = self.engine._collection('some_data').find_one(
+            {"_timestamp": "2012-12-12T00:00:00+00:00"})
+
+        assert_that(get_record, is_(None))
 
     def teardown(self):
         self.engine._mongo.drop_database('backdrop_test')

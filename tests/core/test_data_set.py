@@ -1,6 +1,6 @@
 from hamcrest import assert_that, has_item, has_entries, \
     has_length, contains, has_entry, contains_string, \
-    is_
+    is_, equal_to
 from nose.tools import assert_raises
 from mock import Mock, patch
 from freezegun import freeze_time
@@ -218,6 +218,54 @@ class TestDataSet_store(BaseDataSetTest):
         )
         assert_that(add_period_keys_patch.called, is_(False))
         assert_that(save_record_patch.called, is_(False))
+
+    def test_store_parses_timestamp_to_utc_before_generating_auto_id(self):
+        self.setup_config({'auto_ids': ['_timestamp']})
+
+        expected_id = 'MjAxMi0xMi0xMiAwMDowMDowMCswMDowMA=='
+
+        self.data_set.store([{"_timestamp": "2012-12-12T00:00:00Z"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+        self.data_set.store([{"_timestamp": "2012-12-12T00:00:0000:00"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+        self.data_set.store([{"_timestamp": "12/12/2012"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+        self.data_set.store([{"_timestamp": "12-12-2012 00:00:00"}])
+
+        self.mock_storage.save_record.assert_called_with(
+            'test_data_set', match(has_entry('_id', expected_id)))
+
+    def test_row_is_deleted_if_auto_ids_exist(self):
+        self.setup_config({'auto_ids': ['_timestamp']})
+
+        self.mock_storage.execute_query.return_value = [
+            {"_timestamp": "2012-12-12T00:00:0000:00",
+             "_id": "MjAxNS0xMC0xMiAwMDowMDowMA=="}
+        ]
+
+        self.data_set.store([{"_timestamp": "12-12-2012 00:00:00"}])
+
+        self.mock_storage.delete_record.assert_called_with(
+            'test_data_set', {"_timestamp": d_tz(2012, 12, 12, 0, 0)})
+
+    def test_delete_row_not_called_if_no_auto_ids(self):
+        self.mock_storage.execute_query.return_value = [
+            {"_timestamp": "2012-12-12T00:00:00+00:00",
+             "_id": "MjAxNS0xMC0xMiAwMDowMDowMA=="}
+        ]
+
+        self.data_set.store([{"_timestamp": "12-12-2012 00:00:00"}])
+
+        assert not self.mock_storage.delete_record.called
 
 
 class TestDataSet_execute_query(BaseDataSetTest):

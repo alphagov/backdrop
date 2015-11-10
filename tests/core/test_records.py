@@ -1,7 +1,8 @@
 from unittest import TestCase
-from hamcrest import assert_that, is_
+from hamcrest import assert_that, is_, equal_to
 from nose.tools import assert_raises
-from backdrop.core.records import _generate_auto_id
+from backdrop.core.records import _generate_auto_id, \
+    make_query_criteria_from_auto_ids
 from backdrop.core.errors import ValidationError
 
 
@@ -18,3 +19,19 @@ class TestRecords(TestCase):
             _generate_auto_id,
             {'foo': 1},
             ['bar'])
+
+    def test_make_query_criteria(self):
+        auto_id_keys = ['_timestamp', 'channel']
+        new_record = {
+            "_timestamp": "12-12-2012 00:00:00",
+            "count": 3,
+            "channel": "paper"
+        }
+
+        expected_query_criteria = {
+            "_timestamp": "12-12-2012 00:00:00",
+            "channel": "paper"
+        }
+
+        assert_that(make_query_criteria_from_auto_ids(
+            new_record, auto_id_keys), equal_to(expected_query_criteria))
