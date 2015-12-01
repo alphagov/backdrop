@@ -1,5 +1,5 @@
 TRANSFORMER_AMQP_URL = 'amqp://transformer:notarealpw@localhost:5672/%2Ftransformations'
-STAGECRAFT_URL = 'http://localhost:3204'
+STAGECRAFT_URL = 'http://localhost:3103'
 STAGECRAFT_OAUTH_TOKEN = 'development-oauth-access-token'
-BACKDROP_READ_URL = 'http://localhost:3038/data'
-BACKDROP_WRITE_URL = 'http://localhost:3039/data'
+BACKDROP_READ_URL = 'http://backdrop-read.dev.gov.uk/data'
+BACKDROP_WRITE_URL = 'http://backdrop-write.dev.gov.uk/data'
