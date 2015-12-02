@@ -1,6 +1,6 @@
 from flask import logging
 from .records import add_auto_ids, parse_timestamps, validate_record,\
-    add_period_keys
+    add_period_keys, encode_unicode_records
 from .validation import validate_record_schema
 from .nested_merge import nested_merge, flat_merge
 from .errors import InvalidSortError
@@ -76,6 +76,8 @@ class DataSet(object):
 
     def store(self, records):
         log.info('received {} records'.format(len(records)))
+
+        records = encode_unicode_records(records)
 
         # Validate schema
         errors = []

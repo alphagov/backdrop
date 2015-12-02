@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from base64 import b64encode
 
 from backdrop.core.timeseries import PERIODS
 from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.validation import validate_record_data
-from .errors import ParseError, ValidationError
+from .errors import ValidationError
 
 
 def add_auto_ids(records, auto_ids):
@@ -141,3 +143,29 @@ def validate_record(record):
     if not result.is_valid:
         return result.message
     return None
+
+
+def encode_unicode_records(records):
+    return [encode_unicode_characters(record) for record in records]
+
+
+def encode_unicode_characters(record):
+    """Encodes unicode characters in a record
+    >>> encode_unicode_characters({'name_1': u'PortimÃ£o'})
+    {'name_1': 'Portim\\xc3\\x83\\xc2\\x83\\xc3\\x82\\xc2\\xa3o'}
+    >>> encode_unicode_characters({'name_2': u'DÃ¼sseldorf'})
+    {'name_2': 'D\\xc3\\x83\\xc2\\x83\\xc3\\x82\\xc2\\xbcsseldorf'}
+    >>> encode_unicode_characters({'name_3': u'São Tomé and Príncipe'})
+    {'name_3': 'S\\xc3\\x83\\xc2\\xa3o Tom\\xc3\\x83\\xc2\\xa9 and Pr\\xc3\\x83\\xc2\\xadncipe'}
+    >>> encode_unicode_characters({'name_4': u'Adjudicator’s'})
+    {'name_4': 'Adjudicator\\xc3\\xa2\\xc2\\x80\\xc2\\x99s'}
+    >>> encode_unicode_characters({'name_5': u'Reject – Dual'})
+    {'name_5': 'Reject \\xc3\\xa2\\xc2\\x80\\xc2\\x93 Dual'}
+    >>> encode_unicode_characters({'_timestamp': '12-12-2012 00:00:00'})
+    {'_timestamp': '12-12-2012 00:00:00'}
+    """
+
+    for key, value in record.iteritems():
+        if isinstance(value, basestring):
+            record[key] = value.encode('utf-8', 'xmlcharrefreplace')
+    return record
