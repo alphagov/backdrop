@@ -23,6 +23,26 @@ with open(os.path.join(
 
 data_to_post = [
     {
+        "_id": encode_id('quart', 'digital_cost_per_transaction'),
+        "_timestamp": "2014-12-12T00:00:00+00:00",
+        "digital_cost_per_transaction": None,
+        "end_at": "2013-01-01T00:00:00+00:00",
+        "period": "year",
+        "service_id": "service-with-quarterly-not-latest",
+        "dashboard_slug": "quart",
+        "type": "quarterly"
+    },
+    {
+        '_timestamp': u'2014-12-12T00:00:00+00:00',
+        "_id": encode_id('quart', 'digital_takeup'),
+        'period': u'year',
+        'end_at': u'2013-01-01T00:00:00+00:00',
+        'dashboard_slug': 'quart',
+        'service_id': u'service-with-quarterly-not-latest',
+        'digital_takeup': None,
+        "type": "quarterly"
+    },
+    {
         "_id": encode_id('quarterly-nonsense', 'digital_cost_per_transaction'),
         "_timestamp": "2014-12-12T00:00:00+00:00",
         "digital_cost_per_transaction": 2.36,
@@ -33,14 +53,14 @@ data_to_post = [
         "type": "quarterly"
     },
     {
+        '_timestamp': u'2014-12-12T00:00:00+00:00',
         "_id": encode_id('quarterly-nonsense', 'digital_takeup'),
-        "_timestamp": "2013-12-12T00:00:00+00:00",
-        "digital_takeup": 0,
-        "end_at": "2013-01-01T00:00:00+00:00",
-        "period": "year",
-        "service_id": "service-with-quarterly-data",
-        "dashboard_slug": "quarterly-nonsense",
-        "type": "quarterly"
+        'period': u'year',
+        'end_at': u'2013-01-01T00:00:00+00:00',
+        'dashboard_slug': 'quarterly-nonsense',
+        'service_id': u'service-with-quarterly-data',
+        'digital_takeup': None,
+        'type': u'quarterly'
     },
     {
         "_id": encode_id(
@@ -55,19 +75,19 @@ data_to_post = [
         "type": "quarterly"
     },
     {
+        '_timestamp': u'2014-12-12T00:00:00+00:00',
         "_id": encode_id('quarterly-nonsense2', 'digital_takeup'),
-        "_timestamp": "2013-12-12T00:00:00+00:00",
-        "digital_takeup": 0,
-        "end_at": "2013-01-01T00:00:00+00:00",
-        "period": "year",
-        "service_id": "service-with-quarterly-data",
-        "dashboard_slug": "quarterly-nonsense2",
-        "type": "quarterly"
+        'period': u'year',
+        'end_at': u'2013-01-01T00:00:00+00:00',
+        'dashboard_slug': 'quarterly-nonsense2',
+        'service_id': u'service-with-quarterly-data',
+        'digital_takeup': None,
+        'type': u'quarterly'
     },
     {
         "_id": encode_id('sorn', 'cost_per_transaction'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
-        "cost_per_transaction": 5.2,
+        "cost_per_transaction": None,
         "end_at": "2012-04-01T00:00:00+00:00",
         "period": "year",
         "service_id": "sorn-innit",
@@ -77,7 +97,7 @@ data_to_post = [
     {
         "_id": encode_id('sorn', 'digital_cost_per_transaction'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
-        "digital_cost_per_transaction": 2.52,
+        "digital_cost_per_transaction": None,
         "end_at": "2012-04-01T00:00:00+00:00",
         "period": "year",
         "service_id": "sorn-innit",
@@ -91,7 +111,7 @@ data_to_post = [
         # the data_type is digital_takeup.
         "_id": encode_id('sorn', 'digital_takeup'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
-        "digital_takeup": 0.965537995968002,
+        "digital_takeup": None,
         "end_at": "2012-04-01T00:00:00+00:00",
         "period": "year",
         "service_id": "sorn-innit",
@@ -102,7 +122,7 @@ data_to_post = [
         "_id": encode_id('sorn', 'number_of_digital_transactions'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "end_at": "2012-04-01T00:00:00+00:00",
-        "number_of_digital_transactions": 2184914,
+        "number_of_digital_transactions": None,
         "period": "year",
         "service_id": "sorn-innit",
         "dashboard_slug": "sorn",
@@ -115,8 +135,18 @@ data_to_post = [
         "period": "year",
         "service_id": "sorn-innit",
         "dashboard_slug": "sorn",
-        "total_cost": 11767069.6,
+        "total_cost": None,
         "type": "seasonally-adjusted"
+    },
+    {
+        '_timestamp': u'2013-04-01T00:00:00+00:00',
+        'period': u'year',
+        'end_at': u'2012-04-01T00:00:00+00:00',
+        'number_of_transactions': None,
+        'dashboard_slug': 'sorn',
+        'service_id': u'sorn-innit',
+        "_id": encode_id('sorn', 'number_of_transactions'),
+        'type': u'seasonally-adjusted'
     },
     {
         "_id": encode_id('bis-returns', 'cost_per_transaction'),
@@ -149,16 +179,6 @@ data_to_post = [
         "type": "seasonally-adjusted"
     },
     {
-        "_id": encode_id('bis-returns', 'number_of_digital_transactions'),
-        "_timestamp": "2012-12-12T00:00:00+00:00",
-        "end_at": "2013-01-01T00:00:00+00:00",
-        "number_of_digital_transactions": 2301214,
-        "period": "year",
-        "service_id": "bis-annual-returns",
-        "dashboard_slug": "bis-returns",
-        "type": "seasonally-adjusted"
-    },
-    {
         "_id": encode_id('bis-returns', 'number_of_transactions'),
         "_timestamp": "2013-04-01T00:00:00+00:00",
         "end_at": "2012-04-01T00:00:00+00:00",
@@ -177,6 +197,16 @@ data_to_post = [
         "dashboard_slug": "bis-returns",
         "total_cost": 11767069.6,
         "type": "seasonally-adjusted"
+    },
+    {
+        'number_of_digital_transactions': None,
+        '_timestamp': u'2013-04-01T00:00:00+00:00',
+        'period': u'year',
+        'end_at': u'2012-04-01T00:00:00+00:00',
+        'dashboard_slug': 'bis-returns',
+        'service_id': u'bis-annual-returns',
+        "_id": encode_id('bis-returns', 'number_of_digital_transactions'),
+        'type': u'seasonally-adjusted'
     }
 ]
 
@@ -194,6 +224,11 @@ quarterly_data_dashboard_config = [
     },
     {
         'slug': 'quarterly-nonsense2'
+    }
+]
+quarterly_data_not_latest = [
+    {
+        'slug': 'quart'
     }
 ]
 
@@ -218,7 +253,8 @@ class ComputeTestCase(unittest.TestCase):
         mock_dashboard_finder.side_effect = lambda x: {
             'bis-annual-returns': bis_returns_dashboard_config,
             'sorn-innit': sorn_dashboard_config,
-            'service-with-quarterly-data': quarterly_data_dashboard_config
+            'service-with-quarterly-data': quarterly_data_dashboard_config,
+            'service-with-quarterly-not-latest': quarterly_data_not_latest,
         }.get(x, [])
         transformed_data = compute(data, {'output': {
             'data-group': 'transactions-explorer',
@@ -248,7 +284,8 @@ class ComputeTestCase(unittest.TestCase):
         mock_dashboard_finder.side_effect = lambda x: {
             'bis-annual-returns': bis_returns_dashboard_config,
             'sorn-innit': sorn_dashboard_config,
-            'service-with-quarterly-data': quarterly_data_dashboard_config
+            'service-with-quarterly-data': quarterly_data_dashboard_config,
+            'service-with-quarterly-not-latest': quarterly_data_not_latest,
         }.get(x, [])
         transformed_data = compute(data, {'output': {
             'data-group': 'transactions-explorer',
