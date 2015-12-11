@@ -86,6 +86,8 @@ class ComputeTestCase(unittest.TestCase):
             is_('2013-10-14T00:00:00+00:00'))
         assert_that(
             transformed_data[0]['completion_rate'], is_(0.29334396173774413))
+        assert_that(
+            transformed_data[0]['service_id'], is_('published'))
 
     @patch("performanceplatform.client.DataSet.from_group_and_type")
     @patch("performanceplatform.client.AdminAPI.get_data_set_dashboard")

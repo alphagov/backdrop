@@ -47,6 +47,7 @@ def compute(new_data, transform, data_set_config):
                 'dashboard_slug': slug,
                 data_type: latest_datum[value_key],
                 '_timestamp': latest_datum['_timestamp'],
+                'service_id': slug
             })
 
     return latest_values
