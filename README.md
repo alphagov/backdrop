@@ -74,13 +74,13 @@ Other parameters:
 
 ### Sync data from environment
 
-Copy data from an environment to the local Backdrop database (should be run on your host machine): `bash tools/replicate-db.sh mongo-1.pp-preview`
+Copy data from an environment to the local Backdrop database (should be run on your host machine): `bash tools/replicate-db.sh performance-mongo-1.integration`
 
 You may need to setup your [ssh config](https://github.gds/pages/gds/opsmanual/2nd-line/technical-setup.html#ssh-config) correctly for this to work
 
 To sync to the govuk dev vm, you can pass `govuk_dev` as the 2nd argument to this script -
 
-`bash tools/replicate-db.sh performance-mongo-1.preview govuk_dev`
+`bash tools/replicate-db.sh performance-mongo-1.integration govuk_dev`
 
 
 ## Emptying a dataset
