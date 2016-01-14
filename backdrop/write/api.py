@@ -120,25 +120,22 @@ def write_by_group(data_group, data_type):
     Write by group/type
     e.g. POST https://BACKDROP/data/my-transaction-name/volumetrics
     """
-    with statsd.timer('write.route.data.{data_group}.{data_type}'.format(
-            data_group=data_group,
-            data_type=data_type)):
-        data_set_config = admin_api.get_data_set(data_group, data_type)
+    data_set_config = admin_api.get_data_set(data_group, data_type)
 
-        _validate_config(data_set_config)
-        _validate_auth(data_set_config)
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
 
-        try:
-            data = listify_json(get_json_from_request(request))
-        except ValidationError as e:
-            return (jsonify(messages=[repr(e)]), 400)
-        errors = _append_to_data_set(data_set_config, data)
+    try:
+        data = listify_json(get_json_from_request(request))
+    except ValidationError as e:
+        return (jsonify(messages=[repr(e)]), 400)
+    errors = _append_to_data_set(data_set_config, data)
 
-        if errors:
-            return (jsonify(messages=errors), 400)
-        else:
-            trigger_transforms(data_set_config, data)
-            return jsonify(status='ok')
+    if errors:
+        return (jsonify(messages=errors), 400)
+    else:
+        trigger_transforms(data_set_config, data)
+        return jsonify(status='ok')
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['PUT'])
