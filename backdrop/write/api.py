@@ -53,6 +53,8 @@ log_handler.set_up_audit_logging(app, GOVUK_ENV)
 app.url_map.converters["data_set"] = DataSetConverter
 
 celery_app = Celery(broker=app.config['TRANSFORMER_AMQP_URL'])
+app.config['BROKER_FAILOVER_STRATEGY'] = "round-robin"
+celery_app.conf.update(app.config)
 
 
 def _record_write_error(e):
