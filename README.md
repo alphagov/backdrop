@@ -118,10 +118,7 @@ application.
 1. Run the following command, replacing the fields in capitals:
 
    ```
-   curl-H 'Authorization: Bearer <INSERT BEARER TOKEN HERE>' \
-     -H 'content-type: application/json' \
-     -d '{"_start_at": "2012-01-01T00:00:00Z", "_end_at": "2015-03-20T00:00:00Z"}' \
-     https://www.performance.service.gov.uk/data/<DATA GROUP>/<DATA TYPE>/transform
+   curl -H 'Authorization: Bearer <INSERT BEARER TOKEN HERE>' -H 'content-type: application/json' -d '{"_start_at": "2012-01-01T00:00:00Z", "_end_at": "2015-03-20T00:00:00Z"}' https://www.performance.service.gov.uk/data/<DATA GROUP>/<DATA TYPE>/transform
    ```
 
 ## Celery worker
