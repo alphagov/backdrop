@@ -168,7 +168,7 @@ class TestDataSet_store(BaseDataSetTest):
             is_(True)
         )
         assert_that(
-            '_timestamp is not a valid timestamp, it must be ISO8601'
+            'the _timestamp must be a date in the format yyyy-MM-ddT00:00:00Z'
             in errors,
             is_(True)
         )

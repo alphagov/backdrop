@@ -75,31 +75,62 @@ def parse_timestamps(record):
     >>> record
     {'_timestamp': 'invalid'}
     >>> error
-    '_timestamp is not a valid timestamp, it must be ISO8601'
+    'the _timestamp must be a date in the format yyyy-MM-ddT00:00:00Z'
+    >>> record, error = parse_timestamps({'_timestamp': '31-11-12T00:00:00'})
+    >>> record
+    {'_timestamp': '31-11-12T00:00:00'}
+    >>> error
+    '31-11-12T00:00:00 in the _timestamp field is not a valid date'
     >>> record, error = parse_timestamps({'_start_at': 'invalid'})
     >>> record
     {'_start_at': 'invalid'}
     >>> error
-    '_start_at is not a valid timestamp, it must be ISO8601'
+    '_start_at must be a date in the format yyyy-MM-ddT00:00:00Z'
+    >>> record, error = parse_timestamps({'_start_at': '31-11-12T00:00:00'})
+    >>> record
+    {'_start_at': '31-11-12T00:00:00'}
+    >>> error
+    '31-11-12T00:00:00 in the _start_at field is not a valid date'
+    >>> record, error = parse_timestamps({'_end_at': 'invalid'})
+    >>> record
+    {'_end_at': 'invalid'}
+    >>> error
+    '_end_at must be a date in the format yyyy-MM-ddT00:00:00Z'
+    >>> record, error = parse_timestamps({'_end_at': '31-11-12T00:00:00'})
+    >>> record
+    {'_end_at': '31-11-12T00:00:00'}
+    >>> error
+    '31-11-12T00:00:00 in the _end_at field is not a valid date'
     """
     error = None
     if '_timestamp' in record:
         try:
             record['_timestamp'] = parse_time_as_utc(record['_timestamp'])
-        except (TypeError, ValueError):
-            error = '_timestamp is not a valid timestamp, it must be ISO8601'
+        except TypeError:
+            error = 'the _timestamp must be a date in the format ' \
+                    'yyyy-MM-ddT00:00:00Z'
+        except ValueError:
+            error = '{} in the _timestamp field is not a valid date'.format(
+                record['_timestamp'])
 
     if '_start_at' in record:
         try:
             record['_start_at'] = parse_time_as_utc(record['_start_at'])
-        except (TypeError, ValueError):
-            error = '_start_at is not a valid timestamp, it must be ISO8601'
+        except TypeError:
+            error = '_start_at must be a date in the format ' \
+                    'yyyy-MM-ddT00:00:00Z'
+        except ValueError:
+            error = '{} in the _start_at field is not a valid date'.format(
+                record['_start_at'])
 
     if '_end_at' in record:
         try:
             record['_end_at'] = parse_time_as_utc(record['_end_at'])
-        except (TypeError, ValueError):
-            error = '_end_at is not a valid timestamp, it must be ISO8601'
+        except TypeError:
+            error = '_end_at must be a date in the format yyyy-MM-ddT00:00:00Z'
+        except ValueError:
+            error = '{} in the _end_at field is not a valid date'.format(
+                record['_end_at'])
 
     return (record, error)
 
