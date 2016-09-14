@@ -144,6 +144,14 @@ class MongoStorageEngine(object):
         record['_updated_at'] = timeutils.now()
         self._collection(data_set_id).save(record)
 
+    def find_record(self, data_set_id, record_id):
+        return self._collection(data_set_id).find_one(record_id)
+
+    def update_record(self, data_set_id, record_id, record):
+        record['_updated_at'] = timeutils.now()
+        self._collection(data_set_id).update(
+            {"_id": record_id}, {"$set": record})
+
     def execute_query(self, data_set_id, query):
         return map(convert_datetimes_to_utc,
                    self._execute_query(data_set_id, query))

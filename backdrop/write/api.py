@@ -140,6 +140,33 @@ def write_by_group(data_group, data_type):
         return jsonify(status='ok')
 
 
+@app.route('/data/<data_group>/<data_type>/<data_set_id>', methods=['PATCH'])
+@cache_control.nocache
+@statsd.timer('write.route.data.patch.data_set')
+def patch_by_group_type_and_id(data_group, data_type, data_set_id):
+    """
+    Patch by group, type and id
+    e.g. PATCH https://BACKDROP/data/gcloud/sales/MjAxNi0wOC0xNSAwMDowMD
+    """
+    data_set_config = admin_api.get_data_set(data_group, data_type)
+
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        data = get_json_from_request(request)
+
+        errors = _patch_data_set(data_set_config, data_set_id, data)
+
+        if errors:
+            return (jsonify(messages=errors), 400)
+        else:
+            return jsonify(status='ok')
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
+
+
 @app.route('/data/<data_group>/<data_type>', methods=['PUT'])
 @cache_control.nocache
 @statsd.timer('write.route.data.empty.data_set')
@@ -286,6 +313,12 @@ def _append_to_data_set(data_set_config, data):
     return data_set.store(data)
 
 
+def _patch_data_set(data_set_config, data_set_id, data):
+    audit_patch(data_set_config['name'], data)
+    data_set = DataSet(storage, data_set_config)
+    return data_set.patch(data_set_id, data)
+
+
 def _empty_data_set(data_set_config):
     audit_delete(data_set_config['name'])
     data_set = DataSet(storage, data_set_config)
@@ -357,6 +390,19 @@ def audit_append(data_set_name, data):
             'datapoints': len(data),
         }
         app.audit_logger.info("Data append action", extra=extra)
+
+
+def audit_patch(data_set_name, data):
+    if data:
+        start_at, end_at = parse_bounding_dates(data)
+        extra = {
+            'token': request.headers.get('Authorization'),
+            'data_set': data_set_name,
+            'start_at': start_at,
+            'end_at': end_at,
+            'data': data,
+        }
+        app.audit_logger.info("Data patch action", extra=extra)
 
 
 def audit_delete(data_set_name):
