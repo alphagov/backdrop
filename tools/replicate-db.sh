@@ -66,7 +66,7 @@ if [ -z "$2" ]; then
     vagrant ssh development-1 -c "cd /var/apps/backdrop/tools && mongorestore --drop ${DUMPDIR}"
     popd
 elif [ "$2" = 'govuk_dev' ]; then
-    pushd ../../govuk-puppet/development
+    pushd ../../govuk-puppet/development-vm
     vagrant ssh -c "cd /var/govuk/backdrop/tools && mongorestore --drop ${DUMPDIR}"
     popd
 else

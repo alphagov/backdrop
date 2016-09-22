@@ -71,6 +71,12 @@ class DataSet(object):
         if not self.storage.data_set_exists(self.name):
             self.storage.create_data_set(self.name, self.config['capped_size'])
 
+    def patch(self, record_id, record):
+        if self.storage.find_record(self.name, record_id) is not None:
+            return self.storage.update_record(self.name, record_id, record)
+        else:
+            return 'No record found with id {}'.format(record_id)
+
     def empty(self):
         return self.storage.empty_data_set(self.name)
 

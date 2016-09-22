@@ -220,6 +220,32 @@ class TestDataSet_store(BaseDataSetTest):
         assert_that(save_record_patch.called, is_(False))
 
 
+class TestDataSet_patch(BaseDataSetTest):
+    schema = {
+        "$schema": "http://json-schema.org/schema#",
+        "title": "Timestamps",
+        "type": "object",
+        "properties": {
+            "_timestamp": {
+                "description": "An ISO8601 formatted date time",
+                "type": "string",
+                "format": "date-time"
+            }
+        },
+        "required": ["_timestamp"]
+    }
+
+    def test_patching_a_simple_record(self):
+        self.data_set.patch('uuid', {'foo': 'bar'})
+        self.mock_storage.update_record.assert_called_with(
+            'test_data_set', 'uuid', {'foo': 'bar'})
+
+    def test_record_not_found(self):
+        self.mock_storage.find_record.return_value = None
+        result = self.data_set.patch('uuid', {'foo': 'bar'})
+        assert_that(result, is_('No record found with id uuid'))
+
+
 class TestDataSet_execute_query(BaseDataSetTest):
 
     def test_period_query_fails_when_weeks_do_not_start_on_monday(self):
