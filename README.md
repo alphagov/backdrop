@@ -92,6 +92,14 @@ command
 curl -X PUT -d "[]" https://{backdrop_url}/data/<data-group>/<data-type> -H 'Authorization: Bearer <token-from-stagecraft>' -H 'Content-Type: application/json'
 ```
 
+## Transformers
+
+Transformers run as part of the `backdrop-transformer-procfile-worker` service.
+
+```
+sudo service backdrop-transformer-procfile-worker status
+```
+
 ## Triggering a transform manually
 
 A transform occurs when data is written to in Backdrop. The transform applies
