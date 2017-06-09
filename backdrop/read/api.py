@@ -1,26 +1,23 @@
+
 import datetime
 import json
 from os import getenv
+
 from bson import ObjectId
-
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_featureflags import FeatureFlag
+from performanceplatform import client
 
+from backdrop import statsd
 from .query import parse_query_from_request
 from .validation import validate_request_args
-from ..core import log_handler, cache_control, http_validation
+from ..core import log_handler, cache_control, http_validation, parser
 from ..core.data_set import DataSet
 from ..core.errors import InvalidOperationError
 from ..core.flaskutils import generate_request_id
-from ..core.timeutils import as_utc
 from ..core.response import crossdomain
-
 from ..core.storage.mongo import MongoStorageEngine
-
-from backdrop import statsd
-
-from performanceplatform import client
-
+from ..core.timeutils import as_utc
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -228,7 +225,9 @@ def fetch(data_set_config):
             # Do not cache unpublished data-sets
             response.headers['Cache-Control'] = "no-cache"
         else:
-            response = jsonify(data=data)
+            fmt = to_csv if request.args.get("format") == "csv" else to_json
+            response = fmt(data=data)
+
             # Set cache control based on data set type
             if data_set_config.get('realtime', DEFAULT_DATA_SET_REALTIME):
                 cache_duration = 120
@@ -239,6 +238,21 @@ def fetch(data_set_config):
                 "must-revalidate" % cache_duration
             )
 
+    return response
+
+
+def to_csv(data, filename="export.csv"):
+    csv = parser.json_to_csv(data=data)
+    response = make_response(csv)
+    content_disposition = "attachment; filename={}".format(filename)
+    content_type = "text/csv"
+    response.headers["Content-Disposition"] = content_disposition
+    response.headers["Content-type"] = content_type
+    return response
+
+
+def to_json(data):
+    response = jsonify(data=data)
     return response
 
 

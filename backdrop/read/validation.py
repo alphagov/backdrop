@@ -1,11 +1,13 @@
-from datetime import time
-from dateutil import parser
-import pytz
-import api
-from backdrop.core.timeseries import PERIODS
-from ..core.validation import value_is_valid_datetime_string, valid, \
-    invalid, key_is_valid
 import re
+from datetime import time
+
+import pytz
+from dateutil import parser
+
+from backdrop.core.timeseries import PERIODS
+from ..core.validation import (
+    value_is_valid_datetime_string, valid, invalid, key_is_valid
+)
 
 
 class Validator(object):
@@ -42,7 +44,7 @@ class MultiValueValidator(Validator):
 class ParameterValidator(Validator):
 
     def __init__(self, request_args):
-        self.allowed_parameters = set([
+        self.allowed_parameters = {
             'start_at',
             'end_at',
             'duration',
@@ -55,7 +57,8 @@ class ParameterValidator(Validator):
             'collect',
             'flatten',
             'inclusive',
-        ])
+            'format'
+        }
         super(ParameterValidator, self).__init__(request_args)
 
     def _unrecognised_parameters(self, request_args):
