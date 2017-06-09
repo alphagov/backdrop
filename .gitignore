@@ -1,4 +1,4 @@
-backdrop/write/config/development_environment.py
+backdrop/*/config/development_environment.py
 
 *.pyc
 client_secrets.json
