@@ -19,7 +19,9 @@ def json_to_csv(data):
             continue
         if not parsed:
             parsed = [header]
-        parsed.append([item.get(i, "") for i in header])
+        line = [item.get(i, "") for i in header]
+        line = [i.encode("utf8") if isinstance(i, basestring) else i for i in line]
+        parsed.append(line)
 
     out.writerows(parsed)
     return string.getvalue()
