@@ -92,6 +92,13 @@ command
 curl -X PUT -d "[]" https://{backdrop_url}/data/<data-group>/<data-type> -H 'Authorization: Bearer <token-from-stagecraft>' -H 'Content-Type: application/json'
 ```
 
+## Remove single entry from dataset
+
+```
+curl -X DELETE https://{backdrop_url}/data/<data-group>/<data-type>/<data_set_id> -H 'Authorization: Bearer <token-from-stagecraft>'
+```
+
+
 ## Transformers
 
 Transformers run as part of the `backdrop-transformer-procfile-worker` service.

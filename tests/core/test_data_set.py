@@ -1,15 +1,12 @@
-from hamcrest import assert_that, has_item, has_entries, \
-    has_length, contains, has_entry, contains_string, \
-    is_
-from nose.tools import assert_raises
-from mock import Mock, patch
 from freezegun import freeze_time
+from hamcrest import assert_that, has_item, has_entries, \
+    has_length, contains, has_entry, is_
+from mock import Mock, patch
+from nose.tools import assert_raises
 
 from backdrop.core import data_set
 from backdrop.core.query import Query
 from backdrop.core.timeseries import WEEK, MONTH
-from backdrop.core.errors import ValidationError
-from jsonschema import ValidationError as SchemaValidationError
 from tests.support.test_helpers import d, d_tz, match
 
 
@@ -243,6 +240,33 @@ class TestDataSet_patch(BaseDataSetTest):
     def test_record_not_found(self):
         self.mock_storage.find_record.return_value = None
         result = self.data_set.patch('uuid', {'foo': 'bar'})
+        assert_that(result, is_('No record found with id uuid'))
+
+
+class TestDataSet_delete(BaseDataSetTest):
+    schema = {
+        "$schema": "http://json-schema.org/schema#",
+        "title": "Timestamps",
+        "type": "object",
+        "properties": {
+            "_timestamp": {
+                "description": "An ISO8601 formatted date time",
+                "type": "string",
+                "format": "date-time"
+            }
+        },
+        "required": ["_timestamp"]
+    }
+
+    def test_deleting_a_simple_record(self):
+        self.data_set.delete('uuid')
+        self.mock_storage.delete_record.assert_called_with(
+            'test_data_set', 'uuid'
+        )
+
+    def test_record_not_found(self):
+        self.mock_storage.find_record.return_value = None
+        result = self.data_set.delete('uuid')
         assert_that(result, is_('No record found with id uuid'))
 
 
