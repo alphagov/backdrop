@@ -77,6 +77,11 @@ class DataSet(object):
         else:
             return 'No record found with id {}'.format(record_id)
 
+    def delete(self, record_id):
+        if self.storage.find_record(self.name, record_id) is not None:
+            return self.storage.delete_record(self.name, record_id)
+        return 'No record found with id {}'.format(record_id)
+
     def empty(self):
         return self.storage.empty_data_set(self.name)
 

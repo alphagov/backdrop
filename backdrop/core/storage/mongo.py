@@ -1,15 +1,14 @@
-import os
-import logging
 import datetime
 import itertools
+import logging
+import os
 
 import pymongo
-from pymongo.errors import AutoReconnect, CollectionInvalid
 from bson import Code
+from pymongo.errors import AutoReconnect, CollectionInvalid
 
 from .. import timeutils
 from ..errors import DataSetCreationError
-
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +150,9 @@ class MongoStorageEngine(object):
         record['_updated_at'] = timeutils.now()
         self._collection(data_set_id).update(
             {"_id": record_id}, {"$set": record})
+
+    def delete_record(self, data_set_id, record_id):
+        self._collection(data_set_id).remove({"_id": record_id})
 
     def execute_query(self, data_set_id, query):
         return map(convert_datetimes_to_utc,

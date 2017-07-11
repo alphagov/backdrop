@@ -1,15 +1,14 @@
 import datetime
 
+from freezegun import freeze_time
 from hamcrest import assert_that, is_, less_than, contains, has_entries, \
     instance_of, has_entry, contains_inanyorder
 from nose.tools import assert_raises
-from freezegun import freeze_time
 
-from backdrop.core.query import Query
 from backdrop.core.errors import DataSetCreationError
+from backdrop.core.query import Query
 from backdrop.core.records import add_period_keys
 from backdrop.core.timeseries import DAY
-
 from tests.support.test_helpers import d_tz
 
 
@@ -117,6 +116,26 @@ class BaseStorageTest(object):
         self.engine.empty_data_set('foo_bar')
 
         assert_that(len(self.engine.execute_query('foo_bar', Query.create())), is_(0))
+
+    def test_delete_record(self):
+        data = [{'_id': '111', 'foo': 'bar'}, {'_id': '222', 'bar': 'foo'}]
+        self._save_all('foo_bar', *data)
+        assert_that(len(self.engine.execute_query('foo_bar', Query.create())), is_(2))
+
+        self.engine.delete_record('foo_bar', '111')
+        assert_that(
+            self.engine.execute_query('foo_bar', Query.create()),
+            contains(has_entries({'_id': '222', 'bar': 'foo'}))
+        )
+
+        self.engine.delete_record('foo_bar', '333')
+        assert_that(
+            self.engine.execute_query('foo_bar', Query.create()),
+            contains(has_entries({'_id': '222', 'bar': 'foo'}))
+        )
+
+        self.engine.delete_record('foo_bar', '222')
+        assert_that(self.engine.execute_query('foo_bar', Query.create()), is_([]))
 
     def test_datetimes_are_returned_as_utc(self):
         self._save_all('foo_bar',

@@ -1,26 +1,22 @@
 import datetime
-import pytz
-
 from os import getenv
-from celery import Celery
 
+import pytz
+from celery import Celery
 from dateutil.parser import parse as datetime_parse
 from flask import abort, Flask, g, jsonify, request
 from flask_featureflags import FeatureFlag
+from performanceplatform import client
+
 from backdrop import statsd
 from backdrop.core.data_set import DataSet
 from backdrop.core.flaskutils import DataSetConverter
 from backdrop.write.decompressing_request import DecompressingRequest
-
-from ..core.errors import ParseError, ValidationError
-from ..core import log_handler, cache_control
-from ..core.flaskutils import generate_request_id
-
-from ..core.storage.mongo import MongoStorageEngine
-
 from .validation import auth_header_is_valid, extract_bearer_token
-
-from performanceplatform import client
+from ..core import log_handler, cache_control
+from ..core.errors import ParseError, ValidationError
+from ..core.flaskutils import generate_request_id
+from ..core.storage.mongo import MongoStorageEngine
 
 GOVUK_ENV = getenv("GOVUK_ENV", "development")
 
@@ -138,6 +134,29 @@ def write_by_group(data_group, data_type):
     else:
         trigger_transforms(data_set_config, data)
         return jsonify(status='ok')
+
+
+@app.route('/data/<data_group>/<data_type>/<data_set_id>', methods=['DELETE'])
+@cache_control.nocache
+@statsd.timer('write.route.data.delete.data_set')
+def delete_by_group_type_and_id(data_group, data_type, data_set_id):
+    """
+    Delete by group, type and id
+    e.g. DELETE https://BACKDROP/data/gcloud/sales/MjAxNi0wOC0xNSAwMDowMD
+    """
+
+    data_set_config = admin_api.get_data_set(data_group, data_type)
+    _validate_config(data_set_config)
+    _validate_auth(data_set_config)
+
+    try:
+        errors = _delete_data_set(data_set_config, data_set_id)
+        if errors:
+            return (jsonify(messages=errors), 400)
+        return jsonify(status='ok')
+
+    except (ParseError, ValidationError) as e:
+        abort(400, repr(e))
 
 
 @app.route('/data/<data_group>/<data_type>/<data_set_id>', methods=['PATCH'])
@@ -317,6 +336,11 @@ def _patch_data_set(data_set_config, data_set_id, data):
     audit_patch(data_set_config['name'], data)
     data_set = DataSet(storage, data_set_config)
     return data_set.patch(data_set_id, data)
+
+
+def _delete_data_set(data_set_config, data_set_id):
+    data_set = DataSet(storage, data_set_config)
+    return data_set.delete(data_set_id)
 
 
 def _empty_data_set(data_set_config):
