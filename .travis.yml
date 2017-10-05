@@ -7,6 +7,7 @@ sudo: false
 services: mongodb
 # command to install dependencies
 install:
+  - pip install --upgrade setuptools
   - pip install -q -r requirements_for_tests.txt
 # command to run tests
 env:
