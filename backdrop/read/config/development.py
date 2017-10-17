@@ -1,6 +1,4 @@
-DATABASE_NAME = "backdrop"
-MONGO_HOSTS = ['localhost']
-MONGO_PORT = 27017
+DATABASE_URL = 'mongodb://localhost:27017/backdrop_development'
 LOG_LEVEL = "DEBUG"
 
 STAGECRAFT_URL = 'http://localhost:3103'

@@ -10,7 +10,7 @@ sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')
 )
 
-os.environ["GOVUK_ENV"] = "test"
+os.environ["ENVIRONMENT"] = "test"
 
 from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
