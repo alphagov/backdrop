@@ -29,7 +29,10 @@ feature_flags = FeatureFlag(app)
 app.config.from_object(
     "backdrop.read.config.{}".format(ENVIRONMENT))
 
-storage = MongoStorageEngine.create(app.config['DATABASE_URL'])
+storage = MongoStorageEngine.create(
+    app.config['DATABASE_URL'],
+    app.config.get('CA_CERTIFICATE')
+)
 
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
