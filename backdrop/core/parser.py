@@ -20,7 +20,8 @@ def json_to_csv(data):
         if not parsed:
             parsed = [header]
         line = [item.get(i, "") for i in header]
-        line = [i.encode("utf8") if isinstance(i, basestring) else i for i in line]
+        line = [i.encode("utf8") if isinstance(
+            i, basestring) else i for i in line]
         parsed.append(line)
 
     out.writerows(parsed)

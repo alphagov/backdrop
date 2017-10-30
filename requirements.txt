@@ -13,8 +13,8 @@ python-dateutil==2.2
 pytz==2013b
 pyopenssl==17.0.0
 rauth==0.7.0
-requests==2.7.0
+requests==2.18.4
 statsd==3.0.1
 xlrd==0.9.3
 logstash_formatter==0.5.7
-Werkzeug==0.9.6
+Werkzeug==0.12.2
