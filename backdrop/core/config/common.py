@@ -2,6 +2,7 @@ import os
 import json
 from base64 import b64decode
 
+
 def load_paas_settings():
     paas = {}
     if 'VCAP_SERVICES' in os.environ:
