@@ -1,0 +1,18 @@
+---
+buildpack: python_buildpack
+name: performance-platform-backdrop
+services:
+  - gds-performance-platform-mongodb-service
+memory: 256M
+applications:
+  - name: performance-platform-backdrop-read
+    command: python start.py read 8080
+    instances: 1
+    memory: 512M
+    health-check-type: none
+
+  - name: performance-platform-backdrop-write
+    command: python start.py write 8080
+    instances: 1
+    memory: 512M
+    health-check-type: none
