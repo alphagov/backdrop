@@ -3,7 +3,7 @@ language: python
 python:
   - "2.7"
 cache: pip
-sudo: false
+sudo: true
 notifications:
   email: false
 
@@ -45,7 +45,7 @@ deploy:
     on:
       branch: staging
 
-- provider: script
+  - provider: script
     script: APP_SIGNON_API_USER_TOKEN=$APP_SIGNON_API_USER_TOKEN_PRODUCTION etc/deploy.sh production
     skip_cleanup: true
     on:
