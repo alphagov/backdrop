@@ -205,18 +205,6 @@ class ApiHealthCheckTestCase(unittest.TestCase):
         entity = json.loads(response.data)
         assert_that(entity["status"], is_("ok"))
 
-    @patch("backdrop.write.api.statsd")
-    @patch("backdrop.write.api.storage")
-    def test_exception_handling(self, storage, statsd):
-        storage.alive.side_effect = ValueError("BOOM")
-
-        response = self.app.get("/_status")
-
-        assert_that(response, has_status(500))
-        assert_that(response, is_error_response())
-
-        statsd.incr.assert_called_with("write.error", data_set="/_status")
-
 
 class UploadPageTestCase(unittest.TestCase):
     def setUp(self):

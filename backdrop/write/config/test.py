@@ -1,6 +1,4 @@
-DATABASE_NAME = "backdrop_test"
-MONGO_HOSTS = ['localhost']
-MONGO_PORT = 27017
+DATABASE_URL = 'mongodb://localhost:27017/backdrop_test'
 LOG_LEVEL = "DEBUG"
 CLIENT_ID = "it's not important here"
 CLIENT_SECRET = "it's not important here"

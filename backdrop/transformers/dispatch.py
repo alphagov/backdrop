@@ -16,11 +16,11 @@ from worker import app, config
 
 from performanceplatform.client import AdminAPI, DataSet
 
-GOVUK_ENV = getenv("GOVUK_ENV", "development")
+ENVIRONMENT = getenv("ENVIRONMENT", "development")
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 logger.addHandler(
-    get_log_file_handler("log/{}.log".format(GOVUK_ENV), logging.DEBUG))
+    get_log_file_handler("log/{}.log".format(ENVIRONMENT), logging.DEBUG))
 
 stats_client = StatsClient(prefix=getenv("GOVUK_STATSD_PREFIX",
                                          "pp.apps.backdrop.transformers.worker"))

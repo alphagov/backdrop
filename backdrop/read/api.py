@@ -91,12 +91,7 @@ def http_error_handler(e):
 @cache_control.nocache
 @statsd.timer('read.route.heath_check.status')
 def health_check():
-
-    if not storage.alive():
-        return jsonify(status='error',
-                       message='cannot connect to database'), 500
-
-    return jsonify(status='ok', message='database is up')
+    return jsonify(status='ok', message='app is up')
 
 
 @app.route('/_status/data-sets', methods=['GET'])
