@@ -7,4 +7,14 @@ CA_CERTIFICATE = PAAS.get('CA_CERTIFICATE')
 STAGECRAFT_URL = os.getenv('STAGECRAFT_URL')
 SIGNON_API_USER_TOKEN = os.getenv('SIGNON_API_USER_TOKEN')
 LOG_LEVEL = "INFO"
+DATA_SET_UPLOAD_FORMAT = {
+    "ithc_excel": "excel",
+}
+DATA_SET_UPLOAD_FILTERS = {
+    "ithc_excel": [
+        "backdrop.core.upload.filters.first_sheet_filter",
+    ],
+}
 SESSION_COOKIE_SECURE = True
+SECRET_KEY = os.getenv('SECRET_KEY')
+STAGECRAFT_COLLECTION_ENDPOINT_TOKEN = os.getenv('STAGECRAFT_COLLECTION_ENDPOINT_TOKEN')

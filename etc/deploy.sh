@@ -27,6 +27,7 @@ cf set-env performance-platform-backdrop-read SIGNON_API_USER_TOKEN $APP_SIGNON_
 cf set-env performance-platform-backdrop-write ENVIRONMENT $PAAS_SPACE
 cf set-env performance-platform-backdrop-write STAGECRAFT_URL https://performance-platform-stagecraft-$PAAS_SPACE.cloudapps.digital
 cf set-env performance-platform-backdrop-write SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN 
+cf set-env performance-platform-backdrop-write SECRET_KEY $APP_SECRET_KEY
 
 # deploy apps
 cf push -f manifest.yml
