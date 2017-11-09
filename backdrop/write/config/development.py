@@ -15,4 +15,4 @@ STAGECRAFT_URL = 'http://localhost:3103'
 
 SIGNON_API_USER_TOKEN = 'development-oauth-access-token'
 
-TRANSFORMER_AMQP_URL = 'amqp://backdrop_write:backdrop_write@localhost:5672/%2Fbackdrop_write'
+BROKER_URL = 'amqp://backdrop_write:backdrop_write@localhost:5672/%2Fbackdrop_write'

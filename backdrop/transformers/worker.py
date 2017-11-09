@@ -10,7 +10,7 @@ config = importlib.import_module(
 
 app = Celery(
     'transformations',
-    broker=config.TRANSFORMER_AMQP_URL,
+    broker=config.BROKER_URL,
     include=['backdrop.transformers.dispatch'])
 
 

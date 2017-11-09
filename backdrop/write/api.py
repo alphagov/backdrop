@@ -48,7 +48,7 @@ log_handler.set_up_audit_logging(app, ENVIRONMENT)
 
 app.url_map.converters["data_set"] = DataSetConverter
 
-celery_app = Celery(broker=app.config['TRANSFORMER_AMQP_URL'])
+celery_app = Celery(broker=app.config['BROKER_URL'])
 app.config['BROKER_FAILOVER_STRATEGY'] = "round-robin"
 celery_app.conf.update(app.config)
 
