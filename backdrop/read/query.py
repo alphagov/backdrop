@@ -3,13 +3,12 @@ from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.query import Query
 import re
 
-
 __all__ = ['parse_query_from_request']
 
 
-def parse_query_from_request(request):
+def parse_query_from_request(request, config):
     """Parses a Query object from a flask request"""
-    return Query.create(**parse_request_args(request.args))
+    return Query.create(**parse_request_args(request.args, config.get('DEFAULT_COLLECTION', 'default')))
 
 
 def if_present(func, value):
@@ -18,7 +17,7 @@ def if_present(func, value):
         return func(value)
 
 
-def parse_request_args(request_args):
+def parse_request_args(request_args, default_collection='default'):
     args = dict()
 
     args['start_at'] = if_present(parse_time_as_utc,
@@ -67,7 +66,8 @@ def parse_request_args(request_args):
         if ':' in collect_arg:
             args['collect'].append(tuple(collect_arg.split(':')))
         else:
-            args['collect'].append((collect_arg, 'default'))
+            args['collect'].append(
+                (collect_arg, default_collection))
 
     args['flatten'] = if_present(boolify, request_args.get('flatten'))
     args['inclusive'] = if_present(boolify, request_args.get('inclusive'))
