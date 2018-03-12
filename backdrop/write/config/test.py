@@ -8,6 +8,7 @@ DATA_SET_AUTO_ID_KEYS = {
     "evl_volumetrics": ["_timestamp", "service", "transaction"],
 }
 BROKER_URL = 'memory://'
+DEFAULT_COLLECTION = 'default'
 
 from development import (STAGECRAFT_COLLECTION_ENDPOINT_TOKEN, STAGECRAFT_URL,
                          SIGNON_API_USER_TOKEN)

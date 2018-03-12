@@ -8,3 +8,4 @@ STAGECRAFT_URL = 'https://performance-platform-stagecraft-production.cloudapps.d
 STAGECRAFT_OAUTH_TOKEN = os.getenv('STAGECRAFT_OAUTH_TOKEN')
 BACKDROP_READ_URL = 'https://performance-platform-backdrop-read-production.cloudapps.digital/data'
 BACKDROP_WRITE_URL = 'https://performance-platform-backdrop-write-production.cloudapps.digital/data'
+DEFAULT_COLLECTION = PAAS.get('DEFAULT_COLLECTION')

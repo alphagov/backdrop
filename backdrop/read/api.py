@@ -203,7 +203,7 @@ def fetch(data_set_config):
         data_set = DataSet(storage, data_set_config)
 
         try:
-            query = parse_query_from_request(request)
+            query = parse_query_from_request(request, app.config)
             data = data_set.execute_query(query)
 
         except InvalidOperationError:
