@@ -6,9 +6,9 @@ import re
 __all__ = ['parse_query_from_request']
 
 
-def parse_query_from_request(request, config):
+def parse_query_from_request(request):
     """Parses a Query object from a flask request"""
-    return Query.create(**parse_request_args(request.args, config.get('DEFAULT_COLLECTION', 'default')))
+    return Query.create(**parse_request_args(request.args))
 
 
 def if_present(func, value):
@@ -17,7 +17,7 @@ def if_present(func, value):
         return func(value)
 
 
-def parse_request_args(request_args, default_collection='default'):
+def parse_request_args(request_args):
     args = dict()
 
     args['start_at'] = if_present(parse_time_as_utc,
@@ -67,7 +67,7 @@ def parse_request_args(request_args, default_collection='default'):
             args['collect'].append(tuple(collect_arg.split(':')))
         else:
             args['collect'].append(
-                (collect_arg, default_collection))
+                (collect_arg, 'default'))
 
     args['flatten'] = if_present(boolify, request_args.get('flatten'))
     args['inclusive'] = if_present(boolify, request_args.get('inclusive'))
