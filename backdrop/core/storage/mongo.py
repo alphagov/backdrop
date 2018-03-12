@@ -72,7 +72,7 @@ function(collection_names) {
 class MongoStorageEngine(object):
 
     @classmethod
-    def create(cls, database_url, ca_certificate):
+    def create(cls, database_url, ca_certificate=None):
         if ca_certificate is not None:
             dir = os.path.dirname(__file__)
             filename = os.path.join(dir, 'mongodb.crt')

@@ -18,7 +18,7 @@ class BaseClient(object):
         return self._mongo_db
 
     def clean_mongo(self):
-        self._mongo_db.connection.drop_database(
+        self._mongo_db.client.drop_database(
             self._mongo_db.name)
 
     def before_scenario(self):

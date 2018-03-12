@@ -48,7 +48,7 @@ log_handler.set_up_audit_logging(app, ENVIRONMENT)
 
 app.url_map.converters["data_set"] = DataSetConverter
 
-celery_app = Celery(broker=app.config['TRANSFORMER_AMQP_URL'])
+celery_app = Celery(broker=app.config['BROKER_URL'])
 app.config['BROKER_FAILOVER_STRATEGY'] = "round-robin"
 celery_app.conf.update(app.config)
 
@@ -105,10 +105,7 @@ def http_error_handler(e):
 @cache_control.nocache
 @statsd.timer('write.route.health_check.status')
 def health_check():
-    if storage.alive():
-        return jsonify(status='ok', message='database seems fine')
-    else:
-        abort(500, 'cannot connect to database')
+    return jsonify(status='ok', message='app is up')
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['POST'])

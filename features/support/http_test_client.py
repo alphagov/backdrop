@@ -5,11 +5,10 @@ from .support import FlaskApp, BaseClient
 
 
 class HTTPTestClient(BaseClient):
-    def __init__(self, database_name):
-        self.database_name = database_name
+    def __init__(self, database_url):
         self._read_api = FlaskApp("read", "5000")
         self._write_api = FlaskApp("write", "5001")
-        self._mongo_db = MongoClient('localhost', 27017)[self.database_name]
+        self._mongo_db = MongoClient(database_url).get_database()
         self._start()
 
     def get(self, url, headers=None):

@@ -22,11 +22,17 @@ cf bind-service performance-platform-backdrop-write gds-performance-platform-mon
 # set environmental variables
 cf set-env performance-platform-backdrop-read ENVIRONMENT $PAAS_SPACE
 cf set-env performance-platform-backdrop-read STAGECRAFT_URL https://performance-platform-stagecraft-$PAAS_SPACE.cloudapps.digital
-cf set-env performance-platform-backdrop-read SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN 
+cf set-env performance-platform-backdrop-read SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN
 
 cf set-env performance-platform-backdrop-write ENVIRONMENT $PAAS_SPACE
 cf set-env performance-platform-backdrop-write STAGECRAFT_URL https://performance-platform-stagecraft-$PAAS_SPACE.cloudapps.digital
-cf set-env performance-platform-backdrop-write SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN 
+cf set-env performance-platform-backdrop-write SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN
+cf set-env performance-platform-backdrop-write SECRET_KEY $APP_SECRET_KEY
+cf set-env performance-platform-backdrop-write REDIS_DATABASE_NUMBER $REDIS_DATABASE_NUMBER
+
+cf set-env performance-platform-backdrop-celery-worker ENVIRONMENT $PAAS_SPACE
+cf set-env performance-platform-backdrop-celery-worker STAGECRAFT_OAUTH_TOKEN $APP_STAGECRAFT_OAUTH_TOKEN
+cf set-env performance-platform-backdrop-celery-worker REDIS_DATABASE_NUMBER $REDIS_DATABASE_NUMBER
 
 # deploy apps
 cf push -f manifest.yml

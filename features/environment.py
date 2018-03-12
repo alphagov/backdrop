@@ -61,7 +61,7 @@ def create_client(feature):
     if 'use_write_api_client' in feature.tags:
         return FlaskTestClient(write_api)
     if 'use_http_client' in feature.tags:
-        return HTTPTestClient(config.DATABASE_NAME)
+        return HTTPTestClient(config.DATABASE_URL)
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "
