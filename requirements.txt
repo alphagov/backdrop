@@ -1,14 +1,13 @@
 argh==0.25
-Celery==3.1.17
+celery[redis]==4.1.0
 Flask==0.10.1
 Flask-FeatureFlags==0.4
-gunicorn==19.1.1
 invoke
 isodate==0.5.0
 jsonschema==2.4
 performanceplatform-client==0.6.0
 #pip==1.5.6
-pymongo==2.8
+pymongo==3.5.1
 python-dateutil==2.2
 pytz==2013b
 pyopenssl==17.0.0

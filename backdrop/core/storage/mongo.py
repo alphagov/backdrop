@@ -39,23 +39,6 @@ def convert_datetimes_to_utc(result):
     return dict((key, time_as_utc(value)) for key, value in result.items())
 
 
-def get_mongo_client(hosts, port):
-    """Return an appropriate mongo client
-    """
-    client_list = ','.join(':'.join([host, str(port)]) for host in hosts)
-
-    # We can't always guarantee we'll be on 'production'
-    # so we allow jenkins to add the set as a variable
-    # Some test environments / other envs have their own sets e.g. 'gds-ci'
-    replica_set = os.getenv('MONGO_REPLICA_SET', 'production')
-
-    if replica_set == '':
-        return pymongo.MongoClient(client_list)
-    else:
-        return pymongo.MongoReplicaSetClient(
-            client_list, replicaSet=replica_set)
-
-
 def reconnecting_save(collection, record, tries=3):
     """Save to mongo, retrying if necesarry
     """
@@ -89,18 +72,32 @@ function(collection_names) {
 class MongoStorageEngine(object):
 
     @classmethod
-    def create(cls, hosts, port, database):
-        return cls(get_mongo_client(hosts, port), database)
+    def create(cls, database_url, ca_certificate=None):
+        if ca_certificate is not None:
+            dir = os.path.dirname(__file__)
+            filename = os.path.join(dir, 'mongodb.crt')
+            f = open(filename, 'w')
+            f.write(ca_certificate)
+            f.close()
 
-    def __init__(self, mongo, database):
-        self._mongo = mongo
-        self._db = mongo[database]
+            mongo_client = pymongo.MongoClient(
+                database_url,
+                ssl_ca_certs=filename
+            )
+        else:
+            mongo_client = pymongo.MongoClient(database_url)
+
+        return cls(mongo_client)
+
+    def __init__(self, mongo_client):
+        self._mongo_client = mongo_client
+        self._db = mongo_client.get_database()
 
     def _collection(self, data_set_id):
         return self._db[data_set_id]
 
     def alive(self):
-        return self._mongo.alive()
+        return self._mongo_client.alive()
 
     def data_set_exists(self, data_set_id):
         return data_set_id in self._db.collection_names()

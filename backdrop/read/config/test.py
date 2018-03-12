@@ -1,6 +1,4 @@
-DATABASE_NAME = "backdrop_test"
-MONGO_HOSTS = ['localhost']
-MONGO_PORT = 27017
+DATABASE_URL = 'mongodb://localhost:27017/backdrop_test'
 LOG_LEVEL = "ERROR"
 
 DATA_SET_RATE_LIMIT = '10000/second'

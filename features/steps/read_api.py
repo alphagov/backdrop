@@ -32,7 +32,7 @@ def step(context, fixture_name, data_set_name):
                         '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
-            context.client.mongo()[data_set_name].save(obj)
+            context.client.mongo()[data_set_name].insert_one(obj)
 
 
 def get_data_set_settings_from_context_table(table):
@@ -56,7 +56,7 @@ def step(context, fixture_name, data_set_name):
                         '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
-            context.client.mongo()[data_set_name].save(obj)
+            context.client.mongo()[data_set_name].insert_one(obj)
 
 
 @given('I have a record updated "{timespan}" ago in the "{data_set_name}" data_set')

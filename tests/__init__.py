@@ -5,4 +5,4 @@ sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')
 )
 
-os.environ["GOVUK_ENV"] = "test"
+os.environ["ENVIRONMENT"] = "test"

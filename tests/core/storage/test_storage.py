@@ -37,9 +37,6 @@ class BaseStorageTest(object):
 
         self._save_all(data_set_id, *records)
 
-    def test_is_alive(self):
-        assert_that(self.engine.alive(), is_(True))
-
     def test_does_not_exist(self):
         assert_that(self.engine.data_set_exists('foo_bar'), is_(False))
 

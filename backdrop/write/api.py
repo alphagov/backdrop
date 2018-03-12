@@ -18,7 +18,7 @@ from ..core.errors import ParseError, ValidationError
 from ..core.flaskutils import generate_request_id
 from ..core.storage.mongo import MongoStorageEngine
 
-GOVUK_ENV = getenv("GOVUK_ENV", "development")
+ENVIRONMENT = getenv("ENVIRONMENT", "development")
 
 app = Flask("backdrop.write.api")
 
@@ -29,12 +29,12 @@ feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
-    "backdrop.write.config.{}".format(GOVUK_ENV))
+    "backdrop.write.config.{}".format(ENVIRONMENT))
 
 storage = MongoStorageEngine.create(
-    app.config['MONGO_HOSTS'],
-    app.config['MONGO_PORT'],
-    app.config['DATABASE_NAME'])
+    app.config['DATABASE_URL'],
+    app.config.get('CA_CERTIFICATE')
+)
 
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
@@ -43,12 +43,12 @@ admin_api = client.AdminAPI(
     request_id_fn=generate_request_id,
 )
 
-log_handler.set_up_logging(app, GOVUK_ENV)
-log_handler.set_up_audit_logging(app, GOVUK_ENV)
+log_handler.set_up_logging(app, ENVIRONMENT)
+log_handler.set_up_audit_logging(app, ENVIRONMENT)
 
 app.url_map.converters["data_set"] = DataSetConverter
 
-celery_app = Celery(broker=app.config['TRANSFORMER_AMQP_URL'])
+celery_app = Celery(broker=app.config['BROKER_URL'])
 app.config['BROKER_FAILOVER_STRATEGY'] = "round-robin"
 celery_app.conf.update(app.config)
 
@@ -105,10 +105,7 @@ def http_error_handler(e):
 @cache_control.nocache
 @statsd.timer('write.route.health_check.status')
 def health_check():
-    if storage.alive():
-        return jsonify(status='ok', message='database seems fine')
-    else:
-        abort(500, 'cannot connect to database')
+    return jsonify(status='ok', message='app is up')
 
 
 @app.route('/data/<data_group>/<data_type>', methods=['POST'])

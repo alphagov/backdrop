@@ -19,11 +19,12 @@ from backdrop.core.data_set import DataSet
 
 from .test_storage import BaseStorageTest
 
+DATABASE_URL = 'mongodb://localhost:27017/backdrop_test'
+
 
 class TestMongoStorageEngine(BaseStorageTest):
     def setup(self):
-        self.engine = MongoStorageEngine.create(
-            ['localhost'], 27017, 'backdrop_test')
+        self.engine = MongoStorageEngine.create(DATABASE_URL)
 
     def test_create_data_set(self):
         self.engine.create_data_set('should_have_index', 0)
@@ -53,7 +54,9 @@ class TestMongoStorageEngine(BaseStorageTest):
         assert_that(last_updated.second, is_(timestamp.second))
 
     def teardown(self):
-        self.engine._mongo.drop_database('backdrop_test')
+        mongo_client = self.engine._mongo_client
+        database_name = mongo_client.get_database().name
+        mongo_client.drop_database(database_name)
 
 
 class TestReconnectingSave(object):

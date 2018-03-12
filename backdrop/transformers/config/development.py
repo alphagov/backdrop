@@ -1,4 +1,4 @@
-TRANSFORMER_AMQP_URL = 'amqp://backdrop_write:backdrop_write@localhost:5672/%2Fbackdrop_write'
+BROKER_URL = 'amqp://backdrop_write:backdrop_write@localhost:5672/%2Fbackdrop_write'
 STAGECRAFT_URL = 'http://localhost:3103'
 STAGECRAFT_OAUTH_TOKEN = 'development-oauth-access-token'
 BACKDROP_READ_URL = 'http://backdrop-read.dev.gov.uk/data'

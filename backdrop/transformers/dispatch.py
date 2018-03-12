@@ -8,6 +8,7 @@ from os import getenv
 from statsd import StatsClient
 
 from backdrop.core.timeseries import parse_period
+from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.log_handler import get_log_file_handler
 from backdrop.core.errors import incr_on_error
 from backdrop.transformers.tasks.util import encode_id
@@ -16,11 +17,11 @@ from worker import app, config
 
 from performanceplatform.client import AdminAPI, DataSet
 
-GOVUK_ENV = getenv("GOVUK_ENV", "development")
+ENVIRONMENT = getenv("ENVIRONMENT", "development")
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 logger.addHandler(
-    get_log_file_handler("log/{}.log".format(GOVUK_ENV), logging.DEBUG))
+    get_log_file_handler("log/{}.log".format(ENVIRONMENT), logging.DEBUG))
 
 stats_client = StatsClient(prefix=getenv("GOVUK_STATSD_PREFIX",
                                          "pp.apps.backdrop.transformers.worker"))
@@ -146,6 +147,9 @@ def run_transform(data_set_config, transform, earliest, latest):
         data_set_config['data_group'],
         data_set_config['data_type'],
     )
+
+    earliest = parse_time_as_utc(earliest)
+    latest = parse_time_as_utc(latest)
 
     data = data_set.get(
         query_parameters=get_query_parameters(transform, earliest, latest)

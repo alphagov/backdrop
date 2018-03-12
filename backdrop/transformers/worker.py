@@ -4,13 +4,13 @@ from celery import Celery
 import importlib
 from os import getenv
 
-GOVUK_ENV = getenv("GOVUK_ENV", "development")
+ENVIRONMENT = getenv("ENVIRONMENT", "development")
 config = importlib.import_module(
-    "backdrop.transformers.config.{}".format(GOVUK_ENV))
+    "backdrop.transformers.config.{}".format(ENVIRONMENT))
 
 app = Celery(
     'transformations',
-    broker=config.TRANSFORMER_AMQP_URL,
+    broker=config.BROKER_URL,
     include=['backdrop.transformers.dispatch'])
 
 

@@ -10,7 +10,7 @@ sys.path.append(
     os.path.join(os.path.dirname(__file__), '..')
 )
 
-os.environ["GOVUK_ENV"] = "test"
+os.environ["ENVIRONMENT"] = "test"
 
 from support.http_test_client import HTTPTestClient
 from support.flask_test_client import FlaskTestClient
@@ -61,7 +61,7 @@ def create_client(feature):
     if 'use_write_api_client' in feature.tags:
         return FlaskTestClient(write_api)
     if 'use_http_client' in feature.tags:
-        return HTTPTestClient(config.DATABASE_NAME)
+        return HTTPTestClient(config.DATABASE_URL)
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "

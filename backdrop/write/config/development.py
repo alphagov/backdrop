@@ -1,6 +1,4 @@
-DATABASE_NAME = "backdrop"
-MONGO_HOSTS = ['localhost']
-MONGO_PORT = 27017
+DATABASE_URL = 'mongodb://localhost:27017/backdrop_development'
 LOG_LEVEL = "DEBUG"
 DATA_SET_AUTO_ID_KEYS = {
     "lpa_volumes": ("key", "start_at", "end_at")
@@ -17,4 +15,4 @@ STAGECRAFT_URL = 'http://localhost:3103'
 
 SIGNON_API_USER_TOKEN = 'development-oauth-access-token'
 
-TRANSFORMER_AMQP_URL = 'amqp://backdrop_write:backdrop_write@localhost:5672/%2Fbackdrop_write'
+BROKER_URL = 'amqp://backdrop_write:backdrop_write@localhost:5672/%2Fbackdrop_write'

@@ -1,0 +1,30 @@
+---
+buildpack: python_buildpack
+services:
+  - redis-poc
+
+applications:
+  - name: performance-platform-backdrop-read
+    command: python start.py read 8080
+    services:
+      - gds-performance-platform-mongodb-service
+    instances: 1
+    memory: 512M
+    no-route: true
+    health-check-type: none
+
+  - name: performance-platform-backdrop-write
+    command: python start.py write 8080
+    services:
+      - gds-performance-platform-mongodb-service
+    instances: 1
+    memory: 512M
+    no-route: true
+    health-check-type: none
+
+  - name: performance-platform-backdrop-celery-worker
+    command: celery -A backdrop.transformers.worker worker --loglevel=info
+    instances: 1
+    memory: 1G
+    no-route: true
+    health-check-type: none

@@ -18,3 +18,4 @@ tmp/*
 
 # vim swap files
 .*.swp
+venv/

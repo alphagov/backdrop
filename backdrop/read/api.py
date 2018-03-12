@@ -19,7 +19,7 @@ from ..core.response import crossdomain
 from ..core.storage.mongo import MongoStorageEngine
 from ..core.timeutils import as_utc
 
-GOVUK_ENV = getenv("GOVUK_ENV", "development")
+ENVIRONMENT = getenv("ENVIRONMENT", "development")
 
 app = Flask("backdrop.read.api")
 
@@ -27,12 +27,12 @@ feature_flags = FeatureFlag(app)
 
 # Configuration
 app.config.from_object(
-    "backdrop.read.config.{}".format(GOVUK_ENV))
+    "backdrop.read.config.{}".format(ENVIRONMENT))
 
 storage = MongoStorageEngine.create(
-    app.config['MONGO_HOSTS'],
-    app.config['MONGO_PORT'],
-    app.config['DATABASE_NAME'])
+    app.config['DATABASE_URL'],
+    app.config.get('CA_CERTIFICATE')
+)
 
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
@@ -46,7 +46,7 @@ DEFAULT_DATA_SET_RAW_QUERIES = False
 DEFAULT_DATA_SET_PUBLISHED = True
 DEFAULT_DATA_SET_REALTIME = False
 
-log_handler.set_up_logging(app, GOVUK_ENV)
+log_handler.set_up_logging(app, ENVIRONMENT)
 
 
 class JsonEncoder(json.JSONEncoder):
@@ -91,12 +91,7 @@ def http_error_handler(e):
 @cache_control.nocache
 @statsd.timer('read.route.heath_check.status')
 def health_check():
-
-    if not storage.alive():
-        return jsonify(status='error',
-                       message='cannot connect to database'), 500
-
-    return jsonify(status='ok', message='database is up')
+    return jsonify(status='ok', message='app is up')
 
 
 @app.route('/_status/data-sets', methods=['GET'])
