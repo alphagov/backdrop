@@ -5,7 +5,6 @@ DATA_SET_AUTO_ID_KEYS = {
 }
 
 STAGECRAFT_COLLECTION_ENDPOINT_TOKEN = 'dev-create-endpoint-token'
-DEFAULT_COLLECTION = 'default'
 
 try:
     from development_environment import *

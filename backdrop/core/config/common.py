@@ -12,7 +12,6 @@ def load_paas_settings():
                 if service['name'] == 'gds-performance-platform-mongodb-service':
                     credentials = service['credentials']
                     paas['DATABASE_URL'] = credentials['uri']
-                    paas['DEFAULT_COLLECTION'] = credentials['name']
                     ca_cert = b64decode(credentials['ca_certificate_base64'])
                     paas['CA_CERTIFICATE'] = ca_cert
         if 'REDIS_DATABASE_NUMBER' in os.environ:
