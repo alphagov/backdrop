@@ -3,7 +3,6 @@ from backdrop.core.timeutils import parse_time_as_utc
 from backdrop.core.query import Query
 import re
 
-
 __all__ = ['parse_query_from_request']
 
 
@@ -67,7 +66,8 @@ def parse_request_args(request_args):
         if ':' in collect_arg:
             args['collect'].append(tuple(collect_arg.split(':')))
         else:
-            args['collect'].append((collect_arg, 'default'))
+            args['collect'].append(
+                (collect_arg, 'default'))
 
     args['flatten'] = if_present(boolify, request_args.get('flatten'))
     args['inclusive'] = if_present(boolify, request_args.get('inclusive'))
