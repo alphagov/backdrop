@@ -16,8 +16,8 @@ sudo apt-get update && sudo apt-get install cf-cli
 cf login -u $PAAS_USER -p $PAAS_PASSWORD -a https://api.cloud.service.gov.uk -o gds-performance-platform -s $PAAS_SPACE
 
 # bind services
-cf bind-service performance-platform-backdrop-read gds-performance-platform-mongodb-service
-cf bind-service performance-platform-backdrop-write gds-performance-platform-mongodb-service
+#cf bind-service performance-platform-backdrop-read gds-performance-platform-mongodb-service
+#cf bind-service performance-platform-backdrop-write gds-performance-platform-mongodb-service
 
 # set environmental variables
 cf set-env performance-platform-backdrop-read ENVIRONMENT $PAAS_SPACE
