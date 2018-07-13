@@ -44,6 +44,8 @@ To start just the read or write applications:
 
 ## Testing
 
+On one terminal, run ```mongod --dbpath .```
+
 Run tests with ```./run_tests.sh```
 
 Splinter tests are not run in Travis or Jenkins due to their instability.
