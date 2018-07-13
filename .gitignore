@@ -15,7 +15,9 @@ nosetests.xml
 pep8.out
 tmp/*
 .DS_store
+.python-version
 
 # vim swap files
 .*.swp
 venv/
+mongo/

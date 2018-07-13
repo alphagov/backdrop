@@ -19,7 +19,8 @@ class RequestIdFilter(logging.Filter):
 
 
 def get_log_file_handler(path, log_level=logging.DEBUG):
-    handler = RotatingFileHandler(path, maxBytes=1024*1024*10, backupCount=5)
+    handler = RotatingFileHandler(
+        path, maxBytes=1024 * 1024 * 10, backupCount=5)
     handler.setFormatter(logging.Formatter(
         "%(asctime)s [%(levelname)s] -> %(message)s"))
     handler.setLevel(log_level)
@@ -27,7 +28,8 @@ def get_log_file_handler(path, log_level=logging.DEBUG):
 
 
 def get_json_log_handler(path, app_name):
-    handler = RotatingFileHandler(path, maxBytes=1024*1024*10, backupCount=5)
+    handler = RotatingFileHandler(
+        path, maxBytes=1024 * 1024 * 10, backupCount=5)
     formatter = LogstashFormatter()
     formatter.defaults['@tags'] = ['application', app_name]
     handler.setFormatter(formatter)
@@ -67,7 +69,8 @@ def create_request_logger(app):
     def log_request():
         if request.method != "HEAD":
             app.logger.info("request: %s - %s" % (request.method, request.url),
-                        extra=create_logging_extra_dict())
+                            extra=create_logging_extra_dict())
+
     return log_request
 
 
@@ -81,6 +84,7 @@ def create_response_logger(app):
                 extra=create_logging_extra_dict()
             )
         return response
+
     return log_response
 
 

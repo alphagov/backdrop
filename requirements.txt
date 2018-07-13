@@ -6,7 +6,6 @@ invoke
 isodate==0.5.0
 jsonschema==2.4
 performanceplatform-client==0.6.0
-#pip==1.5.6
 pymongo==3.5.1
 python-dateutil==2.2
 pytz==2013b
