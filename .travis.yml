@@ -19,7 +19,7 @@ install:
   - pip install -q -r requirements_for_tests.txt
 
 env:
-  global: 
+  global:
     - PAAS_USER: pp-deploy@digital.cabinet-office.gov.uk
     # PAAS_PASSWORD
     - secure: HNo6rnNiXmNYAV1TvkcMxeniXpmHoZkNEiT+X9EgyInCOnVm4mz89qi/AElY/ESE5HdYIegJ5l1M5tAWCei4dSDSTSfkbBBiHE6dfpf1OSU857oQ6T6161NRg4V2oxNdWSRgAX+G8rpxBShaXCDU9q9iBxhsqrmTX+UGlzKloDk=
