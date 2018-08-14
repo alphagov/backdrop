@@ -1,5 +1,6 @@
 argh==0.25
-celery[redis]==4.1.1
+git+git://github.com/tlwr/celery.git@master#egg=celery
+git+git://github.com/tlwr/kombu.git@master#egg=kombu
 Flask==0.10.1
 Flask-FeatureFlags==0.4
 invoke
@@ -17,3 +18,4 @@ statsd==3.0.1
 xlrd==0.9.3
 logstash_formatter==0.5.7
 Werkzeug==0.12.2
+redis==2.10.6
