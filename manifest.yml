@@ -2,6 +2,7 @@
 buildpack: python_buildpack
 services:
   - redis-poc
+  - redis
 
 applications:
   - name: performance-platform-backdrop-read
