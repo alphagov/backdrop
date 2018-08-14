@@ -1,5 +1,5 @@
 argh==0.25
-celery[redis]==4.1.0
+celery[redis]==4.1.1
 Flask==0.10.1
 Flask-FeatureFlags==0.4
 invoke
