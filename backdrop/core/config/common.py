@@ -15,10 +15,10 @@ def load_paas_settings():
                     ca_cert = b64decode(credentials['ca_certificate_base64'])
                     paas['CA_CERTIFICATE'] = ca_cert
         if 'REDIS_DATABASE_NUMBER' in os.environ:
-            for service in vcap['user-provided']:
-                if service['name'] == 'redis-poc':
+            for service in vcap['redis']:
+                if service['name'] == 'redis':
                     database_number = os.environ['REDIS_DATABASE_NUMBER']
-                    url = service['credentials']['url']
+                    url = service['credentials']['uri']
                     url += '/' + database_number
                     paas['REDIS_URL'] = url
     return paas
