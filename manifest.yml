@@ -28,3 +28,6 @@ applications:
     memory: 1G
     no-route: true
     health-check-type: none
+    env:
+      BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
+      CELERY_CONFIG_MODULE: backdrop.celeryconfig
