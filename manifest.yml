@@ -1,33 +1,30 @@
 ---
-buildpack: python_buildpack
-services:
-  - redis
+defaults: &defaults
+  buildpack: python_buildpack
+  services:
+    - redis
+  instances: 1
+  memory: 512M
+  no-route: true
+  health-check-type: none
 
 applications:
   - name: performance-platform-backdrop-read
+    <<: *defaults
     command: python start.py read 8080
     services:
       - gds-performance-platform-mongodb-service
-    instances: 1
-    memory: 512M
-    no-route: true
-    health-check-type: none
 
   - name: performance-platform-backdrop-write
+    <<: *defaults
     command: python start.py write 8080
     services:
       - gds-performance-platform-mongodb-service
-    instances: 1
-    memory: 512M
-    no-route: true
-    health-check-type: none
 
   - name: performance-platform-backdrop-celery-worker
+    <<: *defaults
     command: celery -A backdrop.transformers.worker worker --loglevel=info
-    instances: 1
     memory: 1G
-    no-route: true
-    health-check-type: none
     env:
       BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
       CELERY_CONFIG_MODULE: backdrop.celeryconfig
