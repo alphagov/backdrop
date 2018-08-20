@@ -40,3 +40,4 @@ cf push -f manifest.yml
 # create and map routes
 cf map-route performance-platform-backdrop-read cloudapps.digital --hostname performance-platform-backdrop-read-$PAAS_SPACE
 cf map-route performance-platform-backdrop-write cloudapps.digital --hostname performance-platform-backdrop-write-$PAAS_SPACE
+cf map-route performance-platform-backdrop-flower cloudapps.digital --hostname performance-platform-backdrop-flower-$PAAS_SPACE

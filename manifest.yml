@@ -28,3 +28,12 @@ applications:
     env:
       BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
       CELERY_CONFIG_MODULE: backdrop.celeryconfig
+
+  - name: performance-platform-backdrop-flower
+    <<: *defaults
+    command: etc/run_flower.sh
+    memory: 1G
+    env:
+      DISABLE_COLLECTSTATIC: 1
+      BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
+      CELERY_CONFIG_MODULE: backdrop.celeryconfig
