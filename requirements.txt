@@ -1,6 +1,6 @@
 argh==0.25
-git+git://github.com/tlwr/celery.git@master#egg=celery
-git+git://github.com/tlwr/kombu.git@master#egg=kombu
+git+git://github.com/alphagov/celery.git@4.2.1-rediss#egg=celery
+git+git://github.com/alphagov/kombu.git@4.2.1-rediss#egg=kombu
 Flask==0.10.1
 Flask-FeatureFlags==0.4
 invoke
