@@ -1,0 +1,17 @@
+version: "3"
+services:
+  backdrop-read:
+    build: .
+    ports:
+      - "3038:3038"
+    command: ["read", "3038"]
+  backdrop-write:
+    build: .
+    ports:
+      - "3039:3039"
+    command: ["write", "3039"]
+  mongo:
+    image: mongo:2.4
+    ports:
+      - 27017:27017
+

@@ -1,0 +1,26 @@
+.git
+**/*.pyc
+
+# From .gitignore:
+
+backdrop/*/config/development_environment.py
+
+*.pyc
+client_secrets.json
+tokens.dat
+assets/*
+!assets/.gitkeep
+.idea
+*.tar.gz
+.coverage
+build
+coverage.xml
+*.log*
+nosetests.xml
+pep8.out
+tmp/*
+.DS_store
+
+# vim swap files
+.*.swp
+venv/
