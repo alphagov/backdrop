@@ -28,7 +28,9 @@ if [ -z "$VIRTUAL_ENV" -a -n "$WORKON_HOME" ]; then
 fi
 
 
-pip install -r requirements_for_tests.txt
+if [ -z "${NOINSTALL:-}" ]; then
+  pip install -r requirements_for_tests.txt
+fi
 
 rm -f coverage.xml .coverage nosetests.xml
 find . -name '*.pyc' -delete
