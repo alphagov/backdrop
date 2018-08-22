@@ -119,10 +119,22 @@ class PostgresStorageEngine(object):
     def _get_postgres_query(self, data_set_id, query):
         with self.connection.cursor() as psql_cursor:
             where_conditions = self._get_where_conditions(query)
-            return psql_cursor.mogrify("SELECT record FROM mongo " +
-                "WHERE " + " AND ".join(["collection=%(collection)s"] + where_conditions),
+            limit = self._get_limit(query)
+            return psql_cursor.mogrify(
+                " ".join([
+                    "SELECT record FROM mongo",
+                    "WHERE",
+                    " AND ".join(["collection=%(collection)s"] + where_conditions),
+                    limit,
+                ]),
                 {'collection': data_set_id}
             )
+
+    def _get_limit(self, query):
+        if not query.limit:
+            return 'LIMIT ALL'
+        with self.connection.cursor() as psql_cursor:
+            return psql_cursor.mogrify('LIMIT %(limit)s', {'limit': query.limit})
 
     def _get_where_conditions(self, query):
         """

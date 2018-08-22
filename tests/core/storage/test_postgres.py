@@ -1,3 +1,4 @@
+import unittest
 from hamcrest import assert_that, is_
 from backdrop.core.storage.postgres import PostgresStorageEngine
 from .test_storage import BaseStorageTest
@@ -14,8 +15,16 @@ class TestPostgresStorageEngine(BaseStorageTest):
         )
         assert_that(
             result,
-            is_("SELECT record FROM mongo WHERE collection='some-collection' AND record ->> 'foo' = 'bar'")
+            is_("SELECT record FROM mongo WHERE collection='some-collection' AND record ->> 'foo' = 'bar' LIMIT ALL")
         )
+
+    @unittest.skip('The postgres datastore does not support the creation of empty datasets')
+    def test_create(self):
+        pass
+
+    @unittest.skip('The postgres datastore does not support the creation of empty datasets')
+    def test_create_fails_if_it_already_exists(self):
+        pass
 
     def test_filter_by_from_query(self):
         result = self.engine._get_where_conditions(Query.create(filter_by = [
