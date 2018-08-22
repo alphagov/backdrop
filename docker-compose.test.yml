@@ -1,0 +1,14 @@
+version: "3"
+services:
+  backdrop-test:
+    build: .
+    ports:
+      - "3038:3038"
+    environment:
+      - DATABASE_URL=mongodb://mongo:27017/backdrop_test
+    command: ["read", "3038"]
+    # entrypoint: ["/bin/bash"]
+    # command: ["./run_tests.sh"]
+  mongo:
+    image: mongo:2.4
+

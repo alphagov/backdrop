@@ -12,6 +12,4 @@ services:
     command: ["write", "3039"]
   mongo:
     image: mongo:2.4
-    ports:
-      - 27017:27017
 
