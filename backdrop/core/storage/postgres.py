@@ -62,8 +62,21 @@ class PostgresStorageEngine(object):
             self.connection.commit()
 
     def get_last_updated(self, data_set_id):
-        # TODO - this requires a bit of sorting on the JSON column
-        pass
+        with self.connection.cursor() as psql_cursor:
+            psql_cursor.execute("""
+                SELECT record FROM mongo
+                WHERE collection = %(collection)s
+                ORDER BY updated_at DESC
+                LIMIT 1
+                """,
+                {'collection': data_set_id}
+            )
+
+            if psql_cursor.rowcount == 0:
+                return None
+
+            (record,) = psql_cursor.fetchone()
+            return parse_datetime_fields(record)['_updated_at']
 
     def batch_last_updated(self, data_sets):
         # TODO - this requires quite a complex query
@@ -87,16 +100,32 @@ class PostgresStorageEngine(object):
             return parse_datetime_fields(record)
 
     def update_record(self, data_set_id, record_id, record):
-        record['_updated_at'] = timeutils.now()
+        updated_at = timeutils.now()
+        record['_updated_at'] = updated_at
+        ts = record['_timestamp'] if '_timestamp' in record else updated_at
+
         record_id = data_set_id + ':' + record_id
         with self.connection.cursor() as psql_cursor:
             psql_cursor.execute("""
-                INSERT INTO mongo (id, collection, record)
-                VALUES (%(id)s, %(collection)s, %(record)s)
-                ON CONFLICT (id) DO UPDATE SET record=%(record)s""",
+                INSERT INTO mongo (id, collection, timestamp, updated_at, record)
+                VALUES
+                (
+                    %(id)s,
+                    %(collection)s,
+                    %(timestamp)s,
+                    %(updated_at)s,
+                    %(record)s
+                )
+                ON CONFLICT (id) DO UPDATE SET
+                    timestamp=%(timestamp)s,
+                    updated_at=%(updated_at)s,
+                    record=%(record)s
+                """,
                 {
                     'id': record_id,
                     'collection': data_set_id,
+                    'timestamp': ts,
+                    'updated_at': record['_updated_at'],
                     'record': json.dumps(record, default=json_serial)
                 }
 
