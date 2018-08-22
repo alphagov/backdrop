@@ -105,7 +105,7 @@ class PostgresStorageEngine(object):
         with self.connection.cursor() as psql_cursor:
             psql_cursor.execute(
                 "DELETE FROM mongo WHERE id=%(id)s",
-                {'id': record_id}
+                {'id': data_set_id + ':' + record_id}
             )
             self.connection.commit()
 
