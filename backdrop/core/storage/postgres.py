@@ -142,7 +142,6 @@ class PostgresStorageEngine(object):
 
     def execute_query(self, data_set_id, query):
         with self.connection.cursor() as psql_cursor:
-            where_conditions = self._get_where_conditions(query)
             psql_cursor.execute(self._get_postgres_query(data_set_id, query))
             records = psql_cursor.fetchall()
             return [parse_datetime_fields(record) for (record,) in records]
@@ -150,13 +149,18 @@ class PostgresStorageEngine(object):
     def _get_postgres_query(self, data_set_id, query):
         with self.connection.cursor() as psql_cursor:
             where_conditions = self._get_where_conditions(query)
+            time_limit_conditions = self._get_time_limit_conditions(query)
             limit = self._get_limit(query)
             sort_by = self._get_sort_by(query)
             return psql_cursor.mogrify(
                 " ".join([line for line in [
                     "SELECT record FROM mongo",
                     "WHERE",
-                    " AND ".join(["collection=%(collection)s"] + where_conditions),
+                    " AND ".join(
+                        ["collection=%(collection)s"] +
+                        where_conditions +
+                        time_limit_conditions
+                    ),
                     sort_by,
                     limit,
                 ] if len(line) > 0]),
@@ -201,4 +205,32 @@ class PostgresStorageEngine(object):
                 )
                 for tup in query.filter_by
             ]
+
+    def _get_time_limit_conditions(self, query):
+        """
+        Converts a query into a list of conditions to be concatenated into a where query
+        These conditions are only based on start_at and end_at
+        """
+
+        if not query:
+            return []
+
+        clauses = []
+
+        if query.start_at:
+            with self.connection.cursor() as psql_cursor:
+                clauses.append(psql_cursor.mogrify(
+                    'timestamp >= %(start_at)s',
+                    {'start_at': query.start_at}
+                ))
+
+        if query.end_at:
+            with self.connection.cursor() as psql_cursor:
+                operator = '<=' if query.inclusive else '<'
+                clauses.append(psql_cursor.mogrify(
+                    'timestamp ' + operator + ' %(end_at)s',
+                    {'end_at': query.end_at}
+                ))
+
+        return clauses
 
