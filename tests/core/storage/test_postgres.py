@@ -4,6 +4,9 @@ from backdrop.core.storage.postgres import PostgresStorageEngine
 from .test_storage import BaseStorageTest
 from backdrop.core.query import Query
 
+def setup_module():
+    PostgresStorageEngine('postgres://localhost:5432/backdrop').create_table_and_indices()
+
 class TestPostgresStorageEngine(BaseStorageTest):
     def setup(self):
         self.engine = PostgresStorageEngine('postgres://postgres:mysecretpassword@localhost:5432')

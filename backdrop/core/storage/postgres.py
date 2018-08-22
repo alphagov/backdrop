@@ -36,6 +36,29 @@ class PostgresStorageEngine(object):
     def __init__(self, datatbase_url):
         self.connection = psycopg2.connect(datatbase_url)
 
+    def create_table_and_indices(self):
+        """
+        This is probably only going to be used by the tests, or run manually
+        when setting up the database for the first time.
+
+        Database migrations are for losers (it is in fact us, the people who
+        support this project, who are the losers).
+        """
+        with self.connection.cursor() as psql_cursor:
+            psql_cursor.execute("""
+                CREATE TABLE IF NOT EXISTS mongo (
+                    id         VARCHAR   PRIMARY KEY,
+                    collection VARCHAR   NOT NULL,
+                    timestamp  TIMESTAMP NOT NULL,
+                    updated_at TIMESTAMP NOT NULL,
+                    record     JSON      NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS mongo_collection ON mongo (collection);
+                CREATE INDEX IF NOT EXISTS mongo_timestamp ON mongo (timestamp);
+                CREATE INDEX IF NOT EXISTS mongo_updated_at ON mongo (updated_at);
+            """)
+        self.connection.commit()
+
     def data_set_exists(self, data_set_id):
         # This is slightly different to the mongo implementation
         # in that it will return False if `create_data_set` has
