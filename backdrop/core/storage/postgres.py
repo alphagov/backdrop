@@ -3,6 +3,8 @@ import json
 from datetime import date, datetime
 from .. import timeutils
 import dateutil.parser
+import dateutil.tz
+import pytz
 
 def json_serial(obj):
     """
@@ -23,11 +25,11 @@ def parse_datetime_fields(obj):
     >>> parse_datetime_fields({'_updated_at':'1988-01-20T00:00:00'})
     {'_updated_at': datetime.datetime(1988, 1, 20, 0, 0)}
     """
-
-    cp = obj.copy()
-    if '_updated_at' in obj:
-        cp['_updated_at'] = dateutil.parser.parse(obj['_updated_at'])
-    return cp
+    obj_copy = obj.copy()
+    for field in ['_updated_at', '_timestamp']:
+        if field in obj:
+            obj_copy[field ] = dateutil.parser.parse(obj[field ]).replace(tzinfo=pytz.UTC)
+    return obj_copy
 
 class PostgresStorageEngine(object):
 
@@ -82,7 +84,7 @@ class PostgresStorageEngine(object):
                 {'id': data_set_id + ':' + record_id}
             )
             (record,) = psql_cursor.fetchone()
-            return record
+            return parse_datetime_fields(record)
 
     def update_record(self, data_set_id, record_id, record):
         record['_updated_at'] = timeutils.now()
