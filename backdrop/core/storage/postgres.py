@@ -79,7 +79,7 @@ class PostgresStorageEngine(object):
                 SELECT record FROM mongo
                 WHERE id=%(id)s
                 """,
-                {'id': record_id}
+                {'id': data_set_id + ':' + record_id}
             )
             (record,) = psql_cursor.fetchone()
             return record
