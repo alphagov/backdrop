@@ -59,7 +59,7 @@ class BaseStorageTest(object):
         assert_that(self.engine.data_set_exists('foo_bar'), is_(False))
 
     def test_simple_saving_and_finding(self):
-        self._save_all('foo_bar', {'foo': 'bar'})
+        self._save_all('foo_bar', {'_id':'test_id_1','foo': 'bar'})
 
         assert_that(self.engine.execute_query('foo_bar', Query.create()),
                     contains(has_entries({'foo': 'bar'})))
@@ -73,9 +73,9 @@ class BaseStorageTest(object):
     def test_get_last_updated(self):
         self.engine.create_data_set('foo_bar', 0)
         with freeze_time('2012-12-12'):
-            self.engine.save_record('foo_bar', {'foo': 'first'})
+            self.engine.save_record('foo_bar', {'_id':'test_id_2','foo': 'first'})
         with freeze_time('2012-11-12'):
-            self.engine.save_record('foo_bar', {'foo': 'second'})
+            self.engine.save_record('foo_bar', {'_id':'test_id_3','foo': 'second'})
 
         assert_that(self.engine.get_last_updated('foo_bar'),
                     is_(d_tz(2012, 12, 12)))
@@ -97,7 +97,7 @@ class BaseStorageTest(object):
         self.engine.create_data_set('foo_bar', 1)
 
         for i in range(100):
-            self.engine.save_record('foo_bar', {'foo': i})
+            self.engine.save_record('foo_bar', {'_id':'test_id_4','foo': i})
 
         assert_that(
             len(self.engine.execute_query('foo_bar', Query.create())),
@@ -105,7 +105,7 @@ class BaseStorageTest(object):
 
     def test_empty_a_data_set(self):
         self._save_all('foo_bar',
-                       {'foo': 'bar'}, {'bar': 'foo'})
+                       {'_id':'test_id_5','foo': 'bar'}, {'_id':'test_id_6','bar': 'foo'})
 
         assert_that(len(self.engine.execute_query('foo_bar', Query.create())), is_(2))
 
@@ -136,7 +136,7 @@ class BaseStorageTest(object):
 
     def test_datetimes_are_returned_as_utc(self):
         self._save_all('foo_bar',
-                       {'_timestamp': datetime.datetime(2012, 8, 8)})
+                       {'_id':'test_id_7','_timestamp': datetime.datetime(2012, 8, 8)})
 
         results = self.engine.execute_query('foo_bar', Query.create())
 
@@ -145,7 +145,7 @@ class BaseStorageTest(object):
                         has_entries({'_timestamp': d_tz(2012, 8, 8)})))
 
     def test_query_with_filter(self):
-        self._save_all('foo_bar', {'foo': 'bar'}, {'foo': 'foo'})
+        self._save_all('foo_bar', {'_id':'test_id_8','foo': 'bar'}, {'_id':'test_id_9','foo': 'foo'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             filter_by=[('foo', 'bar')]))
@@ -156,9 +156,9 @@ class BaseStorageTest(object):
 
     def test_basic_query_with_time_limits(self):
         self._save_all('foo_bar',
-                       {'_timestamp': d_tz(2012, 12, 12)},
-                       {'_timestamp': d_tz(2012, 12, 14)},
-                       {'_timestamp': d_tz(2012, 12, 11)})
+                       {'_id':'test_id_10','_timestamp': d_tz(2012, 12, 12)},
+                       {'_id':'test_id_11','_timestamp': d_tz(2012, 12, 14)},
+                       {'_id':'test_id_12','_timestamp': d_tz(2012, 12, 11)})
 
         # start at
         results = self.engine.execute_query('foo_bar', Query.create(
@@ -187,8 +187,8 @@ class BaseStorageTest(object):
 
     def test_basic_query_with_sort_ascending(self):
         self._save_all('foo_bar',
-                       {'foo': 'mug'},
-                       {'foo': 'book'})
+                       {'_id':'test_id_13','foo': 'mug'},
+                       {'_id':'test_id_14','foo': 'book'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             sort_by=('foo', 'ascending')))
@@ -200,8 +200,8 @@ class BaseStorageTest(object):
 
     def test_basic_query_with_sort_descending(self):
         self._save_all('foo_bar',
-                       {'foo': 'mug'},
-                       {'foo': 'book'})
+                       {'_id':'test_id_15','foo': 'mug'},
+                       {'_id':'test_id_16','foo': 'book'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             sort_by=('foo', 'descending')))
@@ -212,7 +212,7 @@ class BaseStorageTest(object):
                         has_entry('foo', 'book')))
 
     def test_basic_query_with_limit(self):
-        self._save_all('foo_bar', {'foo': 'bar'}, {'foo': 'foo'})
+        self._save_all('foo_bar', {'_id':'test_id_17','foo': 'bar'}, {'_id':'test_id_18','foo': 'foo'})
 
         results = self.engine.execute_query('foo_bar', Query.create(limit=1))
 
@@ -221,8 +221,8 @@ class BaseStorageTest(object):
     # !GROUPED!
     def test_query_grouped_by_field(self):
         self._save_all('foo_bar',
-                       {'foo': 'foo'}, {'foo': 'foo'},
-                       {'foo': 'bar'})
+                       {'_id':'test_id_19','foo': 'foo'}, {'_id':'test_id_20','foo': 'foo'},
+                       {'_id':'test_id_21','foo': 'bar'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo']))
@@ -235,9 +235,9 @@ class BaseStorageTest(object):
     def test_query_grouped_by_period(self):
         self._save_all_with_periods(
             'foo_bar',
-            {'_timestamp': d_tz(2012, 12, 12, 12)},
-            {'_timestamp': d_tz(2012, 12, 12, 15)},
-            {'_timestamp': d_tz(2012, 12, 13, 12)})
+            {'_id':'test_id_22','_timestamp': d_tz(2012, 12, 12, 12)},
+            {'_id':'test_id_23','_timestamp': d_tz(2012, 12, 12, 15)},
+            {'_id':'test_id_24','_timestamp': d_tz(2012, 12, 13, 12)})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             period=DAY))
@@ -252,10 +252,10 @@ class BaseStorageTest(object):
     def test_group_by_field_and_period(self):
         self._save_all_with_periods(
             'foo_bar',
-            {'_timestamp': d_tz(2012, 12, 12), 'foo': 'foo'},
-            {'_timestamp': d_tz(2012, 12, 13), 'foo': 'foo'},
-            {'_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'},
-            {'_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'})
+            {'_id':'test_id_25','_timestamp': d_tz(2012, 12, 12), 'foo': 'foo'},
+            {'_id':'test_id_26','_timestamp': d_tz(2012, 12, 13), 'foo': 'foo'},
+            {'_id':'test_id_27','_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'},
+            {'_id':'test_id_28','_timestamp': d_tz(2012, 12, 12), 'foo': 'bar'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo'], period=DAY))
@@ -268,8 +268,8 @@ class BaseStorageTest(object):
 
     def test_group_query_with_collect_fields(self):
         self._save_all('foo_bar',
-                       {'foo': 'foo', 'c': 1}, {'foo': 'foo', 'c': 3},
-                       {'foo': 'bar', 'c': 2})
+                       {'_id':'test_id_29','foo': 'foo', 'c': 1}, {'_id':'test_id_30','foo': 'foo', 'c': 3},
+                       {'_id':'test_id_31','foo': 'bar', 'c': 2})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo'], collect=[('c', 'sum')]))
@@ -281,10 +281,10 @@ class BaseStorageTest(object):
 
     def test_group_and_collect_with_false_values(self):
         self._save_all('foo_bar',
-                       {'foo': 'one', 'bar': False},
-                       {'foo': 'two', 'bar': True},
-                       {'foo': 'two', 'bar': True},
-                       {'foo': 'one', 'bar': False})
+                       {'_id':'test_id_32','foo': 'one', 'bar': False},
+                       {'_id':'test_id_33','foo': 'two', 'bar': True},
+                       {'_id':'test_id_34','foo': 'two', 'bar': True},
+                       {'_id':'test_id_35','foo': 'one', 'bar': False})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo'], collect=[('bar', 'sum')]))
@@ -296,9 +296,9 @@ class BaseStorageTest(object):
 
     def test_group_query_ignores_records_without_grouping_key(self):
         self._save_all('foo_bar',
-                       {'foo': 'one'},
-                       {'foo': 'two'},
-                       {'bar': 'one'})
+                       {'_id':'test_id_36','foo': 'one'},
+                       {'_id':'test_id_37','foo': 'two'},
+                       {'_id':'test_id_38','bar': 'one'})
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo']))
@@ -310,9 +310,9 @@ class BaseStorageTest(object):
 
     def test_basic_query_with_inclusive_time_limits(self):
         self._save_all('foo_bar',
-                       {'_timestamp': d_tz(2014, 12, 01)},
-                       {'_timestamp': d_tz(2014, 12, 02)},
-                       {'_timestamp': d_tz(2014, 12, 03)})
+                       {'_id':'test_id_39','_timestamp': d_tz(2014, 12, 01)},
+                       {'_id':'test_id_40','_timestamp': d_tz(2014, 12, 02)},
+                       {'_id':'test_id_41','_timestamp': d_tz(2014, 12, 03)})
 
         # start at
         results = self.engine.execute_query('foo_bar', Query.create(
