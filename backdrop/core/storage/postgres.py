@@ -110,13 +110,34 @@ class PostgresStorageEngine(object):
             self.connection.commit()
 
     def execute_query(self, data_set_id, query):
-        # TODO - use the query to filter this down
         with self.connection.cursor() as psql_cursor:
-            psql_cursor.execute("""
-                SELECT record FROM mongo
-                WHERE collection=%(collection)s
-                """,
-                {'collection': data_set_id}
-            )
+            where_conditions = self._get_where_conditions(query)
+            psql_cursor.execute(self._get_postgres_query(data_set_id, query))
             records = psql_cursor.fetchall()
             return [parse_datetime_fields(record) for (record,) in records]
+
+    def _get_postgres_query(self, data_set_id, query):
+        with self.connection.cursor() as psql_cursor:
+            where_conditions = self._get_where_conditions(query)
+            return psql_cursor.mogrify("SELECT record FROM mongo " +
+                "WHERE " + " AND ".join(["collection=%(collection)s"] + where_conditions),
+                {'collection': data_set_id}
+            )
+
+    def _get_where_conditions(self, query):
+        """
+        Converts a query into a list of conditions to be concatenated into a where query
+        """
+
+        if not query or not query.filter_by:
+            return []
+
+        with self.connection.cursor() as psql_cursor:
+            return [
+                psql_cursor.mogrify(
+                    "record ->> %(key)s = %(value)s",
+                    {'key': tup[0], 'value': tup[1]}
+                )
+                for tup in query.filter_by
+            ]
+

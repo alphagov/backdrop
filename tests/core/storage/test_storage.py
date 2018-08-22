@@ -61,7 +61,8 @@ class BaseStorageTest(object):
     def test_simple_saving_and_finding(self):
         self._save_all('foo_bar', {'_id':'test_id_1','foo': 'bar'})
 
-        assert_that(self.engine.execute_query('foo_bar', Query.create()),
+        x = self.engine.execute_query('foo_bar', Query.create())
+        assert_that(x,
                     contains(has_entries({'foo': 'bar'})))
 
     def test_saving_a_record_adds_an_updated_at(self):
