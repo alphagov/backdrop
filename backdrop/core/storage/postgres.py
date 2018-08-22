@@ -2,11 +2,32 @@ import psycopg2
 import json
 from datetime import date, datetime
 from .. import timeutils
+import dateutil.parser
 
 def json_serial(obj):
+    """
+    Helper to allow python's json.dumps() funtion to handle datetimes.
+
+    >>> json.dumps({'birthday': datetime(1988, 01, 20)}, default=json_serial)
+    '{"birthday": "1988-01-20T00:00:00"}'
+    """
+
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
+
+def parse_datetime_fields(obj):
+    """
+    The code expects _updated_at to be a datetime, but it's stored as a string.
+
+    >>> parse_datetime_fields({'_updated_at':'1988-01-20T00:00:00'})
+    {'_updated_at': datetime.datetime(1988, 1, 20, 0, 0)}
+    """
+
+    cp = obj.copy()
+    if '_updated_at' in obj:
+        cp['_updated_at'] = dateutil.parser.parse(obj['_updated_at'])
+    return cp
 
 class PostgresStorageEngine(object):
 
@@ -89,7 +110,7 @@ class PostgresStorageEngine(object):
             self.connection.commit()
 
     def execute_query(self, data_set_id, query):
-        # TODO
+        # TODO - use the query to filter this down
         with self.connection.cursor() as psql_cursor:
             psql_cursor.execute("""
                 SELECT record FROM mongo
@@ -98,4 +119,4 @@ class PostgresStorageEngine(object):
                 {'collection': data_set_id}
             )
             records = psql_cursor.fetchall()
-            return [record for (record,) in records]
+            return [parse_datetime_fields(record) for (record,) in records]
