@@ -167,13 +167,17 @@ class PostgresStorageEngine(object):
     def execute_query(self, data_set_id, query):
         if query.is_grouped:
             with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as psql_cursor:
-                pg_query = self._get_grouped_postgres_query(data_set_id, query)
+                groups_lookup = self._get_groups_lookup(query)
+                pg_query = self._get_grouped_postgres_query(data_set_id, query, groups_lookup)
                 psql_cursor.execute(pg_query)
                 records = psql_cursor.fetchall()
                 for record in records:
                     for key, value in record.iteritems():
                         if isinstance(value, datetime):
                             record[key] = value.replace(tzinfo=pytz.UTC)
+                        if key in groups_lookup:
+                            record[groups_lookup[key]] = value
+                            del record[key]
                 return records
         else:
             with self.connection.cursor() as psql_cursor:
@@ -182,30 +186,52 @@ class PostgresStorageEngine(object):
                 records = psql_cursor.fetchall()
                 return [parse_datetime_fields(record) for (record,) in records]
 
-    def _get_postgres_query(self, data_set_id, query):
-        if query.is_grouped:
-            return self._get_grouped_postgres_query(data_set_id, query)
-        else:
-            return self._get_basic_postgres_query(data_set_id, query)
-
-    def _get_grouped_postgres_query(self, data_set_id, query):
+    def _get_grouped_postgres_query(self, data_set_id, query, groups_lookup):
         with self.connection.cursor() as psql_cursor:
+            groups = self._get_groups(psql_cursor, groups_lookup)
             return " ".join([line for line in [
                 "SELECT",
                 ", ".join([elem for elem in [
                     "count(*) as _count",
-                    self._get_period_group(psql_cursor, query)
-                ] if elem]),
+                    self._get_period_group(query),
+                ] + groups.values() if elem]),
                 "FROM mongo",
                 # query.period.name is not user input, so no need to mogrify this
-                "GROUP BY _%s_start_at" % query.period.name if query.period else ""
+                "GROUP BY" if query.period or query.group_by else "",
+                ", ".join([elem for elem in [
+                    "_%s_start_at" % query.period.name if query.period else "",
+                ] + groups.keys() if elem])
             ] if line])
 
-    def _get_period_group(self, psql_cursor, query):
+    def _get_period_group(self, query):
         if query.period:
             # query.period.name is not user input, so no need to mogrify this
             return "date_trunc('{period}', timestamp) as _{period}_start_at".format(period = query.period.name)
         return ''
+
+    def _get_groups_lookup(self, query):
+        """
+        Returns a dictionary of sql friendly name to user-provided name
+
+        >>> _get_groups_lookup(Query.create(group_by=['foo','bar']))
+        {'record_0': 'foo', 'record_1': 'bar'}
+        """
+        if query.group_by:
+            return {
+                'record_{index}'.format(index=i): group_by
+                for i, group_by in enumerate(query.group_by)
+            }
+        else:
+            return {}
+
+    def _get_groups(self, psql_cursor, groups_lookup):
+        return {
+            key: psql_cursor.mogrify(
+                "record->%(field)s as {key}".format(key=key),
+                {'field':value}
+            )
+            for key, value in groups_lookup.iteritems()
+        }
 
 
     def _get_basic_postgres_query(self, data_set_id, query):

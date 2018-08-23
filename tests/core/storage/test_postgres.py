@@ -13,7 +13,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         self.engine = PostgresStorageEngine('postgres://postgres:mysecretpassword@localhost:5432')
 
     def test_get_basic_postgres_query(self):
-        result = self.engine._get_postgres_query(
+        result = self.engine._get_basic_postgres_query(
             'some-collection',
             Query.create(filter_by = [('foo', 'bar')])
         )
@@ -22,22 +22,40 @@ class TestPostgresStorageEngine(BaseStorageTest):
             is_("SELECT record FROM mongo WHERE collection='some-collection' AND record ->> 'foo' = 'bar' LIMIT ALL")
         )
 
-    def test_get_group_by_postgres_query(self):
-        result = self.engine._get_postgres_query(
+    def test_get_group_by_period_postgres_query(self):
+        query = Query.create(period=DAY)
+        result = self.engine._get_grouped_postgres_query(
             'some-collection',
-            Query.create(period=DAY)
+            query,
+            self.engine._get_groups_lookup(query)
         )
         assert_that(
             result,
             is_("SELECT count(*) as _count, date_trunc('day', timestamp) as _day_start_at FROM mongo GROUP BY _day_start_at")
         )
-        result = self.engine._get_postgres_query(
+
+    def test_get_group_by_record_postgres_query(self):
+        query = Query.create(period=WEEK)
+        result = self.engine._get_grouped_postgres_query(
             'some-collection',
-            Query.create(period=WEEK)
+            query,
+            self.engine._get_groups_lookup(query)
         )
         assert_that(
             result,
             is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at FROM mongo GROUP BY _week_start_at")
+        )
+
+    def test_get_group_by_record_and_period_postgres_query(self):
+        query = Query.create(period=WEEK, group_by=['foo'])
+        result = self.engine._get_grouped_postgres_query(
+            'some-collection',
+            query,
+            self.engine._get_groups_lookup(query)
+        )
+        assert_that(
+            result,
+            is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at, record->'foo' as record_0 FROM mongo GROUP BY _week_start_at, record_0")
         )
 
     @unittest.skip('The postgres datastore does not support the creation of empty datasets')
