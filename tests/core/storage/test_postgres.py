@@ -27,7 +27,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
-            {},
+            self.engine._get_collect_lookup(query),
             self.engine._get_groups_lookup(query)
         )
         assert_that(
@@ -40,7 +40,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
-           {},
+            self.engine._get_collect_lookup(query),
             self.engine._get_groups_lookup(query)
         )
         assert_that(
@@ -53,7 +53,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
-            {},
+            self.engine._get_collect_lookup(query),
             self.engine._get_groups_lookup(query)
         )
         assert_that(
@@ -66,7 +66,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
-            {'collect_0': 'foo'},
+            self.engine._get_collect_lookup(query),
             self.engine._get_groups_lookup(query)
         )
         assert_that(

@@ -167,11 +167,7 @@ class PostgresStorageEngine(object):
     def execute_query(self, data_set_id, query):
         if query.is_grouped:
             with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as psql_cursor:
-                collect_lookup = {
-                    'collect_{}'.format(index): field_name
-                    for index, (field_name, _op) in enumerate((query.collect or []))
-                }
-
+                collect_lookup = self._get_collect_lookup(query)
                 groups_lookup = self._get_groups_lookup(query)
 
                 pg_query = self._get_grouped_postgres_query(
@@ -255,6 +251,20 @@ class PostgresStorageEngine(object):
             ])
         else:
             return ""
+
+    def _get_collect_lookup(self, query):
+        """
+        Returns a dictionary of sql friendly name to user-provided name
+
+        >>> _get_collect_lookup(Query.create(collect=[('foo','banana')]))
+        # banana is ignored
+        {'collect_0': 'foo'}
+        """
+
+        return {
+            'collect_{}'.format(index): field_name
+            for index, (field_name, _op) in enumerate((query.collect or []))
+        }
 
     def _get_groups_lookup(self, query):
         """
