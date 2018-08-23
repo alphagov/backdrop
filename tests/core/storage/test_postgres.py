@@ -3,15 +3,16 @@ from hamcrest import assert_that, is_
 from backdrop.core.storage.postgres import PostgresStorageEngine
 from .test_storage import BaseStorageTest
 from backdrop.core.query import Query
+from backdrop.core.timeseries import DAY, WEEK
 
 def setup_module():
-    PostgresStorageEngine('postgres://localhost:5432/backdrop').create_table_and_indices()
+    PostgresStorageEngine('postgres://postgres:mysecretpassword@localhost:5432').create_table_and_indices()
 
 class TestPostgresStorageEngine(BaseStorageTest):
     def setup(self):
         self.engine = PostgresStorageEngine('postgres://postgres:mysecretpassword@localhost:5432')
 
-    def test_get_postgres_query(self):
+    def test_get_basic_postgres_query(self):
         result = self.engine._get_postgres_query(
             'some-collection',
             Query.create(filter_by = [('foo', 'bar')])
@@ -19,6 +20,24 @@ class TestPostgresStorageEngine(BaseStorageTest):
         assert_that(
             result,
             is_("SELECT record FROM mongo WHERE collection='some-collection' AND record ->> 'foo' = 'bar' LIMIT ALL")
+        )
+
+    def test_get_group_by_postgres_query(self):
+        result = self.engine._get_postgres_query(
+            'some-collection',
+            Query.create(period=DAY)
+        )
+        assert_that(
+            result,
+            is_("SELECT count(*) as _count, date_trunc('day', timestamp) as _day_start_at FROM mongo GROUP BY _day_start_at")
+        )
+        result = self.engine._get_postgres_query(
+            'some-collection',
+            Query.create(period=WEEK)
+        )
+        assert_that(
+            result,
+            is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at FROM mongo GROUP BY _week_start_at")
         )
 
     @unittest.skip('The postgres datastore does not support the creation of empty datasets')

@@ -1,4 +1,5 @@
 import psycopg2
+import psycopg2.extras
 import json
 from datetime import date, datetime
 from .. import timeutils
@@ -51,7 +52,7 @@ class PostgresStorageEngine(object):
                     collection VARCHAR   NOT NULL,
                     timestamp  TIMESTAMP NOT NULL,
                     updated_at TIMESTAMP NOT NULL,
-                    record     JSON      NOT NULL
+                    record     JSONB     NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS mongo_collection ON mongo (collection);
                 CREATE INDEX IF NOT EXISTS mongo_timestamp ON mongo (timestamp);
@@ -164,12 +165,50 @@ class PostgresStorageEngine(object):
             self.connection.commit()
 
     def execute_query(self, data_set_id, query):
-        with self.connection.cursor() as psql_cursor:
-            psql_cursor.execute(self._get_postgres_query(data_set_id, query))
-            records = psql_cursor.fetchall()
-            return [parse_datetime_fields(record) for (record,) in records]
+        if query.is_grouped:
+            with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as psql_cursor:
+                pg_query = self._get_grouped_postgres_query(data_set_id, query)
+                psql_cursor.execute(pg_query)
+                records = psql_cursor.fetchall()
+                for record in records:
+                    for key, value in record.iteritems():
+                        if isinstance(value, datetime):
+                            record[key] = value.replace(tzinfo=pytz.UTC)
+                return records
+        else:
+            with self.connection.cursor() as psql_cursor:
+                pg_query = self._get_basic_postgres_query(data_set_id, query)
+                psql_cursor.execute(pg_query)
+                records = psql_cursor.fetchall()
+                return [parse_datetime_fields(record) for (record,) in records]
 
     def _get_postgres_query(self, data_set_id, query):
+        if query.is_grouped:
+            return self._get_grouped_postgres_query(data_set_id, query)
+        else:
+            return self._get_basic_postgres_query(data_set_id, query)
+
+    def _get_grouped_postgres_query(self, data_set_id, query):
+        with self.connection.cursor() as psql_cursor:
+            return " ".join([line for line in [
+                "SELECT",
+                ", ".join([elem for elem in [
+                    "count(*) as _count",
+                    self._get_period_group(psql_cursor, query)
+                ] if elem]),
+                "FROM mongo",
+                # query.period.name is not user input, so no need to mogrify this
+                "GROUP BY _%s_start_at" % query.period.name if query.period else ""
+            ] if line])
+
+    def _get_period_group(self, psql_cursor, query):
+        if query.period:
+            # query.period.name is not user input, so no need to mogrify this
+            return "date_trunc('{period}', timestamp) as _{period}_start_at".format(period = query.period.name)
+        return ''
+
+
+    def _get_basic_postgres_query(self, data_set_id, query):
         with self.connection.cursor() as psql_cursor:
             where_conditions = self._get_where_conditions(query)
             time_limit_conditions = self._get_time_limit_conditions(query)
