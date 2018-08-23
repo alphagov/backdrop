@@ -55,7 +55,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         )
         assert_that(
             result,
-            is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at, record->'foo' as record_0 FROM mongo GROUP BY _week_start_at, record_0")
+            is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at, record->'foo' as record_0 FROM mongo WHERE record->'foo' IS NOT NULL GROUP BY _week_start_at, record_0")
         )
 
     @unittest.skip('The postgres datastore does not support the creation of empty datasets')

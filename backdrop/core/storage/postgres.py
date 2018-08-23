@@ -194,8 +194,13 @@ class PostgresStorageEngine(object):
                 ", ".join([elem for elem in [
                     "count(*) as _count",
                     self._get_period_group(query),
-                ] + groups.values() if elem]),
+
+                ] + [
+                    # Fine not to use mogrify here too, because everything has been mogrified already
+                    "%s as %s" % (value, key) for key, value in groups.iteritems()
+                ] if elem]),
                 "FROM mongo",
+                self._get_groups_not_null_conditional(psql_cursor, groups.values()),
                 # query.period.name is not user input, so no need to mogrify this
                 "GROUP BY" if query.period or query.group_by else "",
                 ", ".join([elem for elem in [
@@ -208,6 +213,15 @@ class PostgresStorageEngine(object):
             # query.period.name is not user input, so no need to mogrify this
             return "date_trunc('{period}', timestamp) as _{period}_start_at".format(period = query.period.name)
         return ''
+
+    def _get_groups_not_null_conditional(self, psql_cursor, group_values):
+        if group_values:
+            return "WHERE " + " AND ".join([
+                # keys are `record_XX` not user input, so no need to mogrify this
+                "%s IS NOT NULL" % value for value in group_values
+            ])
+        else:
+            return ""
 
     def _get_groups_lookup(self, query):
         """
@@ -227,7 +241,7 @@ class PostgresStorageEngine(object):
     def _get_groups(self, psql_cursor, groups_lookup):
         return {
             key: psql_cursor.mogrify(
-                "record->%(field)s as {key}".format(key=key),
+                "record->%(field)s",
                 {'field':value}
             )
             for key, value in groups_lookup.iteritems()
