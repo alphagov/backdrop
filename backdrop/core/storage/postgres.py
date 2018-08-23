@@ -165,48 +165,48 @@ class PostgresStorageEngine(object):
             self.connection.commit()
 
     def execute_query(self, data_set_id, query):
-        if query.is_grouped:
-            with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as psql_cursor:
-                collect_lookup = self._get_collect_lookup(query)
-                groups_lookup = self._get_groups_lookup(query)
-
-                pg_query = self._get_grouped_postgres_query(
-                    data_set_id,
-                    query,
-                    collect_lookup,
-                    groups_lookup
-                )
-
-                psql_cursor.execute(pg_query)
-                records = psql_cursor.fetchall()
-
-                for record in records:
-                    keys_to_remove = []
-                    pairs_to_add = []
-
-                    aggregated_pairs = {}
-                    aggregated_pairs.update(collect_lookup)
-                    aggregated_pairs.update(groups_lookup)
-
-                    for key, value in record.iteritems():
-                        if isinstance(value, datetime):
-                            record[key] = value.replace(tzinfo=pytz.UTC)
-                        if key in aggregated_pairs:
-                            pairs_to_add.append(tuple([aggregated_pairs[key], value]))
-                            keys_to_remove.append(key)
-
-                    for key in keys_to_remove:
-                        del record[key]
-                    for key, value in pairs_to_add:
-                        record[key] = value
-
-                return records
-        else:
+        if not query.is_grouped:
             with self.connection.cursor() as psql_cursor:
                 pg_query = self._get_basic_postgres_query(data_set_id, query)
                 psql_cursor.execute(pg_query)
                 records = psql_cursor.fetchall()
                 return [parse_datetime_fields(record) for (record,) in records]
+
+        with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as psql_cursor:
+            collect_lookup = self._get_collect_lookup(query)
+            groups_lookup = self._get_groups_lookup(query)
+
+            pg_query = self._get_grouped_postgres_query(
+                data_set_id,
+                query,
+                collect_lookup,
+                groups_lookup
+            )
+
+            psql_cursor.execute(pg_query)
+            records = psql_cursor.fetchall()
+
+            for record in records:
+                keys_to_remove = []
+                pairs_to_add = []
+
+                aggregated_pairs = {}
+                aggregated_pairs.update(collect_lookup)
+                aggregated_pairs.update(groups_lookup)
+
+                for key, value in record.iteritems():
+                    if isinstance(value, datetime):
+                        record[key] = value.replace(tzinfo=pytz.UTC)
+                    if key in aggregated_pairs:
+                        pairs_to_add.append(tuple([aggregated_pairs[key], value]))
+                        keys_to_remove.append(key)
+
+                for key in keys_to_remove:
+                    del record[key]
+                for key, value in pairs_to_add:
+                    record[key] = value
+
+            return records
 
     def _get_grouped_postgres_query(self, data_set_id, query, collect_lookup, groups_lookup):
         with self.connection.cursor() as psql_cursor:
@@ -273,13 +273,10 @@ class PostgresStorageEngine(object):
         >>> _get_groups_lookup(Query.create(group_by=['foo','bar']))
         {'group_0': 'foo', 'group_1': 'bar'}
         """
-        if query.group_by:
-            return {
-                'group_{index}'.format(index=i): group_by
-                for i, group_by in enumerate(query.group_by)
-            }
-        else:
-            return {}
+        return {
+            'group_{index}'.format(index=i): group_by
+            for i, group_by in enumerate(query.group_by or [])
+        }
 
     def _get_groups(self, psql_cursor, groups_lookup):
         return {
@@ -356,10 +353,6 @@ class PostgresStorageEngine(object):
         Converts a query into a list of conditions to be concatenated into a where query
         These conditions are only based on start_at and end_at
         """
-
-        if not query:
-            return []
-
         clauses = []
 
         if query.start_at:
