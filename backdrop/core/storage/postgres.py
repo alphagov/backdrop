@@ -167,17 +167,43 @@ class PostgresStorageEngine(object):
     def execute_query(self, data_set_id, query):
         if query.is_grouped:
             with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as psql_cursor:
+                collect_lookup = {
+                    'collect_{}'.format(index): field_name
+                    for index, (field_name, _op) in enumerate((query.collect or []))
+                }
+
                 groups_lookup = self._get_groups_lookup(query)
-                pg_query = self._get_grouped_postgres_query(data_set_id, query, groups_lookup)
+
+                pg_query = self._get_grouped_postgres_query(
+                    data_set_id,
+                    query,
+                    collect_lookup,
+                    groups_lookup
+                )
+
                 psql_cursor.execute(pg_query)
                 records = psql_cursor.fetchall()
+
                 for record in records:
+                    keys_to_remove = []
+                    pairs_to_add = []
+
+                    aggregated_pairs = {}
+                    aggregated_pairs.update(collect_lookup)
+                    aggregated_pairs.update(groups_lookup)
+
                     for key, value in record.iteritems():
                         if isinstance(value, datetime):
                             record[key] = value.replace(tzinfo=pytz.UTC)
-                        if key in groups_lookup:
-                            record[groups_lookup[key]] = value
-                            del record[key]
+                        if key in aggregated_pairs:
+                            pairs_to_add.append(tuple([aggregated_pairs[key], value]))
+                            keys_to_remove.append(key)
+
+                    for key in keys_to_remove:
+                        del record[key]
+                    for key, value in pairs_to_add:
+                        record[key] = value
+
                 return records
         else:
             with self.connection.cursor() as psql_cursor:
@@ -186,19 +212,19 @@ class PostgresStorageEngine(object):
                 records = psql_cursor.fetchall()
                 return [parse_datetime_fields(record) for (record,) in records]
 
-    def _get_grouped_postgres_query(self, data_set_id, query, groups_lookup):
+    def _get_grouped_postgres_query(self, data_set_id, query, collect_lookup, groups_lookup):
         with self.connection.cursor() as psql_cursor:
             groups = self._get_groups(psql_cursor, groups_lookup)
+
             return " ".join([line for line in [
                 "SELECT",
                 ", ".join([elem for elem in [
                     "count(*) as _count",
                     self._get_period_group(query),
-
                 ] + [
                     # Fine not to use mogrify here too, because everything has been mogrified already
                     "%s as %s" % (value, key) for key, value in groups.iteritems()
-                ] if elem]),
+                ] + self._get_collections(psql_cursor, collect_lookup) if elem]),
                 "FROM mongo",
                 self._get_groups_not_null_conditional(psql_cursor, groups.values()),
                 # query.period.name is not user input, so no need to mogrify this
@@ -207,6 +233,13 @@ class PostgresStorageEngine(object):
                     "_%s_start_at" % query.period.name if query.period else "",
                 ] + groups.keys() if elem])
             ] if line])
+
+    def _get_collections(self, psql_cursor, collect_lookup):
+        # array_agg(record->'foo') as collect_0, ...
+        return [
+            "array_agg(record->'%s') as %s" % (field_name, column_name)
+            for column_name, field_name in (collect_lookup or {}).iteritems()
+        ]
 
     def _get_period_group(self, query):
         if query.period:
@@ -217,7 +250,7 @@ class PostgresStorageEngine(object):
     def _get_groups_not_null_conditional(self, psql_cursor, group_values):
         if group_values:
             return "WHERE " + " AND ".join([
-                # keys are `record_XX` not user input, so no need to mogrify this
+                # keys are `group_XX` not user input, so no need to mogrify this
                 "%s IS NOT NULL" % value for value in group_values
             ])
         else:
@@ -228,11 +261,11 @@ class PostgresStorageEngine(object):
         Returns a dictionary of sql friendly name to user-provided name
 
         >>> _get_groups_lookup(Query.create(group_by=['foo','bar']))
-        {'record_0': 'foo', 'record_1': 'bar'}
+        {'group_0': 'foo', 'group_1': 'bar'}
         """
         if query.group_by:
             return {
-                'record_{index}'.format(index=i): group_by
+                'group_{index}'.format(index=i): group_by
                 for i, group_by in enumerate(query.group_by)
             }
         else:

@@ -27,6 +27,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
+            {},
             self.engine._get_groups_lookup(query)
         )
         assert_that(
@@ -39,6 +40,7 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
+           {},
             self.engine._get_groups_lookup(query)
         )
         assert_that(
@@ -51,11 +53,25 @@ class TestPostgresStorageEngine(BaseStorageTest):
         result = self.engine._get_grouped_postgres_query(
             'some-collection',
             query,
+            {},
             self.engine._get_groups_lookup(query)
         )
         assert_that(
             result,
-            is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at, record->'foo' as record_0 FROM mongo WHERE record->'foo' IS NOT NULL GROUP BY _week_start_at, record_0")
+            is_("SELECT count(*) as _count, date_trunc('week', timestamp) as _week_start_at, record->'foo' as group_0 FROM mongo WHERE record->'foo' IS NOT NULL GROUP BY _week_start_at, group_0")
+        )
+
+    def test_get_group_by_collect_postgres_query(self):
+        query = Query.create(collect=[('foo', 'banana')], group_by=['bar'])
+        result = self.engine._get_grouped_postgres_query(
+            'some-collection',
+            query,
+            {'collect_0': 'foo'},
+            self.engine._get_groups_lookup(query)
+        )
+        assert_that(
+            result,
+            is_("SELECT count(*) as _count, record->'bar' as group_0, array_agg(record->'foo') as collect_0 FROM mongo WHERE record->'bar' IS NOT NULL GROUP BY group_0")
         )
 
     @unittest.skip('The postgres datastore does not support the creation of empty datasets')

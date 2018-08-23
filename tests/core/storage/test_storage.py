@@ -268,9 +268,12 @@ class BaseStorageTest(object):
                         has_entries({'_day_start_at': d_tz(2012, 12, 13), 'foo': 'foo', '_count': 1})))
 
     def test_group_query_with_collect_fields(self):
-        self._save_all('foo_bar',
-                       {'_id':'test_id_29','foo': 'foo', 'c': 1}, {'_id':'test_id_30','foo': 'foo', 'c': 3},
-                       {'_id':'test_id_31','foo': 'bar', 'c': 2})
+        self._save_all(
+            'foo_bar',
+            {'_id':'test_id_29','foo': 'foo', 'c': 1},
+            {'_id':'test_id_30','foo': 'foo', 'c': 3},
+            {'_id':'test_id_31','foo': 'bar', 'c': 2}
+        )
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo'], collect=[('c', 'sum')]))
