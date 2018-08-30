@@ -3,6 +3,7 @@ from ...core.config.common import load_paas_settings
 
 PAAS = load_paas_settings()
 DATABASE_URL = PAAS.get('DATABASE_URL')
+DATABASE_ENGINE = PAAS.get('DATABASE_ENGINE')
 CA_CERTIFICATE = PAAS.get('CA_CERTIFICATE')
 STAGECRAFT_URL = os.getenv('STAGECRAFT_URL')
 BROKER_URL = PAAS.get('REDIS_URL') or os.getenv('REDIS_URL')

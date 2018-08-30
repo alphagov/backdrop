@@ -1,4 +1,5 @@
-DATABASE_URL = 'mongodb://localhost:27017/backdrop_test'
+DATABASE_URL = 'postgres://postgres@localhost:5432'
+DATABASE_ENGINE = 'postgres'
 LOG_LEVEL = "ERROR"
 
 DATA_SET_RATE_LIMIT = '10000/second'

@@ -26,6 +26,7 @@ handler.setFormatter(logging.Formatter(
     "-> %(message)s"))
 
 app_config = {
+    'DATABASE_ENGINE': config.DATABASE_ENGINE,
     'DATABASE_URL': config.DATABASE_URL,
 }
 
