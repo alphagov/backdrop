@@ -6,6 +6,7 @@ import json
 import os
 from os.path import dirname, join as pjoin
 import pytz
+import re
 
 
 class IsResponseWithStatus(BaseMatcher):
@@ -107,6 +108,30 @@ def d(year, month, day, hour=0, minute=0, second=0):
 
 def fixture_path(name):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'features', 'fixtures', name))
+
+
+def mock_mogrify(template, values):
+    """
+    >>> mock_mogrify("select %(thing)s from %(other_thing)s ...", {'thing': 'value', 'other_thing': 'other_value'})
+    "select 'value' from 'other_value' ..."
+    """
+
+    tokens = re.split("(%\([^\)]+\)s)", template)
+
+    return re.sub(
+        "\s+",
+        " ",
+        "".join([_mogrify_token(token, values) for token in tokens])
+    ).strip()
+
+
+def _mogrify_token(token, values):
+    match = re.match("%\(([^\(]+)\)s", token)
+    if match:
+        (key,) = match.groups()
+        return "'%s'" % values[key]
+    else:
+        return token
 
 
 @contextmanager
