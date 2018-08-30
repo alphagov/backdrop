@@ -4,7 +4,7 @@ from .support import BaseClient
 class FlaskTestClient(BaseClient):
     def __init__(self, flask_app):
         self._client = flask_app.app.test_client()
-        self._mongo_db = flask_app.storage._db
+        self._storage = flask_app.storage
         self._config = flask_app.app.config
 
     def get(self, url, headers=None):

@@ -9,7 +9,7 @@ Feature: the read api should provide cache control headers
             | key                 | value |
             | raw_queries_allowed | true  |
          when I go to "/foo"
-         then the "ETag" header should be ""7c7cec78f75fa9f30428778f2b6da9b42bd104d0""
+         then the "ETag" header should not be empty
 
     Scenario: response is Not Modified when etag matches
         Given "licensing.json" is in "foo" data_set

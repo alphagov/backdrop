@@ -6,6 +6,7 @@ from hamcrest import contains_inanyorder, has_items, has_entries, \
     assert_that, is_
 
 from backdrop.core.timeutils import utc
+from backdrop.core.query import Query
 
 
 @when(u'I enter "{filename}" into the file upload field')
@@ -45,7 +46,7 @@ def data_set_contains(context, data_set_name, sequence_matcher):
     documents = [json.loads(line) for line in context.text.split("\n")]
     matchers = [has_entries(doc) for doc in documents]
 
-    data_set = context.client.mongo()[data_set_name]
+    data_set = context.client.storage().execute_query(data_set_name, Query.create())
     records = [datetimes_to_strings(record) for record in data_set.find()]
     records = [ints_to_floats(record) for record in records]
     records = [nones_to_zeroes(record) for record in records]
@@ -79,5 +80,5 @@ def nones_to_zeroes(record):
 
 @then(u'the platform should have "{n}" items stored in "{data_set_name}"')
 def step(context, n, data_set_name):
-    data_set = context.client.mongo()[data_set_name]
+    data_set = context.client.storage().execute_query(data_set_name, Query.create())
     assert_that(data_set.count(), is_(int(n)))

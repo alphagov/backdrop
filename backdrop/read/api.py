@@ -16,7 +16,7 @@ from ..core.data_set import DataSet
 from ..core.errors import InvalidOperationError
 from ..core.flaskutils import generate_request_id
 from ..core.response import crossdomain
-from ..core.storage.mongo import MongoStorageEngine
+from ..core.storage.storage_factory import create_storage_engine
 from ..core.timeutils import as_utc
 
 ENVIRONMENT = getenv("ENVIRONMENT", "development")
@@ -29,11 +29,7 @@ feature_flags = FeatureFlag(app)
 app.config.from_object(
     "backdrop.read.config.{}".format(ENVIRONMENT))
 
-storage = MongoStorageEngine.create(
-    app.config['DATABASE_URL'],
-    app.config.get('CA_CERTIFICATE')
-)
-
+storage = create_storage_engine(app.config)
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
     app.config['SIGNON_API_USER_TOKEN'],

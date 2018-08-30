@@ -16,7 +16,7 @@ from .validation import auth_header_is_valid, extract_bearer_token
 from ..core import log_handler, cache_control
 from ..core.errors import ParseError, ValidationError
 from ..core.flaskutils import generate_request_id
-from ..core.storage.mongo import MongoStorageEngine
+from ..core.storage.storage_factory import create_storage_engine
 
 ENVIRONMENT = getenv("ENVIRONMENT", "development")
 
@@ -31,10 +31,7 @@ feature_flags = FeatureFlag(app)
 app.config.from_object(
     "backdrop.write.config.{}".format(ENVIRONMENT))
 
-storage = MongoStorageEngine.create(
-    app.config['DATABASE_URL'],
-    app.config.get('CA_CERTIFICATE')
-)
+storage = create_storage_engine(app.config)
 
 admin_api = client.AdminAPI(
     app.config['STAGECRAFT_URL'],
