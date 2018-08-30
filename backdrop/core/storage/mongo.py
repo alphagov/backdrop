@@ -100,6 +100,14 @@ class MongoStorageEngine(object):
     def alive(self):
         return self._mongo_client.alive()
 
+    # stub methods to maintain API compatibility with postgres
+    def create_table_and_indices(self):
+        pass
+
+    def drop_table_and_indices(self):
+        self._mongo_client.drop_database(
+            self._db.name)
+
     def data_set_exists(self, data_set_id):
         return data_set_id in self._db.collection_names()
 

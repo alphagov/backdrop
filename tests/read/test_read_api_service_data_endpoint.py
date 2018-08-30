@@ -115,9 +115,8 @@ class PreflightChecksApiTestCase(unittest.TestCase):
 
     def setUp(self):
         self.app = api.app.test_client()
-        mongo_client = api.storage._mongo_client
-        database_name = mongo_client.get_database().name
-        mongo_client.drop_database(database_name)
+        api.storage.drop_table_and_indices()
+        api.storage.create_table_and_indices()
 
     @fake_data_set_exists("data_set", data_group="some-group", data_type="some-type")
     def test_cors_preflight_requests_have_empty_body(self):
