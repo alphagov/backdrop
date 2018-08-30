@@ -61,7 +61,8 @@ class BaseStorageTest(object):
     def test_simple_saving_and_finding(self):
         self._save_all('foo_bar', {'foo': 'bar'})
 
-        assert_that(self.engine.execute_query('foo_bar', Query.create()),
+        x = self.engine.execute_query('foo_bar', Query.create())
+        assert_that(x,
                     contains(has_entries({'foo': 'bar'})))
 
     def test_saving_a_record_adds_an_updated_at(self):
@@ -149,6 +150,16 @@ class BaseStorageTest(object):
 
         results = self.engine.execute_query('foo_bar', Query.create(
             filter_by=[('foo', 'bar')]))
+
+        assert_that(results,
+                    contains(
+                        has_entry('foo', 'bar')))
+
+    def test_query_with_filter_prefix(self):
+        self._save_all('foo_bar', {'foo': 'bar'}, {'foo': 'foo'})
+
+        results = self.engine.execute_query('foo_bar', Query.create(
+            filter_by_prefix=[['foo', 'ba']]))
 
         assert_that(results,
                     contains(
@@ -267,9 +278,12 @@ class BaseStorageTest(object):
                         has_entries({'_day_start_at': d_tz(2012, 12, 13), 'foo': 'foo', '_count': 1})))
 
     def test_group_query_with_collect_fields(self):
-        self._save_all('foo_bar',
-                       {'foo': 'foo', 'c': 1}, {'foo': 'foo', 'c': 3},
-                       {'foo': 'bar', 'c': 2})
+        self._save_all(
+            'foo_bar',
+            {'foo': 'foo', 'c': 1},
+            {'foo': 'foo', 'c': 3},
+            {'foo': 'bar', 'c': 2}
+        )
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo'], collect=[('c', 'sum')]))

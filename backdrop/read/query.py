@@ -37,16 +37,13 @@ def parse_request_args(request_args):
             "false": False,
         }.get(value, value)
 
-    def construct_prefix_regex(value):
-        return re.compile('^%s.*' % re.escape(value))
-
     def parse_filter_by(filter_by, is_regex):
         key, value = filter_by.split(':', 1)
 
-        if not is_regex:
-            return [key, boolify(value)]
+        if is_regex:
+            return [key, value]
         else:
-            return [key, construct_prefix_regex(value)]
+            return [key, boolify(value)]
 
     args['filter_by'] = [parse_filter_by(p, False) for p in
                          request_args.getlist('filter_by')]
