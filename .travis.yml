@@ -39,6 +39,8 @@ env:
     - secure: JkoKVPblX1sHICKxJMT0kPi5Nax3dn3cG1bzmAmpMDX+rd37I4XtA96G17ibUmUrp2CVrOo4is5WjI9hPDwmC8/o7/6MOHqJo7jeflY+Iq8bWShcja0khlb4aBlpWfgMS+vniLCBPkQtUe2eE87jFLYJXmsuBGfp4r4L88fhgOk=
     # APP_STAGECRAFT_OAUTH_TOKEN_PRODUCTION
     - secure: HZPkW81a+OsfFrCCpcuYYBKNIEmejsQlIreVo2AJ1NipBVK8DniqIK+bXGUIQraaqeKXApXknfPepVpyqG3uyzHvkboylooWa7fuoJB4bs9Eb91Qo2AeWjP2fts0EmUX8R76K51n7EwUgk9xemM/bE2e+0FmG5e35JpXEwfm/5I=
+    # FLOWER_BASIC_AUTH
+    - secure: Q+McmaCCuUjt4VoXajGzukxJEVZitEnmj8nsWVgD2SchawjFzVO/W/dzMZHjMoU308rZWe0YMIcLO7gKBxmRhaJ8+txHZR3TwodMiOP5XvjsdDjOqlkvqutTtHgw934s8DSLEceU4WvlXlzMf8O1KEr9yAPrg3GUUhjNmEUxTZk=
 
 script:
   - ./run_tests.sh

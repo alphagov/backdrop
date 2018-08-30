@@ -1,8 +1,6 @@
 ---
 defaults: &defaults
   buildpack: python_buildpack
-  services:
-    - redis
   instances: 1
   memory: 512M
   no-route: true
@@ -13,18 +11,24 @@ applications:
     <<: *defaults
     command: python start.py read 8080
     services:
+      - redis
       - gds-performance-platform-mongodb-service
+      - backdrop-db
 
   - name: performance-platform-backdrop-write
     <<: *defaults
     command: python start.py write 8080
     services:
+      - redis
       - gds-performance-platform-mongodb-service
+      - backdrop-db
 
   - name: performance-platform-backdrop-celery-worker
     <<: *defaults
     command: celery -A backdrop.transformers.worker worker --loglevel=info
     memory: 1G
+    services:
+      - redis
     env:
       BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
       CELERY_CONFIG_MODULE: backdrop.celeryconfig
@@ -33,6 +37,8 @@ applications:
     <<: *defaults
     command: etc/run_flower.sh
     memory: 1G
+    services:
+      - redis
     env:
       DISABLE_COLLECTSTATIC: 1
       BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
