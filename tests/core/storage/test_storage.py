@@ -5,6 +5,7 @@ from hamcrest import assert_that, is_, less_than, contains, has_entries, \
     instance_of, has_entry, contains_inanyorder
 from nose.tools import assert_raises
 
+from backdrop.core.data_set import DataSet
 from backdrop.core.errors import DataSetCreationError
 from backdrop.core.query import Query
 from backdrop.core.records import add_period_keys
@@ -335,3 +336,35 @@ class BaseStorageTest(object):
             inclusive=True))
 
         assert_that(len(results), is_(3))
+
+    def test_batch_last_updated(self):
+        records = {
+            # timestamps in ascending order
+            'some_data': [
+                {'_timestamp': d_tz(2018, 1, 1)},
+                {'_timestamp': d_tz(2019, 1, 1)},
+                {'_timestamp': d_tz(2020, 1, 1)},
+            ],
+            # timestamps in descending order
+            'some_other_data': [
+                {'_timestamp': d_tz(2017, 1, 1)},
+                {'_timestamp': d_tz(2016, 1, 1)},
+                {'_timestamp': d_tz(2015, 1, 1)},
+            ]
+        }
+
+        for key, items in records.iteritems():
+            self.engine.create_data_set(key, 0)
+            for item in items:
+                self.engine.save_record(key, item)
+
+        some_data_set = DataSet(self.engine, {'name': 'some_data'})
+        some_other_data_set = DataSet(self.engine, {'name': 'some_other_data'})
+
+        self.engine.batch_last_updated([some_data_set, some_other_data_set])
+
+        some_data_set_last_updated = some_data_set.get_last_updated()
+        some_other_data_set_last_updated = some_other_data_set.get_last_updated()
+
+        assert_that(some_data_set_last_updated, is_(d_tz(2020, 1, 1, 0, 0, 0)))
+        assert_that(some_other_data_set_last_updated, is_(d_tz(2017, 1, 1, 0, 0, 0)))
