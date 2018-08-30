@@ -9,7 +9,7 @@ STAGECRAFT_URL = os.getenv('STAGECRAFT_URL')
 BROKER_URL = PAAS.get('REDIS_URL') or os.getenv('REDIS_URL')
 BROKER_FAILOVER_STRATEGY = "round-robin"
 SIGNON_API_USER_TOKEN = os.getenv('SIGNON_API_USER_TOKEN')
-LOG_LEVEL = "INFO"
+LOG_LEVEL = os.getenv("LOG_LEVEL", "ERROR")
 DATA_SET_UPLOAD_FORMAT = {
     "ithc_excel": "excel",
 }

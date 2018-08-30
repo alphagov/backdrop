@@ -5,6 +5,7 @@ import dateutil.tz
 import psycopg2
 import psycopg2.extras
 import pytz
+import logging
 
 from uuid import uuid4
 
@@ -22,6 +23,8 @@ from sql_query_factory import (
 )
 from .. import timeutils
 
+logger = logging.getLogger(__name__)
+
 
 class PostgresStorageEngine(object):
 
@@ -37,7 +40,10 @@ class PostgresStorageEngine(object):
         support this project, who are the losers).
         """
         with self.connection.cursor() as cursor:
-            cursor.execute(CREATE_TABLE_SQL)
+            query = CREATE_TABLE_SQL
+            logger.debug(
+                'create_table_and_indices - executing sql query: ' + query)
+            cursor.execute(query)
         self.connection.commit()
 
     def drop_table_and_indices(self):
@@ -45,7 +51,10 @@ class PostgresStorageEngine(object):
         As with the create above, this is likely only used during tests.
         """
         with self.connection.cursor() as cursor:
-            cursor.execute(DROP_TABLE_SQL)
+            query = DROP_TABLE_SQL
+            logger.debug(
+                'drop_table_and_indices - executing sql query: ' + query)
+            cursor.execute(query)
         self.connection.commit()
 
     def data_set_exists(self, data_set_id):
@@ -53,8 +62,9 @@ class PostgresStorageEngine(object):
         # in that it will return False if `create_data_set` has
         # been called, but no records have been saved.
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                create_data_set_exists_query(cursor.mogrify, data_set_id))
+            query = create_data_set_exists_query(cursor.mogrify, data_set_id)
+            logger.debug('data_set_exists - executing sql query: ' + query)
+            cursor.execute(query)
             return cursor.rowcount > 0
 
     def create_data_set(self, data_set_id, size):
@@ -62,14 +72,16 @@ class PostgresStorageEngine(object):
 
     def delete_data_set(self, data_set_id):
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                create_delete_data_set_query(cursor.mogrify, data_set_id))
+            query = create_delete_data_set_query(cursor.mogrify, data_set_id)
+            logger.debug('delete_data_set - executing sql query: ' + query)
+            cursor.execute(query)
             self.connection.commit()
 
     def get_last_updated(self, data_set_id):
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                create_get_last_updated_query(cursor.mogrify, data_set_id))
+            query = create_get_last_updated_query(cursor.mogrify, data_set_id)
+            logger.debug('get_last_updated - executing sql query: ' + query)
+            cursor.execute(query)
 
             if cursor.rowcount == 0:
                 return None
@@ -80,8 +92,10 @@ class PostgresStorageEngine(object):
     def batch_last_updated(self, data_sets):
         collections = [collection.name for collection in data_sets]
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                create_batch_last_updated_query(cursor.mogrify, collections))
+            query = create_batch_last_updated_query(
+                cursor.mogrify, collections)
+            logger.debug('batch_last_updated - executing sql query: ' + query)
+            cursor.execute(query)
             results = cursor.fetchall()
             timestamp_by_collection = {
                 collection: max_timestamp for [collection, max_timestamp] in results}
@@ -106,8 +120,10 @@ class PostgresStorageEngine(object):
 
     def find_record(self, data_set_id, record_id):
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                create_find_record_query(cursor.mogrify, data_set_id, record_id))
+            query = create_find_record_query(
+                cursor.mogrify, data_set_id, record_id)
+            logger.debug('find_record - executing sql query: ' + query)
+            cursor.execute(query)
             (record,) = cursor.fetchone()
             return _parse_datetime_fields(record)
 
@@ -117,21 +133,26 @@ class PostgresStorageEngine(object):
         ts = record['_timestamp'] if '_timestamp' in record else updated_at
 
         with self.connection.cursor() as cursor:
-            cursor.execute(create_update_record_query(
-                cursor.mogrify, data_set_id, record, record_id, ts, updated_at))
+            query = create_update_record_query(
+                cursor.mogrify, data_set_id, record, record_id, ts, updated_at)
+            logger.debug('update_record - executing sql query: ' + query)
+            cursor.execute(query)
             self.connection.commit()
 
     def delete_record(self, data_set_id, record_id):
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                create_delete_record_query(cursor.mogrify, data_set_id, record_id))
+            query = create_delete_record_query(
+                cursor.mogrify, data_set_id, record_id)
+            logger.debug('delete_record - executing sql query: ' + query)
+            cursor.execute(query)
             self.connection.commit()
 
     def execute_query(self, data_set_id, query):
         with self.connection.cursor() as cursor:
-            pg_query, convert_query_result_to_dictionaries = create_sql_query(
+            query, convert_query_result_to_dictionaries = create_sql_query(
                 cursor.mogrify, data_set_id, query)
-            cursor.execute(pg_query)
+            logger.debug('execute_query - executing sql query: ' + query)
+            cursor.execute(query)
             records = convert_query_result_to_dictionaries(cursor.fetchall())
             return [_parse_datetime_fields(record) for record in records]
 
