@@ -270,7 +270,7 @@ def _create_basic_sql_query(mogrify, data_set_id, user_query):
     >>> user_query = Query.create(filter_by=[('foo', 'bar')])
     >>> query, fn = create_sql_query(mock_mogrify, 'some-collection', user_query)
     >>> query
-    "SELECT record FROM mongo WHERE collection='some-collection' AND record->>'foo'='bar'"
+    'SELECT record FROM mongo WHERE collection=\\'some-collection\\' AND record @> \\'{"foo": "bar"}\\''
 
     >>> user_query = Query.create(filter_by_prefix=[('foo', 'bar')])
     >>> query, fn = create_sql_query(mock_mogrify, 'some-collection', user_query)
@@ -313,7 +313,7 @@ def _create_basic_sql_query(mogrify, data_set_id, user_query):
 
 def _get_where_conditions(mogrify, user_query):
     filter_by_sql_tokens = [
-        mogrify("record->>%(key)s=%(value)s", {'key': key, 'value': value})
+        mogrify("record @> %(json)s", {'json': json.dumps({key: value})})
         for key, value in (user_query.filter_by or [])
     ]
     filter_by_prefix_sql_tokens = [

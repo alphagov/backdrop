@@ -2,7 +2,7 @@ import datetime
 
 from freezegun import freeze_time
 from hamcrest import assert_that, is_, less_than, contains, has_entries, \
-    instance_of, has_entry, contains_inanyorder
+    instance_of, has_entry, contains_inanyorder, none
 from nose.tools import assert_raises
 
 from backdrop.core.data_set import DataSet
@@ -292,7 +292,7 @@ class BaseStorageTest(object):
         assert_that(results,
                     contains_inanyorder(
                         has_entries({'foo': 'bar', 'c': [2]}),
-                        has_entries({'foo': 'foo', 'c': [1, 3]})))
+                        has_entries({'foo': 'foo', 'c': contains_inanyorder(1, 3)})))
 
     def test_group_and_collect_with_false_values(self):
         self._save_all('foo_bar',
@@ -360,11 +360,14 @@ class BaseStorageTest(object):
 
         some_data_set = DataSet(self.engine, {'name': 'some_data'})
         some_other_data_set = DataSet(self.engine, {'name': 'some_other_data'})
+        yet_another_data_set = DataSet(self.engine, {'name': 'yet_another_data'})
 
-        self.engine.batch_last_updated([some_data_set, some_other_data_set])
+        self.engine.batch_last_updated([some_data_set, some_other_data_set, yet_another_data_set])
 
         some_data_set_last_updated = some_data_set.get_last_updated()
         some_other_data_set_last_updated = some_other_data_set.get_last_updated()
+        yet_another_data_set_last_updated = yet_another_data_set.get_last_updated()
 
         assert_that(some_data_set_last_updated, is_(d_tz(2020, 1, 1, 0, 0, 0)))
         assert_that(some_other_data_set_last_updated, is_(d_tz(2017, 1, 1, 0, 0, 0)))
+        assert_that(yet_another_data_set_last_updated, is_(none()))
