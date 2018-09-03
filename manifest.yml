@@ -12,7 +12,6 @@ applications:
     command: python start.py read 8080
     services:
       - redis
-      - gds-performance-platform-mongodb-service
       - backdrop-db
 
   - name: performance-platform-backdrop-write
@@ -20,7 +19,6 @@ applications:
     command: python start.py write 8080
     services:
       - redis
-      - gds-performance-platform-mongodb-service
       - backdrop-db
 
   - name: performance-platform-backdrop-celery-worker
