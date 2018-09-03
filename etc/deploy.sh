@@ -30,7 +30,7 @@ cycle_app performance-platform-backdrop-read
 cf set-env performance-platform-backdrop-read ENVIRONMENT $PAAS_SPACE
 cf set-env performance-platform-backdrop-read STAGECRAFT_URL https://performance-platform-stagecraft-$PAAS_SPACE.cloudapps.digital
 cf set-env performance-platform-backdrop-read SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN
-cf set-env performance-platform-backdrop-read DATABASE_ENGINE mongodb
+cf set-env performance-platform-backdrop-read DATABASE_ENGINE $DATABASE_ENGINE
 cf push performance-platform-backdrop-read
 
 cycle_app performance-platform-backdrop-write
@@ -39,7 +39,7 @@ cf set-env performance-platform-backdrop-write STAGECRAFT_URL https://performanc
 cf set-env performance-platform-backdrop-write SIGNON_API_USER_TOKEN $APP_SIGNON_API_USER_TOKEN
 cf set-env performance-platform-backdrop-write SECRET_KEY $APP_SECRET_KEY
 cf set-env performance-platform-backdrop-write REDIS_DATABASE_NUMBER $REDIS_DATABASE_NUMBER
-cf set-env performance-platform-backdrop-write DATABASE_ENGINE mongodb
+cf set-env performance-platform-backdrop-write DATABASE_ENGINE $DATABASE_ENGINE
 cf push performance-platform-backdrop-write
 
 cycle_app performance-platform-backdrop-celery-worker
