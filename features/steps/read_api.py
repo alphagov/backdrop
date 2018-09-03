@@ -61,7 +61,7 @@ def step(context, fixture_name, data_set_name):
 
 @given('I have a record updated "{timespan}" ago in the "{data_set_name}" data_set')
 def step(context, timespan, data_set_name):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     number_of_seconds = int(re.match(r'^(\d+) seconds?', timespan).group(1))
     timedelta = datetime.timedelta(seconds=number_of_seconds)
     updated = now - timedelta
