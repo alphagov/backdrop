@@ -86,10 +86,8 @@ class Test_parse_request_args(unittest.TestCase):
 
         args = parse_request_args(request_args)
 
-        parsed_regex = re.compile('^\\/hello\\/world.*')
-
         assert_that(args['filter_by_prefix'],
-                    has_item(["foo", parsed_regex]))
+                    has_item(["foo", '/hello/world']))
 
     def test_many_filter_by_are_parsed(self):
         request_args = MultiDict([
@@ -99,22 +97,8 @@ class Test_parse_request_args(unittest.TestCase):
 
         args = parse_request_args(request_args)
 
-        parsed_regex1 = re.compile('^bar.*')
-        parsed_regex2 = re.compile('^foo.*')
-
-        assert_that(args['filter_by_prefix'], has_item(["foo", parsed_regex1]))
-        assert_that(args['filter_by_prefix'], has_item(["bar", parsed_regex2]))
-
-    def test_filter_by_prefix_escapes_regex_group_operators(self):
-        request_args = MultiDict([
-            ("filter_by_prefix", "foo:(a)+")])
-
-        args = parse_request_args(request_args)
-
-        parsed_regex = re.compile('^\(a\)\+.*')
-
-        assert_that(args['filter_by_prefix'],
-                    has_item(["foo", parsed_regex]))
+        assert_that(args['filter_by_prefix'], has_item(["foo", 'bar']))
+        assert_that(args['filter_by_prefix'], has_item(["bar", 'foo']))
 
     def test_group_by_is_passed_through_untouched(self):
         request_args = MultiDict([("group_by", "foobar")])

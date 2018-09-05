@@ -1,14 +1,14 @@
-from pymongo import MongoClient
+from backdrop.core.storage.storage_factory import create_storage_engine
 import requests
 
 from .support import FlaskApp, BaseClient
 
 
 class HTTPTestClient(BaseClient):
-    def __init__(self, database_url):
+    def __init__(self, config):
         self._read_api = FlaskApp("read", "5000")
         self._write_api = FlaskApp("write", "5001")
-        self._mongo_db = MongoClient(database_url).get_database()
+        self._storage = create_storage_engine(config)
         self._start()
 
     def get(self, url, headers=None):

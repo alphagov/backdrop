@@ -6,6 +6,8 @@ from dateutil import parser
 from hamcrest import assert_that, has_length, equal_to
 from io import BytesIO
 
+from backdrop.core.query import Query
+from backdrop.core.timeseries import DAY, WEEK
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), '..', 'fixtures')
 
@@ -120,45 +122,36 @@ def step(context, data_set_url):
 
 @then('the stored data should contain "{amount}" "{key}" equaling "{value}"')
 def step(context, amount, key, value):
-    result = context.client.mongo()[context.data_set].find({key: value})
+    result = context.client.storage().execute_query(context.data_set, Query.create(filter_by=[(key, value)]))
     assert_that(list(result), has_length(int(amount)))
 
 
 @then('the stored data should contain "{amount}" "{key}" on "{time}"')
 def step(context, amount, key, time):
     time_query = parser.parse(time)
-    result = context.client.mongo()[context.data_set].find({key: time_query})
-    assert_that(list(result), has_length(int(amount)))
+    if key == '_start_at':
+        query = Query.create(start_at=time_query, period=DAY, duration=1)
+    elif key == '_end_at':
+        query = Query.create(end_at=time_query, period=DAY, duration=-1)
+    elif key == '_week_start_at':
+        query = Query.create(start_at=time_query, period=WEEK, duration=1)
+    else:
+        raise NotImplementedError(key)
+    result = context.client.storage().execute_query(context.data_set, query)
+    assert_that(result, has_length(1))
+    assert_that(result[0]['_count'], equal_to(int(amount)))
 
 
 @then(u'the collection called "{collection}" should contain {count} records')
 def step(context, collection, count):
-    result = context.client.mongo()[collection].find({})
+    result = context.client.storage().execute_query(collection, Query.create())
     assert_that(list(result), has_length(int(count)))
-
-
-@then('the collection called "{collection}" should exist')
-def step(context, collection):
-    assert collection in context.client.mongo().collection_names()
 
 
 @then('the collection called "{collection}" should not exist')
 def step(context, collection):
-    assert collection not in context.client.mongo().collection_names()
-
-
-@then('the collection called "{collection}" should be uncapped')
-def step(context, collection):
-    options = context.client.mongo()[collection].options()
-    assert options['capped'] is False
-
-
-@then('the collection called "{collection}" should be capped at "{size}"')
-def step(context, collection, size):
-    options = context.client.mongo()[collection].options()
-    assert options['capped'] is True
-
-    assert_that(int(options['size']), equal_to(int(size)))
+    result = context.client.storage().execute_query(collection, Query.create())
+    assert_that(result, has_length(0))
 
 
 def _make_headers_from_context(context):

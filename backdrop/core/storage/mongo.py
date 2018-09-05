@@ -2,6 +2,7 @@ import datetime
 import itertools
 import logging
 import os
+import re
 
 import pymongo
 from bson import Code
@@ -99,6 +100,14 @@ class MongoStorageEngine(object):
     def alive(self):
         return self._mongo_client.alive()
 
+    # stub methods to maintain API compatibility with postgres
+    def create_table_and_indices(self):
+        pass
+
+    def drop_table_and_indices(self):
+        self._mongo_client.drop_database(
+            self._db.name)
+
     def data_set_exists(self, data_set_id):
         return data_set_id in self._db.collection_names()
 
@@ -193,8 +202,11 @@ def get_mongo_spec(query):
     {}
     >>> get_mongo_spec(Query.create(filter_by=[('foo', 'bar')]))
     {'foo': 'bar'}
-    >>> get_mongo_spec(Query.create(filter_by_prefix=[('foo', 'bar')]))
-    {'foo': 'bar'}
+    >>> key, value = get_mongo_spec(Query.create(filter_by_prefix=[['foo', '(bar)']])).items()[0]
+    >>> key
+    'foo'
+    >>> value.pattern
+    '^\\\\(bar\\\\).*'
     >>> get_mongo_spec(Query.create(start_at=dt(2012, 12, 12)))
     {'_timestamp': {'$gte': datetime.datetime(2012, 12, 12, 0, 0)}}
     """
@@ -204,7 +216,8 @@ def get_mongo_spec(query):
     if query.filter_by:
         filter_term = query.filter_by
     else:
-        filter_term = query.filter_by_prefix
+        filter_term = [
+            [key, _construct_prefix_regex(value)] for key, value in query.filter_by_prefix]
 
     return dict(filter_term + time_range.items())
 
@@ -319,3 +332,7 @@ def clean_collect_field(collect_field):
     "foo\\\\\'bar"
     """
     return collect_field.replace('\\', '\\\\').replace("'", "\\'")
+
+
+def _construct_prefix_regex(value):
+    return re.compile('^%s.*' % re.escape(value))

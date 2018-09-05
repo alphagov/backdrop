@@ -1,4 +1,5 @@
-DATABASE_URL = 'mongodb://localhost:27017/backdrop_development'
+DATABASE_URL = 'postgres://postgres@localhost:5432'
+DATABASE_ENGINE = 'postgres'
 LOG_LEVEL = "DEBUG"
 
 STAGECRAFT_URL = 'http://localhost:3103'

@@ -25,6 +25,10 @@ handler.setFormatter(logging.Formatter(
     "%(asctime)s [%(levelname)s - %(name)s - %(filename)s:%(lineno)d] "
     "-> %(message)s"))
 
+app_config = {
+    'DATABASE_ENGINE': config.DATABASE_ENGINE,
+    'DATABASE_URL': config.DATABASE_URL,
+}
 
 log = logging.getLogger()
 log.addHandler(handler)
@@ -36,7 +40,7 @@ def before_feature(context, feature):
 
 def before_scenario(context, _):
     context.client.before_scenario()
-    context.client.clean_mongo()
+    context.client.clean_storage()
     context.after_handlers = []
 
 
@@ -61,7 +65,7 @@ def create_client(feature):
     if 'use_write_api_client' in feature.tags:
         return FlaskTestClient(write_api)
     if 'use_http_client' in feature.tags:
-        return HTTPTestClient(config.DATABASE_URL)
+        return HTTPTestClient(app_config)
 
     raise AssertionError(
         "Test client not selected! Please annotate the failing feature with "

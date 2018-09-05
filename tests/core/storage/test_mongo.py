@@ -34,25 +34,6 @@ class TestMongoStorageEngine(BaseStorageTest):
 
         assert_that(indicies, has_key('_timestamp_-1'))
 
-    def test_batch_last_updated(self):
-        timestamp = time_as_utc(datetime.datetime.utcnow())
-        self.engine.create_data_set('some_data', 0)
-        self.engine.save_record('some_data', {
-            '_timestamp': timestamp,
-        })
-
-        data_set = DataSet(self.engine, {'name': 'some_data'})
-
-        self.engine.batch_last_updated([data_set])
-        last_updated = data_set.get_last_updated()
-
-        assert_that(last_updated.year, is_(timestamp.year))
-        assert_that(last_updated.month, is_(timestamp.month))
-        assert_that(last_updated.day, is_(timestamp.day))
-        assert_that(last_updated.hour, is_(timestamp.hour))
-        assert_that(last_updated.minute, is_(timestamp.minute))
-        assert_that(last_updated.second, is_(timestamp.second))
-
     def teardown(self):
         mongo_client = self.engine._mongo_client
         database_name = mongo_client.get_database().name

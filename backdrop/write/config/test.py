@@ -1,5 +1,6 @@
-DATABASE_URL = 'mongodb://localhost:27017/backdrop_test'
-LOG_LEVEL = "DEBUG"
+DATABASE_URL = 'postgres://postgres@localhost:5432'
+DATABASE_ENGINE = 'postgres'
+LOG_LEVEL = "INFO"
 CLIENT_ID = "it's not important here"
 CLIENT_SECRET = "it's not important here"
 DATA_SET_AUTO_ID_KEYS = {

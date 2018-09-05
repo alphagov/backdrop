@@ -5,7 +5,7 @@ import re
 from behave import given, when, then, step_matcher
 from dateutil import parser
 from flask import json
-from hamcrest import assert_that, is_, matches_regexp, has_length, equal_to, \
+from hamcrest import assert_that, is_, is_not, matches_regexp, has_length, equal_to, \
     has_item, has_entries, has_entry
 import pytz
 
@@ -32,7 +32,7 @@ def step(context, fixture_name, data_set_name):
                         '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
-            context.client.mongo()[data_set_name].insert_one(obj)
+            context.client.storage().save_record(data_set_name, obj)
 
 
 def get_data_set_settings_from_context_table(table):
@@ -56,19 +56,19 @@ def step(context, fixture_name, data_set_name):
                         '_week_start_at', '_month_start_at']:
                 if key in obj:
                     obj[key] = parser.parse(obj[key]).astimezone(pytz.utc)
-            context.client.mongo()[data_set_name].insert_one(obj)
+            context.client.storage().save_record(data_set_name, obj)
 
 
 @given('I have a record updated "{timespan}" ago in the "{data_set_name}" data_set')
 def step(context, timespan, data_set_name):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     number_of_seconds = int(re.match(r'^(\d+) seconds?', timespan).group(1))
     timedelta = datetime.timedelta(seconds=number_of_seconds)
     updated = now - timedelta
     record = {
         "_updated_at": updated
     }
-    context.client.mongo()[data_set_name].save(record)
+    context.client.storage().save_record(data_set_name, record)
 
 
 @given('I have a data_set named "{data_set_name}" with settings')
@@ -179,6 +179,8 @@ def step(context, nth, expected_json):
     the_data = json.loads(context.response.data)['data']
     i = parse_position(nth, the_data)
     expected = json.loads(expected_json)
+    if '_updated_at' in the_data[i]:
+        del the_data[i]['_updated_at']
     assert_that(the_data[i], is_(expected))
 
 
@@ -229,6 +231,12 @@ def impl(context, nth, key, expected_json):
 @then('the "{header}" header should be "{value}"')
 def step(context, header, value):
     assert_that(context.response.headers.get(header), is_(value))
+
+
+@then('the "{header}" header should not be empty')
+def step(context, header):
+    assert_that(context.response.headers.get(header), is_not(None))
+    assert_that(context.response.headers.get(header), is_not(''))
 
 
 @then(u'the error message should be "{expected_message}"')

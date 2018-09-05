@@ -14,12 +14,17 @@ def wait_until(condition, timeout=15, interval=0.1):
 
 
 class BaseClient(object):
-    def mongo(self):
-        return self._mongo_db
+    def __init__(self):
+        self._client = None
+        self._storage = None
+        self._config = None
 
-    def clean_mongo(self):
-        self._mongo_db.client.drop_database(
-            self._mongo_db.name)
+    def storage(self):
+        return self._storage
+
+    def clean_storage(self):
+        self.storage().drop_table_and_indices()
+        self.storage().create_table_and_indices()
 
     def before_scenario(self):
         pass

@@ -2,9 +2,10 @@ import datetime
 
 from freezegun import freeze_time
 from hamcrest import assert_that, is_, less_than, contains, has_entries, \
-    instance_of, has_entry, contains_inanyorder
+    instance_of, has_entry, contains_inanyorder, none
 from nose.tools import assert_raises
 
+from backdrop.core.data_set import DataSet
 from backdrop.core.errors import DataSetCreationError
 from backdrop.core.query import Query
 from backdrop.core.records import add_period_keys
@@ -61,7 +62,8 @@ class BaseStorageTest(object):
     def test_simple_saving_and_finding(self):
         self._save_all('foo_bar', {'foo': 'bar'})
 
-        assert_that(self.engine.execute_query('foo_bar', Query.create()),
+        x = self.engine.execute_query('foo_bar', Query.create())
+        assert_that(x,
                     contains(has_entries({'foo': 'bar'})))
 
     def test_saving_a_record_adds_an_updated_at(self):
@@ -149,6 +151,16 @@ class BaseStorageTest(object):
 
         results = self.engine.execute_query('foo_bar', Query.create(
             filter_by=[('foo', 'bar')]))
+
+        assert_that(results,
+                    contains(
+                        has_entry('foo', 'bar')))
+
+    def test_query_with_filter_prefix(self):
+        self._save_all('foo_bar', {'foo': 'bar'}, {'foo': 'foo'})
+
+        results = self.engine.execute_query('foo_bar', Query.create(
+            filter_by_prefix=[['foo', 'ba']]))
 
         assert_that(results,
                     contains(
@@ -267,9 +279,12 @@ class BaseStorageTest(object):
                         has_entries({'_day_start_at': d_tz(2012, 12, 13), 'foo': 'foo', '_count': 1})))
 
     def test_group_query_with_collect_fields(self):
-        self._save_all('foo_bar',
-                       {'foo': 'foo', 'c': 1}, {'foo': 'foo', 'c': 3},
-                       {'foo': 'bar', 'c': 2})
+        self._save_all(
+            'foo_bar',
+            {'foo': 'foo', 'c': 1},
+            {'foo': 'foo', 'c': 3},
+            {'foo': 'bar', 'c': 2}
+        )
 
         results = self.engine.execute_query('foo_bar', Query.create(
             group_by=['foo'], collect=[('c', 'sum')]))
@@ -277,7 +292,7 @@ class BaseStorageTest(object):
         assert_that(results,
                     contains_inanyorder(
                         has_entries({'foo': 'bar', 'c': [2]}),
-                        has_entries({'foo': 'foo', 'c': [1, 3]})))
+                        has_entries({'foo': 'foo', 'c': contains_inanyorder(1, 3)})))
 
     def test_group_and_collect_with_false_values(self):
         self._save_all('foo_bar',
@@ -321,3 +336,38 @@ class BaseStorageTest(object):
             inclusive=True))
 
         assert_that(len(results), is_(3))
+
+    def test_batch_last_updated(self):
+        records = {
+            # timestamps in ascending order
+            'some_data': [
+                {'_timestamp': d_tz(2018, 1, 1)},
+                {'_timestamp': d_tz(2019, 1, 1)},
+                {'_timestamp': d_tz(2020, 1, 1)},
+            ],
+            # timestamps in descending order
+            'some_other_data': [
+                {'_timestamp': d_tz(2017, 1, 1)},
+                {'_timestamp': d_tz(2016, 1, 1)},
+                {'_timestamp': d_tz(2015, 1, 1)},
+            ]
+        }
+
+        for key, items in records.iteritems():
+            self.engine.create_data_set(key, 0)
+            for item in items:
+                self.engine.save_record(key, item)
+
+        some_data_set = DataSet(self.engine, {'name': 'some_data'})
+        some_other_data_set = DataSet(self.engine, {'name': 'some_other_data'})
+        yet_another_data_set = DataSet(self.engine, {'name': 'yet_another_data'})
+
+        self.engine.batch_last_updated([some_data_set, some_other_data_set, yet_another_data_set])
+
+        some_data_set_last_updated = some_data_set.get_last_updated()
+        some_other_data_set_last_updated = some_other_data_set.get_last_updated()
+        yet_another_data_set_last_updated = yet_another_data_set.get_last_updated()
+
+        assert_that(some_data_set_last_updated, is_(d_tz(2020, 1, 1, 0, 0, 0)))
+        assert_that(some_other_data_set_last_updated, is_(d_tz(2017, 1, 1, 0, 0, 0)))
+        assert_that(yet_another_data_set_last_updated, is_(none()))
