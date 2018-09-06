@@ -20,6 +20,9 @@ applications:
     services:
       - redis
       - backdrop-db
+    env:
+      BACKDROP_BROKER_SSL_CERT_REQS: CERT_NONE
+      CELERY_CONFIG_MODULE: backdrop.celeryconfig
 
   - name: performance-platform-backdrop-celery-worker
     <<: *defaults
